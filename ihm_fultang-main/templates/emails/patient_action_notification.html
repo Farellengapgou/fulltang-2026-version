@@ -1,0 +1,34 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<div class="content">
+    <h2>Mise à jour de votre dossier médical</h2>
+
+    <div style="background: #fff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <p>Bonjour <strong>{{ patient.full_name }}</strong>,</p>
+
+        <div style="border-left: 3px solid #00bbf0; padding-left: 15px; margin: 15px 0;">
+            <p><strong>Type d'action :</strong> {{ action.type }}</p>
+            <p><strong>Effectué par :</strong> Dr {{ medical_staff.last_name }} ({{ medical_staff.role }})</p>
+            <p><strong>Date :</strong> {{ action_date|date:"d/m/Y H:i" }}</p>
+        </div>
+
+        <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+            <p>{{ action.description }}</p>
+
+            {% if action.link %}
+            <p style="margin-top: 10px;">
+                <a href="{{ action.link }}" style="color: #005792; text-decoration: underline;">
+                    Consulter les détails
+                </a>
+            </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <p style="color: #666;">
+        Pour toute question, contactez notre service patient :<br>
+        📞 +237 6XX XXX XXX | 📧 patients@hospital.com
+    </p>
+</div>
+{% endblock %}

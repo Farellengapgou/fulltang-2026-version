@@ -1,0 +1,17 @@
+.idea
+
+venv
+.metadata
+env
+__pycache__
+.pyc
+.env
+db.sqlite3
+mon_env/
+media/
+.qodo/
+.vscode/
+.vscode
+!media/guide_fultang.pdf
+*.qodo/*
+.qodo

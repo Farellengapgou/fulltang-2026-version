@@ -1,0 +1,26 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<div class="content">
+    <h2>Bienvenue à l'Hôpital Fultang</h2>
+
+    <div style="text-align: center; margin: 25px 0;">
+        <img src="[LOGO_HOPITAL]" alt="Logo hôpital" style="max-width: 150px; margin-bottom: 20px;">
+        <p>Cher(e) <strong>{{ patient.full_name }}</strong>,</p>
+        <p>Votre dossier médical a été créé avec succès.</p>
+    </div>
+
+    <div style="background: white; padding: 20px; border-radius: 8px;">
+        <p><strong>Informations d'enregistrement :</strong></p>
+        <ul style="list-style: none; padding-left: 0;">
+            <li>📅 Date : {{ registration_date|date:"d/m/Y" }}</li>
+            <li>🏥 Numéro dossier : {{ patient.id }}</li>
+            <li>📞 Contact : +237 6XX XXX XXX</li>
+        </ul>
+    </div>
+
+    <p style="margin-top: 25px;">
+        <a href="[LIEN_PORTAL_PATIENT]" class="button">Accéder à votre espace</a>
+    </p>
+</div>
+{% endblock %}

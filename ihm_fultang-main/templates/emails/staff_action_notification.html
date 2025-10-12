@@ -1,0 +1,27 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<div class="content">
+    <h2>Notification d'action - {{ action.type }}</h2>
+
+    <div style="margin: 20px 0; padding: 15px; background: white; border-radius: 8px;">
+        <p><strong>Détails de l'action :</strong></p>
+        <p>{{ action.description }}</p>
+
+        <div style="margin-top: 15px;">
+            <p><strong>Date :</strong> {{ action_date|date:"d/m/Y H:i" }}</p>
+            <p><strong>Responsable :</strong> {{ staff.get_full_name }} ({{ staff.role }})</p>
+
+            {% if action.link %}
+            <p style="margin-top: 15px;">
+                <a href="{{ action.link }}" class="button">Voir les détails</a>
+            </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <p style="color: #666; font-size: 0.9em;">
+        Cet email est envoyé automatiquement, merci de ne pas y répondre.
+    </p>
+</div>
+{% endblock %}
