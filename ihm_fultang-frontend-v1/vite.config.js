@@ -1,10 +1,5 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-
-// https://vite.dev/config/
-/*export default defineConfig({
-  plugins: [react()],
-})*/
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   base: "/",
@@ -13,11 +8,12 @@ export default defineConfig({
     port: 9000,
     strictPort: true,
     host: true,
-    allowedHosts: ['fultang.ddns.net'],
+    allowedHosts: ["localhost", "127.0.0.1"],
   },
   server: {
     port: 9000,
     strictPort: true,
     host: true,
-  }
-})
+    allowedHosts: ["localhost", "127.0.0.1"],
+  },
+});

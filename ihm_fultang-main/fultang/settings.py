@@ -64,7 +64,8 @@ CORS_ORIGIN_ALLOW_ALL = True  #c'est pas securise de faire ça
 
 """
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173"
+    "http://localhost:9000",
+    "http://127.0.0.1:9000",
 ]
 """
 
@@ -100,7 +101,7 @@ WSGI_APPLICATION = 'fultang.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': '/app/volumes/db.sqlite3',
     }
 }
 
