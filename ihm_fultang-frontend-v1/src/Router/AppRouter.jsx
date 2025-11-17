@@ -67,7 +67,7 @@ export function AppRoute()
 
     const LaboratoryHomePage = React.lazy(async () => ({default: (await import("../Pages/Laboratory/LaboratoryHomePage.jsx")).LaboratoryHomePage,}));
     const LaboratoryPatientList = React.lazy(async () => ({default: (await import("../Pages/Laboratory/LaboratoryPatientList.jsx")).LaboratoryPatientList,}));
-    const LaboratoryExamenList = React.lazy(async () => ({default: (await import("../Pages/Laboratory/LaboratoryExamList.jsx")).ExamenList,}));
+    const LaboratoryExamenList = React.lazy(async () => ({default: (await import("../Pages/Laboratory/LaboratoryExamList.jsx")).LaboratoryExamList,}));
     const LaboratoryExamenDetails = React.lazy(async () => ({default: (await import("../Pages/Laboratory/ExamenDetails.jsx")).ExamDetails,}));
     const LaboratoryExamenHistories = React.lazy(async () => ({default: (await import("../Pages/Laboratory/LaboratoryExamHistory.jsx")).ExamHistory,}));
     const LaboratoryExamResulDetails = React.lazy(async () => ({default: (await import("../Pages/Laboratory/ExamResultDetail.jsx")).ExamResultDetails,}));
