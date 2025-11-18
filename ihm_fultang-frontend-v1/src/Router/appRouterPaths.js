@@ -10,9 +10,10 @@ export const AppRoutesPaths = {
         // --- PHARMACY ROUTES ---
     // pharmacyRoot: "/pharmacy",
     pharmacyPage:"/pharmacy/dashboard",
-    PharmacyMedication:"/pharmacyMedication",
-    pharmacyAdd: "/pharmacy/add",
     PharmacistPage : "/pharmacy/list",
+    PharmacyMedication:"//pharmacy/Medication",
+    pharmacyAdd: "/pharmacy/add",
+    
     pharmacyPrescriptions: "/pharmacy/prescriptions",
 
 
