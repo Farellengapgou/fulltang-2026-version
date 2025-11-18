@@ -188,6 +188,21 @@ class ConsultationViewSet(ModelViewSet):
                 return Response(serializer.data, status.HTTP_200_OK)
         except MedicalStaff.DoesNotExist:
             return Response({"details": "le docteur spécifé n'existe pas"}, status.HTTP_404_NOT_FOUND)
+        
+    @swagger_auto_schema(
+        operation_description="Permet de compter le nombre de consultations enregistrées",
+        responses={
+        200: openapi.Response(description="Nombre de consultations enregistrées")
+        },
+        tags=tags
+    )
+    @action(methods=['get'], detail=False, url_path='count', permission_classes=[ConsultationPermissions])
+    def number_of_consultations(self, request):
+        query = Consultation.objects.all()
+        data = {}
+        data['consultation_count'] = query.count()
+
+        return Response(data, status=status.HTTP_200_OK)
 
 
 

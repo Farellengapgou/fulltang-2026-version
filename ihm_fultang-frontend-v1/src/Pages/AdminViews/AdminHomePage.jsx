@@ -18,7 +18,7 @@ export function AdminHomePage() {
     const [stats, setStats] = useState({
         patients: 0,
         medicalStaff: 0,
-        consultations: 0,
+        consultations: 2,
         appointments: 0,
         scheduledExams: 0,
         totalRooms: 0
@@ -40,7 +40,7 @@ export function AdminHomePage() {
         }));
     })
     .catch((error) =>{
-        console.error("Erreur lors de la récupération du nombre du patients :",error);
+        console.error("Erreur lors de la récupération du nombre de patients :",error);
     });
     },[]);
 
@@ -60,7 +60,28 @@ export function AdminHomePage() {
         }));
     })
     .catch((error) =>{
-        console.error("Erreur lors de la récupération du nombre de personnel :",error);
+        console.error("Erreur lors de la récupération du nombre de membres du personnel :",error);
+    });
+    },[]);
+
+    useEffect(() =>{
+        const token = localStorage.getItem("token_key_fultang");
+
+        axios.get("http://localhost:8009/api/v1/medical/consultation/count/", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    })
+    .then((response) => {
+        const consultations_count = response.data.consultation_count;
+        console.log("nombre de consultations:",consultations_count);
+        setStats((prevStats) => ({
+            ...prevStats,
+            consultations: consultations_count
+        }));
+    })
+    .catch((error) =>{
+        console.error("Erreur lors de la récupération du nombre de consultations :",error);
     });
     },[]);
 
