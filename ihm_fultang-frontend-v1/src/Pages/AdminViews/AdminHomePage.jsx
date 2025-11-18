@@ -40,7 +40,27 @@ export function AdminHomePage() {
         }));
     })
     .catch((error) =>{
-        console.error("Erreur lors de la récupération du nombre de patients :",error);
+        console.error("Erreur lors de la récupération du nombre du patients :",error);
+    });
+    },[]);
+
+    useEffect(() =>{
+        const token = localStorage.getItem("token_key_fultang");
+
+        axios.get("http://localhost:8009/api/v1/medical/medical-staff/count/", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    })
+    .then((response) => {
+        const staffs_count = response.data.medical_staff_count;
+        setStats((prevStats) => ({
+            ...prevStats,
+            medicalStaff: staffs_count
+        }));
+    })
+    .catch((error) =>{
+        console.error("Erreur lors de la récupération du nombre de personnel :",error);
     });
     },[]);
 
