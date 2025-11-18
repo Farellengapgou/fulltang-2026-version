@@ -6,6 +6,8 @@ import {useNavigate} from "react-router-dom";
 import {AppRoutesPaths as AppRouterPaths} from "../../Router/appRouterPaths.js";
 import QuickActionButton from "../../GlobalComponents/QuickActionButton.jsx";
 import StatCard from "../../GlobalComponents/StatCard.jsx";
+import axios from 'axios';
+import { useState, useEffect  } from 'react';
 
 
 export function AdminHomePage() {
@@ -13,14 +15,34 @@ export function AdminHomePage() {
 
     const navigate = useNavigate();
 
-    const stats = {
-        patients: 5,
-        medicalStaff: 6,
+    const [stats, setStats] = useState({
+        patients: 0,
+        medicalStaff: 0,
         consultations: 0,
         appointments: 0,
         scheduledExams: 0,
-        totalRooms: 12
-    };
+        totalRooms: 0
+    });
+
+    useEffect(() =>{
+        const token = localStorage.getItem("token_key_fultang");
+
+        axios.get("http://localhost:8009/api/v1/medical/patient/count/", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    })
+    .then((response) => {
+        const patients_count = response.data.patient_count;
+        setStats((prevStats) => ({
+            ...prevStats,
+            patients: patients_count
+        }));
+    })
+    .catch((error) =>{
+        console.error("Erreur lors de la récupération du nombre de patients :",error);
+    });
+    },[]);
 
 
     const adminPrivileges = [
