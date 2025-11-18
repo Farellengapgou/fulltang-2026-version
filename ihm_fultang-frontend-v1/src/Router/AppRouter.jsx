@@ -63,11 +63,13 @@ export function AppRoute()
     const FinancialContributions = React.lazy(async () => ({default: (await import("../Pages/Accountant/FinancialContribution.jsx")).FinancialContributions,}));
     const FinancialReportsAccountant = React.lazy(async () => ({default: (await import("../Pages/Accountant/FinancialReports.jsx")).FinancialReports,}));
     const PharmacyMedication = React.lazy(async () => ({default: (await import("../Pages/Pharmacy/PharmacyMedication.jsx")).PharmacyMedication,}));
+    const PharmacistPage = React.lazy(async () => ({default: (await import("../Pages/Pharmacy/PharmacyList.jsx")).PharmacistPage,}));
+
     const CreateFactureAccountant = React.lazy(async () => ({default: (await import("../Pages/Accountant/CreateFacture.jsx")).CreateFacturePage,}));
 
     const LaboratoryHomePage = React.lazy(async () => ({default: (await import("../Pages/Laboratory/LaboratoryHomePage.jsx")).LaboratoryHomePage,}));
     const LaboratoryPatientList = React.lazy(async () => ({default: (await import("../Pages/Laboratory/LaboratoryPatientList.jsx")).LaboratoryPatientList,}));
-    const LaboratoryExamenList = React.lazy(async () => ({default: (await import("../Pages/Laboratory/LaboratoryExamList.jsx")).ExamenList,}));
+    const LaboratoryExamenList = React.lazy(async () => ({default: (await import("../Pages/Laboratory/LaboratoryExamList.jsx")).LaboratoryExamList,}));
     const LaboratoryExamenDetails = React.lazy(async () => ({default: (await import("../Pages/Laboratory/ExamenDetails.jsx")).ExamDetails,}));
     const LaboratoryExamenHistories = React.lazy(async () => ({default: (await import("../Pages/Laboratory/LaboratoryExamHistory.jsx")).ExamHistory,}));
     const LaboratoryExamResulDetails = React.lazy(async () => ({default: (await import("../Pages/Laboratory/ExamResultDetail.jsx")).ExamResultDetails,}));
@@ -96,6 +98,8 @@ export function AppRoute()
                 <Route path={AppRoutesPaths.forgottenPasswordPage} element={<ForgottenPage />}/>
                 <Route path={AppRoutesPaths.nursePage} element={<NursePage />}/>
                 <Route path={AppRoutesPaths.pharmacyPage} element={<PharmacyPage />}/>
+                <Route path={AppRoutesPaths.PharmacistPage} element={<PharmacistPage />}/>
+                <Route path={AppRoutesPaths.PharmacyMedication} element ={<PharmacyMedication/>}/>
                 <Route path={AppRoutesPaths.nurseMedicalStaffsPage} element={<NurseMedicalStaffsPage />}/>
                 <Route path={AppRoutesPaths.consultationHistoryPage} element={<ConsultationHistoryPage/>}/>
                 <Route path={AppRoutesPaths.helpCenterPage} element={<HelpCenterPage/>}/>
@@ -144,7 +148,6 @@ export function AppRoute()
 
                 <Route path={AppRoutesPaths.financialContributions} element={<FinancialContributions />}/>
                 <Route path={AppRoutesPaths.financialReportsAccountant} element={<FinancialReportsAccountant />}/>
-                <Route path={AppRoutesPaths.PharmacyMedication} element ={<PharmacyMedication/>}/>
                 <Route path={AppRoutesPaths.createFactureAccountant} element={<CreateFactureAccountant/>}/>
 
                 <Route path={AppRoutesPaths.laboratoryAssistantPage} element={<LaboratoryHomePage/>}/>
