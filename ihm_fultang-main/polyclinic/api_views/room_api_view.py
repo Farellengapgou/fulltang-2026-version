@@ -1,10 +1,14 @@
 from rest_framework.viewsets import ModelViewSet
 from polyclinic.models import Room
+from polyclinic.permissions.room_permissions import RoomPermissions
 from polyclinic.serializers.room_serializers import RoomSerializer
 from polyclinic.pagination import CustomPagination
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.utils.decorators import method_decorator
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -113,3 +117,18 @@ class RoomViewSet(ModelViewSet):
         if 'id' in serializer.validated_data:
             serializer.validated_data.pop('id')
         serializer.save()
+
+    @swagger_auto_schema(
+        operation_description="Permet de compter le nombre de chambres enregistrées",
+        responses={
+            200: openapi.Response(description="Nombre de chambres enregistrées")
+        },
+        tags=tags
+    )
+    @action(methods=['get'], detail=False, url_path='count', permission_classes=[RoomPermissions])
+    def number_of_exams(self, request):
+        query = Room.objects.all()
+        data = {}
+        data['room_count'] = query.count()
+
+        return Response(data, status=status.HTTP_200_OK)
