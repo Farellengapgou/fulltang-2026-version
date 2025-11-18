@@ -18,8 +18,8 @@ export function AdminHomePage() {
     const [stats, setStats] = useState({
         patients: 0,
         medicalStaff: 0,
-        consultations: 2,
-        appointments: 0,
+        consultations: 0,
+        appointments: 3,
         scheduledExams: 0,
         totalRooms: 0
     });
@@ -74,7 +74,6 @@ export function AdminHomePage() {
     })
     .then((response) => {
         const consultations_count = response.data.consultation_count;
-        console.log("nombre de consultations:",consultations_count);
         setStats((prevStats) => ({
             ...prevStats,
             consultations: consultations_count
@@ -85,6 +84,25 @@ export function AdminHomePage() {
     });
     },[]);
 
+    useEffect(() =>{
+        const token = localStorage.getItem("token_key_fultang");
+
+        axios.get("http://localhost:8009/api/v1/medical/appointment/count/", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    })
+    .then((response) => {
+        const appointments_count = response.data.appointment_count;
+        setStats((prevStats) => ({
+            ...prevStats,
+            appointments: appointments_count
+        }));
+    })
+    .catch((error) =>{
+        console.error("Erreur lors de la récupération du nombre de rendez-vous :",error);
+    });
+    },[]);
 
     const adminPrivileges = [
         {

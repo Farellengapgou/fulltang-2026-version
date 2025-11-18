@@ -192,7 +192,7 @@ class ConsultationViewSet(ModelViewSet):
     @swagger_auto_schema(
         operation_description="Permet de compter le nombre de consultations enregistrées",
         responses={
-        200: openapi.Response(description="Nombre de consultations enregistrées")
+            200: openapi.Response(description="Nombre de consultations enregistrées")
         },
         tags=tags
     )
