@@ -148,3 +148,8 @@ class AccountViewSet(ModelViewSet):
         
         serializer = FinancialOperationSerializer(operations, many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path="total", url_name="total")
+    def total(self, request):
+        """Retourne le nombre total de comptes"""
+        return Response({"total": Account.objects.count()})
