@@ -123,9 +123,6 @@ export function AddMedicalStaff() {
                             {/*Make sure the information entered is accurate as it will be used to create the staff member's official profile.*/}
 
                     <img src={joinOurStaffImage} alt={"image"} className={"w-[600px] h-[400px] rounded-2xl"}/>
-                    <p className='"text-justify text-red-500 font-normal text-md mb-5"'>
-                        Make sure the information entered is accurate as it will be used to create the staff member's official profile.
-                    </p>
                 </div>
                 <div className="w-1/2 p-8 flex items-center justify-center">
                     <form onSubmit={handleSubmit} className="space-y-6">
