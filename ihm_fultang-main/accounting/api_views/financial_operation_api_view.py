@@ -7,8 +7,6 @@ from accounting.permissions.accounting_staff_permissions import AccountingStaffP
 from accounting.serializers import FinancialOperationSerializer
 from accounting.models import FinancialOperation
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.decorators import action
-from rest_framework.response import Response
 
 tags = ["financial-operation"]
 auth_header_param = openapi.Parameter(
@@ -97,8 +95,3 @@ class FinancialOperationViewSet(ModelViewSet):
 
     def get_queryset(self):
         return FinancialOperation.objects.select_related('account').all()
-
-    @action(detail=False, methods=["get"], url_path="total", url_name="total")
-    def total(self, request):
-        """Retourne le nombre total d'opérations financières"""
-        return Response({"total": FinancialOperation.objects.count()})

@@ -7,8 +7,6 @@ from accounting.permissions.accounting_staff_permissions import AccountingStaffP
 from accounting.serializers import FactureSerializer
 from accounting.models import Facture
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.decorators import action
-from rest_framework.response import Response
 
 tags = ["facture"]
 auth_header_param = openapi.Parameter(
@@ -97,8 +95,3 @@ class FactureViewSet(ModelViewSet):
 
     def get_queryset(self):
         return Facture.objects.select_related('financialOperation').all()
-
-    @action(detail=False, methods=["get"], url_path="total", url_name="total")
-    def total(self, request):
-        """Retourne le nombre total de factures"""
-        return Response({"total": Facture.objects.count()})
