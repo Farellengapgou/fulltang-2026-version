@@ -8,6 +8,8 @@ import {SuccessModal} from "../Modals/SuccessModal.jsx";
 import {ErrorModal} from "../Modals/ErrorModal.jsx";
 import Wait from "../Modals/wait.jsx";
 import { Eye, EyeOff } from 'lucide-react';
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/style.css';
 
 export function AddMedicalStaff() {
     const [password, setPassword] = useState("");
@@ -72,6 +74,7 @@ export function AddMedicalStaff() {
     async function handleSubmit (e) {
         e.preventDefault();
         setIsLoading(true);
+
         try
         {
             const response = await axiosInstance.post("/medical-staff/", medicalStaffData);
@@ -114,12 +117,15 @@ export function AddMedicalStaff() {
             <AdminNavBar/>
             <div className="flex m-5">
                 <div className="w-1/2 mr-6 flex flex-col items-center justify-center">
-                    <h1 className="text-4xl font-bold text-secondary mb-8">Add a new medical staff member</h1>
-                        <p className="text-justify italic text-red-500 font-semibold text-md mb-5">Please complete all
-                            fields below to add a new medical staff member to Fultang Clinic. Make sure the information
-                            entered is accurate as it will be used to create the staff member's official profile.</p>
+                    <h1 className="text-4xl font-bold text-secondary mb-4">Add a new medical staff member</h1>
+                        <p className="text-justify text-secondary font-normal text-md mb-5">Please complete all
+                            fields below to add a new medical staff member to Fultang Clinic.</p>
+                            {/*Make sure the information entered is accurate as it will be used to create the staff member's official profile.*/}
 
                     <img src={joinOurStaffImage} alt={"image"} className={"w-[600px] h-[400px] rounded-2xl"}/>
+                    <p className='"text-justify text-red-500 font-normal text-md mb-5"'>
+                        Make sure the information entered is accurate as it will be used to create the staff member's official profile.
+                    </p>
                 </div>
                 <div className="w-1/2 p-8 flex items-center justify-center">
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -267,14 +273,37 @@ export function AddMedicalStaff() {
                                 <label className={applyLabelStyle()}>
                                     Phone Number
                                 </label>
-                                <input
-                                    type="tel"
-                                    name="phoneNumber"
+                                <PhoneInput
+                                    country={'cm'} // Cameroun par défaut
                                     value={medicalStaffData.phoneNumber}
-                                    onChange={handleChange}
-                                    className={applyInputStyle()}
-                                    placeholder="Enter the user's phone number"
-                                    required
+                                    onChange={(value) => {
+                                        setMedicalStaffData(prevData => ({
+                                            ...prevData,
+                                            phoneNumber: value
+                                        }));
+                                    }}
+                                    
+                                    countryCodeEditable={false} // IMPORTANT: Rend le code pays non modifiable
+
+                                    inputStyle={{
+                                        width: '100%',
+                                        height: '42px',
+                                        fontSize: '16px',
+                                        paddingLeft: '48px',
+                                        borderRadius: '6px',
+                                        border: '2px solid #e5e7eb',
+                                    }}
+                                    buttonStyle={{
+                                        borderRadius: '6px 0 0 6px',
+                                        border: '2px solid #e5e7eb',
+                                        borderRight: 'none',
+                                    }}
+                                    dropdownStyle={{
+                                        borderRadius: '8px',
+                                    }}
+                                    enableSearch
+                                    searchPlaceholder="Search country..."
+                                    preferredCountries={['cm', 'fr', 'us', 'gb', 'ca']}
                                 />
                             </div>
                         </div>
