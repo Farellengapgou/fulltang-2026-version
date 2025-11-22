@@ -98,39 +98,30 @@ export function AddMedicalStaff() {
         }
     }
 
-
-
     function applyInputStyle()
     {
         return "w-full px-4 py-2 border-2 border-gray-200 rounded-md focus:outline-none  focus:border-2  focus:border-primary-end";
     }
-
-
 
     function applyLabelStyle()
     {
         return "block text-md font-semibold text-gray-600 mb-1";
     }
 
+    
     return (
         <CustomDashboard linkList={adminNavLink} requiredRole={"Admin"}>
             <AdminNavBar/>
             <div className="flex m-5">
                 <div className="w-1/2 mr-6 flex flex-col items-center justify-center">
                     <h1 className="text-4xl font-bold text-secondary mb-4">Add a new medical staff member</h1>
-                        <p className="text-justify text-secondary font-normal text-md mb-5">Please complete all
-                            fields below to add a new medical staff member to Fultang Clinic.</p>
-                            {/*Make sure the information entered is accurate as it will be used to create the staff member's official profile.*/}
-
+                    <p className="text-justify text-secondary font-normal text-md mb-5">Please complete all
+                        fields below to add a new medical staff member to Fultang Clinic.</p>
                     <img src={joinOurStaffImage} alt={"image"} className={"w-[600px] h-[400px] rounded-2xl"}/>
-                    <p className='"text-justify text-red-500 font-normal text-md mb-5"'>
-                        Make sure the information entered is accurate as it will be used to create the staff member's official profile.
-                    </p>
                 </div>
+
                 <div className="w-1/2 p-8 flex items-center justify-center">
                     <form onSubmit={handleSubmit} className="space-y-6">
-
-
                         <div className="grid grid-cols-2 gap-6">
                             <div>
                                 <label className={applyLabelStyle()}>

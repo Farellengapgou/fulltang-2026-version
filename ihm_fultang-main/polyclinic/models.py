@@ -82,7 +82,7 @@ APPOINTMENT_STATE = [
     ("Completed", "Completed"),
 ]
 
-STATUS_PRODUCT_CHOICES = [
+STATUS_PRODUCT_CHOICES = [ 
         ('Available', 'Available'),
         ('Out of Stock', 'Out of Stock'),
         ('Discontinued', 'Discontinued'),
