@@ -2,7 +2,6 @@ import {useEffect, useState} from "react";
 import PropTypes from "prop-types";
 import axiosInstance from "../../Utils/axiosInstance.js";
 
-
 export function EditDrugInfosModal ({ isOpen, onClose, setCanOpenSuccessModal, setSuccessMessage, setIsLoading, drugData }) {
     EditDrugInfosModal.propTypes = {
         isOpen: PropTypes.bool.isRequired,
@@ -13,46 +12,68 @@ export function EditDrugInfosModal ({ isOpen, onClose, setCanOpenSuccessModal, s
         drugData: PropTypes.object.isRequired
     };
 
-
+    const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
-        quantity: 0,
-        name: '',
-        status: '',
-        price: 0.0,
-        expiryDate: '',
+        name:'',
+        generic_name: '',
+        category: '',
+        brand: '',
+        price: 0,
+        current_stock: 0,
+        expiry_date: '',
         description: '',
-    
+        requires_prescription: false,
+        updated_at: new Date().toISOString(),
 
     });
     const [error, setError] = useState("");
     const [checkedFields, setCheckedFields] = useState({
-        quantity: false,
         name: false,
-        status: false,
+        generic_name: false,
+        category: false,
+        brand: false,
         price: false,
-        expiryDate: false,
+        current_stock: false,
+        expiry_date: false,
         description: false,
+        requires_prescription: false,
+        updated_at: false,
         
     });
 
+    async function fetchCategories() {
+        try {
+            const response = await axiosInstance.get("/category-product/");
+            const categoriesData = response.data.results || [];
+            setCategories(categoriesData);
+            console.log("Categories:", categoriesData);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        }
+    }
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
     useEffect(() => {
         if (drugData) {
-            setFormData(drugData);
+            setFormData(prev => ({
+                ...prev,
+                ...drugData   // fill only provided fields
+            }));
         }
     }, [drugData]);
 
 
 
-    function handleChange(e) {
-        const { name, value } = e.target;
-        if (name === 'expiryDate') {
-            const date = new Date(value).toISOString();
-            setFormData(prevData => ({ ...prevData, [name]: date }));
-        } else {
-            setFormData(prevData => ({ ...prevData, [name]: value }));
-        }
+    function handleChange (e) {
+        const { name, value, type, checked } = e.target;
+        setFormData(prevData => ({
+            ...prevData,
+            [name]: type === "checkbox" ? checked : value
+        }));
     }
-
 
     function handleCheckboxChange(e) {
         const { name, checked } = e.target;
@@ -70,7 +91,7 @@ export function EditDrugInfosModal ({ isOpen, onClose, setCanOpenSuccessModal, s
             }, {});
 
             try {
-                const response = await axiosInstance.patch(`/medicament/${drugData.id}/`, updatedData);
+                const response = await axiosInstance.patch(`/product/${drugData.id}/`, updatedData);
                 if (response.status === 200) {
                     setIsLoading(false);
                     setSuccessMessage(`${drugData.name} 's information has been updated successfully!`);
@@ -97,16 +118,12 @@ export function EditDrugInfosModal ({ isOpen, onClose, setCanOpenSuccessModal, s
     }
 
 
-    function formatDateForInput(isoDate){
-        try {
-            const date = new Date(isoDate);
-            return date.toISOString().slice(0, 16);
-        } catch (error) {
-            console.error( error);
-            return '';
-        }
+    function formatDate(date) {
+        if (!date) return "";
+        const d = new Date(date);
+        if (isNaN(d)) return "";
+        return d.toISOString().split("T")[0];
     }
-
 
     if (!isOpen) return null;
 
@@ -115,7 +132,7 @@ return (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm transition-all duration-300">
                 <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
                     <div className="bg-gradient-to-r from-primary-end to-primary-start px-6 py-4 rounded-t-lg flex-col flex justify-center items-center">
-                        <h3 className="text-4xl font-bold text-white">Edit Drug Information</h3>
+                        <h3 className="text-4xl font-bold text-white">Edit Medication Information</h3>
                         <div className="flex mt-3">
                             <p className="text-white font-semibold ml-3 italic">(Please check the fields you want to modify)</p>
                         </div>
@@ -149,144 +166,234 @@ return (
                                 </div>
                             </div>
 
-
                             <div className="w-2/3 flex items-center space-x-2">
                                 <input
                                     type="checkbox"
-                                    id="quantity"
-                                    name="quantity"
-                                    checked={checkedFields.quantity}
+                                    id="Generic_name"
+                                    name="generic_name"
+                                    checked={checkedFields.generic_name}
                                     onChange={handleCheckboxChange}
                                     className={applyCheckboxStyle()}
                                 />
                                 <div className="flex-1">
-                                    <label htmlFor="quantity"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                                    <label htmlFor="Generic_name"
+                                           className="block text-sm font-medium text-gray-700 mb-1">Generic name</label>
                                     <input
-                                        type="number"
-                                        id="quantity"
-                                        name="quantity"
-                                        placeholder="Enter drug's quantity"
-                                        value={formData.quantity}
+                                        type="text"
+                                        id="generic_name"
+                                        name="generic_name"
+                                        placeholder="Enter drug's generic name"
+                                        value={formData.generic_name}
                                         onChange={handleChange}
                                         className={applyFormStyle()}
-                                        required={checkedFields.quantity}
-                                        disabled={!checkedFields.quantity}
+                                        required={checkedFields.generic_name}
+                                        disabled={!checkedFields.generic_name}
                                     />
                                 </div>
                             </div>
                         </div>
 
-
-                           <div className="grid grid-cols-2 ">
-                                <div className="w-2/3 flex items-center space-x-2">
-                                    <input
-                                        type="checkbox"
-                                        id="status"
-                                        name="status"
-                                        checked={checkedFields.status}
-                                        onChange={handleCheckboxChange}
-                                        className={applyCheckboxStyle()}
-                                    />
-                                    <div className="flex-1">
-                                        <label htmlFor="lastName"
-                                            className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                                        <input
-                                            type="text"
-                                            id="status"
-                                            name="status"
-                                            placeholder="Enter drug's status"
-                                            value={formData.status}
+                        <div className="flex space-x-3">
+                            <div className="w-2/3 flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    id="Category"
+                                    name="category"
+                                    checked={checkedFields.category}
+                                    onChange={handleCheckboxChange}
+                                    className={applyCheckboxStyle()}
+                                />
+                                <div className="flex-1">
+                                    <label htmlFor="Category"
+                                        className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                                    <div className="flex gap-2">
+                                        <select
+                                            name="category"
+                                            value={formData.category}
                                             onChange={handleChange}
                                             className={applyFormStyle()}
-                                            required={checkedFields.status}
-                                            disabled={!checkedFields.status}
-                                        />
+                                            required={checkedFields.category}
+                                            disabled={!checkedFields.category}
+                                        >
+                                            <option value="">Select a category</option>
+                                            {categories.map(cat => (
+                                                <option key={cat.id} value={cat.id}>
+                                                    {cat.name}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div className="w-2/3 flex items-center space-x-2">
+                            <div className="w-2/3 flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    id="Brand"
+                                    name="brand"
+                                    checked={checkedFields.brand}
+                                    onChange={handleCheckboxChange}
+                                    className={applyCheckboxStyle()}
+                                />
+                                <div className="flex-1">
+                                    <label htmlFor="Brand"
+                                        className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
                                     <input
-                                        type="checkbox"
+                                        type="text"
+                                        id="brand"
+                                        name="brand"
+                                        placeholder="Enter medication's brand"
+                                        value={formData.brand}
+                                        onChange={handleChange}
+                                        className={applyFormStyle()}
+                                        required={checkedFields.brand}
+                                        disabled={!checkedFields.brand}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex space-x-3">
+                            <div className="w-1/3 flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    id="Price"
+                                    name="price"
+                                    checked={checkedFields.price}
+                                    onChange={handleCheckboxChange}
+                                    className={applyCheckboxStyle()}
+                                />
+                                <div className="flex-1">
+                                    <label htmlFor="Price"
+                                        className="block text-sm font-medium text-gray-700 mb-1">Price</label>
+                                    <input
+                                        type="number"
                                         id="price"
                                         name="price"
-                                        checked={checkedFields.price}
-                                        onChange={handleCheckboxChange}
-                                        className={applyCheckboxStyle()}
-                                    />
-                                    <div className="flex-1">
-                                        <label htmlFor="price"
-                                            className="block text-sm font-medium text-gray-700 mb-1">Price</label>
-                                        <input
-                                            type="number"
-                                            id="price"
-                                            name="price"
-                                            placeholder="Enter drug's price"
-                                            value={formData.price}
-                                            onChange={handleChange}
-                                            className={applyFormStyle()}
-                                            required={checkedFields.price}
-                                            disabled={!checkedFields.price}
+                                        placeholder="Enter drug's price"
+                                        value={formData.price}
+                                        onChange={handleChange}
+                                        className={applyFormStyle()}
+                                        required={checkedFields.price}
+                                        disabled={!checkedFields.price}
                                         />
-                                    </div>
                                 </div>
                             </div>
 
-
-                            <div className="grid grid-cols-2 ">
-                                <div className="w-full flex items-center space-x-2">
+                            <div className="w-1/3 flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    id="Current_stock"
+                                    name="current_stock"
+                                    checked={checkedFields.current_stock}
+                                    onChange={handleCheckboxChange}
+                                    className={applyCheckboxStyle()}
+                                />
+                                <div className="flex-1">
+                                    <label htmlFor="Current_stock"
+                                        className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
                                     <input
-                                        type="checkbox"
-                                        id="expiryDate"
-                                        name="expiryDate"
-                                        checked={checkedFields.expiryDate}
-                                        onChange={handleCheckboxChange}
-                                        className={applyCheckboxStyle()}
-                                    />
-                                    <div className="flex-1">
-                                        <label htmlFor="lastName"
-                                            className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
-                                        <input
-                                            type="text"
-                                            id="expiryDate"
-                                            name="expiryDate"
-                                            placeholder="Enter drug's expiryDate"
-                                            value={formatDateForInput(formData.expiryDate)}
-                                            onChange={handleChange}
-                                            className={applyFormStyle()}
-                                            required={formatDateForInput(checkedFields.expiryDate)}
-                                            disabled={!checkedFields.expiryDate}
+                                        type="number"
+                                        id="current_stock"
+                                        name="current_stock"
+                                        placeholder="Enter drug's stock"
+                                        value={formData.current_stock}
+                                        onChange={handleChange}
+                                        className={applyFormStyle()}
+                                        required={checkedFields.current_stock}
+                                        disabled={!checkedFields.current_stock}
                                         />
-                                    </div>
                                 </div>
                             </div>
-                            <div className="w-2/3 flex items-center space-x-2">
+
+                            <div className="w-1/3 flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    id="expiry_date"
+                                    name="expiry_date"
+                                    checked={checkedFields.expiry_date}
+                                    onChange={handleCheckboxChange}
+                                    className={applyCheckboxStyle()}
+                                />
+                                <div className="flex-1">
+                                    <label htmlFor="lastName"
+                                        className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
                                     <input
-                                        type="checkbox"
+                                        type="date"
+                                        id="expiry_date"
+                                        name="expiry_date"
+                                        value={formatDate(formData.expiry_date)}
+                                        onChange={handleChange}
+                                        className={applyFormStyle()}
+                                        required={formatDate(checkedFields.expiry_date)}
+                                        disabled={!checkedFields.expiry_date}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex space-x-3">
+                            <div className="w-3/4 flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    id="description"
+                                    name="description"
+                                    checked={checkedFields.description}
+                                    onChange={handleCheckboxChange}
+                                    className={applyCheckboxStyle()}
+                                />
+                                <div className="flex-1">
+                                    <label htmlFor="description"
+                                        className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                    <input
+                                        type="text"
                                         id="description"
                                         name="description"
-                                        checked={checkedFields.description}
-                                        onChange={handleCheckboxChange}
-                                        className={applyCheckboxStyle()}
+                                        placeholder="Enter drug's description"
+                                        value={formData.description}
+                                        onChange={handleChange}
+                                        className={applyFormStyle()}
+                                        required={checkedFields.description}
+                                        disabled={!checkedFields.description}
                                     />
-                                    <div className="flex-1">
-                                        <label htmlFor="description"
-                                            className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                                        <input
-                                            type="text"
-                                            id="description"
-                                            name="description"
-                                            placeholder="Enter drug's description"
-                                            value={formData.description}
-                                            onChange={handleChange}
+                                </div>
+                            </div>
+
+                            <div className="w-1/4 flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    id="Requires_prescription"
+                                    name="requires_prescription"
+                                    checked={checkedFields.requires_prescription}
+                                    onChange={handleCheckboxChange}
+                                    className={applyCheckboxStyle()}
+                                />
+                                <div className="flex-1">
+                                    <label htmlFor="Requires_prescription"
+                                        className="block text-sm font-medium text-gray-700 mb-1">On prescription?</label>
+                                    <div className="flex gap-2">
+                                        <select
+                                            name="requires_prescription"
+                                            value={String(formData.requires_prescription)}  // Important
+                                            onChange={(e) => {
+                                                handleChange({
+                                                    target: {
+                                                        name: "requires_prescription",
+                                                        value: e.target.value === "true",
+                                                    }
+                                                });
+                                            }}
                                             className={applyFormStyle()}
-                                            required={checkedFields.description}
-                                            disabled={!checkedFields.description}
-                                        />
+                                            required={checkedFields.requires_prescription}
+                                            disabled={!checkedFields.requires_prescription}
+                                        >
+                                            <option value="true">true</option>
+                                            <option value="false">false</option>
+                                        </select>
                                     </div>
                                 </div>
-                            
-
+                            </div>
+                        </div>
 
                         <div className="px-6 py-1 flex justify-center space-x-6">
                             <button

@@ -62,18 +62,18 @@ export const adminNavLink = [
         
     },
     {
-        name: 'Drugs',
+        name: 'Medications',
         icon: FaPills,
         subLinks: [
             {
                 icon: FaListAlt,
-                name: "Drugs List",
-                link: appRoutes.adminDrugsListPage,
+                name: "Medications List",
+                link: appRoutes.adminMedicationsListPage,
             },
             {
                 icon: FaPlus,
-                name: "Add A Drug",
-                link: appRoutes.addDrug
+                name: "Add A Medication",
+                link: appRoutes.addMedication
             }
         ]
         

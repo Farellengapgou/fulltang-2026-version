@@ -39,7 +39,7 @@ export function AppRoute()
     const AddExamPage = React.lazy(async () => ({default: (await import("../Pages/AdminViews/AddExam.jsx")).AddExam}));
     const AdminExamsListPage = React.lazy(async () => ({default: (await import("../Pages/AdminViews/AdminExamsList.jsx")).AdminExamsList}));
     const AddMedicationPage = React.lazy(async () => ({default: (await import("../Pages/AdminViews/AddMedication.jsx")).AddMedication}));
-    const AdminDrugsListPage = React.lazy(async () => ({default: (await import("../Pages/AdminViews/AdminDrugsList.jsx")).AdminDrugsList}));
+    const AdminMedicationsListPage = React.lazy(async () => ({default: (await import("../Pages/AdminViews/AdminMedicationsList.jsx")).AdminMedicationsList}));
     const AdminHospitalRoomPage = React.lazy(async () => ({default: (await import("../Pages/AdminViews/AdminHospitalRooms.jsx")).AdminHospitalRooms}));
     const AdminFinancialReportsPage = React.lazy(async () => ({default: (await import("../Pages/AdminViews/AdminFinancialReports.jsx")).AdminFinancialReports}));
     const AccountantPage = React.lazy(async () => ({default: (await import("../Pages/Accountant/Accountant.jsx")).Accountant}));
@@ -119,8 +119,8 @@ export function AppRoute()
                 <Route path={AppRoutesPaths.adminAppointmentsListPage} element={<AdminAppointmentsListPage />} />
                 <Route path={AppRoutesPaths.addExam} element={<AddExamPage />} />
                 <Route path={AppRoutesPaths.adminExamsListPage} element={<AdminExamsListPage />} />
-                <Route path={AppRoutesPaths.addDrug} element={<AddMedicationPage />} />
-                <Route path={AppRoutesPaths.adminDrugsListPage} element={<AdminDrugsListPage />} />
+                <Route path={AppRoutesPaths.addMedication} element={<AddMedicationPage />} />
+                <Route path={AppRoutesPaths.adminMedicationsListPage} element={<AdminMedicationsListPage />} />
                 <Route path={AppRoutesPaths.adminHospitalRoomPage} element={<AdminHospitalRoomPage />} />
                 <Route path={AppRoutesPaths.adminFinancialReportsPage} element={<AdminFinancialReportsPage />} />
                 <Route path={AppRoutesPaths.accountantPage} element={<AccountantPage />} />

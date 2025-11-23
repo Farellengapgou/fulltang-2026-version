@@ -84,7 +84,7 @@ APPOINTMENT_STATE = [
 
 STATUS_PRODUCT_CHOICES = [ 
         ('Available', 'Available'),
-        ('Out of Stock', 'Out of Stock'),
+        ('Running low', 'Running Low'),
         ('Discontinued', 'Discontinued'),
         ('Expiring Soon', 'Expiring Soon'),
     ]
@@ -313,9 +313,15 @@ class PolyclinicProduct(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.category.name})"
-
-    def is_low_stock(self):
-        return self.current_stock <= self.min_stock_level
+    
+    def save(self, *args, **kwargs):
+        if self.current_stock == 0:
+            self.status = "Out of Stock"
+        elif self.current_stock <= self.min_stock_level:
+            self.status = "Running Low"
+        else:
+            self.status = "Available"
+        super().save(*args, **kwargs)
 
 
 class PolyclinicInventoryMovement(models.Model):

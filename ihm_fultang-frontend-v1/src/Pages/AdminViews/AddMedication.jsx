@@ -28,7 +28,6 @@ export function AddMedication()
         price: 0,
         current_stock: 0,
         min_stock_level: 10,
-        status_: '',
         requires_prescription: false,
         expiry_date: '',
         created_at: new Date().toISOString(), 
@@ -38,8 +37,9 @@ export function AddMedication()
     async function fetchCategories() {
         try {
             const response = await axiosInstance.get("/category-product/");
-            setCategories(response.data.results || []);
-            console.log("Categories:", response.data.results);
+            const categoriesData = response.data.results || [];
+            setCategories(categoriesData);
+            console.log("Categories:", categoriesData);
         } catch (error) {
             console.error("Error fetching categories:", error);
         }
@@ -60,19 +60,16 @@ export function AddMedication()
     async function handleSubmit (e) {
         e.preventDefault();
         setIsLoading(true);
-        const updatedStatus = 
-            medicationData.current_stock === 0
-            ? "Out of Stock"
-            : medicationData.current_stock <= medicationData.min_stock_level
-            ? "Expiring Soon"
-            : "Available";
 
         const finalData = {
             ...medicationData,
-            status_: updatedStatus,
+            category: Number(medicationData.category),
+            current_stock: Number(medicationData.current_stock),
+            price: Number(medicationData.price),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
+        console.log("Sending data:", finalData);
 
         try
         {
