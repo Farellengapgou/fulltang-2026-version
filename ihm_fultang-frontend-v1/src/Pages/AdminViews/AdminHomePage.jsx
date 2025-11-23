@@ -20,7 +20,7 @@ export function AdminHomePage() {
         medicalStaff: 0,
         consultations: 0,
         appointments: 3,
-        scheduledExams: 0,
+        scheduledExams: 4,
         totalRooms: 0
     });
 
@@ -101,6 +101,26 @@ export function AdminHomePage() {
     })
     .catch((error) =>{
         console.error("Erreur lors de la récupération du nombre de rendez-vous :",error);
+    });
+    },[]);
+
+    useEffect(() =>{
+        const token = localStorage.getItem("token_key_fultang");
+
+        axios.get("http://localhost:8009/api/v1/medical/exam/count/", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    })
+    .then((response) => {
+        const exams_count = response.data.exam_count;
+        setStats((prevStats) => ({
+            ...prevStats,
+            scheduledExams: exams_count
+        }));
+    })
+    .catch((error) =>{
+        console.error("Erreur lors de la récupération du nombre d'examens :",error);
     });
     },[]);
 

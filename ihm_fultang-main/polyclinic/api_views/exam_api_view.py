@@ -6,6 +6,9 @@ from polyclinic.pagination import CustomPagination
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.utils.decorators import method_decorator
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 tags = ["exam"]
@@ -113,3 +116,18 @@ class ExamViewSet(ModelViewSet):
         if 'id' in serializer.validated_data:
             serializer.validated_data.pop('id')
         serializer.save()
+
+    @swagger_auto_schema(
+        operation_description="Permet de compter le nombre d'examens enregistrés",
+        responses={
+            200: openapi.Response(description="Nombre d'examens enregistrés")
+        },
+        tags=tags
+    )
+    @action(methods=['get'], detail=False, url_path='count', permission_classes=[ExamPermissions])
+    def number_of_exams(self, request):
+        query = Exam.objects.all()
+        data = {}
+        data['exam_count'] = query.count()
+
+        return Response(data, status=status.HTTP_200_OK)

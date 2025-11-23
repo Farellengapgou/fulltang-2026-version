@@ -171,9 +171,9 @@ class AppointmentViewSet(ModelViewSet):
             return Response({"details": "le docteur spécifé n'existe pas"}, status.HTTP_404_NOT_FOUND)
         
     @swagger_auto_schema(
-        operation_description="Permet de compter le nombre de rendez-vous enregistrées",
+        operation_description="Permet de compter le nombre de rendez-vous enregistrés",
         responses={
-            200: openapi.Response(description="Nombre de rendez-vous enregistrées")
+            200: openapi.Response(description="Nombre de rendez-vous enregistrés")
         },
         tags=tags
     )
