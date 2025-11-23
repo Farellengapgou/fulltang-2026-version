@@ -21,7 +21,7 @@ export function AdminHomePage() {
         consultations: 0,
         appointments: 3,
         scheduledExams: 4,
-        totalRooms: 0
+        totalRooms: 6
     });
 
     useEffect(() =>{
@@ -88,7 +88,7 @@ export function AdminHomePage() {
         const token = localStorage.getItem("token_key_fultang");
 
         axios.get("http://localhost:8009/api/v1/medical/appointment/count/", {
-        headers: {
+        headers: {                          
             Authorization: `Bearer ${token}`,
         }
     })
@@ -121,6 +121,26 @@ export function AdminHomePage() {
     })
     .catch((error) =>{
         console.error("Erreur lors de la récupération du nombre d'examens :",error);
+    });
+    },[]);
+
+    useEffect(() =>{
+        const token = localStorage.getItem("token_key_fultang");
+
+        axios.get("http://localhost:8009/api/v1/medical/room/count/", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    })
+    .then((response) => {
+        const rooms_count = response.data.room_count;
+        setStats((prevStats) => ({
+            ...prevStats,
+            totalRooms: rooms_count
+        }));
+    })
+    .catch((error) =>{
+        console.error("Erreur lors de la récupération du nombre de chambres :",error);
     });
     },[]);
 
