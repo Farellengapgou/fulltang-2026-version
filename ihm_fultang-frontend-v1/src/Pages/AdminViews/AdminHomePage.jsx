@@ -6,6 +6,8 @@ import {useNavigate} from "react-router-dom";
 import {AppRoutesPaths as AppRouterPaths} from "../../Router/appRouterPaths.js";
 import QuickActionButton from "../../GlobalComponents/QuickActionButton.jsx";
 import StatCard from "../../GlobalComponents/StatCard.jsx";
+import axios from 'axios';
+import { useState, useEffect  } from 'react';
 
 
 export function AdminHomePage() {
@@ -13,15 +15,94 @@ export function AdminHomePage() {
 
     const navigate = useNavigate();
 
-    const stats = {
-        patients: 5,
-        medicalStaff: 6,
+    const [stats, setStats] = useState({
+        patients: 0,
+        medicalStaff: 0,
         consultations: 0,
-        appointments: 0,
+        appointments: 3,
         scheduledExams: 0,
-        totalRooms: 12
-    };
+        totalRooms: 0
+    });
 
+    useEffect(() =>{
+        const token = localStorage.getItem("token_key_fultang");
+
+        axios.get("http://localhost:8009/api/v1/medical/patient/count/", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    })
+    .then((response) => {
+        const patients_count = response.data.patient_count;
+        setStats((prevStats) => ({
+            ...prevStats,
+            patients: patients_count
+        }));
+    })
+    .catch((error) =>{
+        console.error("Erreur lors de la récupération du nombre de patients :",error);
+    });
+    },[]);
+
+    useEffect(() =>{
+        const token = localStorage.getItem("token_key_fultang");
+
+        axios.get("http://localhost:8009/api/v1/medical/medical-staff/count/", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    })
+    .then((response) => {
+        const staffs_count = response.data.medical_staff_count;
+        setStats((prevStats) => ({
+            ...prevStats,
+            medicalStaff: staffs_count
+        }));
+    })
+    .catch((error) =>{
+        console.error("Erreur lors de la récupération du nombre de membres du personnel :",error);
+    });
+    },[]);
+
+    useEffect(() =>{
+        const token = localStorage.getItem("token_key_fultang");
+
+        axios.get("http://localhost:8009/api/v1/medical/consultation/count/", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    })
+    .then((response) => {
+        const consultations_count = response.data.consultation_count;
+        setStats((prevStats) => ({
+            ...prevStats,
+            consultations: consultations_count
+        }));
+    })
+    .catch((error) =>{
+        console.error("Erreur lors de la récupération du nombre de consultations :",error);
+    });
+    },[]);
+
+    useEffect(() =>{
+        const token = localStorage.getItem("token_key_fultang");
+
+        axios.get("http://localhost:8009/api/v1/medical/appointment/count/", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    })
+    .then((response) => {
+        const appointments_count = response.data.appointment_count;
+        setStats((prevStats) => ({
+            ...prevStats,
+            appointments: appointments_count
+        }));
+    })
+    .catch((error) =>{
+        console.error("Erreur lors de la récupération du nombre de rendez-vous :",error);
+    });
+    },[]);
 
     const adminPrivileges = [
         {
