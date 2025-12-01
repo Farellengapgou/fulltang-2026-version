@@ -2,6 +2,10 @@ import React from "react"
 import { Route, Routes } from "react-router-dom";
 import {Loading} from "../GlobalComponents/Loading.jsx";
 import {AppRoutesPaths} from "./appRouterPaths.js";
+import { HelpConsultations } from "../Pages/ConsultationAppointments.jsx";
+import { HelpPayments } from "../Pages/PaymentsBilling.jsx";
+import { HelpTechnical } from "../Pages/TechnicalIssues.jsx";
+import { HelpFAQ } from "../Pages/FAQ.jsx";
 
 
 
@@ -82,6 +86,11 @@ export function AppRoute()
     const FinancialPayrollJournal = React.lazy(async () => ({default: (await import("../Pages/AccountantNew/Payroll & Social Charge/PayrollJournal.jsx")).SocialChargesCalculator}));
     const FinancialCostAnalytic = React.lazy(async () => ({default: (await import("../Pages/AccountantNew/Payroll & Social Charge/CostAnalytic.jsx")).HRAnalyticsDashboard}));
 
+    const ConsultationAppointments = React.lazy(async () => ({default: (await import("../Pages/ConsultationAppointments.jsx")).default}));
+    const PaymentsBilling = React.lazy(async () => ({default: (await import("../Pages/PaymentsBilling.jsx")).default}));
+    const TechnicalIssues = React.lazy(async () => ({default: (await import("../Pages/TechnicalIssues.jsx")).default}));
+    const FAQ = React.lazy(async () => ({default: (await import("../Pages/FAQ.jsx")).default}));
+    
 
 
 
@@ -163,6 +172,12 @@ export function AppRoute()
                 <Route path={AppRoutesPaths.financialAccountantAccountingGrandLivre} element={<FinancialGrandLivre/>}/>
                 <Route path={AppRoutesPaths.financialAccountPayroll} element={<FinancialPayrollJournal/>}/>
                 <Route path={AppRoutesPaths.financialAccountantCostAnalytic} element={<FinancialCostAnalytic/>}/>
+
+
+                <Route path="/help/consultations" element={<HelpConsultations />} />
+                <Route path="/help/payments" element={<HelpPayments />} />
+                <Route path="/help/technical" element={<HelpTechnical />} />
+                <Route path="/help/faq" element={<HelpFAQ />} />
 
 
 

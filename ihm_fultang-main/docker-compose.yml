@@ -15,7 +15,7 @@ services:
     build:
       context: . # dossier courant
       dockerfile: Dockerfile
-    image: "${FULTANG_IMAGE}"
+    image: "${FULTANG_IMAGE:-fultang:latest}"
     restart: always
     volumes:
       - ./volumes:/app/volumes
@@ -38,7 +38,7 @@ services:
       - fultang
 
   celery:
-    image: "${FULTANG_IMAGE}"
+    image: "${FULTANG_IMAGE:-fultang:latest}"
     restart: always
     user: django-user
     command: ["sh", "-c", "celery -A fultang worker --loglevel=info"]
@@ -51,7 +51,7 @@ services:
       - fultang
 
   celery-beat:
-    image: "${FULTANG_IMAGE}"
+    image: "${FULTANG_IMAGE:-fultang:latest}"
     restart: always
     user: django-user
     command:

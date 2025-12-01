@@ -1,4 +1,3 @@
-
 export const AppRoutesPaths = {
     notFound: "*",
     adminHomePage: "/admin/home",
@@ -71,7 +70,10 @@ export const AppRoutesPaths = {
     financialAccountantBudgets: "/accountant-financial/budgets",
     financialAccountantReports: "/accountant-financial/reports",
     financialAccountPayroll : "/accountant-financial/payroll-journal",
-    financialAccountantCostAnalytic : "/accountant-financial/cost-analytic"
+    financialAccountantCostAnalytic : "/accountant-financial/cost-analytic",
 
-
+    consultationAppointments: "/help-center/consultation-appointments",
+    paymentsBilling: "/help-center/payments-billing",
+    technicalIssues: "/help-center/technical-issues",
+    faq: "/help-center/faq",
 }
