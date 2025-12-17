@@ -15,7 +15,7 @@ services:
     build:
       context: . # dossier courant
       dockerfile: Dockerfile
-    image: "${FULTANG_IMAGE}"
+    image: "${FULTANG_IMAGE}"+
     restart: always
     volumes:
       - ./volumes:/app/volumes

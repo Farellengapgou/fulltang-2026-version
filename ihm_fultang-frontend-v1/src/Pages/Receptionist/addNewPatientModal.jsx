@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import axiosInstance from "../../Utils/axiosInstance.js";
 import {useAuthentication} from "../../Utils/Provider.jsx";
 
-
+const MIN_DATE = "1900-01-01";
 export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, setSuccessMessage, setIsLoading})
 {
     AddNewPatientModal.propTypes = {
@@ -205,17 +205,19 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-1">Birth
-                                    Date</label>
-                                    <input
-                                        type="date"
-                                        id="birthDate"
-                                        name="birthDate"
-                                        placeholder={"enter patient's birth date"}
-                                        value={formData.birthDate}
-                                        onChange={handleChange}
-                                        className={applyFormStyle()}
-                                        required={true}
-                                    />
+                                                                    Date</label>
+                                <input
+                                    type="date"
+                                    name="birthDate"
+                                    id="birthDate"
+                                    value={formData.birthDate}
+                                    onChange={handleChange}
+                                    max={new Date().toISOString().split("T")[0]} // empêche dates futures
+                                    min={MIN_DATE} 
+                                    className={applyFormStyle()}
+                                    required={true}
+                                />
+
                             </div>
                             <div>
                                 <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-1">Age</label>

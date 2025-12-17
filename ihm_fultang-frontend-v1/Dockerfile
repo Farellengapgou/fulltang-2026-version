@@ -2,17 +2,12 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package.json .
+COPY package.json package-lock.json ./
 
 RUN npm install
 
-RUN npm i react-icons && npm i jquery && npm i lucide-react 
-
 COPY . .
 
-# Comment the line below if you want to run the dev mode
-RUN npm run build
+EXPOSE 5173
 
-EXPOSE 9000
-
-CMD [ "npm", "run", "preview" ]
+CMD ["npm", "run", "dev", "--", "--host"]

@@ -1,6 +1,9 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.exceptions import ValidationError
 
+
+
+
 from polyclinic.models import Patient, PatientAccess, MedicalFolder, Consultation
 from authentication.models import MedicalStaff
 from polyclinic.permissions.patient_access_permissions import PatientAccessPermission
@@ -15,6 +18,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
+
+from rest_framework import filters
+from django.db.models import Q
+
 from django.utils.timezone import now, timedelta
 from django.db import transaction
 
@@ -107,20 +114,29 @@ class PatientViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, PatientPermission]
     pagination_class = CustomPagination
 
-    def get_queryset(self):
-        """
-        user = self.request.user
-        if user.role=="Admin" or user.role=="Receptionist":
-            return Patient.objects.all()
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['firstName', 'lastName', 'phoneNumber', 'email', 'cniNumber', 'address']
+    ordering_fields = ['created_at', 'firstName', 'lastName', 'birthDate']
+    ordering = ['-created_at']
 
-        return Patient.objects.filter(
-            id__in=PatientAccess.objects.filter(
-                idMedicalStaff=user,
-                access=True
-            ).values_list("idPatient", flat=True)
-        )
-        """
-        return Patient.objects.all()
+    def get_queryset(self):
+        queryset = Patient.objects.all()
+        
+        # Filtre par genre
+        gender = self.request.query_params.get('gender', None)
+        if gender:
+            queryset = queryset.filter(gender=gender)
+        
+        # Filtre par plage de dates
+        birth_date_from = self.request.query_params.get('birth_date_from', None)
+        birth_date_to = self.request.query_params.get('birth_date_to', None)
+        
+        if birth_date_from:
+            queryset = queryset.filter(birthDate__gte=birth_date_from)
+        if birth_date_to:
+            queryset = queryset.filter(birthDate__lte=birth_date_to)
+        
+        return queryset
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -264,18 +280,5 @@ class PatientViewSet(ModelViewSet):
             return Response(serializer.data, status.HTTP_200_OK)
         except MedicalStaff.DoesNotExist:
             return Response({"details": "le docteur spécifé n'existe pas"}, status.HTTP_404_NOT_FOUND)
-        
-    @swagger_auto_schema(
-        operation_description="Permet de compter le nombre de patients enregistrés",
-        responses={
-            200: openapi.Response(description="Nombre de patients enregistrés")
-        },
-        tags=tags
-    )
-    @action(methods=['get'], detail=False, url_path='count', permission_classes=[PatientAccessPermission])
-    def number_of_patients(self, request):
-        query = Patient.objects.all()
-        data = {}
-        data['patient_count'] = query.count()
 
-        return Response(data, status=status.HTTP_200_OK)
+
