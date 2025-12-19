@@ -23,6 +23,8 @@ export function Nurse()
 
 
     const [patientList, setPatientList] = useState([]);
+    const [filteredPatientList, setFilteredPatientList] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
     const [numberOfPatients, setNumberOfPatients] = useState(0);
     const [nexUrlForRenderPatientList, setNexUrlForRenderPatientList] = useState("");
     const [previousUrlForRenderPatientList,setPreviousUrlForRenderPatientList] = useState("");
@@ -34,6 +36,7 @@ export function Nurse()
     const [errorStatus, setErrorStatus] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [currentTime, setCurrentTime] = useState(new Date());
 
 
 
@@ -48,6 +51,7 @@ export function Nurse()
             {
                 console.log(response.data);
                 setPatientList(response.data.results);
+                setFilteredPatientList(response.data.results);
                 setNumberOfPatients(response.data.count);
                 setNexUrlForRenderPatientList(response.data.next);
                 setPreviousUrlForRenderPatientList(response.data.previous);
@@ -76,6 +80,7 @@ export function Nurse()
                 {
                     //console.log(response)
                     setPatientList(response.data.results);
+                    setFilteredPatientList(response.data.results);
                     setNumberOfPatients(response.data.count);
                     setNexUrlForRenderPatientList(response.data.next);
                     setPreviousUrlForRenderPatientList(response.data.previous);
@@ -118,8 +123,62 @@ export function Nurse()
         fetchPatientList();
     }, []);
 
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+    
+        return () => clearInterval(timer);
+    }, []);
 
+    function formatTime(date) {
+        let hours = date.getHours();
+        const minutes = date.getMinutes();
+        const seconds = date.getSeconds();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+    
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+    
+        const hoursStr = hours.toString().padStart(2, '0');
+        const minutesStr = minutes.toString().padStart(2, '0');
+        const secondsStr = seconds.toString().padStart(2, '0');
+    
+        return `${hoursStr}:${minutesStr}:${secondsStr} ${ampm}`;
+    }
 
+    function handleSearchInputChange(e) {
+        const query = e.target.value;
+            setSearchQuery(query);
+    
+        if (query.trim() === "") {
+            setFilteredPatientList(patientList);
+        } else {
+        const filtered = patientList.filter(patient => 
+            patient.firstName.toLowerCase().includes(query.toLowerCase()) ||
+            patient.lastName.toLowerCase().includes(query.toLowerCase())
+        );
+        setFilteredPatientList(filtered);
+        }
+    }
+
+    function handleSearch() {
+        if (searchQuery.trim() === "") {
+            setFilteredPatientList(patientList);
+        } else {
+        const filtered = patientList.filter(patient => 
+            patient.firstName.toLowerCase().includes(query.toLowerCase()) ||
+            patient.lastName.toLowerCase().includes(query.toLowerCase())
+        );
+        setFilteredPatientList(filtered);
+        }
+    }
+
+    function handleKeyPress(e) {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    }
 
 
     return (
@@ -140,7 +199,7 @@ export function Nurse()
                                 </div>
                             </div>
                             <div>
-                                <p className="text-white mt-28 text-xl font-bold mr-4">12:30:25 AM</p>
+                               <p className="text-white mt-28 text-xl font-bold mr-4">{formatTime(currentTime)}</p>
                             </div>
                         </div>
 
@@ -155,10 +214,17 @@ export function Nurse()
                                     <FaSearch className="text-xl text-secondary m-2"/>
                                     <input
                                         type="text"
-                                        className="border-none focus:outline-none focus:ring-0"
+                                        value={searchQuery}
+                                        onChange={handleSearchInputChange}
+                                        onKeyPress={handleKeyPress}
+                                        placeholder="Search by name..."
+                                        className="border-none focus:outline-none focus:ring-0 w-full pr-2"
                                     />
                                 </div>
-                                <button className="ml-2 w-20 h-10 text-white bg-secondary rounded-lg">
+                                <button 
+                                    onClick={handleSearch}
+                                    className="ml-2 w-20 h-10 text-white bg-secondary rounded-lg hover:bg-opacity-80 transition-all duration-300"
+                                >
                                     Search
                                 </button>
                             </div>
@@ -171,10 +237,10 @@ export function Nurse()
                             </div>
                         )
                         : ( errorStatus ? <ServerErrorPage errorStatus={errorStatus} message={errorMessage}/> :
-                            (patientList.length >0 ? (
+                            (filteredPatientList.length > 0 ? (
                                     <>
                                         <div className="ml-5 mr-5 mt-2 border-2  rounded-lg shadow-lg  p-2">
-                                            <PatientList patients={patientList}
+                                            <PatientList patients={filteredPatientList}
                                                          setCanOpenViewPatientDetailModal={setCanOpenViewPatientDetailsModal}
                                                          setSelectedPatient={setSelectedPatient}/>
                                         </div>
@@ -208,10 +274,23 @@ export function Nurse()
                                     <div
                                         className="flex flex-col items-center justify-center py-12 px-4 text-center mt-7">
                                         <img src={noPatientImage} alt={"image"} className="w-36 h-36 rounded-lg"/>
-                                        <h3 className="font-bold text-2xl mt-4 mb-2 text-gray-800">No patients recorded</h3>
+                                        <h3 className="font-bold text-2xl mt-4 mb-2 text-gray-800">
+                                            {searchQuery ? "No patients found" : "No patients recorded"}
+                                        </h3>
                                         <p className="text-gray-600 mb-6 max-w-xl text-md font-medium">
-                                            There are currently no patients registered in the system.
+                                            {searchQuery 
+                                                ? `No patients match "${searchQuery}". Try a different search term.`
+                                                : "There are currently no patients registered in the system."
+                                            }
                                         </p>
+                                        {searchQuery && (
+                                            <button 
+                                                onClick={() => {setSearchQuery(""); setFilteredPatientList(patientList);}}
+                                                className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-opacity-80 transition-all duration-300"
+                                            >
+                                                Clear Search
+                                            </button>
+                                       )}
                                     </div>
                                 )
                             )
