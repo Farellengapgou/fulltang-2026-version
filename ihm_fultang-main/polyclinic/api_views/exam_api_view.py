@@ -8,6 +8,8 @@ from drf_yasg import openapi
 from django.utils.decorators import method_decorator
 from rest_framework.permissions import IsAuthenticated
 
+from rest_framework.filters import SearchFilter
+
 tags = ["exam"]
 auth_header_param = openapi.Parameter(
     name="Authorization",
@@ -96,6 +98,8 @@ class ExamViewSet(ModelViewSet):
 
     permission_classes = [IsAuthenticated, ExamPermissions]
     pagination_class = CustomPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['examName', 'examDescription']
 
     def get_queryset(self):
         queryset = Exam.objects.all()
