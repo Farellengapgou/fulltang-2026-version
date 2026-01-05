@@ -5,6 +5,7 @@ import userIcon from "../../assets/userIcon.png"
 import { useNavigate } from "react-router-dom"; 
 import { useEffect, useState } from "react";
 import axiosInstance from "../../Utils/axiosInstance.js";
+import { AppRoutesPaths } from "../../Router/appRouterPaths.js";
 
 export function HelpCenter () {
     const {logout , userData} = useAuthentication();
@@ -26,11 +27,23 @@ export function HelpCenter () {
         message: ''
     });
     const [submitStatus, setSubmitStatus] = useState(null);
+    const helpLinkMap = {
+        "/help/consultations": AppRoutesPaths.consultationAppointments,
+        "/help/payments": AppRoutesPaths.paymentsBilling,
+        "/help/technical": AppRoutesPaths.technicalIssues,
+        "/help/faq": AppRoutesPaths.faq,
+    };
+
+    const normalizeHelpLink = (link) => {
+        if (!link) return link;
+        if (helpLinkMap[link]) return helpLinkMap[link];
+        return link;
+    };
 
     useEffect(() => {
         const fetchCategories = async () => {
           try {
-            const response = await axiosInstance.get("/medical/help-center/categories/");
+            const response = await axiosInstance.get("/help-center/categories/");
             setCategories(response.data);
             console.log("Categories loaded:", response.data);
           } catch (error) {
@@ -40,22 +53,22 @@ export function HelpCenter () {
                 {
                     title: "Consultations & Rendez-vous",
                     description: "Guide pour planifier ou annuler un rendez-vous",
-                    link: "/help/consultations",
+                    link: AppRoutesPaths.consultationAppointments,
                 },
                 {
                     title: "Paiements & Facturation",
                     description: "Informations sur les paiements et remboursements",
-                    link: "/help/payments",
+                    link: AppRoutesPaths.paymentsBilling,
                 },
                 {
                     title: "Problèmes Techniques",
                     description: "Résolution des problèmes techniques",
-                    link: "/help/technical",
+                    link: AppRoutesPaths.technicalIssues,
                 },
                 {
                     title: "FAQ",
                     description: "Réponses aux questions fréquemment posées",
-                    link: "/help/faq",
+                    link: AppRoutesPaths.faq,
                 }
             ]);
           }
@@ -78,7 +91,7 @@ export function HelpCenter () {
         setIsLoading(true);
 
         try {
-            const response = await axiosInstance.post('/medical/chatbot/', {
+            const response = await axiosInstance.post('/chatbot/', {
                 question: userInput
             });
 
@@ -136,17 +149,17 @@ export function HelpCenter () {
     const popularArticles = [
         { 
             title: "Comment prendre un rendez-vous?", 
-            link: "/help/consultations",
+            link: AppRoutesPaths.consultationAppointments,
             description: "Guide étape par étape pour créer un rendez-vous"
         },
         { 
             title: "Comment vérifier l'historique des paiements?", 
-            link: "/help/payments",
+            link: AppRoutesPaths.paymentsBilling,
             description: "Accéder et gérer les paiements des patients"
         },
         { 
             title: "Que faire en cas de problème technique?", 
-            link: "/help/technical",
+            link: AppRoutesPaths.technicalIssues,
             description: "Solutions aux problèmes courants"
         }
     ];
@@ -240,8 +253,9 @@ export function HelpCenter () {
                                     key={index}
                                     className="bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow"
                                     onClick={() => {
-                                        console.log("Navigating to:", category.link);
-                                        navigate(category.link);
+                                        const target = normalizeHelpLink(category.link);
+                                        console.log("Navigating to:", target);
+                                        navigate(target);
                                     }}
                                 >
                                     <h3 className="text-lg font-medium mb-2 text-blue-900">
