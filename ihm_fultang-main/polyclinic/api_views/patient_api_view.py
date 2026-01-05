@@ -281,4 +281,26 @@ class PatientViewSet(ModelViewSet):
         except MedicalStaff.DoesNotExist:
             return Response({"details": "le docteur spécifé n'existe pas"}, status.HTTP_404_NOT_FOUND)
 
+    # Ajoutez cette nouvelle action dans patient_api_view.py
+# APRÈS la méthode patient_doctor existante
+
+    @swagger_auto_schema(
+        operation_description="Liste tous les patients sans pagination (pour formulaires)",
+        responses={
+            200: openapi.Response(
+                description="Liste complète des patients", 
+                schema=PatientSerializer(many=True)
+            ),
+        },
+        manual_parameters=[auth_header_param],
+        tags=tags
+    )
+    @action(methods=["get"], detail=False, url_path='all', permission_classes=[IsAuthenticated, PatientPermission])
+    def list_all_patients(self, request):
+        """Retourne tous les patients sans pagination pour les formulaires de sélection"""
+        self.pagination_class = None  # Désactive la pagination
+        patients = Patient.objects.all().order_by('firstName', 'lastName')
+        serializer = PatientSerializer(patients, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
