@@ -1,24 +1,33 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-import PyPDF2
-import openai
+try:
+    import PyPDF2
+except ImportError:
+    PyPDF2 = None
+try:
+    import openai
+except ImportError:
+    openai = None
 import os
 from django.conf import settings
 from polyclinic.serializers.chat_serializers import UserQuerySerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-# Configuration OpenAI (compatible avec OpenRouter)
-OPENAI_API_KEY = "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"
-openai.api_key = OPENAI_API_KEY
-openai.api_base = "https://openrouter.ai/api/v1"  # IMPORTANT: URL OpenRouter
+if openai is not None:
+    # Configuration OpenAI (compatible avec OpenRouter)
+    OPENAI_API_KEY = "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"
+    openai.api_key = OPENAI_API_KEY
+    openai.api_base = "https://openrouter.ai/api/v1"  # IMPORTANT: URL OpenRouter
 
 # Charger le guide PDF
 PDF_PATH = os.path.join(settings.MEDIA_ROOT, "guide_fultang.pdf")
 
 def extract_text_from_pdf(pdf_path):
     """Extrait le texte du PDF avec PyPDF2"""
+    if PyPDF2 is None:
+        return ""
     try:
         text = ""
         with open(pdf_path, 'rb') as file:
@@ -63,6 +72,8 @@ except Exception as e:
 
 def generate_answer(question):
     """Génère une réponse avec OpenAI via OpenRouter"""
+    if openai is None:
+        return fallback_answer(question)
     try:
         prompt = f"""Tu es un assistant pour l'application Fultang, un système de gestion hospitalière.
         
@@ -95,12 +106,24 @@ Si tu ne trouves pas l'info dans le guide, dis-le honnêtement et suggère de co
     except Exception as e:
         error_msg = str(e)
         print(f"Erreur OpenAI: {error_msg}")
-        
-        # Réponses de secours basées sur des mots-clés
-        question_lower = question.lower()
-        
-        if any(word in question_lower for word in ['consultation', 'rendez-vous', 'rdv', 'appointment']):
-            return """Pour créer une consultation dans Fultang:
+        return fallback_answer(question)
+
+def fallback_answer(question):
+    """Réponses de secours basées sur des mots-clés (sans mention d'erreur technique)"""
+    question_lower = (question or "").lower()
+
+    if any(word in question_lower for word in ['bonjour', 'salut', 'hello', 'bonsoir']):
+        return """Bonjour ! 👋
+Je peux vous aider sur :
+- Consultations et rendez-vous
+- Paiements et facturation
+- Gestion des patients
+- Problèmes techniques
+
+Posez-moi votre question."""
+
+    if any(word in question_lower for word in ['consultation', 'rendez-vous', 'rdv', 'appointment']):
+        return """Pour créer une consultation dans Fultang:
 
 1. Allez dans le menu 'Consultations' ou 'Appointments'
 2. Cliquez sur 'Nouveau' ou 'New'
@@ -115,8 +138,8 @@ Prix des consultations:
 - Dentiste: 7000 FCFA
 - Ophtalmologue: 8000 FCFA"""
         
-        elif any(word in question_lower for word in ['paiement', 'facture', 'payment', 'bill']):
-            return """Gestion des paiements dans Fultang:
+    if any(word in question_lower for word in ['paiement', 'facture', 'payment', 'bill']):
+        return """Gestion des paiements dans Fultang:
 
 1. Les factures sont générées automatiquement après consultation
 2. Pour enregistrer un paiement:
@@ -132,8 +155,8 @@ Modes de paiement acceptés:
 
 Un reçu est généré automatiquement."""
         
-        elif any(word in question_lower for word in ['patient', 'dossier', 'créer']):
-            return """Création d'un dossier patient:
+    if any(word in question_lower for word in ['patient', 'dossier', 'créer']):
+        return """Création d'un dossier patient:
 
 1. Allez dans 'Patients'
 2. Cliquez sur 'Nouveau Patient'
@@ -150,8 +173,7 @@ Un dossier médical sera automatiquement créé. Vous pouvez ensuite:
 - Prescrire des examens
 - Gérer les hospitalisations"""
         
-        else:
-            return f"""Je n'ai pas pu traiter votre question pour le moment (erreur technique: {error_msg[:100]}).
+    return """Je n'ai pas assez d'informations sur cette question.
 
 Pour une assistance immédiate:
 - Consultez la FAQ dans le Help Center

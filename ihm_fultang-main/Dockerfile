@@ -4,14 +4,14 @@ FROM python:3.10-slim
 # Définir le répertoire de travail dans le conteneur
 WORKDIR /app
 
-# Installer les dépendances système nécessaires pour mysqlclient
-RUN apt-get update && apt-get install -y \
-    gcc \
-    libpq-dev \
-    libmariadb-dev \
-    pkg-config \
-    build-essential \
-    default-libmysqlclient-dev
+# Dépendances système optionnelles; commenter cette section si le réseau/DNS bloque apt-get
+# RUN apt-get update && apt-get install -y \
+#     gcc \
+#     libpq-dev \
+#     libmariadb-dev \
+#     pkg-config \
+#     build-essential \
+#     default-libmysqlclient-dev
 
 # Copier les fichiers requirements.txt dans le conteneur
 COPY requirements.txt /app

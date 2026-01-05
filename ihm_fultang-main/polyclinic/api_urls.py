@@ -20,7 +20,7 @@ from authentication.api_views.medical_staff_api_views import MedicalStaffViewSet
 from rest_framework.routers import DefaultRouter
 from django.urls import path
 from polyclinic.api_views.chat_api_view import ChatbotView
-from polyclinic.api_views.help_center_api_view import HelpCenterCategoriesView
+from polyclinic.api_views.helpcenter_api_view import HelpCenterCategoriesView
 
 
 router = DefaultRouter()
