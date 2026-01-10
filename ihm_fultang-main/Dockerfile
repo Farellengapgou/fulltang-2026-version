@@ -4,14 +4,14 @@ FROM python:3.10-slim
 # Définir le répertoire de travail dans le conteneur
 WORKDIR /app
 
-# Installer les dépendances système nécessaires pour mysqlclient
-RUN apt-get update && apt-get install -y \
-    gcc \
-    libpq-dev \
-    libmariadb-dev \
-    pkg-config \
-    build-essential \
-    default-libmysqlclient-dev
+# Dépendances système optionnelles; commenter cette section si le réseau/DNS bloque apt-get
+# RUN apt-get update && apt-get install -y \
+#     gcc \
+#     libpq-dev \
+#     libmariadb-dev \
+#     pkg-config \
+#     build-essential \
+#     default-libmysqlclient-dev
 
 # Copier les fichiers requirements.txt dans le conteneur
 COPY requirements.txt /app
@@ -27,8 +27,9 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 COPY . /app
 
 # on donne les droits de lecture et ecriture à tous le monde à la bd (pour celery et celery beat)
-RUN chmod 666 db.sqlite3 && \
-    chmod -R 777 /app
+RUN chmod -R 777 /app
+# RUN chmod 666 db.sqlite3 && \
+#     chmod -R 777 /app
 
 # Exposer le port sur lequel l'application va fonctionner
 EXPOSE 8009
