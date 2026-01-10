@@ -10,6 +10,7 @@ from accounting.api_views.financial_operation_api_view import FinancialOperation
 from accounting.api_views.chart_of_account_api_view import ChartOfAccountsViewSet
 from accounting.api_views.journal_api_view import JournalViewSet
 from accounting.api_views.journal_entry_api_view import JournalEntryViewSet
+from accounting.api_views.invoice_total_api_view import InvoiceTotalAPI
 
 
 # Configuration du routeur principal
@@ -31,3 +32,4 @@ router.register(r'journal-entries', JournalEntryViewSet, basename='journalentry'
 
 urlpatterns = [path('statistics/', AccountingStatsAPI.as_view(), name='account-statistics'),]
 urlpatterns += router.urls
+urlpatterns += [path('invoice/total', InvoiceTotalAPI.as_view(), name='invoice-total')]

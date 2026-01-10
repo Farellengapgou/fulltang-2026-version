@@ -23,7 +23,7 @@ def extract_text_from_pdf(pdf_path):
     text = "\n".join([page.get_text() for page in doc])
     return text
 
-guide_text = extract_text_from_pdf(PDF_PATH)
+guide_text = ""
 
 # Fonction pour générer une réponse
 def generate_answer(prompt):
