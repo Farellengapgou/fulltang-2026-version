@@ -5,6 +5,8 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from decimal import Decimal
 from datetime import datetime, timedelta
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
 # Plan comptable
 class ChartOfAccounts(models.Model):
@@ -192,3 +194,115 @@ class Supplier(Tier):
         Vérifie si le fournisseur peut livrer une catégorie donnée
         """
         return self.allowed_article_categories.filter(id=category.id).exists()
+    
+class Entry(models.Model):
+    """
+    Représente une entrée comptable
+    """
+
+    ENTRY_STATES = [
+        ('DRAFT', 'Brouillon'),
+        ('POSTED', 'Validée'),
+        ('CANCELLED', 'Annulée'),
+    ]
+
+    # Lien article : Champs pour GenericForeignKey
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        limit_choices_to={'model__in': ['medicament', 'equipement', 'consommable']}
+    )
+    object_id = models.PositiveIntegerField()
+    article = GenericForeignKey('content_type', 'object_id')
+    
+    unit = models.CharField(
+        max_length=50,
+        help_text="Unité de mesure de l'article (ex: boîte, pièce, litre)"
+    )
+    quantity = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+    )
+
+    created_by = models.ForeignKey(
+        "authentication.MedicalStaff",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="Comptable ayant créé l'entrée",
+    )
+
+    supplied_by = models.ForeignKey(
+        'Supplier',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="Fournisseur ayant livré l'article",
+    )
+
+    state = models.CharField(
+        max_length=10,
+        choices=ENTRY_STATES,
+        default='DRAFT'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+class Release(models.Model):
+    """
+    Représente une sortie de stock comptable
+    """
+
+    RELEASE_STATES = [
+        ('DRAFT', 'Brouillon'),
+        ('POSTED', 'Validée'),
+        ('CANCELLED', 'Annulée'),
+    ]
+
+    # Lien article : Champs pour GenericForeignKey
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        limit_choices_to={'model__in': ['medicament', 'equipement', 'consommable']}
+    )
+    object_id = models.PositiveIntegerField()
+    article = GenericForeignKey('content_type', 'object_id')
+    
+    unit = models.CharField(
+        max_length=50,
+        help_text="Unité de mesure de l'article (ex: boîte, pièce, litre)"
+    )
+    quantity = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+    )
+
+    created_by = models.ForeignKey(
+        "authentication.MedicalStaff",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="MedicalStaff ayant créé la sortie",
+    )
+
+    reason = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Raison de la sortie (ex: consommation interne, don, perte)"
+    )
+
+    state = models.CharField(
+        max_length=10,
+        choices=RELEASE_STATES,
+        default='DRAFT'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+
+
+
