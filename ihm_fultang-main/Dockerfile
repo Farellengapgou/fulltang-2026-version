@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
  && rm -rf /var/lib/apt/lists/*
 
-# Copier requirements
+# Copier requirements 
 COPY requirements.txt .
 
 # Upgrade pip + installer dépendances Python
