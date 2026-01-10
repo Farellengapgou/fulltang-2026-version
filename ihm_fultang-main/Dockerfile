@@ -5,7 +5,6 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # Installer dépendances système
-# On garde la version complète de mofif_receptionist
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
@@ -30,10 +29,10 @@ RUN adduser --disabled-password --gecos "" --no-create-home django-user
 # Copier le code
 COPY . /app
 
-# Permissions
-# On combine les deux approches pour la BD et les fichiers
-RUN chmod 666 db.sqlite3 || true && \
-    chmod -R 777 /app
+# Permissions et création DB
+RUN chmod -R 777 /app && \
+    touch db.sqlite3 && \
+    chmod 666 db.sqlite3
 
 # Port exposé
 EXPOSE 8009
@@ -42,5 +41,4 @@ EXPOSE 8009
 ENV PYTHONUNBUFFERED=1
 
 # Lancer les migrations et démarrer le serveur Django
-# On garde les migrations de HEAD pour s'assurer que tout soit créé
 CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8009"]
