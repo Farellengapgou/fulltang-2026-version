@@ -61,13 +61,16 @@ STATEPATIENT = [
 
 ROOM_TYPES = [
     ("Simple", "Simple"),
+    ("Double", "Double"),
+    ("VIP", "VIP"),
+    ("Multiple", "Multiple"),
     ("Emergency", "Emergency"),
     ("Staff", "Staff"),
 ]
 
 ROOM_FACILITIES = [
     ("Television", "Television"),
-    ("Air Conditioning", "Air Conditioning"),
+    ("Air conditioning", "Air conditioning"),
     ("Private bathroom", "Private bathroom"),
     ("Mini fridge", "Mini fridge"),
 ]
@@ -234,7 +237,7 @@ class MedicalFolderPage(models.Model):
 class Exam(models.Model):
     examName = models.CharField(max_length=100)
     examCost = models.FloatField()
-    examDescription = models.TextField(max_length=23, blank=True, null=True)
+    examDescription = models.TextField(max_length=500, blank=True, null=True)
     def __str__(self) -> str:
         return self.examName.__str__()
 
@@ -521,12 +524,16 @@ class PrescriptionDrug(models.Model):
 
 
 class Room(models.Model):
-    roomLabel = models.CharField(max_length=100)
-    beds = models.PositiveIntegerField(default = 1)
-    busyBeds = models.IntegerField(default = 0)
+    roomNumber = models.CharField(max_length=100, unique=True)
+    beds = models.PositiveIntegerField(default=1)
+    occupiedBeds = models.IntegerField(default=0)
     price = models.FloatField(default=2000)
     type = models.CharField(max_length=255, choices=ROOM_TYPES, default="Simple")
-    facilities = models.CharField(max_length=255, choices=ROOM_FACILITIES, default="Private Bathroom")
+    facilities = models.JSONField(default=list, blank=True, null=True)
+    addDate = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return f"Room {self.roomNumber}"
 
 class Hospitalisation(models.Model):
     atDate = models.DateTimeField(auto_now_add=True)

@@ -11,6 +11,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
+from rest_framework.filters import SearchFilter
+
 tags = ["exam"]
 auth_header_param = openapi.Parameter(
     name="Authorization",
@@ -99,6 +101,8 @@ class ExamViewSet(ModelViewSet):
 
     permission_classes = [IsAuthenticated, ExamPermissions]
     pagination_class = CustomPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['examName', 'examDescription']
 
     def get_queryset(self):
         queryset = Exam.objects.all()

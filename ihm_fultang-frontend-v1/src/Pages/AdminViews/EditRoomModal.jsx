@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BedDouble, DollarSign, Users, CheckCircle, X } from 'lucide-react';
 import { CustomDashboard } from "../../GlobalComponents/CustomDashboard.jsx";
 import { adminNavLink } from "./adminNavLink.js";
@@ -6,18 +6,15 @@ import { AdminNavBar } from "./AdminNavBar.jsx";
 import PropTypes from "prop-types";
 import axiosInstance from "../../Utils/axiosInstance.js";
 
+export function EditRoomModal({ isOpen, onClose, room, setSuccessMessage, setCanOpenSuccessModal }) {
 
-
-
-export function AddHospitalRoomModal({ isOpen, onClose, setSuccessMessage, setCanOpenSuccessModal }) {
-
-    AddHospitalRoomModal.propTypes = {
+    EditRoomModal.propTypes = {
         isOpen: PropTypes.bool.isRequired,
         onClose: PropTypes.func.isRequired,
+        room: PropTypes.object,
         setSuccessMessage: PropTypes.func.isRequired,
         setCanOpenSuccessModal: PropTypes.func.isRequired,
     }
-
 
     const [roomData, setRoomData] = useState({
         roomNumber: '',
@@ -29,6 +26,18 @@ export function AddHospitalRoomModal({ isOpen, onClose, setSuccessMessage, setCa
     const [error, setError] = useState("");
     const facilityOptions = ['Television', 'Air conditioning', 'Private bathroom', 'Mini fridge'];
 
+    // Pre-populate form when room changes
+    useEffect(() => {
+        if (room && room.raw) {
+            setRoomData({
+                roomNumber: room.raw.roomNumber || room.number || '',
+                type: room.raw.type || 'Simple',
+                beds: room.raw.beds || room.bedNumber || 1,
+                price: room.raw.price || room.price || '',
+                facilities: room.raw.facilities || [],
+            });
+        }
+    }, [room]);
 
     function handleChange(e) {
         const { name, value } = e.target;
@@ -40,30 +49,33 @@ export function AddHospitalRoomModal({ isOpen, onClose, setSuccessMessage, setCa
         ));
     }
 
-
     function handleFacilityChange(facility) {
         setRoomData(prev => (
             {
                 ...prev,
-                facilities: prev.facilities.includes(facility) ? prev.facilities.filter(f => f !== facility) : [...prev.facilities, facility]
+                facilities: prev.facilities.includes(facility)
+                    ? prev.facilities.filter(f => f !== facility)
+                    : [...prev.facilities, facility]
             }
         ));
     }
 
-
     async function handleSubmit(e) {
         e.preventDefault();
+        if (!room || !room.id) {
+            setError("Invalid room data");
+            return;
+        }
+
         try {
-            const response = await axiosInstance.post("/room/", roomData);
-            if (response.status === 201) {
-                setSuccessMessage("room added successfully !");
+            const response = await axiosInstance.put(`/room/${room.id}/`, roomData);
+            if (response.status === 200) {
+                setSuccessMessage("Room updated successfully!");
                 setError("");
                 setCanOpenSuccessModal(true);
-                onClose();
+                onClose(false);
             }
-
-        }
-        catch (error) {
+        } catch (error) {
             // Extract specific error message from backend response
             if (error.response && error.response.data) {
                 const errorData = error.response.data;
@@ -97,18 +109,18 @@ export function AddHospitalRoomModal({ isOpen, onClose, setSuccessMessage, setCa
         }
     }
 
+    if (!isOpen || !room) return null;
 
-    if (!isOpen) return;
     return (
         <CustomDashboard linkList={adminNavLink} requiredRole={"Admin"}>
             <AdminNavBar />
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm transition-all duration-300">
-                <div className="bg-white rounded-xl shadow-xl w-[800px] ">
+                <div className="bg-white rounded-xl shadow-xl w-[800px]">
                     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                         <div className="bg-gradient-to-r from-primary-end to-primary-start px-6 py-4 flex justify-between items-center">
-                            <h1 className="text-3xl font-bold text-white">Add A New Room</h1>
+                            <h1 className="text-3xl font-bold text-white">Edit Room</h1>
                             <button className="text-white hover:text-gray-200 transition-colors"
-                                onClick={() => { onClose() }}>
+                                onClick={() => onClose(false)}>
                                 <X size={30} />
                             </button>
                         </div>
@@ -214,13 +226,20 @@ export function AddHospitalRoomModal({ isOpen, onClose, setSuccessMessage, setCa
                                 </div>
                             </div>
 
-                            <div className="mt-8 flex justify-end">
+                            <div className="mt-8 flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => onClose(false)}
+                                    className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md transition-colors duration-300"
+                                >
+                                    Cancel
+                                </button>
                                 <button
                                     type="submit"
                                     className="bg-primary-end  text-white font-bold py-2 px-4 rounded-md transition-colors duration-300 flex items-center"
                                 >
                                     <CheckCircle className="mr-2" size={20} />
-                                    Add The room
+                                    Update Room
                                 </button>
                             </div>
                         </form>
@@ -228,7 +247,5 @@ export function AddHospitalRoomModal({ isOpen, onClose, setSuccessMessage, setCa
                 </div>
             </div>
         </CustomDashboard>
-
     );
 }
-

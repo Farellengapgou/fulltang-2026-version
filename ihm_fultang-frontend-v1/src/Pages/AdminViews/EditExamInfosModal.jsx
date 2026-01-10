@@ -1,9 +1,9 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import axiosInstance from "../../Utils/axiosInstance.js";
 
 
-export function EditExamInfosModal ({ isOpen, onClose, setCanOpenSuccessModal, setSuccessMessage, setIsLoading, examData }) {
+export function EditExamInfosModal({ isOpen, onClose, setCanOpenSuccessModal, setSuccessMessage, setIsLoading, examData }) {
     EditExamInfosModal.propTypes = {
         isOpen: PropTypes.bool.isRequired,
         onClose: PropTypes.func.isRequired,
@@ -15,23 +15,27 @@ export function EditExamInfosModal ({ isOpen, onClose, setCanOpenSuccessModal, s
 
 
     const [formData, setFormData] = useState({
-        name: '',
-        cost: 0.0,
-        description: '',
+        examName: '',
+        examCost: 0.0,
+        examDescription: '',
     });
 
     const [error, setError] = useState("");
     const [checkedFields, setCheckedFields] = useState({
-        
-        name: false,
-        cost: false,
-        description: false,
-        
+
+        examName: false,
+        examCost: false,
+        examDescription: false,
+
     });
 
     useEffect(() => {
         if (examData) {
-            setFormData(examData);
+            setFormData({
+                examName: examData.examName || '',
+                examCost: examData.examCost || 0.0,
+                examDescription: examData.examDescription || ''
+            });
         }
     }, [examData]);
 
@@ -39,9 +43,9 @@ export function EditExamInfosModal ({ isOpen, onClose, setCanOpenSuccessModal, s
 
     function handleChange(e) {
         const { name, value } = e.target;
-        
-            setFormData(prevData => ({ ...prevData, [name]: value }));
-        
+
+        setFormData(prevData => ({ ...prevData, [name]: value }));
+
     }
 
 
@@ -53,28 +57,28 @@ export function EditExamInfosModal ({ isOpen, onClose, setCanOpenSuccessModal, s
     async function handleSubmit(e) {
         e.preventDefault();
         setIsLoading(true);
-            const updatedData = Object.keys(checkedFields).reduce((acc, key) => {
-                if (checkedFields[key]) {
-                    acc[key] = formData[key];
-                }
-                return acc;
-            }, {});
-
-            try {
-                const response = await axiosInstance.patch(`/exam/${examData.id}/`, updatedData);
-                if (response.status === 200) {
-                    setIsLoading(false);
-                    setSuccessMessage(`${examData.name} 's information has been updated successfully!`);
-                    setCanOpenSuccessModal(true);
-                    onClose();
-                }
-            } catch (error) {
-                setIsLoading(false);
-                setSuccessMessage("");
-                setCanOpenSuccessModal(false);
-                setError("Something went wrong, please try again later!");
-                console.log(error);
+        const updatedData = Object.keys(checkedFields).reduce((acc, key) => {
+            if (checkedFields[key]) {
+                acc[key] = formData[key];
             }
+            return acc;
+        }, {});
+
+        try {
+            const response = await axiosInstance.patch(`/exam/${examData.id}/`, updatedData);
+            if (response.status === 200) {
+                setIsLoading(false);
+                setSuccessMessage(`${formData.examName} 's information has been updated successfully!`);
+                setCanOpenSuccessModal(true);
+                onClose();
+            }
+        } catch (error) {
+            setIsLoading(false);
+            setSuccessMessage("");
+            setCanOpenSuccessModal(false);
+            setError("Something went wrong, please try again later!");
+            console.log(error);
+        }
         setIsLoading(false);
     }
 
@@ -90,8 +94,8 @@ export function EditExamInfosModal ({ isOpen, onClose, setCanOpenSuccessModal, s
 
     if (!isOpen) return null;
 
-return (
-    <>
+    return (
+        <>
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm transition-all duration-300">
                 <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
                     <div className="bg-gradient-to-r from-primary-end to-primary-start px-6 py-4 rounded-t-lg flex-col flex justify-center items-center">
@@ -106,81 +110,81 @@ return (
                             <div className="w-2/3 flex items-center space-x-2">
                                 <input
                                     type="checkbox"
-                                    id="Name"
-                                    name="name"
-                                    checked={checkedFields.name}
+                                    id="examName"
+                                    name="examName"
+                                    checked={checkedFields.examName}
                                     onChange={handleCheckboxChange}
                                     className={applyCheckboxStyle()}
                                 />
                                 <div className="flex-1">
-                                    <label htmlFor="Name"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                    <label htmlFor="examName"
+                                        className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                                     <input
                                         type="text"
-                                        id="name"
-                                        name="name"
+                                        id="examName"
+                                        name="examName"
                                         placeholder="Enter exam's name"
-                                        value={formData.name}
+                                        value={formData.examName}
                                         onChange={handleChange}
                                         className={applyFormStyle()}
-                                        required={checkedFields.name}
-                                        disabled={!checkedFields.name}
+                                        required={checkedFields.examName}
+                                        disabled={!checkedFields.examName}
                                     />
                                 </div>
                             </div>
 
-                                <div className="w-2/3 flex items-center space-x-2">
+                            <div className="w-2/3 flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    id="examCost"
+                                    name="examCost"
+                                    checked={checkedFields.examCost}
+                                    onChange={handleCheckboxChange}
+                                    className={applyCheckboxStyle()}
+                                />
+                                <div className="flex-1">
+                                    <label htmlFor="examCost"
+                                        className="block text-sm font-medium text-gray-700 mb-1">Cost</label>
                                     <input
-                                        type="checkbox"
-                                        id="cost"
-                                        name="cost"
-                                        checked={checkedFields.cost}
-                                        onChange={handleCheckboxChange}
-                                        className={applyCheckboxStyle()}
+                                        type="number"
+                                        id="examCost"
+                                        name="examCost"
+                                        placeholder="Enter exam's cost"
+                                        value={formData.examCost}
+                                        onChange={handleChange}
+                                        className={applyFormStyle()}
+                                        required={checkedFields.examCost}
+                                        disabled={!checkedFields.examCost}
                                     />
-                                    <div className="flex-1">
-                                        <label htmlFor="cost"
-                                            className="block text-sm font-medium text-gray-700 mb-1">Cost</label>
-                                        <input
-                                            type="number"
-                                            id="cost"
-                                            name="cost"
-                                            placeholder="Enter exam's cost"
-                                            value={formData.cost}
-                                            onChange={handleChange}
-                                            className={applyFormStyle()}
-                                            required={checkedFields.cost}
-                                            disabled={!checkedFields.cost}
-                                        />
-                                    </div>
                                 </div>
+                            </div>
                         </div>
-                                <div className="w-2/3 flex items-center space-x-2">
-                                        <input
-                                            type="checkbox"
-                                            id="description"
-                                            name="description"
-                                            checked={checkedFields.description}
-                                            onChange={handleCheckboxChange}
-                                            className={applyCheckboxStyle()}
-                                        />
-                                        <div className="flex-1">
-                                            <label htmlFor="description"
-                                                className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                                            <input
-                                                type="text"
-                                                id="description"
-                                                name="description"
-                                                placeholder="Enter exam's description"
-                                                value={formData.description}
-                                                onChange={handleChange}
-                                                className={applyFormStyle()}
-                                                required={checkedFields.description}
-                                                disabled={!checkedFields.description}
-                                            />
-                                        </div>
-                                    </div>
-                            
+                        <div className="w-2/3 flex items-center space-x-2">
+                            <input
+                                type="checkbox"
+                                id="examDescription"
+                                name="examDescription"
+                                checked={checkedFields.examDescription}
+                                onChange={handleCheckboxChange}
+                                className={applyCheckboxStyle()}
+                            />
+                            <div className="flex-1">
+                                <label htmlFor="examDescription"
+                                    className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <input
+                                    type="text"
+                                    id="examDescription"
+                                    name="examDescription"
+                                    placeholder="Enter exam's description"
+                                    value={formData.examDescription}
+                                    onChange={handleChange}
+                                    className={applyFormStyle()}
+                                    required={checkedFields.examDescription}
+                                    disabled={!checkedFields.examDescription}
+                                />
+                            </div>
+                        </div>
+
 
 
                         <div className="px-6 py-1 flex justify-center space-x-6">
@@ -194,7 +198,7 @@ return (
                                 type="button"
                                 onClick={() => {
                                     setError(""),
-                                    onClose()
+                                        onClose()
                                 }}
                                 className="px-4 py-2 border bg-red-400 text-md hover:text-xl hover:bg-red-500 text-white font-bold rounded-lg transition-all duration-300"
                             >
@@ -204,6 +208,6 @@ return (
                     </form>
                 </div>
             </div>
-    </>
-)
+        </>
+    )
 }

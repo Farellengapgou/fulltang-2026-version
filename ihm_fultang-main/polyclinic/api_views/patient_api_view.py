@@ -1,5 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.exceptions import ValidationError
+from rest_framework.filters import SearchFilter
 
 from polyclinic.models import Patient, PatientAccess, MedicalFolder, Consultation
 from authentication.models import MedicalStaff
@@ -106,6 +107,9 @@ class PatientViewSet(ModelViewSet):
 
     permission_classes = [IsAuthenticated, PatientPermission]
     pagination_class = CustomPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['firstName', 'lastName', 'cniNumber', 'phoneNumber']
+
 
     def get_queryset(self):
         """
