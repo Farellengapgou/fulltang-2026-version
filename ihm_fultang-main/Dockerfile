@@ -1,42 +1,46 @@
-# Utiliser une image de base officielle de Python
+# Image Python
 FROM python:3.10-slim
 
-# Définir le répertoire de travail dans le conteneur
+# Répertoire de travail
 WORKDIR /app
 
-# Dépendances système optionnelles; commenter cette section si le réseau/DNS bloque apt-get
-# RUN apt-get update && apt-get install -y \
-#     gcc \
-#     libpq-dev \
-#     libmariadb-dev \
-#     pkg-config \
-#     build-essential \
-#     default-libmysqlclient-dev
+# Installer dépendances système
+# On garde la version complète de mofif_receptionist
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libpq-dev \
+    libmariadb-dev-compat \
+    libmariadb-dev \
+    default-libmysqlclient-dev \
+    build-essential \
+    pkg-config \
+    curl \
+ && rm -rf /var/lib/apt/lists/*
 
-# Copier les fichiers requirements.txt dans le conteneur
-COPY requirements.txt /app
+# Copier requirements
+COPY requirements.txt .
 
-# Installer les dépendances Python
-RUN pip install --no-cache-dir -r requirements.txt && \
-    adduser \
-        --disabled-password \
-        --no-create-home \
-        django-user
+# Upgrade pip + installer dépendances Python
+RUN pip install --upgrade pip && \
+    pip install --default-timeout=200 --no-cache-dir -r requirements.txt
 
-# Copier le reste de l'application dans le conteneur
+# Créer utilisateur Django
+RUN adduser --disabled-password --gecos "" --no-create-home django-user
+
+# Copier le code
 COPY . /app
 
-# on donne les droits de lecture et ecriture à tous le monde à la bd (pour celery et celery beat)
-RUN chmod -R 777 /app
-# RUN chmod 666 db.sqlite3 && \
-#     chmod -R 777 /app
+# Permissions
+# On combine les deux approches pour la BD et les fichiers
+RUN chmod 666 db.sqlite3 || true && \
+    chmod -R 777 /app
 
-# Exposer le port sur lequel l'application va fonctionner
+# Port exposé
 EXPOSE 8009
 
-
-# Définir la variable d'environnement pour désactiver le buffering des sorties (optionnel)
+# Désactiver output buffering
 ENV PYTHONUNBUFFERED=1
 
 # Lancer les migrations et démarrer le serveur Django
+# On garde les migrations de HEAD pour s'assurer que tout soit créé
 CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8009"]

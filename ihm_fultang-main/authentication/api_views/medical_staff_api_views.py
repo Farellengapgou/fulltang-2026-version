@@ -162,6 +162,31 @@ class MedicalStaffViewSet(ModelViewSet):
         doctors_list = list(doctors.values('id', 'first_name', 'last_name', 'role'))
         return JsonResponse(doctors_list, safe=False)
 
+    # Ajoutez cette nouvelle action APRÈS la méthode all_doctors existante
+# dans authentication/api_views/medical_staff_api_view.py
+
+    @swagger_auto_schema(
+        operation_description="Renvoie la liste de tous les médecins sans pagination (pour formulaires)",
+        responses={
+            200: openapi.Response(
+                description="Liste de tous les médecins", 
+                schema=MedicalStaffSerializer(many=True)
+            )
+        },
+        tags=tags
+    )
+    @action(methods=['get'], detail=False, url_path='doctors', permission_classes=[IsAuthenticated])
+    def list_doctors_for_forms(self, request):
+        """Retourne uniquement les docteurs sans pagination pour les formulaires de sélection"""
+        self.pagination_class = None  # Désactive la pagination pour cette action
+        doctors = MedicalStaff.objects.filter(
+            role__in=['Doctor', 'Specialist', 'Ophtalmologist', 'Dentist'],
+            is_active=True  # Uniquement les docteurs actifs
+        ).order_by('first_name', 'last_name')
+        
+        serializer = MedicalStaffSerializer(doctors, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     @swagger_auto_schema(
         operation_description="Permet de compter les medical staff par categorie",
         responses={
