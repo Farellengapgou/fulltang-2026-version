@@ -101,7 +101,8 @@ WSGI_APPLICATION = 'fultang.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/app/volumes/db.sqlite3',
+        # Use local sqlite file for development (was Docker path)
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -153,9 +154,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = "authentication.MedicalStaff"
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'rest_framework_simplejwt.authentication.JWTAuthentication',
+    # ],
 }
 # Configuration du token d'authentification
 from datetime import timedelta

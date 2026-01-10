@@ -1,4 +1,4 @@
-version: "3"
+
 
 services:
   #db:
@@ -15,12 +15,13 @@ services:
     build:
       context: . # dossier courant
       dockerfile: Dockerfile
-    image: "${FULTANG_IMAGE}"
+    image: "${FULTANG_IMAGE:-fultang:latest}"
     restart: always
     volumes:
-      - ./volumes:/app/volumes
+      - .:/app
     ports:
-      - "8009:8009"
+      - "8010:8009"
+
     env_file:
       - .env
     networks:
@@ -38,12 +39,12 @@ services:
       - fultang
 
   celery:
-    image: "${FULTANG_IMAGE}"
+    image: "${FULTANG_IMAGE:-fultang:latest}"
     restart: always
     user: django-user
-    command: ["sh", "-c", "celery -A fultang worker --loglevel=info"]
+    command: [ "sh", "-c", "celery -A fultang worker --loglevel=info" ]
     volumes:
-      - ./volumes:/app/volumes
+      - .:/app
     depends_on:
       - redis
       - fultang
@@ -51,19 +52,32 @@ services:
       - fultang
 
   celery-beat:
-    image: "${FULTANG_IMAGE}"
+    image: "${FULTANG_IMAGE:-fultang:latest}"
     restart: always
     user: django-user
-    command:
-      [
-        "sh",
-        "-c",
-        "celery -A fultang beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler",
-      ]
+    command: [ "sh", "-c", "celery -A fultang beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler" ]
     volumes:
-      - ./volumes:/app/volumes
+      - .:/app
     depends_on:
       - redis
+      - fultang
+    networks:
+      - fultang
+
+  fultang-frontend:
+    build:
+      context: ../ihm_fultang-frontend-v1
+      dockerfile: Dockerfile
+    container_name: fultang-frontend
+    restart: always
+    volumes:
+      - ../ihm_fultang-frontend-v1:/app
+      - /app/node_modules
+    ports:
+      - "9000:9000"
+    env_file:
+      - ../ihm_fultang-frontend-v1/.env
+    depends_on:
       - fultang
     networks:
       - fultang

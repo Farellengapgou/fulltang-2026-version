@@ -1,18 +1,20 @@
+# Utiliser une image node stable
 FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package.json .
+# Copier les fichiers de dépendances pour profiter du cache Docker
+COPY package.json package-lock.json ./
 
+# Installer les dépendances
 RUN npm install
 
-RUN npm i react-icons && npm i jquery && npm i lucide-react 
-
+# Copier tout le reste du code (en ignorant node_modules grâce au .dockerignore)
 COPY . .
 
-# Comment the line below if you want to run the dev mode
-RUN npm run build
+# Port exposé
+# On choisit le port 5173 de mofif_receptionist pour Vite
+EXPOSE 5173
 
-EXPOSE 9000
-
-CMD [ "npm", "run", "preview" ]
+# Commande de démarrage en mode développement
+CMD ["npm", "run", "dev", "--", "--host"]

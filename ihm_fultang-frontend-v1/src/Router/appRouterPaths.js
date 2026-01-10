@@ -1,11 +1,21 @@
-
 export const AppRoutesPaths = {
     notFound: "*",
     adminHomePage: "/admin/home",
     welcomePage: "/",
     loginPage: "/login",
     forgottenPasswordPage: "/forgotten-password",
-    pharmacyPage:"/pharmacy",
+    
+
+        // --- PHARMACY ROUTES ---
+    // pharmacyRoot: "/pharmacy",
+    pharmacyPage:"/pharmacy/dashboard",
+    PharmacistPage : "/pharmacy/list",
+    PharmacyMedication:"//pharmacy/Medication",
+    pharmacyAdd: "/pharmacy/add",
+    
+    pharmacyPrescriptions: "/pharmacy/prescriptions",
+
+
     doctorPage: "/doctor/dashboard",
     laboratoryAssistantPage: "/laboratory-assistant/home",
     receptionistPage: "/receptionist/patients",
@@ -51,7 +61,7 @@ export const AppRoutesPaths = {
     doctorPatientMedicalFolderPage:"/doctor/patients/medical-folder/:id",
     financialContributions: "/accountant/financial-contributions",
     financialReportsAccountant: "/accountant/financial-reports",
-    PharmacyMedication:"/pharmacyMedication",
+    
     createFactureAccountant: "/accountant/create-facture",
 
     laboratoryPatientList: "/laboratory-assistant/patient-list",
@@ -71,7 +81,10 @@ export const AppRoutesPaths = {
     financialAccountantBudgets: "/accountant-financial/budgets",
     financialAccountantReports: "/accountant-financial/reports",
     financialAccountPayroll : "/accountant-financial/payroll-journal",
-    financialAccountantCostAnalytic : "/accountant-financial/cost-analytic"
+    financialAccountantCostAnalytic : "/accountant-financial/cost-analytic",
 
-
+    consultationAppointments: "/help-center/consultation-appointments",
+    paymentsBilling: "/help-center/payments-billing",
+    technicalIssues: "/help-center/technical-issues",
+    faq: "/help-center/faq",
 }
