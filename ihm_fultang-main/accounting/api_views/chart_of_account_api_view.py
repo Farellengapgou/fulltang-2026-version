@@ -6,13 +6,13 @@ from accounting.serializers import ChartOfAccountsSerializer
 
 from accounting.permissions.accounting_staff_permissions import AccountingStaffPermission
 from accounting.serializers import AccountSerializer
-from accounting.models import Account, AccountState, BudgetExercise
+from accounting.models_financier import Account, AccountState, BudgetExercise
 from rest_framework.viewsets import ModelViewSet
 from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from accounting.models import ChartOfAccounts
+from accounting.models_financier import ChartOfAccounts
 from django.db import transaction
 
 tags = ["chart-account"]

@@ -1,5 +1,5 @@
 from django.utils.timezone import now
-from accounting.models import BudgetExercise, Account, AccountState
+from accounting.models_financier import BudgetExercise, Account, AccountState
 from datetime import datetime, timedelta
 from celery import shared_task
 from polyclinic.models import Consultation

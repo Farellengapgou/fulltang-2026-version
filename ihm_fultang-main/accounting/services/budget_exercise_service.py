@@ -1,4 +1,4 @@
-from accounting.models import AccountState
+from accounting.models_financier import AccountState
 
 immobilized_actives_prefixes = [str(i) for i in range(20, 29)]
 circulant_actives_prefixes = [str(i) for i in range(30, 50)]

@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
-from accounting.models import *
+from accounting.models_financier import *
 
 class BudgetExerciseSerializer(ModelSerializer):
     class Meta:
@@ -51,7 +51,7 @@ from rest_framework import serializers
 from django.db import transaction
 from django.utils import timezone
 from decimal import Decimal
-from .models import (
+from .models_financier import (
     ChartOfAccounts, Journal, JournalEntry, JournalEntryLine,
     Supplier, Asset, AnalyticAccount, Budget, BudgetLine,
     AccountingPeriod, TaxRate, TaxDeclaration, BankAccount,

@@ -5,7 +5,7 @@ from django.utils import timezone
 from accounting.serializers import FinancialOperationSerializer
 from authentication.serializers.medical_staff_serializers import MedicalStaffSerializer
 from polyclinic.models import Bill, BillItem, Patient
-from accounting.models import AccountState, BudgetExercise, FinancialOperation, Account
+from accounting.models_financier import AccountState, BudgetExercise, FinancialOperation, Account
 from polyclinic.serializers.bill_items_serializers import BillItemCreateSerializer, BillItemSerializer, BillItemUpdateSerializer
 from polyclinic.services.bill_service import BillService
 

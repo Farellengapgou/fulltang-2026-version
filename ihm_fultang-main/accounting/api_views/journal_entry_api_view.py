@@ -4,7 +4,7 @@ from django.utils.decorators import method_decorator
 from rest_framework.permissions import IsAuthenticated
 from accounting.serializers import PostJournalEntrySerializer, JournalEntrySerializer
 from rest_framework.viewsets import ModelViewSet
-from accounting.models import JournalEntry
+from accounting.models_financier import JournalEntry
 from django.db import transaction
 from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
