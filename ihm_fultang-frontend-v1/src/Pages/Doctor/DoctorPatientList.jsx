@@ -34,8 +34,10 @@ export function DoctorPatientList()
 
 
     function calculateNumberOfSlide() {
+        if (numberOfPatients===0) return 1;
         return numberOfPatients % 5 === 0 ? numberOfPatients / 5 : Math.floor(numberOfPatients / 5) + 1;
     }
+
 
 
     function updateActualPageNumber(action) {
