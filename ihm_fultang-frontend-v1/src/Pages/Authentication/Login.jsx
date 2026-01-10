@@ -115,7 +115,7 @@ export function LoginPage()
                  }}
             >
                 <p onClick={ ()=>navigate("/") } className="text-3xl text-white font-bold mt-6 ml-8 cursor-pointer">
-                    FullTang
+                    FulTang
                 </p>
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <div className="flex ml-56 mt-28 w-[1400px] h-[480px]">
@@ -129,7 +129,7 @@ export function LoginPage()
                                 Polyclinic Fultang has several departments namely the dental service, the ophthalmology service, the general medicine, the laboratory,
                                 as well as a pharmacy.
                             </p>
-                            <p className="italic mt-4 text-blue-400 text-xl ">
+                            <p className="italic mt-4 text-yellow-700 text-xl ">
                                 Note: this page is the hospital staff login page
                             </p>
                             <button onClick={()=>navigate(appRouterPaths.helpCenterPage)} className="w-44 h-14  py-2 border-secondary border-2 text-secondary rounded-lg px-1 mt-4 font-bold hover:text-white hover:bg-secondary transition-all duration-300">
