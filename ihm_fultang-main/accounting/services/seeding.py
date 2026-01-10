@@ -1,6 +1,6 @@
 from django.utils import timezone
 from decimal import Decimal
-from accounting.models import ChartOfAccounts, Journal, TaxRate
+from accounting.models_financier import ChartOfAccounts, Journal, TaxRate
 
 class AccountingSetup:
     """Configuration initiale du module comptabilité"""

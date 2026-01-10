@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from accounting.permissions.accounting_staff_permissions import AccountingStaffPermission
-from accounting.models import Facture
+from accounting.models_financier import Facture
 
 
 class InvoiceTotalAPI(APIView):
