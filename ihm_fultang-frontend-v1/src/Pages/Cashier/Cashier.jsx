@@ -16,16 +16,16 @@ export function Cashier() {
   useEffect(() => {
     const interval = setInterval(() => {
       setTime(new Date().toLocaleTimeString());
-    }, 1000); 
+    }, 1000);
 
-    return () => clearInterval(interval); 
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
     async function fetchConsultations() {
       setIsLoading(true);
       try {
-        const response = await axiosInstance.get("/consultation/");
+        const response = await axiosInstance.get("/consultation/?invalid=true");
         setIsLoading(false);
         if (response.status === 200) {
           setConsultations(response.data.results);
@@ -59,9 +59,7 @@ export function Cashier() {
             </div>
           </div>
           <div>
-            <p className="text-white mt-28 text-xl font-bold mr-4">
-              {time}
-            </p>
+            <p className="text-white mt-28 text-xl font-bold mr-4">{time}</p>
           </div>
         </div>
         <ConsultationList consultationList={consultations} />

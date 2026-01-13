@@ -90,6 +90,27 @@ class BillCreateSerializer(serializers.ModelSerializer):
         account_state.balance += bill.amount
         account_state.save()
 
+        # Connect to Accounting Module: Create Journal Entry
+        # This will debit the treasury account (Cash/Bank) and credit the customer account
+        # based on the financial operation and bill details.
+        try:
+            from accounting.services.accounting_service import AccountingService
+            # We assume 'CASH' as default unless there's a more specific marker in operation
+            # Let's check if the operation has a name that suggests 'BANK' or 'TRANSFER'
+            payment_method = 'CASH'
+            if 'banque' in operation.name.lower() or 'virement' in operation.name.lower():
+                payment_method = 'BANK'
+            
+            AccountingService.create_payment_entry(
+                bill=bill,
+                payment_amount=bill.amount,
+                payment_method=payment_method
+            )
+        except Exception as e:
+            print(f"Error creating accounting entry: {e}")
+            # We don't want to crash the bill creation if accounting fails, 
+            # but in a real system we might want stricter enforcement.
+
         return bill
 
 

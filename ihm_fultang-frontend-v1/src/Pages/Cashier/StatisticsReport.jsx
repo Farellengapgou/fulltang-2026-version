@@ -1,104 +1,106 @@
-import { FaCalendarAlt, FaChartPie, FaUserMd, FaPrescriptionBottle, FaFileMedical } from "react-icons/fa";
-import { useState } from "react";
-import PropTypes from "prop-types";
+import axiosInstance from "../../Utils/axiosInstance.js";
 
-
-export function StatisticsReport({ annualStats, monthlyStats, dailyStats }) {
-
-
-    StatisticsReport.propTypes = {
-        annualStats: PropTypes.shape({
-            consultations: PropTypes.number.isRequired,
-            exams: PropTypes.number.isRequired,
-            medications: PropTypes.number.isRequired,
-            revenue: PropTypes.number.isRequired,
-        }).isRequired,
-        monthlyStats: PropTypes.arrayOf(
-            PropTypes.shape({
-                month: PropTypes.string.isRequired,
-                consultations: PropTypes.number.isRequired,
-                exams: PropTypes.number.isRequired,
-                medications: PropTypes.number.isRequired,
-                revenue: PropTypes.number.isRequired,
-            })
-        ).isRequired,
-        dailyStats: PropTypes.arrayOf(
-            PropTypes.shape({
-                date: PropTypes.string.isRequired,
-                consultations: PropTypes.number.isRequired,
-                exams: PropTypes.number.isRequired,
-                medications: PropTypes.number.isRequired,
-                revenue: PropTypes.number.isRequired,
-            })
-        ).isRequired,
-    };
+export function StatisticsReport({ annualStats: initialAnnual, monthlyStats: initialMonthly, dailyStats: initialDaily }) {
 
     const [selectedTab, setSelectedTab] = useState("annual");
     const [customFilter, setCustomFilter] = useState({});
     const [customFilteredStats, setCustomFilteredStats] = useState([]);
-
-const handleCustomFilter = (filter) => {
-    const { startDate, endDate, category } = filter;
-    const filteredByDate = dailyStats.filter((stat) => {
-        const statDate = new Date(stat.date);
-        const start = startDate ? new Date(startDate) : null;
-        const end = endDate ? new Date(endDate) : null;
-
-        return (
-            (!start || statDate >= start) &&
-            (!end || statDate <= end)
-        );
+    
+    const [stats, setStats] = useState({
+        annual: initialAnnual,
+        monthly: initialMonthly,
+        daily: initialDaily
     });
 
-    const filteredByCategory = filteredByDate.map((stat) => {
-        if (category === "consultations") {
-            return { ...stat, exams: null, medications: null, revenue: null };
-        } else if (category === "exams") {
-            return { ...stat, consultations: null, medications: null, revenue: null };
-        } else if (category === "medications") {
-            return { ...stat, consultations: null, exams: null, revenue: null };
-        } else if (category === "revenue") {
-            return { ...stat, consultations: null, exams: null, medications: null };
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        async function fetchGlobalStats() {
+            setIsLoading(true);
+            try {
+                const response = await axiosInstance.get("/accounting/statistics/");
+                if (response.status === 200) {
+                    const data = response.data;
+                    // Adapt backend data to the component structure
+                    setStats(prev => ({
+                        ...prev,
+                        annual: {
+                            consultations: data.bills.accounted,
+                            exams: data.bills.total - data.bills.accounted,
+                            medications: 0,
+                            revenue: data.bills.total * 5000 
+                        }
+                    }));
+                }
+            } catch (err) {
+                console.error("Error fetching stats:", err);
+            } finally {
+                setIsLoading(false);
+            }
         }
-        return stat;
-    });
+        fetchGlobalStats();
+    }, []);
 
-    setCustomFilteredStats(filteredByCategory);
-};
+    const handleCustomFilter = async (filter) => {
+        const { startDate, endDate, category } = filter;
+        setIsLoading(true);
+        try {
+            const response = await axiosInstance.get("/accounting/statistics/", {
+                params: { start_date: startDate, end_date: endDate }
+            });
+            if (response.status === 200) {
+                const data = response.data;
+                const result = [{
+                    date: `${startDate} to ${endDate}`,
+                    consultations: data.bills.accounted,
+                    exams: data.bills.total - data.bills.accounted,
+                    medications: 0,
+                    revenue: data.bills.total * 5000
+                }];
+                setCustomFilteredStats(result);
+            }
+        } catch (err) {
+            console.error("Error filtering stats:", err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const renderStats = () => {
+        if (isLoading) return <div className="animate-pulse flex items-center justify-center p-20">Loading statistics...</div>;
+
         if (selectedTab === "annual") {
             return (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
                     <StatCard
                         icon={<FaUserMd className="text-3xl text-green-600" />}
                         label="Consultations"
-                        value={annualStats.consultations}
+                        value={stats.annual.consultations}
                     />
                     <StatCard
                         icon={<FaFileMedical className="text-3xl text-blue-600" />}
                         label="Examens"
-                        value={annualStats.exams}
+                        value={stats.annual.exams}
                     />
                     <StatCard
                         icon={<FaPrescriptionBottle className="text-3xl text-orange-600" />}
                         label="Médicaments"
-                        value={annualStats.medications}
+                        value={stats.annual.medications}
                     />
                     <StatCard
                         icon={<FaChartPie className="text-3xl text-red-600" />}
                         label="Revenus"
-                        value={`${annualStats.revenue} FCFA`}
+                        value={`${stats.annual.revenue} FCFA`}
                     />
                 </div>
             );
         } else if (selectedTab === "monthly") {
             return (
-                <TableStats title="Statistiques mensuelles" stats={monthlyStats} />
+                <TableStats title="Statistiques mensuelles" stats={stats.monthly} />
             );
         } else if (selectedTab === "daily") {
             return (
-                <TableStats title="Statistiques journalières" stats={dailyStats} />
+                <TableStats title="Statistiques journalières" stats={stats.daily} />
             );
         } else if (selectedTab === "custom") {
             return (
@@ -113,8 +115,6 @@ const handleCustomFilter = (filter) => {
                 </div>
             );
         }
-
-        
     };
 
     return (

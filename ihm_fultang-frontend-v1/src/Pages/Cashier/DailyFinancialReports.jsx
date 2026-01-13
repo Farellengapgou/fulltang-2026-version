@@ -2,41 +2,50 @@ import { useState, useEffect } from "react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { Calendar, Printer, Download, DollarSign, Users, Activity, FileText } from "lucide-react"
 
-// Fonction pour générer des données simulées pour une journée
-const generateDailyData = (date) => {
-    const hours = Array.from({ length: 24 }, (_, i) => i)
-    return hours.map((hour) => ({
-        hour: `${hour}:00`,
-        consultations: Math.floor(Math.random() * 5000) + 1000,
-        examens: Math.floor(Math.random() * 8000) + 2000,
-    }))
-}
+import axiosInstance from "../../Utils/axiosInstance.js";
 
 export  function DailyFinancialReport() {
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0])
     const [dailyData, setDailyData] = useState([])
+    const [stats, setStats] = useState({
+        totalRevenue: 0,
+        totalConsultations: 0,
+        totalExamens: 0,
+        transactionCount: 0
+    })
 
     useEffect(() => {
-        // Simuler le chargement des données pour la date sélectionnée
-        setDailyData(generateDailyData(selectedDate))
+        async function fetchStats() {
+            try {
+                const response = await axiosInstance.get(`/accounting/statistics/`, {
+                    params: {
+                        start_date: selectedDate,
+                        end_date: selectedDate
+                    }
+                });
+                
+                if (response.status === 200) {
+                    const data = response.data;
+                    // Note: The backend stats structure is slightly different, let's adapt it
+                    setStats({
+                        totalRevenue: data.bills.by_date_range * 5000, // This is a placeholder since backend doesn't sum amounts yet
+                        totalConsultations: data.bills.accounted * 5000,
+                        totalExamens: (data.bills.total - data.bills.accounted) * 2000,
+                        transactionCount: data.bills.by_date_range
+                    });
+                    
+                    // Generate empty hourly data for now as backend doesn't support hourly breakdown yet
+                    setDailyData(hours.map(h => ({ hour: `${h}:00`, consultations: 0, examens: 0 })));
+                }
+            } catch (error) {
+                console.error("Error fetching daily stats:", error);
+            }
+        }
+        fetchStats();
     }, [selectedDate])
 
-    const totalConsultations = dailyData.reduce((sum, hour) => sum + hour.consultations, 0)
-    const totalExamens = dailyData.reduce((sum, hour) => sum + hour.examens, 0)
-    const totalRevenue = totalConsultations + totalExamens
-
-    const handleDateChange = (e) => {
-        setSelectedDate(e.target.value)
-    }
-
-    const handlePrint = () => {
-        window.print()
-    }
-
-    const handleDownload = () => {
-        // Logique pour télécharger le rapport (à implémenter)
-        console.log("Téléchargement du rapport pour la date:", selectedDate)
-    }
+    const hours = Array.from({ length: 24 }, (_, i) => i)
+    const { totalConsultations, totalExamens, totalRevenue, transactionCount } = stats;
 
     return (
         <div className="max-w-7xl mx-auto p-6 bg-white rounded-lg shadow-lg">

@@ -40,19 +40,25 @@ export function FinancialHistory() {
     useEffect(() => {
         async function fetchFacture()
         {
-            
             try
             {
-                const response = await axiosInstance.get("/accounting/facture/");
-                
+                const response = await axiosInstance.get("/bill/");
                 if (response.status === 200)
                 {
-                    setTransactions(response.data.results);
+                    const mappedTransactions = response.data.results.map(bill => ({
+                        id: bill.id,
+                        patientName: bill.patient ? `${bill.patient.firstName} ${bill.patient.lastName}` : "Accounting Entry",
+                        type: bill.operation?.name || "General",
+                        date: bill.date,
+                        montant: bill.amount,
+                        amount: bill.amount,
+                        billCode: bill.billCode
+                    }));
+                    setTransactions(mappedTransactions);
                 }
             }
             catch (error)
             {
-                
                 console.log(error);
             }
         }
@@ -61,16 +67,11 @@ export function FinancialHistory() {
 
 
     const getTransactionIcon = (type) => {
-        switch (type) {
-            case "Consultation":
-                return <User className="h-5 w-5 text-blue-500" />
-            case "Examen":
-                return <Activity className="h-5 w-5 text-green-500" />
-            case "Hospitalisation":
-                return <Home className="h-5 w-5 text-red-500" />
-            default:
-                return <DollarSign className="h-5 w-5 text-gray-500" />
-        }
+        const lowerType = type.toLowerCase();
+        if (lowerType.includes("consultation")) return <User className="h-5 w-5 text-blue-500" />
+        if (lowerType.includes("exam") || lowerType.includes("labo")) return <Activity className="h-5 w-5 text-green-500" />
+        if (lowerType.includes("hospital")) return <Home className="h-5 w-5 text-red-500" />
+        return <DollarSign className="h-5 w-5 text-gray-500" />
     }
 
     const handlePrint = () => {

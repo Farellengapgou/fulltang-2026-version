@@ -11,10 +11,12 @@ def create_consultation_accounting_entry(sender, instance, created, **kwargs):
         AccountingService.create_consultation_entry(instance)
 """
 
+"""
 @receiver(post_save, sender='polyclinic.Bill')
 def create_bill_accounting_entry(sender, instance, created, **kwargs):
-    """Crée automatiquement l'écriture comptable lors de la création d'une facture"""
+    # Crée automatiquement l'écriture comptable lors de la création d'une facture
     if created and not instance.isAccounted:
         # Marquer comme comptabilisé
         instance.isAccounted = True
         instance.save()
+"""
