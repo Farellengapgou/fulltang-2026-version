@@ -999,3 +999,129 @@ class FinancialRatio(models.Model):
         return f"{self.ratio_name} - {self.period_month:02d}/{self.period_year}: {self.ratio_value}"
 
         
+
+class Supplier(models.Model):
+    """
+    Gestion des fournisseurs
+    """
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=50, unique=True)
+    address = models.TextField(blank=True, null=True)
+    contact_person = models.CharField(max_length=100, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    tax_id = models.CharField(max_length=50, blank=True, null=True)
+    payment_terms = models.CharField(max_length=100, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='suppliers_created')
+
+    class Meta:
+        db_table = 'suppliers'
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
+class FixedAsset(models.Model):
+    """
+    Gestion des immobilisations
+    """
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=50, unique=True)
+    acquisition_date = models.DateField()
+    acquisition_cost = models.DecimalField(max_digits=15, decimal_places=2)
+    useful_life_years = models.IntegerField()
+    depreciation_method = models.CharField(max_length=50, choices=[('LINEAR', 'Linéaire'), ('DEGRESSIVE', 'Dégressif')])
+    accumulated_depreciation = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    current_value = models.DecimalField(max_digits=15, decimal_places=2)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'fixed_assets'
+
+
+class Inventory(models.Model):
+    """
+    Gestion des stocks (Resumé financier)
+    """
+    item_code = models.CharField(max_length=50)
+    item_name = models.CharField(max_length=255)
+    quantity = models.DecimalField(max_digits=12, decimal_places=2)
+    unit_cost = models.DecimalField(max_digits=15, decimal_places=2)
+    total_value = models.DecimalField(max_digits=15, decimal_places=2)
+    valuation_method = models.CharField(max_length=20, default='FIFO')
+    last_valuation_date = models.DateField(auto_now=True)
+    
+    class Meta:
+        db_table = 'inventory_summary'
+
+
+class Payroll(models.Model):
+    """
+    Enregistrement comptable de la paie
+    """
+    period = models.CharField(max_length=7) # YYYY-MM
+    employee_count = models.IntegerField()
+    total_gross_salary = models.DecimalField(max_digits=15, decimal_places=2)
+    total_net_salary = models.DecimalField(max_digits=15, decimal_places=2)
+    total_social_charges = models.DecimalField(max_digits=15, decimal_places=2)
+    total_tax_deductions = models.DecimalField(max_digits=15, decimal_places=2)
+    payment_date = models.DateField(null=True, blank=True)
+    is_posted = models.BooleanField(default=False)
+    
+    class Meta:
+        db_table = 'payroll_records'
+
+
+class VAT(models.Model):
+    """
+    Gestion de la TVA
+    """
+    period = models.CharField(max_length=7) # YYYY-MM
+    collected_vat = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    deductible_vat = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    vat_credit_carried_forward = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    vat_to_pay = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    declaration_date = models.DateField(null=True, blank=True)
+    payment_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=20, default='DRAFT')
+    
+    class Meta:
+        db_table = 'vat_records'
+
+
+class Budget(models.Model):
+    """
+    Gestion des budgets
+    """
+    year = models.IntegerField()
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    budget_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    actual_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    variance = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    description = models.TextField(blank=True, null=True)
+    
+    class Meta:
+        db_table = 'budgets'
+        unique_together = ('year', 'account')
+
+
+class BankReconciliation(models.Model):
+    """
+    Rapprochements bancaires
+    """
+    bank_account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    statement_date = models.DateField()
+    statement_balance = models.DecimalField(max_digits=15, decimal_places=2)
+    ledger_balance = models.DecimalField(max_digits=15, decimal_places=2)
+    difference = models.DecimalField(max_digits=15, decimal_places=2)
+    status = models.CharField(max_length=20, default='DRAFT')
+    reconciled_at = models.DateTimeField(null=True, blank=True)
+    reconciled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    
+    class Meta:
+        db_table = 'bank_reconciliations'

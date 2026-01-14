@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import { Search, Plus, RefreshCw, Download, Eye, Edit2, Trash2, Filter } from "lucide-react";
+import { Search, Plus, RefreshCw, Download, Eye, Edit2, Trash2 } from "lucide-react";
 import { AccountantNavBar } from "../../Accountant/Components/AccountantNavBar.jsx";
 import { AccountantDashBoard } from "../../Accountant/Components/AccountantDashboard.jsx";
 import { FinancialAccountantNavLink } from "../NavLink.js";
 
-export function FinancialStatements() {
+export function PaymentSchedule() {
     const [isLoading, setIsLoading] = useState(false);
     const [data, setData] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -34,8 +34,8 @@ export function FinancialStatements() {
             <div className="mx-auto p-12">
                 <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-800">États Financiers OHADA</h1>
-                        <p className="text-gray-600 mt-1">Bilan et compte de résultat</p>
+                        <h1 className="text-2xl font-bold text-gray-800">Échéancier Paiements</h1>
+                        <p className="text-gray-600 mt-1">Échéances fournisseurs</p>
                     </div>
                     <div className="flex gap-3">
                         <button onClick={loadData} className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
@@ -71,13 +71,13 @@ export function FinancialStatements() {
                         {errorMessage}
                     </div>
                 ) : (
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
-                        <div className="p-6 text-center text-gray-500">
-                            <p className="text-lg font-semibold">Module prêt pour intégration API</p>
-                            <p className="text-sm mt-2 text-gray-400">
-                                Ce composant attend la connexion aux endpoints backend
-                            </p>
-                        </div>
+                    <div className="bg-white rounded-lg shadow p-6">
+                        <p className="text-center text-gray-500">
+                            Module prêt pour intégration API
+                        </p>
+                        <p className="text-center text-gray-400 text-sm mt-2">
+                            Ce composant est fonctionnel et attend la connexion aux endpoints backend
+                        </p>
                     </div>
                 )}
             </div>

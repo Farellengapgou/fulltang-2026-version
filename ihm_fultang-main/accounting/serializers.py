@@ -754,3 +754,43 @@ class GenerateDepreciationSerializer(serializers.Serializer):
                 )
 
         return value
+
+from .models_financier import Supplier, FixedAsset, Inventory, Payroll, VAT, Budget, BankReconciliation
+
+class SupplierSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Supplier
+        fields = '__all__'
+        read_only_fields = ('created_at', 'updated_at')
+
+class FixedAssetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FixedAsset
+        fields = '__all__'
+        read_only_fields = ('created_at',)
+
+class InventorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Inventory
+        fields = '__all__'
+        read_only_fields = ('last_valuation_date',)
+
+class PayrollSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payroll
+        fields = '__all__'
+
+class VATSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VAT
+        fields = '__all__'
+
+class BudgetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Budget
+        fields = '__all__'
+
+class BankReconciliationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BankReconciliation
+        fields = '__all__'

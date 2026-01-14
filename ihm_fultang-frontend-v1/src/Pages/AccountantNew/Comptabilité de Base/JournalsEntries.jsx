@@ -6,6 +6,9 @@ import {AccountantDashBoard} from "../../Accountant/Components/AccountantDashboa
 import { v4 as uuidv4 } from 'uuid';
 import {FinancialAccountantNavLink} from "../NavLink.js";
 import {AccountantNavBar} from "../../Accountant/Components/AccountantNavBar.jsx";
+import journalEntryService from "../../../Services/Accounting/journalEntryService";
+import chartOfAccountsService from "../../../Services/Accounting/chartOfAccountsService";
+import journalService from "../../../Services/Accounting/journalService";
 
 // Thème de couleurs modernisé inspiré de la seconde interface
 const themeColors = {
@@ -20,22 +23,6 @@ const themeColors = {
     borderPrimary: 'border-teal-600',
 };
 
-// Données d'exemple pour les comptes (normalement viendraient d'une API)
-const sampleChartOfAccounts = [
-    { code: "6132", label: "Loyers", type: "Charge" },
-    { code: "5121", label: "Banque BICEC", type: "Actif" },
-    { code: "7011", label: "Consultations médicales", type: "Produit" },
-    { code: "4011", label: "Fournisseurs", type: "Passif" },
-    { code: "4111", label: "Clients", type: "Actif" },
-];
-
-// Données d'exemple pour les journaux
-const journalTypes = [
-    { code: "AC", name: "Achats" },
-    { code: "VT", name: "Ventes" },
-    { code: "BQ", name: "Banque" },
-    { code: "OD", name: "Opérations Diverses" },
-];
 
 export function JournalEntries() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -48,6 +35,8 @@ export function JournalEntries() {
     const [isViewMode, setIsViewMode] = useState(false);
     const [errorStatus, setErrorStatus] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
+    const [chartOfAccounts, setChartOfAccounts] = useState([]);
+    const [journalTypes, setJournalTypes] = useState([]);
 
     const initialEntryLine = () => ({
         id: uuidv4(),
@@ -58,55 +47,89 @@ export function JournalEntries() {
         credit: ""
     });
 
-    const sampleEntries = [
-        {
-            id: 'entry1',
-            journal: "OD",
-            date: "2024-07-20",
-            reference: "LOY-2024-07",
-            generalLabel: "Loyer juillet 2024",
-            status: "Validée",
-            totalDebit: 500000,
-            totalCredit: 500000,
-            lines: [
-                { id: uuidv4(), accountId: "6132", accountLabel: "Loyers", lineLabel: "Loyer Bureau Principal", debit: 500000, credit: "" },
-                { id: uuidv4(), accountId: "5121", accountLabel: "Banque BICEC", lineLabel: "Paiement Loyer", debit: "", credit: 500000 }
-            ],
-            validatedAt: "2024-07-21T10:00:00Z"
-        },
-        {
-            id: 'entry2',
-            journal: "AC",
-            date: "2024-07-19",
-            reference: "FAC-00123",
-            generalLabel: "Achat fournitures de bureau",
-            status: "Brouillon",
-            totalDebit: 75000,
-            totalCredit: 0,
-            lines: [
-                { id: uuidv4(), accountId: "6064", accountLabel: "Fournitures de bureau", lineLabel: "", debit: 75000, credit: "" }
-            ]
-        }
-    ];
-
+    // Chargement des écritures depuis l'API
     const loadJournalEntries = useCallback(async () => {
         setIsLoading(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            setEntriesList(sampleEntries);
+            const response = await journalEntryService.getAllEntries();
+            
+            // Transformer les données de l'API
+            const transformedEntries = response.map(entry => ({
+                id: entry.id,
+                journal: entry.journal?.code || entry.journal,
+                date: entry.entry_date,
+                reference: entry.voucher_number || entry.entry_number,
+                generalLabel: entry.description,
+                status: entry.state === 'POSTED' ? 'Validée' : entry.state === 'DRAFT' ? 'Brouillon' : 'Équilibrée',
+                totalDebit: entry.total_debit || 0,
+                totalCredit: entry.total_credit || 0,
+                lines: entry.lines?.map(line => ({
+                    id: line.id,
+                    accountId: line.account?.code || line.account,
+                    accountLabel: line.account?.label || "",
+                    lineLabel: line.label,
+                    debit: line.debit || "",
+                    credit: line.credit || ""
+                })) || [],
+                validatedAt: entry.validated_at
+            }));
+            
+            setEntriesList(transformedEntries);
             setErrorStatus(null);
         } catch (error) {
-            console.error(error);
-            setErrorStatus(500);
-            setErrorMessage("Erreur lors du chargement des écritures.");
+            console.error("Erreur lors du chargement des écritures:", error);
+            setErrorStatus(error.response?.status || 500);
+            setErrorMessage(
+                error.response?.data?.detail || 
+                error.response?.data?.message || 
+                "Erreur lors du chargement des écritures."
+            );
         } finally {
             setIsLoading(false);
         }
     }, []);
 
+    // Chargement du plan comptable
+    const loadChartOfAccounts = useCallback(async () => {
+        try {
+            const response = await chartOfAccountsService.getDetailedAccounts();
+            const transformedAccounts = response.map(account => ({
+                code: account.code,
+                label: account.label,
+                type: account.account_type
+            }));
+            setChartOfAccounts(transformedAccounts);
+        } catch (error) {
+            console.error("Erreur lors du chargement du plan comptable:", error);
+        }
+    }, []);
+
+    // Chargement des journaux
+    const loadJournals = useCallback(async () => {
+        try {
+            const response = await journalService.getAllJournals();
+            const transformedJournals = response.map(journal => ({
+                code: journal.code,
+                name: journal.name
+            }));
+            setJournalTypes(transformedJournals);
+        } catch (error) {
+            console.error("Erreur lors du chargement des journaux:", error);
+            // Fallback sur des journaux par défaut
+            setJournalTypes([
+                { code: "AC", name: "Achats" },
+                { code: "VT", name: "Ventes" },
+                { code: "BQ", name: "Banque" },
+                { code: "OD", name: "Opérations Diverses" },
+            ]);
+        }
+    }, []);
+
     useEffect(() => {
         loadJournalEntries();
-    }, [loadJournalEntries]);
+        loadChartOfAccounts();
+        loadJournals();
+    }, [loadJournalEntries, loadChartOfAccounts, loadJournals]);
 
     const filteredEntries = entriesList.filter(entry => {
         const matchesSearch = entry.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -135,51 +158,72 @@ export function JournalEntries() {
     };
 
     const handleSaveEntry = async (entryData, isValidationIntent) => {
-        console.log("Saving entry:", entryData, "Validation Intent:", isValidationIntent);
         setIsLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        try {
+            // Préparer les données pour l'API
+            const apiData = {
+                journal: entryData.journal,
+                entry_date: entryData.date,
+                voucher_number: entryData.reference,
+                description: entryData.generalLabel,
+                state: 'DRAFT', // Toujours créer en brouillon d'abord
+                lines: entryData.lines.map(line => ({
+                    account: line.accountId,
+                    label: line.lineLabel,
+                    debit: parseFloat(line.debit) || 0,
+                    credit: parseFloat(line.credit) || 0
+                }))
+            };
 
-        let newStatus = entryData.status;
-        if (isValidationIntent) {
-            if (entryData.totalDebit === entryData.totalCredit && entryData.totalDebit > 0) {
-                newStatus = "Validée";
-                console.log("Simulating validation for entry ID:", entryData.id);
+            let savedEntry;
+            if (editingEntry && editingEntry.id) {
+                // Modification d'une écriture existante
+                savedEntry = await journalEntryService.updateEntry(editingEntry.id, apiData);
             } else {
-                alert("L'écriture doit être équilibrée pour être validée.");
-                setIsLoading(false);
-                return;
+                // Création d'une nouvelle écriture
+                savedEntry = await journalEntryService.createEntry(apiData);
             }
-        } else {
-            if (entryData.totalDebit === entryData.totalCredit && entryData.totalDebit > 0) {
-                newStatus = "Équilibrée";
-            } else {
-                newStatus = "Brouillon";
+
+            // Si validation demandée, valider l'écriture
+            if (isValidationIntent) {
+                await journalEntryService.validateEntry(savedEntry.id);
             }
-        }
 
-        const finalEntryData = {...entryData, status: newStatus};
-
-        if (editingEntry && editingEntry.id) {
-            setEntriesList(prev => prev.map(e => e.id === finalEntryData.id ? finalEntryData : e));
-        } else {
-            setEntriesList(prev => [{ ...finalEntryData, id: uuidv4() }, ...prev]);
+            // Recharger la liste des écritures
+            await loadJournalEntries();
+            
+            setShowEntryModal(false);
+            setEditingEntry(null);
+        } catch (error) {
+            console.error("Erreur lors de la sauvegarde:", error);
+            alert(
+                error.response?.data?.detail || 
+                error.response?.data?.message || 
+                "Une erreur est survenue lors de la sauvegarde de l'écriture."
+            );
+        } finally {
+            setIsLoading(false);
         }
-        setShowEntryModal(false);
-        setEditingEntry(null);
-        setIsLoading(false);
     };
 
     const handleDeleteEntry = async (entryId) => {
-        if (confirm("Êtes-vous sûr de vouloir supprimer cette écriture (si brouillon) ?")) {
-            const entryToDelete = entriesList.find(e => e.id === entryId);
-            if (entryToDelete && entryToDelete.status === "Brouillon") {
-                setIsLoading(true);
-                await new Promise(resolve => setTimeout(resolve, 500));
-                setEntriesList(prev => prev.filter(e => e.id !== entryId));
-                setIsLoading(false);
-            } else {
-                alert("Seules les écritures en brouillon peuvent être supprimées.");
-            }
+        if (!confirm("Êtes-vous sûr de vouloir supprimer cette écriture ?")) {
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            await journalEntryService.deleteEntry(entryId);
+            await loadJournalEntries();
+        } catch (error) {
+            console.error("Erreur lors de la suppression:", error);
+            alert(
+                error.response?.data?.detail || 
+                error.response?.data?.message || 
+                "Erreur lors de la suppression. Seules les écritures en brouillon peuvent être supprimées."
+            );
+        } finally {
+            setIsLoading(false);
         }
     };
 

@@ -5,7 +5,8 @@ import {AccountantDashBoard} from "../../Accountant/Components/AccountantDashboa
 import {FinancialAccountantNavLink} from "../NavLink.js";
 import {AccountModal} from "./AccountModal.jsx";
 import {ViewAccountDetailsModal} from "./ViewAccountDetailsModal.jsx";
-import {Tooltip} from "antd"; // Import du nouveau modal
+import {Tooltip} from "antd";
+import chartOfAccountsService from "../../../Services/Accounting/chartOfAccountsService";
 
 
 // Classes OHADA avec leurs icônes et descriptions
@@ -33,78 +34,36 @@ export function ChartOfAccounts() {
     const [errorMessage, setErrorMessage] = useState("");
 
 
-    // Données d'exemple pour la démonstration
-    const sampleAccounts = [
-        {
-            id: 1,
-            code: "2154",
-            label: "Équipements de radiologie",
-            class: "2",
-            type: "Actif",
-            balance: 125000,
-            isActive: true,
-            createdDate: "2024-01-15T10:30:00Z",
-            lastUsed: "2024-06-10T14:20:00Z"
-        },
-        {
-            id: 2,
-            code: "7011",
-            label: "Consultations médicales",
-            class: "7",
-            type: "Produit",
-            balance: 45000,
-            isActive: true,
-            createdDate: "2024-01-10T08:15:00Z",
-            lastUsed: "2024-06-14T09:30:00Z"
-        },
-        {
-            id: 3,
-            code: "4111",
-            label: "Patients débiteurs",
-            class: "4",
-            type: "Actif",
-            balance: 15000,
-            isActive: true,
-            createdDate: "2024-02-01T11:45:00Z",
-            lastUsed: "2024-06-13T16:10:00Z"
-        },
-        {
-            id: 4,
-            code: "6011",
-            label: "Achats de médicaments",
-            class: "6",
-            type: "Charge",
-            balance: 28000,
-            isActive: true,
-            createdDate: "2024-01-20T14:00:00Z",
-            lastUsed: "2024-06-12T11:25:00Z"
-        },
-        {
-            id: 5,
-            code: "5121",
-            label: "Banque BICEC",
-            class: "5",
-            type: "Actif",
-            balance: 85000,
-            isActive: true,
-            createdDate: "2024-01-05T09:20:00Z",
-            lastUsed: "2024-06-14T08:45:00Z"
-        }
-    ];
-
-    // Simulation du chargement des données
+    // Chargement des comptes depuis l'API
     const loadChartOfAccounts = useCallback(async () => {
         setIsLoading(true);
         try {
-            // Simulation d'un appel API
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            setAccountsList(sampleAccounts);
+            const response = await chartOfAccountsService.getAllAccounts();
+            
+            // Transformer les données de l'API pour correspondre au format attendu
+            const transformedAccounts = response.map(account => ({
+                id: account.id,
+                code: account.code,
+                label: account.label,
+                class: account.code ? account.code.charAt(0) : "",
+                type: account.account_type || "Actif",
+                balance: account.balance || 0,
+                isActive: account.is_active !== undefined ? account.is_active : true,
+                createdDate: account.created_at,
+                lastUsed: account.updated_at
+            }));
+            
+            setAccountsList(transformedAccounts);
             setErrorStatus(null);
             setErrorMessage("");
         } catch (error) {
-            console.error(error);
-            setErrorStatus(500);
-            setErrorMessage("Une erreur est survenue lors du chargement du plan comptable.");
+            console.error("Erreur lors du chargement du plan comptable:", error);
+            setErrorStatus(error.response?.status || 500);
+            setErrorMessage(
+                error.response?.data?.detail || 
+                error.response?.data?.message || 
+                "Une erreur est survenue lors du chargement du plan comptable."
+            );
         } finally {
             setIsLoading(false);
         }
@@ -167,6 +126,70 @@ export function ChartOfAccounts() {
     // Fonction pour voir les détails d'un compte
     const handleViewDetails = (account) => {
         setViewingAccount(account);
+    };
+
+    // Fonction pour sauvegarder un compte (création ou modification)
+    const handleSaveAccount = async (formData) => {
+        setIsLoading(true);
+        try {
+            // Préparer les données pour l'API
+            const accountData = {
+                code: formData.code,
+                label: formData.label,
+                account_class: formData.code ? formData.code.charAt(0) : "",
+                account_type: formData.type,
+                is_active: formData.isActive !== undefined ? formData.isActive : true,
+                is_detailed: true, // Par défaut, les comptes créés manuellement sont détaillés
+            };
+
+            if (editingAccount && editingAccount.id) {
+                // Modification d'un compte existant
+                await chartOfAccountsService.updateAccount(editingAccount.id, accountData);
+            } else {
+                // Création d'un nouveau compte
+                await chartOfAccountsService.createAccount(accountData);
+            }
+
+            // Recharger la liste des comptes
+            await loadChartOfAccounts();
+            
+            // Fermer le modal
+            setShowCreateModal(false);
+            setEditingAccount(null);
+        } catch (error) {
+            console.error("Erreur lors de la sauvegarde du compte:", error);
+            alert(
+                error.response?.data?.detail || 
+                error.response?.data?.message || 
+                "Une erreur est survenue lors de la sauvegarde du compte."
+            );
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Fonction pour supprimer un compte
+    const handleDeleteAccount = async (accountId) => {
+        if (!confirm("Êtes-vous sûr de vouloir supprimer ce compte ?")) {
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            await chartOfAccountsService.deleteAccount(accountId);
+            
+            // Recharger la liste des comptes
+            await loadChartOfAccounts();
+        } catch (error) {
+            console.error("Erreur lors de la suppression du compte:", error);
+            alert(
+                error.response?.data?.detail || 
+                error.response?.data?.message || 
+                "Une erreur est survenue lors de la suppression du compte. Le compte est peut-être utilisé dans des écritures."
+            );
+        } finally {
+            setIsLoading(false);
+        }
     };
 
 
@@ -357,11 +380,7 @@ export function ChartOfAccounts() {
 
                                             <Tooltip placement={"right"} title={"Delete"}>
                                                 <button
-                                                    onClick={() => {
-                                                        if (confirm("Êtes-vous sûr de vouloir supprimer ce compte ?")) {
-                                                            console.log("Supprimer:", account.id);
-                                                        }
-                                                    }}
+                                                    onClick={() => handleDeleteAccount(account.id)}
                                                     className="text-red-600 hover:text-red-800 transition-colors"
                                                     title="Supprimer"
                                                 >
@@ -401,11 +420,7 @@ export function ChartOfAccounts() {
                             setShowCreateModal(false);
                             setEditingAccount(null);
                         }}
-                        onSave={(formData) => {
-                            console.log("Sauvegarder:", formData);
-                            // Ici on ferait l'appel API pour sauvegarder
-                            loadChartOfAccounts(); // Recharger les données
-                        }}
+                        onSave={handleSaveAccount}
                     />
                 )}
 
