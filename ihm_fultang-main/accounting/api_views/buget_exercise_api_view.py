@@ -1,7 +1,7 @@
 from accounting.permissions.accounting_staff_permissions import AccountingStaffPermission
 from accounting.serializers import BudgetExerciseSerializer
 from rest_framework.viewsets import ModelViewSet
-from accounting.models_financier import BudgetExercise, AccountState
+from accounting.models import BudgetExercise, AccountState
 from polyclinic.pagination import CustomPagination
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi

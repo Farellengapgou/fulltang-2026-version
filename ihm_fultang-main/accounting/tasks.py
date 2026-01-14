@@ -1,9 +1,9 @@
 from django.utils import timezone
-from accounting.models_financier import BudgetExercise, Account, AccountState
+from accounting.models import BudgetExercise, Account, AccountState
 from datetime import datetime, timedelta
 from celery import shared_task
 from accounting.services.accounting_service import AccountingService
-from accounting.models_financier import AccountingPeriod
+from accounting.models import AccountingPeriod
 
 
 class AccountingTasks:

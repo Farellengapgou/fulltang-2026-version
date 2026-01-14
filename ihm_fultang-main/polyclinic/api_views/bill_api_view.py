@@ -1,6 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
 from polyclinic.models import Bill, MedicalFolderPage, BillItem
-from accounting.models_financier import FinancialOperation, Account
+from accounting.models import FinancialOperation, Account
 from polyclinic.permissions.bill_permissions import BillPermissions
 from polyclinic.serializers.bill_items_serializers import BillItemSerializer, BillItemCreateSerializer, BillItemUpdateSerializer
 from polyclinic.serializers.bill_serializers import BillSerializer, BillCreateSerializer, BillUpdateSerializer
@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
-from accounting.models_financier import AccountState, BudgetExercise
+from accounting.models import AccountState, BudgetExercise
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 from django.db import transaction

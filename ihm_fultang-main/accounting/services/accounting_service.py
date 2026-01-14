@@ -1,7 +1,7 @@
 from django.db import models, transaction
 from django.utils import timezone
 from django.db.models import Sum, Q
-from ..models_financier import ChartOfAccounts, JournalEntry, JournalEntryLine, Journal, Asset, AccountingPeriod, Customer, AccountPeriodBalance
+from ..models import ChartOfAccounts, JournalEntry, JournalEntryLine, Journal, Asset, AccountingPeriod, Customer, AccountPeriodBalance
 from decimal import Decimal
 
 # Modèles de services pour intégration

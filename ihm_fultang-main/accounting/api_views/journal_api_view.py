@@ -8,7 +8,7 @@ from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from accounting.models_financier import Journal
+from accounting.models import Journal
 from django.db import transaction
 
 tags = ["journal"]

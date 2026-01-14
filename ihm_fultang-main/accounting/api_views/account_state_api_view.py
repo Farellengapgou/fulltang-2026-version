@@ -1,4 +1,4 @@
-from accounting.models_financier import AccountState, BudgetExercise, Account
+from accounting.models import AccountState, BudgetExercise, Account
 from accounting.permissions.accounting_staff_permissions import AccountingStaffPermission
 from accounting.serializers import AccountStateSerializer, AccountingViewSerializer, AccountStateCreateSerializer
 from drf_yasg.utils import swagger_auto_schema

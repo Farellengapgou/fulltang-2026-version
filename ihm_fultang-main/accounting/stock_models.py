@@ -877,7 +877,7 @@ class GoodsReceiptNote(models.Model):
         # Débit 33xx - Stock (ou 38xx - Achats stockés)
         # Crédit 401x - Fournisseur
         
-        from accounting.models_financier import JournalEntry, JournalEntryLine, Journal
+        from accounting.models import JournalEntry, JournalEntryLine, Journal
         
         # Récupérer le journal d'achats
         journal = Journal.objects.get(journal_type='PURCHASES')
