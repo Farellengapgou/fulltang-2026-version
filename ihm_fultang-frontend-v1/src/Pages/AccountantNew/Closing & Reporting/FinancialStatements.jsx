@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, Eye, Print } from "lucide-react";
+import { Download, Eye, FileText } from "lucide-react";
 import { FinancialAccountantDashBoard } from "../DashBoard.jsx";
 import { FinancialAccountantNavLink } from "../NavLink.js";
 import { FinancialAccountantNavBar } from "../NavBar.jsx";
