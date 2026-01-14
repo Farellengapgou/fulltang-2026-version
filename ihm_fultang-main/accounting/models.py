@@ -3,7 +3,6 @@ from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db import transaction
 from decimal import Decimal
 from datetime import datetime, timedelta
 
@@ -34,7 +33,7 @@ class Account(models.Model):
     
 
 class AccountState(models.Model):
-    balance = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    balance = models.FloatField(default=0)
 
     budgetExercise = models.ForeignKey('BudgetExercise', on_delete=models.CASCADE)
     account = models.ForeignKey('Account', on_delete=models.CASCADE)
@@ -46,8 +45,7 @@ class FinancialOperation(models.Model):
     account = models.ForeignKey('Account', on_delete=models.CASCADE)
 
 class Facture(models.Model):
-    montant = models.DecimalField(max_digits=15, decimal_places=2, default=0)
-
+    montant = models.FloatField(default=0)
     type = models.CharField(max_length=255)
 
     financialOperation = models.ForeignKey('FinancialOperation', on_delete=models.CASCADE)
@@ -80,11 +78,9 @@ class ChartOfAccounts(models.Model):
     label = models.CharField(max_length=255)
     account_class = models.CharField(max_length=1, choices=ACCOUNT_CLASSES)
     account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPES)
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sub_accounts')
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     is_active = models.BooleanField(default=True)
-    is_detailed = models.BooleanField(default=True)  # True si le compte peut recevoir une écriture (Auxiliaire)
-    is_collective = models.BooleanField(default=False) # True pour les comptes de regroupement (ex: 411)
-    
+    is_detailed = models.BooleanField(default=True)  # True si le compte peut recevoir une écriutre
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -97,44 +93,20 @@ class ChartOfAccounts(models.Model):
 
 
     def get_balance(self, start_date=None, end_date=None):
-        """Calcule le solde du compte sur une période en utilisant AccountPeriodBalance si possible"""
-        # 1. Utilisation prioritaire des soldes matérialisés pour performance (O(1) vs O(N))
-        if end_date:
-            period = AccountingPeriod.objects.filter(year=end_date.year, month=end_date.month).first()
-            if period and period.state in ['CLOSED', 'LOCKED']:
-                balance = AccountPeriodBalance.objects.filter(account=self, period=period).first()
-                if balance:
-                    # Pour simplifier, on retourne le solde de clôture si on demande précisément la fin d'un mois clôturé
-                    if self.account_class in ['2', '3', '5', '6']:
-                        return balance.closing_debit - balance.closing_credit
-                    else:
-                        return balance.closing_credit - balance.closing_debit
-
-        # 2. Fallback dynamique optimisé pour les périodes ouvertes
-        entries = JournalEntryLine.objects.filter(account=self, journal_entry__state='POSTED')
+        """Calcule le solde du compte sur une période"""
+        entries = JournalEntryLine.objects.filter(account=self)
         if start_date:
             entries = entries.filter(journal_entry__entry_date__gte=start_date)
         if end_date:
             entries = entries.filter(journal_entry__entry_date__lte=end_date)
         
-        totals = entries.aggregate(
-            debit=models.Sum('debit_amount'),
-            credit=models.Sum('credit_amount')
-        )
-        total_debit = totals['debit'] or Decimal('0')
-        total_credit = totals['credit'] or Decimal('0')
+        total_debit = entries.aggregate(models.Sum('debit_amount'))['debit_amount__sum'] or 0
+        total_credit = entries.aggregate(models.Sum('credit_amount'))['credit_amount__sum'] or 0
         
-        if self.account_class in ['2', '3', '5', '6']:
+        if self.account_type in ['ASSET', 'EXPENSE']:
             return total_debit - total_credit
         else:
             return total_credit - total_debit
-
-    @property
-    def normal_side(self):
-        """Retourne le sens normal du compte (DEBIT/CREDIT)"""
-        if self.account_class in ['2', '3', '5', '6']:
-            return 'DEBIT'
-        return 'CREDIT'
 
 
 # Journaux comptables
@@ -188,13 +160,6 @@ class JournalEntry(models.Model):
     total_debit = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     total_credit = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     
-    # Pièce justificative (Voucher)
-    voucher_number = models.CharField(max_length=50, unique=True, null=True, blank=True)
-    
-    # Historique de modification
-    is_reversed = models.BooleanField(default=False)
-    reversal_of = models.OneToOneField('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='reversed_by')
-    
     # Relations
     created_by = models.ForeignKey("authentication.MedicalStaff", on_delete=models.CASCADE, related_name='created_entries')
     validated_by = models.ForeignKey("authentication.MedicalStaff", on_delete=models.SET_NULL, null=True, blank=True, related_name='validated_entries')
@@ -207,170 +172,52 @@ class JournalEntry(models.Model):
     
     class Meta:
         verbose_name = "Écriture comptable"
-        constraints = [
-            models.CheckConstraint(
-                check=models.Q(state='DRAFT') | models.Q(total_debit=models.F('total_credit')),
-                name='posted_entry_must_be_balanced'
-            )
-        ]
         ordering = ['-entry_date', '-created_at']
     
     def __str__(self):
         return f"{self.entry_number} - {self.description}"
     
     def save(self, *args, **kwargs):
-        # 1. Empêcher la modification d'une écriture validée (POSTED)
-        if self.pk:
-            old_self = JournalEntry.objects.get(pk=self.pk)
-            if old_self.state == 'POSTED':
-                # On autorise seulement le changement vers CANCELLED si nécessaire, 
-                # mais la règle d'or dit de ne jamais supprimer/modifier.
-                # Ici on bloque tout sauf si on est en train de la passer en POSTED pour la première fois.
-                if self.state == 'POSTED' and old_self.state == 'POSTED':
-                    raise ValidationError("Une écriture validée ne peut plus être modifiée. Utilisez la contre-passation.")
-
-        # 2. Vérifier si la période est ouverte
-        self.check_period_is_open()
-
         if not self.entry_number:
             self.entry_number = self.generate_entry_number()
         super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        if self.state == 'POSTED':
-            raise ValidationError("Une écriture validée ne peut jamais être supprimée. Utilisez la contre-passation.")
-        super().delete(*args, **kwargs)
-
-    def check_period_is_open(self):
-        """Vérifie que la date de l'écriture tombe dans une période ouverte"""
-        period = AccountingPeriod.objects.filter(
-            year=self.entry_date.year, 
-            month=self.entry_date.month
-        ).first()
+    
+    def generate_entry_number(self):
+        """Génère un numéro d'écriture automatique"""
+        today = timezone.now()
+        prefix = f"{self.journal.code}{today.strftime('%Y%m')}"
+        last_entry = JournalEntry.objects.filter(
+            entry_number__startswith=prefix
+        ).order_by('-entry_number').first()
         
-        if not period:
-            # Si la période n'existe pas, on considère qu'on ne peut pas poster
-            # Alternative: Créer la période automatiquement si configuré
-            raise ValidationError(f"Aucune période comptable définie pour {self.entry_date.month}/{self.entry_date.year}")
+        if last_entry:
+            last_number = int(last_entry.entry_number[-4:])
+            new_number = last_number + 1
+        else:
+            new_number = 1
         
-        if period.state != 'OPEN':
-            raise ValidationError(f"La période {period} est {period.get_state_display()}. Écriture non autorisée.")
+        return f"{prefix}{new_number:04d}"
 
-    def update_totals(self, commit=True):
-        """Calcule les totaux à partir des lignes. commit=False pour éviter double save."""
-        lines = self.lines.all()
-        self.total_debit = sum(line.debit_amount for line in lines)
-        self.total_credit = sum(line.credit_amount for line in lines)
-        if commit:
-            super().save() # Utilise super().save() pour éviter le check_period_is_open si déjà validé
-    @property
     def is_balanced(self):
         """Vérifie l'équilibrage de l'écriture"""
         return self.total_debit == self.total_credit
-
+    
     def post(self, validated_by):
-        """Valide l'écriture (Règle d'or: irréversible après ceci)"""
-        # Séparation des rôles
-        if self.created_by == validated_by:
-            raise ValidationError("Le créateur de l'écriture ne peut pas la valider lui-même.")
-
-        # Recalculer les totaux AVANT de vérifier l'équilibre
-        self.update_totals(commit=False)
-
+        """Valide l'écriture"""
         if not self.is_balanced():
-            raise ValidationError(f"L'écriture n'est pas équilibrée (Débit: {self.total_debit}, Crédit: {self.total_credit})")
+            raise ValueError("L'écriture n'est pas équilibrée")
         
-        # Générer le numéro de pièce si absent
-        if not self.voucher_number:
-            self.voucher_number = self.generate_voucher_number()
-
         self.state = 'POSTED'
         self.validated_by = validated_by
         self.validated_at = timezone.now()
-        # Un seul save() ici
-        super().save()
-
-        # Matérialisation des soldes pour performance
-        self.update_period_balances()
-
-    def update_period_balances(self):
-        """Met à jour AccountPeriodBalance pour chaque ligne de l'écriture"""
-        period = AccountingPeriod.objects.filter(
-            year=self.entry_date.year, 
-            month=self.entry_date.month
-        ).first()
-        
-        if not period: return
-
-        for line in self.lines.all():
-            balance, _ = AccountPeriodBalance.objects.get_or_create(
-                account=line.account,
-                period=period
-            )
-            balance.debit_movement += line.debit_amount
-            balance.credit_movement += line.credit_amount
-            # Les soldes d'ouverture et clôture seront recalculés lors de la clôture officielle
-            balance.save()
-
-    def generate_voucher_number(self):
-        """Numérotation chronologique inaltérable des pièces. 
-        Garantit l'absence de trous de séquence."""
-        prefix = f"V_{self.journal.code}_{self.entry_date.year}_"
-        # Utilisation de select_for_update pour éviter les race conditions sur le numéro
-        with transaction.atomic():
-            last_v = JournalEntry.objects.filter(
-                voucher_number__startswith=prefix
-            ).select_for_update().order_by('-voucher_number').first()
-            
-            if last_v and last_v.voucher_number:
-                try:
-                    num = int(last_v.voucher_number.split('_')[-1]) + 1
-                except ValueError:
-                    num = 1
-            else:
-                num = 1
-            return f"{prefix}{num:05d}"
-
-    def reverse(self, user, description=None):
-        """Contre-passation de l'écriture"""
-        if self.state != 'POSTED':
-            raise ValidationError("Seule une écriture validée peut être contre-passée.")
-        
-        if self.is_reversed:
-            raise ValidationError("Cette écriture a déjà été contre-passée.")
-
-        # Création de l'écriture inverse
-        reversal_entry = JournalEntry.objects.create(
-            journal=self.journal,
-            entry_date=timezone.now().date(),
-            description=description or f"Contre-passation de {self.entry_number}: {self.description}",
-            created_by=user,
-            reversal_of=self,
-            reference=self.entry_number
-        )
-
-        for line in self.lines.all():
-            JournalEntryLine.objects.create(
-                journal_entry=reversal_entry,
-                sequence=line.sequence,
-                account=line.account,
-                label=f"Reverse: {line.label}",
-                debit_amount=line.credit_amount, # Inversion
-                credit_amount=line.debit_amount  # Inversion
-            )
-        
-        reversal_entry.update_totals()
-        reversal_entry.post(user)
-        
-        self.is_reversed = True
         self.save()
-        return reversal_entry
-
     
-    
-    # Supprimé car redondant avec update_totals(commit=True)
-    # def update_totals(self):
-    #     ...
+    def update_totals(self):
+        """Met à jour les totaux à partir des lignes"""
+        lines = self.lines.all()
+        self.total_debit = sum(line.debit_amount for line in lines)
+        self.total_credit = sum(line.credit_amount for line in lines)
+        self.save()
 
 
 # Lignes d'écritures
@@ -383,8 +230,7 @@ class JournalEntryLine(models.Model):
     credit_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     
     # Références optionnelles
-    partner_supplier = models.ForeignKey('Supplier', on_delete=models.SET_NULL, null=True, blank=True)
-    partner_customer = models.ForeignKey('Customer', on_delete=models.SET_NULL, null=True, blank=True)
+    partner = models.ForeignKey('Supplier', on_delete=models.SET_NULL, null=True, blank=True)
     analytic_account = models.ForeignKey('AnalyticAccount', on_delete=models.SET_NULL, null=True, blank=True)
     
     class Meta:
@@ -401,15 +247,6 @@ class JournalEntryLine(models.Model):
         if not self.debit_amount and not self.credit_amount:
             raise models.ValidationError("Une ligne doit avoir un montant débit ou crédit")
 
-    def delete(self, *args, **kwargs):
-        if self.journal_entry.state == 'POSTED':
-            raise ValidationError("Impossible de supprimer une ligne d'une écriture validée.")
-        super().delete(*args, **kwargs)
-
-    def save(self, *args, **kwargs):
-        if self.journal_entry.state == 'POSTED':
-            raise ValidationError("Impossible de modifier une ligne d'une écriture validée.")
-        super().save(*args, **kwargs)
 
 # Fournisseurs
 class Supplier(models.Model):
@@ -468,7 +305,7 @@ class Supplier(models.Model):
     def get_orders_total(self, year=None):
         """Retourne le CA annuel avec ce fournisseur"""
         entries = JournalEntryLine.objects.filter(
-            partner_supplier=self,
+            partner=self,
             account__account_type='EXPENSE'
         )
         if year:
@@ -477,51 +314,6 @@ class Supplier(models.Model):
         return entries.aggregate(
             total=models.Sum('debit_amount')
         )['total'] or 0
-
-
-# Clients (Classe 41)
-class Customer(models.Model):
-    CUSTOMER_TYPES = [
-        ('INDIVIDUAL', 'Particulier'),
-        ('CORPORATE', 'Entreprise'),
-        ('INSURANCE', 'Assurance/Mutuelle'),
-        ('GOVERNMENT', 'Organisme Public'),
-    ]
-    
-    code = models.CharField(max_length=20, unique=True)
-    name = models.CharField(max_length=255)
-    customer_type = models.CharField(max_length=15, choices=CUSTOMER_TYPES, default='INDIVIDUAL')
-    
-    # Coordonnées
-    address = models.TextField(blank=True)
-    phone = models.CharField(max_length=50, blank=True)
-    email = models.EmailField(blank=True)
-    
-    # Informations financières
-    payment_terms = models.PositiveIntegerField(default=0, help_text="Délai de paiement en jours")
-    credit_limit = models.DecimalField(max_digits=15, decimal_places=2, default=0)
-    
-    # Relations
-    account = models.ForeignKey(
-        'ChartOfAccounts', 
-        on_delete=models.PROTECT,
-        help_text="Compte 411 correspondant"
-    )
-    
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey("authentication.MedicalStaff", on_delete=models.CASCADE)
-    
-    class Meta:
-        verbose_name = "Client"
-        ordering = ['name']
-    
-    def __str__(self):
-        return f"{self.code} - {self.name}"
-    
-    def get_balance(self):
-        """Solde du client"""
-        return self.account.get_balance()
 
 
 # Immobilisations
@@ -767,27 +559,6 @@ class AccountingPeriod(models.Model):
         self.closed_by = user
         self.closed_at = timezone.now()
         self.save()
-
-
-# Modèle pour performances (Soldes par période)
-class AccountPeriodBalance(models.Model):
-    account = models.ForeignKey('ChartOfAccounts', on_delete=models.CASCADE)
-    period = models.ForeignKey('AccountingPeriod', on_delete=models.CASCADE)
-    
-    opening_debit = models.DecimalField(max_digits=15, decimal_places=2, default=0)
-    opening_credit = models.DecimalField(max_digits=15, decimal_places=2, default=0)
-    
-    debit_movement = models.DecimalField(max_digits=15, decimal_places=2, default=0)
-    credit_movement = models.DecimalField(max_digits=15, decimal_places=2, default=0)
-    
-    closing_debit = models.DecimalField(max_digits=15, decimal_places=2, default=0)
-    closing_credit = models.DecimalField(max_digits=15, decimal_places=2, default=0)
-    
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        unique_together = ['account', 'period']
-        verbose_name = "Solde mensuel par compte"
 
 
 # Extensions du modèle Bill existant

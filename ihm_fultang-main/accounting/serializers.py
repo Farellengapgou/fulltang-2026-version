@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
-from accounting.models_financier import *
+from accounting.models import *
 
 class BudgetExerciseSerializer(ModelSerializer):
     class Meta:
@@ -35,7 +35,7 @@ class FactureSerializer(ModelSerializer):
         fields = '__all__'
 
 class AccountingViewSerializer(ModelSerializer):
-    amount = serializers.DecimalField(max_digits=15, decimal_places=2, default=0)
+    amount = serializers.FloatField(default=0)
 
     account = AccountSerializer()
     
@@ -51,7 +51,7 @@ from rest_framework import serializers
 from django.db import transaction
 from django.utils import timezone
 from decimal import Decimal
-from .models_financier import (
+from .models import (
     ChartOfAccounts, Journal, JournalEntry, JournalEntryLine,
     Supplier, Asset, AnalyticAccount, Budget, BudgetLine,
     AccountingPeriod, TaxRate, TaxDeclaration, BankAccount,
@@ -78,7 +78,7 @@ class ChartOfAccountsSerializer(serializers.ModelSerializer):
         """Calcule le solde du compte"""
         start_date = self.context.get('start_date')
         end_date = self.context.get('end_date')
-        return obj.get_balance(start_date, end_date)
+        return float(obj.get_balance(start_date, end_date))
 
     def get_children_count(self, obj):
         """Retourne le nombre de sous-comptes"""
@@ -157,8 +157,7 @@ class JournalSerializer(serializers.ModelSerializer):
 class JournalEntryLineSerializer(serializers.ModelSerializer):
     account_code = serializers.CharField(source='account.code', read_only=True)
     account_label = serializers.CharField(source='account.label', read_only=True)
-    partner_supplier_name = serializers.CharField(source='partner_supplier.name', read_only=True)
-    partner_customer_name = serializers.CharField(source='partner_customer.name', read_only=True)
+    partner_name = serializers.CharField(source='partner.name', read_only=True)
     analytic_account_name = serializers.CharField(
         source='analytic_account.name', read_only=True
     )
@@ -167,8 +166,7 @@ class JournalEntryLineSerializer(serializers.ModelSerializer):
         model = JournalEntryLine
         fields = [
             'id', 'sequence', 'account', 'account_code', 'account_label',
-            'label', 'debit_amount', 'credit_amount', 'partner_supplier', 'partner_supplier_name',
-            'partner_customer', 'partner_customer_name',
+            'label', 'debit_amount', 'credit_amount', 'partner', 'partner_name',
             'analytic_account', 'analytic_account_name'
         ]
 
@@ -339,12 +337,12 @@ class SupplierSerializer(serializers.ModelSerializer):
 
     def get_balance(self, obj):
         """Retourne le solde fournisseur"""
-        return obj.get_balance()
+        return float(obj.get_balance())
 
     def get_orders_total_current_year(self, obj):
         """Retourne le CA de l'année en cours"""
         current_year = timezone.now().year
-        return obj.get_orders_total(current_year)
+        return float(obj.get_orders_total(current_year))
 
     def validate_code(self, value):
         """Valide l'unicité du code fournisseur"""
@@ -408,15 +406,15 @@ class AssetSerializer(serializers.ModelSerializer):
 
     def get_annual_depreciation(self, obj):
         """Retourne l'amortissement annuel"""
-        return obj.calculate_annual_depreciation()
+        return float(obj.calculate_annual_depreciation())
 
     def get_accumulated_depreciation(self, obj):
         """Retourne les amortissements cumulés"""
-        return obj.get_accumulated_depreciation()
+        return float(obj.get_accumulated_depreciation())
 
     def get_net_book_value(self, obj):
         """Retourne la valeur nette comptable"""
-        return obj.get_net_book_value()
+        return float(obj.get_net_book_value())
 
     def validate(self, attrs):
         """Validation métier des immobilisations"""
@@ -469,7 +467,7 @@ class BudgetLineSerializer(serializers.ModelSerializer):
 
     def get_annual_total(self, obj):
         """Retourne le total annuel"""
-        return obj.get_annual_total()
+        return float(obj.get_annual_total())
 
 
 class BudgetSerializer(serializers.ModelSerializer):
@@ -497,7 +495,7 @@ class BudgetSerializer(serializers.ModelSerializer):
 
     def get_total_budget(self, obj):
         """Calcule le budget total"""
-        return sum(line.get_annual_total() for line in obj.lines.all())
+        return float(sum(line.get_annual_total() for line in obj.lines.all()))
 
     def validate(self, attrs):
         """Validation des dates"""
@@ -537,7 +535,7 @@ class TaxRateSerializer(serializers.ModelSerializer):
 
     def get_rate_percentage(self, obj):
         """Retourne le taux en pourcentage"""
-        return obj.rate * 100
+        return float(obj.rate * 100)
 
 
 class TaxDeclarationSerializer(serializers.ModelSerializer):
@@ -560,7 +558,7 @@ class TaxDeclarationSerializer(serializers.ModelSerializer):
 
     def get_total_due(self, obj):
         """Retourne le montant total dû"""
-        return obj.tax_amount + obj.penalties
+        return float(obj.tax_amount + obj.penalties)
 
     def get_is_overdue(self, obj):
         """Vérifie si la déclaration est en retard"""

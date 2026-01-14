@@ -5,13 +5,13 @@ from rest_framework.permissions import IsAuthenticated
 
 from accounting.permissions.accounting_staff_permissions import AccountingStaffPermission
 from accounting.serializers import AccountSerializer
-from accounting.models_financier import Account, AccountState, BudgetExercise
+from accounting.models import Account, AccountState, BudgetExercise
 from rest_framework.viewsets import ModelViewSet
 from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from accounting.models_financier import FinancialOperation
+from accounting.models import FinancialOperation
 from accounting.serializers import FinancialOperationSerializer
 from django.db import transaction
 
