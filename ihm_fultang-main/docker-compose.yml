@@ -20,7 +20,7 @@ services:
     volumes:
       - .:/app
     ports:
-      - "8010:8009"
+      - "8009:8009"
 
     env_file:
       - .env
