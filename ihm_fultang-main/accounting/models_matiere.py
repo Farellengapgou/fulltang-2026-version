@@ -317,7 +317,7 @@ class StockBatch(models.Model):
     
     # Origine (référence au fournisseur matière)
     supplier = models.ForeignKey(
-        'MaterialSupplier',
+        'Supplier',
         on_delete=models.SET_NULL,
         null=True,
         blank=True
@@ -636,7 +636,7 @@ class StockMovement(models.Model):
     
     # Fournisseur (pour achats)
     supplier = models.ForeignKey(
-        'MaterialSupplier',
+        'Supplier',
         on_delete=models.SET_NULL,
         null=True,
         blank=True
@@ -795,7 +795,7 @@ class GoodsReceipt(models.Model):
     
     # Fournisseur
     supplier = models.ForeignKey(
-        'MaterialSupplier',
+        'upplier',
         on_delete=models.PROTECT,
         null=True,
         blank=True
@@ -1289,6 +1289,10 @@ class GoodsIssueLine(models.Model):
     class Meta:
         verbose_name = "Ligne de bon de sortie"
         verbose_name_plural = "Lignes de bon de sortie"
+        indexes = [
+            models.Index(fields=['content_type', 'object_id']),
+            models.Index(fields=['issue', 'article']),
+        ]
     
     def save(self, *args, **kwargs):
         self.total_value = self.quantity * self.unit_price

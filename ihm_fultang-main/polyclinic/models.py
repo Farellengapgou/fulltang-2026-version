@@ -500,6 +500,8 @@ class PolyclinicProduct(Article):
     requires_prescription = models.BooleanField(default=False)
     dosage = models.CharField(max_length=100, blank=True, null=True)  # ex: "500mg"
     form = models.CharField(max_length=50, blank=True, null=True)  # ex: "tablet", "liquid"
+    price = models.FloatField(default=0.0)
+
     
     # Péremption (pour affichage, le suivi réel est par lot)
     expiry_date = models.DateField(blank=True, null=True, help_text="Date de péremption la plus proche")
