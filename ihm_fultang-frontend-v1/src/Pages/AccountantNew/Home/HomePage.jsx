@@ -35,37 +35,17 @@ export function FinancialAccountantHomePage() {
     });
 
     const [recentActivities, setRecentActivities] = useState([]);
+    const expenseBreakdown = [];
+    const currentPeriodLabel = new Date().toLocaleDateString('fr-FR', {
+        month: 'long',
+        year: 'numeric'
+    });
 
     useEffect(() => {
         async function fetchFinancialStats() {
             try {
-                // Simuler des appels API pour récupérer les données financières
-                // Dans un vrai projet, ces appels seraient faits vers votre backend
-
-                // Exemple d'appel pour les écritures comptables
-                // const journalResponse = await axiosInstance.get('/journal-entries/');
-                // const payrollResponse = await axiosInstance.get('/payroll/summary/');
-                // const cashResponse = await axiosInstance.get('/cash-management/balance/');
-
-                // Pour la démonstration, on utilise des données simulées
-                setStats({
-                    totalRevenue: 2450000, // Revenus du mois en FCFA
-                    monthlyExpenses: 1850000, // Dépenses du mois
-                    pendingInvoices: 15, // Factures en attente
-                    cashBalance: 8500000, // Solde de trésorerie
-                    journalEntries: 342, // Écritures comptables du mois
-                    payrollCost: 12500000, // Coût salarial mensuel
-                    budgetVariance: 5.2, // Écart budgétaire en %
-                    pendingReconciliations: 3 // Rapprochements bancaires en attente
-                });
-
-                setRecentActivities([
-                    { id: 1, action: "Écriture comptable", description: "Facturation services médicaux", time: "Il y a 2h", type: "journal" },
-                    { id: 2, action: "Rapprochement bancaire", description: "Banque BICEC - Mars 2025", time: "Il y a 4h", type: "reconciliation" },
-                    { id: 3, action: "Calcul paie", description: "Personnel médical - Mars", time: "Hier", type: "payroll" },
-                    { id: 4, action: "Analyse budgétaire", description: "Écart budget vs réalisé", time: "Hier", type: "analysis" }
-                ]);
-
+                setStats((prev) => prev);
+                setRecentActivities([]);
             } catch (error) {
                 console.error("Erreur lors de la récupération des statistiques financières:", error);
             }
@@ -92,7 +72,7 @@ export function FinancialAccountantHomePage() {
                         Pilotez la santé financière de votre établissement médical avec des indicateurs en temps réel.
                     </p>
                     <div className="mt-4 text-sm opacity-80">
-                        Période : Mars 2025 | Dernière mise à jour : {new Date().toLocaleDateString('fr-FR')}
+                        Période : {currentPeriodLabel} | Dernière mise à jour : {new Date().toLocaleDateString('fr-FR')}
                     </div>
                 </div>
 
@@ -168,42 +148,21 @@ export function FinancialAccountantHomePage() {
                             Répartition des Charges
                         </h3>
                         <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm font-medium">Personnel médical</span>
-                                <div className="flex items-center">
-                                    <div className="w-32 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div className="bg-blue-500 h-2 rounded-full" style={{width: '45%'}}></div>
+                            {expenseBreakdown.length === 0 ? (
+                                <p className="text-sm text-gray-600">Aucune donnée disponible.</p>
+                            ) : (
+                                expenseBreakdown.map((item) => (
+                                    <div key={item.label} className="flex justify-between items-center">
+                                        <span className="text-sm font-medium">{item.label}</span>
+                                        <div className="flex items-center">
+                                            <div className="w-32 bg-gray-200 rounded-full h-2 mr-2">
+                                                <div className={`${item.color} h-2 rounded-full`} style={{width: item.value}}></div>
+                                            </div>
+                                            <span className="text-sm text-gray-600">{item.value}</span>
+                                        </div>
                                     </div>
-                                    <span className="text-sm text-gray-600">45%</span>
-                                </div>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm font-medium">Équipements & Maintenance</span>
-                                <div className="flex items-center">
-                                    <div className="w-32 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div className="bg-green-500 h-2 rounded-full" style={{width: '25%'}}></div>
-                                    </div>
-                                    <span className="text-sm text-gray-600">25%</span>
-                                </div>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm font-medium">Produits pharmaceutiques</span>
-                                <div className="flex items-center">
-                                    <div className="w-32 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div className="bg-purple-500 h-2 rounded-full" style={{width: '20%'}}></div>
-                                    </div>
-                                    <span className="text-sm text-gray-600">20%</span>
-                                </div>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm font-medium">Frais généraux</span>
-                                <div className="flex items-center">
-                                    <div className="w-32 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div className="bg-orange-500 h-2 rounded-full" style={{width: '10%'}}></div>
-                                    </div>
-                                    <span className="text-sm text-gray-600">10%</span>
-                                </div>
-                            </div>
+                                ))
+                            )}
                         </div>
                     </div>
 

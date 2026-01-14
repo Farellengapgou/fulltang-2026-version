@@ -33,72 +33,10 @@ export function ChartOfAccounts() {
     const [errorMessage, setErrorMessage] = useState("");
 
 
-    // Données d'exemple pour la démonstration
-    const sampleAccounts = [
-        {
-            id: 1,
-            code: "2154",
-            label: "Équipements de radiologie",
-            class: "2",
-            type: "Actif",
-            balance: 125000,
-            isActive: true,
-            createdDate: "2024-01-15T10:30:00Z",
-            lastUsed: "2024-06-10T14:20:00Z"
-        },
-        {
-            id: 2,
-            code: "7011",
-            label: "Consultations médicales",
-            class: "7",
-            type: "Produit",
-            balance: 45000,
-            isActive: true,
-            createdDate: "2024-01-10T08:15:00Z",
-            lastUsed: "2024-06-14T09:30:00Z"
-        },
-        {
-            id: 3,
-            code: "4111",
-            label: "Patients débiteurs",
-            class: "4",
-            type: "Actif",
-            balance: 15000,
-            isActive: true,
-            createdDate: "2024-02-01T11:45:00Z",
-            lastUsed: "2024-06-13T16:10:00Z"
-        },
-        {
-            id: 4,
-            code: "6011",
-            label: "Achats de médicaments",
-            class: "6",
-            type: "Charge",
-            balance: 28000,
-            isActive: true,
-            createdDate: "2024-01-20T14:00:00Z",
-            lastUsed: "2024-06-12T11:25:00Z"
-        },
-        {
-            id: 5,
-            code: "5121",
-            label: "Banque BICEC",
-            class: "5",
-            type: "Actif",
-            balance: 85000,
-            isActive: true,
-            createdDate: "2024-01-05T09:20:00Z",
-            lastUsed: "2024-06-14T08:45:00Z"
-        }
-    ];
-
-    // Simulation du chargement des données
     const loadChartOfAccounts = useCallback(async () => {
         setIsLoading(true);
         try {
-            // Simulation d'un appel API
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            setAccountsList(sampleAccounts);
+            setAccountsList([]);
             setErrorStatus(null);
             setErrorMessage("");
         } catch (error) {

@@ -81,6 +81,7 @@ export function AppRoute()
     const FinancialGrandLivre = React.lazy(async () => ({default: (await import("../Pages/AccountantNew/Comptabilité de Base/GrandLivre.jsx")).GrandLivreBalance}));
     const FinancialPayrollJournal = React.lazy(async () => ({default: (await import("../Pages/AccountantNew/Payroll & Social Charge/PayrollJournal.jsx")).SocialChargesCalculator}));
     const FinancialCostAnalytic = React.lazy(async () => ({default: (await import("../Pages/AccountantNew/Payroll & Social Charge/CostAnalytic.jsx")).HRAnalyticsDashboard}));
+    const FinancialBilling = React.lazy(async () => ({default: (await import("../Pages/AccountantNew/Billing & Invoicing/Billing.jsx")).BillingDashboard}));
 
 
 
@@ -163,6 +164,8 @@ export function AppRoute()
                 <Route path={AppRoutesPaths.financialAccountantAccountingGrandLivre} element={<FinancialGrandLivre/>}/>
                 <Route path={AppRoutesPaths.financialAccountPayroll} element={<FinancialPayrollJournal/>}/>
                 <Route path={AppRoutesPaths.financialAccountantCostAnalytic} element={<FinancialCostAnalytic/>}/>
+
+                <Route path={AppRoutesPaths.billing} element={<FinancialBilling/>}/>
 
 
 

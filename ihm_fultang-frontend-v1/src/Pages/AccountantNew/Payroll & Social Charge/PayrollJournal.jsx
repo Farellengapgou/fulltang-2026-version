@@ -7,63 +7,14 @@ import {AccountantDashBoard} from "../../Accountant/Components/AccountantDashboa
 export function SocialChargesCalculator() {
     // État pour les données de charges sociales avec structure plus flexible
     const [chargesData, setChargesData] = useState({
-        masseSalariale: 45000000,
-        effectif: 87,
-        periode: '2025-06',
+        masseSalariale: 0,
+        effectif: 0,
+        periode: '',
         declarations: []
     });
 
     // Configuration modifiable des taux des charges sociales
-    const [taxRates, setTaxRates] = useState([
-        {
-            id: 'cnps_salarie',
-            name: 'CNPS Salarié',
-            category: 'cnps',
-            type: 'percentage',
-            rate: 4.2,
-            base: 'masseSalariale',
-            payedBy: 'employee',
-            description: 'Cotisation salariale CNPS (retraite)',
-            mandatory: true,
-            color: 'blue'
-        },
-        {
-            id: 'cnps_employeur',
-            name: 'CNPS Employeur',
-            category: 'cnps',
-            type: 'percentage',
-            rate: 7.4,
-            base: 'masseSalariale',
-            payedBy: 'employer',
-            description: 'Cotisation patronale CNPS',
-            mandatory: true,
-            color: 'blue'
-        },
-        {
-            id: 'taxe_formation',
-            name: 'Taxe Formation Professionnelle',
-            category: 'taxes',
-            type: 'percentage',
-            rate: 1.2,
-            base: 'masseSalariale',
-            payedBy: 'employer',
-            description: 'Financement de la formation professionnelle',
-            mandatory: true,
-            color: 'green'
-        },
-        {
-            id: 'crtv',
-            name: 'CRTV',
-            category: 'taxes',
-            type: 'fixed',
-            rate: 1000,
-            base: 'effectif',
-            payedBy: 'employer',
-            description: 'Redevance audiovisuelle mensuelle',
-            mandatory: true,
-            color: 'orange'
-        }
-    ]);
+    const [taxRates, setTaxRates] = useState([]);
 
     // État pour l'édition des taux
     const [editingTax, setEditingTax] = useState(null);
@@ -113,39 +64,8 @@ export function SocialChargesCalculator() {
 
     // Échéances générées dynamiquement
     const deadlines = React.useMemo(() => {
-        return [
-            {
-                id: 1,
-                type: 'CNPS',
-                description: 'Déclaration et paiement CNPS',
-                deadline: '2025-07-15',
-                amount: calculations.totalCnps,
-                status: 'pending',
-                priority: 'high',
-                color: 'blue'
-            },
-            {
-                id: 2,
-                type: 'Formation',
-                description: 'Taxe de formation professionnelle',
-                deadline: '2025-07-31',
-                amount: calculations.taxe_formation || 0,
-                status: 'pending',
-                priority: 'medium',
-                color: 'green'
-            },
-            {
-                id: 3,
-                type: 'CRTV',
-                description: 'Redevance audiovisuelle CRTV',
-                deadline: '2025-07-10',
-                amount: calculations.crtv || 0,
-                status: 'pending',
-                priority: 'high',
-                color: 'orange'
-            }
-        ];
-    }, [calculations]);
+        return [];
+    }, []);
 
     // Fonction de formatage améliorée
     const formatCurrency = (amount) => {
