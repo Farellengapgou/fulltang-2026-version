@@ -81,4 +81,5 @@ export const AppRoutesPaths = {
   accountsReceivable: "/accountant-financial/accounts-receivable", 
   suppliers: "/accountant-financial/suppliers",
   supplierInvoices: "/accountant-financial/supplier-invoices",
+  supplierDirectory: "/accountant-financial/supplier-directory",
 };

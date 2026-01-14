@@ -299,6 +299,11 @@ export function AppRoute() {
       await import("../Pages/AccountantNew/Suppliers & Payables/SupplierInvoices.jsx")
     ).SupplierInvoices,
   }));
+  const supplierDirectory = React.lazy(async ()  => ({
+    default: (
+      await import("../Pages/AccountantNew/Suppliers & Payables/SupplierDirectory.jsx")
+    ).SupplierInvoices,
+  }));
 
   return (
     <React.Suspense fallback={<Loading />}>
