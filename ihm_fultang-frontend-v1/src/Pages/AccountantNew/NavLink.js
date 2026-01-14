@@ -207,7 +207,7 @@ export const FinancialAccountantNavLink = [
       {
         icon: FaFileInvoiceDollar,
         name: "Social Charges",
-        link: appRoutes.financialAccountPayroll,
+        link: appRoutes.financialSocialCharge,
         description: "Manage social security, training taxes, etc.",
       },
       {

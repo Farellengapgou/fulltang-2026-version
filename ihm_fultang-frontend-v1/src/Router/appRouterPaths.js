@@ -70,35 +70,54 @@ export const AppRoutesPaths = {
     "/accountant-financial/accounting-journals",
   financialAccountantAccountingGrandLivre:
     "/accountant-financial/accounting-grand-livre",
-  financialAccountantInvoices: "/accountant-financial/invoices",
   financialAccountantPayments: "/accountant-financial/payments",
   financialAccountantBudgets: "/accountant-financial/budgets",
   financialAccountantReports: "/accountant-financial/reports",
-  financialAccountPayroll: "/accountant-financial/payroll-journal",
+  financialSocialCharge: "/accountant-financial/social-charge",
   financialAccountantCostAnalytic: "/accountant-financial/cost-analytic",
+  // Revenue & Receivables
   billing: "/accountant-financial/billing",
   revenueByService: "/accountant-financial/revenue-by-service",
-  accountsReceivable: "/accountant-financial/accounts-receivable", 
+  accountsReceivable: "/accountant-financial/accounts-receivable",
+
+  // Suppliers & Payables
   suppliers: "/accountant-financial/suppliers",
   supplierInvoices: "/accountant-financial/supplier-invoices",
   payables: "/accountant-financial/payables",
+
+  // Cash Management
   cashPositions: "/accountant-financial/cash-positions",
   bankReconciliation: "/accountant-financial/bank-reconciliation",
   cashFlowForecast: "/accountant-financial/cash-flow-forecast",
-  fixedAssetsRegister: "/accountant-financial/fixed-asset-register",
+
+  // Fixed Assets
+  fixedAssetsRegister: "/accountant-financial/fixed-assets",
   depreciation: "/accountant-financial/depreciation",
+
+  // Inventory & Stock
   inventoryValuation: "/accountant-financial/inventory-valuation",
-  abcAnalysis: "/accountant-financial/abc-analysis",
   physicalInventory: "/accountant-financial/physical-inventory",
+  abcAnalysis: "/accountant-financial/abc-analysis",
+
+  // Payroll & Social Charges
+  financialAccountPayroll: "/accountant-financial/payroll-journal",
+
+  // VAT & Taxation
   vatCalculation: "/accountant-financial/vat-calculation",
   taxDeclarations: "/accountant-financial/tax-declarations",
   taxCalendar: "/accountant-financial/tax-calendar",
+
+  // Financial Analysis
   financialRatios: "/accountant-financial/financial-ratios",
   profitabilityAnalysis: "/accountant-financial/profitability-analysis",
   executiveDashboard: "/accountant-financial/executive-dashboard",
+
+  // Budget & Control
   budgetEntry: "/accountant-financial/budget-entry",
   budgetVariance: "/accountant-financial/budget-variance",
   budgetAlerts: "/accountant-financial/budget-alerts",
+
+  // Closing & Reporting
   periodClose: "/accountant-financial/period-close",
   financialStatements: "/accountant-financial/financial-statements",
   customReports: "/accountant-financial/custom-reports",
