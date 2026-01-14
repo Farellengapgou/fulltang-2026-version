@@ -275,6 +275,30 @@ export function AppRoute() {
       await import("../Pages/AccountantNew/Revenue & Receivables/Billing.jsx")
     ).Billing,
   }));
+  const FinancialRevenueByService = React.lazy(async () => ({
+    default: (
+      await import(
+        "../Pages/AccountantNew/Revenue & Receivables/RevenueByService.jsx"
+      )
+    ).RevenueByService,
+  }));
+  const FinancialAccountsReceivable = React.lazy(async () => ({
+    default: (
+      await import(
+        "../Pages/AccountantNew/Revenue & Receivables/AccountsReceivable.jsx"
+      )
+    ).AccountsReceivable,
+  }));
+  const suppliers = React.lazy(async () => ({
+    default: (
+      await import("../Pages/AccountantNew/Suppliers & Payables/Suppliers.jsx")
+    ).Suppliers,
+  }));
+  const supplierInvoices = React.lazy(async () => ({
+    default: (
+      await import("../Pages/AccountantNew/Suppliers & Payables/SupplierInvoices.jsx")
+    ).SupplierInvoices,
+  }));
 
   return (
     <React.Suspense fallback={<Loading />}>
@@ -512,7 +536,21 @@ export function AppRoute() {
         />
 
         <Route path={AppRoutesPaths.billing} element={<FinancialBilling />} />
+        <Route
+          path={AppRoutesPaths.revenueByService}
+          element={<FinancialRevenueByService />}
+        />
+        <Route
+          path={AppRoutesPaths.accountsReceivable}
+          element={<FinancialAccountsReceivable />}
+        />
+        <Route path={AppRoutesPaths.suppliers} element={<suppliers />} />
+        <Route
+          path={AppRoutesPaths.supplierInvoices}
+          element={<supplierInvoices />}
+        />
       </Routes>
+
     </React.Suspense>
   );
 }

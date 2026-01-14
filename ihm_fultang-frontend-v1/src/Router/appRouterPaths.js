@@ -77,4 +77,8 @@ export const AppRoutesPaths = {
   financialAccountPayroll: "/accountant-financial/payroll-journal",
   financialAccountantCostAnalytic: "/accountant-financial/cost-analytic",
   billing: "/accountant-financial/billing",
+  revenueByService: "/accountant-financial/revenue-by-service",
+  accountsReceivable: "/accountant-financial/accounts-receivable", 
+  suppliers: "/accountant-financial/suppliers",
+  supplierInvoices: "/accountant-financial/supplier-invoices",
 };
