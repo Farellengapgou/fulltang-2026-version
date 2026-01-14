@@ -18,8 +18,9 @@ export default function BalanceSheet({ year }) {
   useEffect(() => {
     async function fetchData() {
       try {
+        // Updated to use the new OHADA financial report endpoint
         const response = await axiosInstanceAccountant.get(
-          `/budget-exercise/get_balance_sheet/`
+          `/reports/balance-sheet/`
         );
         console.log(response.data);
         setBalanceSheetData(response.data);

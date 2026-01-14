@@ -53,6 +53,8 @@ export const AppRoutesPaths = {
     financialReportsAccountant: "/accountant/financial-reports",
     PharmacyMedication:"/pharmacyMedication",
     createFactureAccountant: "/accountant/create-facture",
+    journalEntryList: "/accountant/journal-entries",
+    createJournalEntry: "/accountant/create-journal-entry",
 
     laboratoryPatientList: "/laboratory-assistant/patient-list",
     laboratoryExamenList: "/laboratory-assistant/exams-list",

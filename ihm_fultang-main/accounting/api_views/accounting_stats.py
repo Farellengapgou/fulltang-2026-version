@@ -12,6 +12,7 @@ from polyclinic.models import Bill
 
 class AccountingStatsAPI(APIView):
     permission_classes = [IsAuthenticated, AccountingStaffPermission]
+    
     @swagger_auto_schema(
         operation_description="Obtenir les statistiques comptables globales",
         manual_parameters=[

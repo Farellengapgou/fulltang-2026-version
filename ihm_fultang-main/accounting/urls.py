@@ -25,11 +25,16 @@ router.register(r'facture', FactureViewSet, basename='facture')
 router.register(r'financial-operation', FinancialOperationViewSet, basename='financial-operation')
 
 
-# Nouveau
+from accounting.api_views.financial_report_api_view import FinancialReportViewSet
+
+# New
 router.register(r'chart-of-accounts', ChartOfAccountsViewSet, basename='chartofaccounts')
 router.register(r'journals', JournalViewSet, basename='journal')
 router.register(r'journal-entries', JournalEntryViewSet, basename='journalentry')
+router.register(r'reports', FinancialReportViewSet, basename='financial-reports')
 
-urlpatterns = [path('statistics/', AccountingStatsAPI.as_view(), name='account-statistics'),]
+urlpatterns = [
+    path('statistics/', AccountingStatsAPI.as_view(), name='account-statistics'),
+]
 urlpatterns += router.urls
 urlpatterns += [path('invoice/total', InvoiceTotalAPI.as_view(), name='invoice-total')]

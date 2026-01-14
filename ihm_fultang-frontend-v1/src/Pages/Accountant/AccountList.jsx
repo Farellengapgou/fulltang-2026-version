@@ -16,7 +16,6 @@ import { ConfirmationModal } from "../Modals/ConfirmAction.Modal.jsx";
 import { useNavigate } from "react-router-dom";
 import { AccountantNavLink } from "./AccountantNavLink";
 import { AccountantDashBoard } from "./Components/AccountantDashboard";
-//import { ViewAccountDetailsModal } from "./ViewAccountDetailsModal.jsx";
 import { AddAccountModal } from "./Components/AddAccountModal.jsx";
 import { AccountantNavBar } from "./Components/AccountantNavBar";
 
@@ -24,34 +23,29 @@ export function AccountList() {
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [canOpenSuccessModal, setCanOpenSuccessModal] = useState(false);
-  const [canOpenErrorMessageModal, setCanOpenErrorMessageModal] =
-    useState(false);
-  useState(false);
-  const [canOpenConfirmActionModal, setCanOpenConfirmActionModal] =
-    useState(false);
+  const [canOpenErrorMessageModal, setCanOpenErrorMessageModal] = useState(false);
+  const [canOpenConfirmActionModal, setCanOpenConfirmActionModal] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState({});
   const [canOpenAddAccountModal, setCanOpenAddAccountModal] = useState(false);
   const [accountList, setAccountList] = useState([]);
   const [numberOfAccounts, setNumberOfAccounts] = useState(0);
-  const [nextUrlForRenderAccountList, setNextUrlForRenderAccountList] =
-    useState("");
-  const [previousUrlForRenderAccountList, setPreviousUrlForRenderAccountList] =
-    useState("");
+  const [nextUrlForRenderAccountList, setNextUrlForRenderAccountList] = useState("");
+  const [previousUrlForRenderAccountList, setPreviousUrlForRenderAccountList] = useState("");
   const [actualPageNumber, setActualPageNumber] = useState(1);
   const [successMessage, setSuccessMessage] = useState("");
 
   const navigate = useNavigate();
-  // Fonction pour rediriger vers la page de détails du compte
+
   const handleViewAccountDetails = (account) => {
     navigate(`/accountant/account-details/${account.id}`, {
       state: { account },
     });
   };
 
+  const ITEMS_PER_PAGE = 20; // Assuming API pagination size
+
   function calculateNumberOfSlide() {
-    return numberOfAccounts % 5 === 0
-      ? numberOfAccounts / 5
-      : Math.floor(numberOfAccounts / 5) + 1;
+    return Math.ceil(numberOfAccounts / ITEMS_PER_PAGE) || 1;
   }
 
   function updateActualPageNumber(action) {
@@ -67,14 +61,14 @@ export function AccountList() {
   }
 
   async function fetchAccountList() {
+    setIsLoading(true);
     try {
-      const response = await axiosInstanceAccountant.get(
-        "/acccount-state/get_by_budget_exercise/"
-      );
+      // Changed to fetch from the new OHADA Chart of Accounts endpoint
+      const response = await axiosInstanceAccountant.get("/chart-of-accounts/");
       console.log(response);
       if (response.status === 200) {
-        setAccountList(response.data);
-        setNumberOfAccounts(response.data.length);
+        setAccountList(response.data.results);
+        setNumberOfAccounts(response.data.count);
         setNextUrlForRenderAccountList(response.data.next);
         setPreviousUrlForRenderAccountList(response.data.previous);
       }
@@ -84,6 +78,8 @@ export function AccountList() {
       setNextUrlForRenderAccountList("");
       setPreviousUrlForRenderAccountList("");
       console.log(error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -93,6 +89,7 @@ export function AccountList() {
 
   async function fetchNextOrPreviousAccountList(url) {
     if (url) {
+      setIsLoading(true);
       try {
         const response = await axiosInstanceAccountant.get(url);
         if (response.status === 200) {
@@ -107,6 +104,8 @@ export function AccountList() {
         setPreviousUrlForRenderAccountList("");
         setNextUrlForRenderAccountList("");
         console.log(error);
+      } finally {
+        setIsLoading(false);
       }
     }
   }
@@ -114,205 +113,212 @@ export function AccountList() {
   async function deleteAccount(accountId) {
     setIsLoading(true);
     try {
-      const response = await axiosInstanceAccountant.delete(
-        `/account/${accountId}/`
-      );
+      const response = await axiosInstanceAccountant.delete(`/chart-of-accounts/${accountId}/`);
       if (response.status === 204) {
-        setIsLoading(false);
         setSuccessMessage("Account deleted successfully!");
         setErrorMessage("");
         setCanOpenErrorMessageModal(false);
         setCanOpenSuccessModal(true);
       }
     } catch (error) {
-      setIsLoading(false);
       setSuccessMessage("");
-      setErrorMessage(error.response.data.detail);
+      setErrorMessage(error.response?.data?.detail || "Error deleting account");
       setCanOpenSuccessModal(false);
       setCanOpenErrorMessageModal(true);
       console.log(error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
+  const formatAmount = (amount) => {
+    return new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "XAF",
+    }).format(amount || 0);
+  };
+
   return (
-    <AccountantDashBoard
-      requiredRole={"Accountant"}
-      linkList={AccountantNavLink}
-    >
-      <AccountantNavBar></AccountantNavBar>
-      <div className="mt-5 flex flex-col relative">
+    <AccountantDashBoard requiredRole={"Accountant"} linkList={AccountantNavLink}>
+      <AccountantNavBar />
+      <div className="mt-5 flex flex-col relative h-full">
         {/* Header content with search bar */}
-        <div className="flex justify-between mb-5">
-          <p className="font-bold text-xl mt-2 ml-5">List Of Accounts</p>
-          <div className="flex mr-5">
-            <div className="flex w-[300px] h-10 border-2 border-secondary rounded-lg">
+        <div className="flex justify-between mb-5 px-5">
+          <p className="font-bold text-xl mt-2">Plan Comptable OHADA</p>
+          <div className="flex">
+            <div className="flex w-[300px] h-10 border-2 border-secondary rounded-lg bg-white">
               <FaSearch className="text-xl text-secondary m-2" />
               <input
                 type="text"
-                placeholder={"Search for a specific account"}
-                className="border-none focus:outline-none focus:ring-0"
+                placeholder="Search account (Code or Label)"
+                className="border-none focus:outline-none focus:ring-0 w-full rounded-r-lg"
               />
             </div>
-            <button className="ml-2 w-20 h-10 text-white bg-secondary rounded-lg">
+            <button className="ml-2 w-20 h-10 text-white bg-secondary rounded-lg shadow-md hover:bg-secondary-dark transition-colors">
               Search
             </button>
           </div>
         </div>
 
         {/* List of registered accounts */}
-        <div className="ml-5 mr-5">
+        <div className="px-5 flex-1 overflow-auto pb-24">
           <table className="w-full border-separate border-spacing-y-2">
             <thead>
-              <tr className="bg-gradient-to-l from-primary-start to-primary-end">
-                <th className="text-center text-white p-4 text-xl font-bold border-gray-200 rounded-l-2xl">
-                  No
-                </th>
-                <th className="text-center text-white p-4 text-xl font-bold border-gray-200">
-                  Account Number
-                </th>
-                <th className="text-center text-white p-4 text-xl font-bold border-gray-200">
-                  Account Label
-                </th>
-                <th className="text-center text-white p-4 text-xl font-bold border-gray-200">
-                  Current Amount
-                </th>
-                <th className="text-center text-white p-4 text-xl font-bold border-gray-200">
-                  Physical Amount
-                </th>
-                <th className="text-center text-white p-4 text-xl font-bold flex-col rounded-r-2xl">
-                  <p>Operations</p>
-                </th>
+              <tr className="bg-gradient-to-l from-primary-start to-primary-end shadow-md">
+                <th className="text-center text-white p-4 text-lg font-bold rounded-l-2xl">Code</th>
+                <th className="text-left text-white p-4 text-lg font-bold">Label</th>
+                <th className="text-center text-white p-4 text-lg font-bold">Type</th>
+                <th className="text-right text-white p-4 text-lg font-bold">Balance</th>
+                <th className="text-center text-white p-4 text-lg font-bold rounded-r-2xl">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {accountList.length > 0 &&
-                accountList &&
-                accountList?.map((account, index) => (
-                  <tr key={account.id || index} className="bg-gray-100">
-                    <td className="p-4 text-md text-blue-900 rounded-l-lg text-center">
-                      {index + 1}
+              {accountList && accountList.length > 0 ? (
+                accountList.map((account, index) => (
+                  <tr key={account.id || index} className="bg-white hover:bg-gray-50 shadow-sm transition-colors">
+                    <td className="p-4 text-md font-mono font-bold text-blue-900 rounded-l-lg text-center">
+                      {account.code}
                     </td>
-                    <td className="p-4 text-md text-center font-bold">
-                      {account.account.number}
+                    <td className="p-4 text-md text-gray-800 font-medium">
+                      {account.label}
                     </td>
-                    <td className="p-4 text-md text-center">
-                      {account.account.libelle}
+                    <td className="p-4 text-md text-center text-gray-600">
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        account.account_type === 'asset' || account.account_type === 'expense' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {account.account_type || 'General'}
+                      </span>
                     </td>
-                    <td className="p-4 text-md text-center">
-                      {account.soldePrevu}
+                    <td className={`p-4 text-md text-right font-mono font-bold ${
+                      (account.balance || 0) < 0 ? 'text-red-600' : 'text-gray-800'
+                    }`}>
+                      {formatAmount(account.balance)}
                     </td>
-                    <td className="p-4 text-md text-center">
-                      {account.soldeReel}
-                    </td>
-                    <td className="p-4 relative rounded-r-lg">
-                      <div className="w-full items-center justify-center flex gap-6">
-                        <Tooltip placement={"left"} title={"View details"}>
+                    <td className="p-4 rounded-r-lg">
+                      <div className="flex items-center justify-center gap-4">
+                        <Tooltip placement="top" title="View details">
                           <button
                             onClick={() => handleViewAccountDetails(account)}
-                            className="flex items-center justify-center w-9 h-9 text-primary-end text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300"
+                            className="text-primary-end hover:text-primary-start hover:bg-blue-50 p-2 rounded-full transition-all"
                           >
-                            <FaEye />
+                            <FaEye className="text-xl" />
                           </button>
                         </Tooltip>
 
-                        <Tooltip placement={"right"} title={"Delete"}>
+                        <Tooltip placement="top" title="Delete">
                           <button
                             onClick={() => {
-                              setAccountToDelete(account),
-                                setCanOpenConfirmActionModal(true);
+                              setAccountToDelete(account);
+                              setCanOpenConfirmActionModal(true);
                             }}
-                            className="flex items-center justify-center w-9 h-9 text-red-400 text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300"
+                            className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-full transition-all"
                           >
-                            <FaTrash />
+                            <FaTrash className="text-lg" />
                           </button>
                         </Tooltip>
                       </div>
                     </td>
                   </tr>
-                ))}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="p-8 text-center text-gray-500 italic">
+                    {isLoading ? "Loading accounts..." : "No accounts found."}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
+        </div>
 
-          {/* Pagination content */}
-          <div className="fixed w-full justify-center -right-16 bottom-0 flex mt-6 mb-4">
-            <div className="flex gap-4">
-              <Tooltip placement={"left"} title={"Previous slide"}>
+        {/* Pagination content */}
+        <div className="fixed bottom-0 w-full bg-white bg-opacity-90 backdrop-blur-sm p-4 border-t border-gray-200 flex justify-center items-center z-10">
+           <div className="flex items-center gap-6">
+              <Tooltip placement="top" title="Previous page">
                 <button
+                  disabled={!previousUrlForRenderAccountList}
                   onClick={async () => {
-                    await fetchNextOrPreviousAccountList(
-                      previousUrlForRenderAccountList
-                    ),
-                      updateActualPageNumber("prev");
+                    await fetchNextOrPreviousAccountList(previousUrlForRenderAccountList);
+                    updateActualPageNumber("prev");
                   }}
-                  className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl text-secondary hover:text-2xl duration-300 transition-all hover:text-white shadow-xl flex justify-center items-center mt-2"
+                  className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300 ${
+                    !previousUrlForRenderAccountList 
+                      ? "border-gray-300 text-gray-300 cursor-not-allowed" 
+                      : "border-secondary text-secondary hover:bg-secondary hover:text-white shadow-lg"
+                  }`}
                 >
                   <FaArrowLeft />
                 </button>
               </Tooltip>
-              <p className="text-secondary text-2xl font-bold mt-4">
-                {actualPageNumber}/{calculateNumberOfSlide()}
-              </p>
-              <Tooltip placement={"right"} title={"Next slide"}>
+              
+              <span className="text-secondary text-lg font-bold">
+                Page {actualPageNumber} / {calculateNumberOfSlide()}
+              </span>
+              
+              <Tooltip placement="top" title="Next page">
                 <button
+                  disabled={!nextUrlForRenderAccountList}
                   onClick={async () => {
-                    await fetchNextOrPreviousAccountList(
-                      nextUrlForRenderAccountList
-                    ),
-                      updateActualPageNumber("next");
+                    await fetchNextOrPreviousAccountList(nextUrlForRenderAccountList);
+                    updateActualPageNumber("next");
                   }}
-                  className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl text-secondary hover:text-2xl duration-300 transition-all hover:text-white shadow-xl flex justify-center items-center mt-2"
+                  className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300 ${
+                    !nextUrlForRenderAccountList 
+                      ? "border-gray-300 text-gray-300 cursor-not-allowed" 
+                      : "border-secondary text-secondary hover:bg-secondary hover:text-white shadow-lg"
+                  }`}
                 >
                   <FaArrowRight />
                 </button>
               </Tooltip>
             </div>
-          </div>
-
-          {/* Add new account button */}
-          <Tooltip placement={"top"} title={"Add New Account"}>
-            <button
-              onClick={() => setCanOpenAddAccountModal(true)}
-              className="fixed bottom-5 right-5 rounded-full w-14 h-14 bg-gradient-to-r text-4xl font-bold text-white from-primary-start to-primary-end hover:text-5xl transition-all duration-300 flex items-center justify-center"
-            >
-              <FaPlus />
-            </button>
-          </Tooltip>
-
-          {/* Modals content */}
-          <AddAccountModal
-            isOpen={canOpenAddAccountModal}
-            onClose={() => setCanOpenAddAccountModal(false)}
-            setCanOpenSuccessModal={setCanOpenSuccessModal}
-            setSuccessMessage={setSuccessMessage}
-            setIsLoading={setIsLoading}
-          />
-          <SuccessModal
-            isOpen={canOpenSuccessModal}
-            message={successMessage}
-            canOpenSuccessModal={setCanOpenSuccessModal}
-            makeAction={async () => {
-              await fetchAccountList(), calculateNumberOfSlide();
-            }}
-          />
-          <ErrorModal
-            isOpen={canOpenErrorMessageModal}
-            onCloseErrorModal={() => setCanOpenErrorMessageModal(false)}
-            message={errorMessage}
-          />
-          {/* <ViewAccountDetailsModal
-          isOpen={canOpenViewAccountDetailModal}
-          account={selectedAccountDetails}
-          onClose={() => setCanOpenViewAccountDetailModal(false)}
-        /> */}
-          {isLoading && <Wait />}
-          <ConfirmationModal
-            isOpen={canOpenConfirmActionModal}
-            onClose={() => setCanOpenConfirmActionModal(false)}
-            onConfirm={async () => await deleteAccount(accountToDelete.id)}
-            title={"Delete Account"}
-            message={`Are you sure you want to delete the account ${accountToDelete?.account?.number} - ${accountToDelete?.account?.libelle}?`}
-          />
         </div>
+
+        {/* Add new account button */}
+        <Tooltip placement="left" title="Add New Account">
+          <button
+            onClick={() => setCanOpenAddAccountModal(true)}
+            className="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-r from-primary-start to-primary-end text-white rounded-full shadow-2xl flex items-center justify-center text-3xl hover:scale-110 transition-transform duration-300 z-20"
+          >
+            <FaPlus />
+          </button>
+        </Tooltip>
+
+        {/* Modals content */}
+        <AddAccountModal
+          isOpen={canOpenAddAccountModal}
+          onClose={() => setCanOpenAddAccountModal(false)}
+          setCanOpenSuccessModal={setCanOpenSuccessModal}
+          setSuccessMessage={setSuccessMessage}
+          setIsLoading={setIsLoading}
+          // Assuming AddAccountModal needs update to handle ChartOfAccounts, but that's a separate task if it manages 'budget accounts'
+        />
+        <SuccessModal
+          isOpen={canOpenSuccessModal}
+          message={successMessage}
+          canOpenSuccessModal={setCanOpenSuccessModal}
+          makeAction={async () => {
+            await fetchAccountList();
+            setCanOpenSuccessModal(false);
+          }}
+        />
+        <ErrorModal
+          isOpen={canOpenErrorMessageModal}
+          onCloseErrorModal={() => setCanOpenErrorMessageModal(false)}
+          message={errorMessage}
+        />
+        
+        {isLoading && <Wait />}
+        
+        <ConfirmationModal
+          isOpen={canOpenConfirmActionModal}
+          onClose={() => setCanOpenConfirmActionModal(false)}
+          onConfirm={async () => await deleteAccount(accountToDelete.id)}
+          title="Delete Account"
+          message={`Are you sure you want to delete the account ${accountToDelete?.code} - ${accountToDelete?.label}?`}
+        />
       </div>
     </AccountantDashBoard>
   );

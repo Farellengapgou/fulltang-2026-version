@@ -26,6 +26,12 @@ export const AccountantNavLink = [
   },
 
   {
+    name: "Journal Entries",
+    link: appRoutes.journalEntryList,
+    icon: FaFileInvoice,
+  },
+
+  {
     name: "Statistics",
     icon: FaWallet,
     subLinks: [

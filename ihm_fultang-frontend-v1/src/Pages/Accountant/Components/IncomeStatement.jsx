@@ -2,28 +2,22 @@ import { useEffect } from "react";
 import axiosInstanceAccountant from "../../../Utils/axiosInstanceAccountant";
 
 export default function IncomeStatement({ year }) {
-  const expenses = [
-    { code: "60", label: "Achats de biens et services", amount: 2500000 },
-    { code: "63", label: "Impôts et taxes", amount: 350000 },
-    { code: "64", label: "Charges de personnel", amount: 4200000 },
-    { code: "66", label: "Charges financières", amount: 180000 },
-    { code: "68", label: "Amortissements", amount: 420000 },
-  ];
-
-  const income = [
-    { code: "70", label: "Ventes (chiffre d'affaires)", amount: 8250000 },
-    { code: "74", label: "Subventions d'exploitation", amount: 150000 },
-    { code: "76", label: "Produits financiers", amount: 75000 },
-  ];
+  const [incomeStatementData, setIncomeStatementData] = useState({ 
+    data: [
+      { category: "CHARGES", items: [], total: 0 },
+      { category: "PRODUCTS", items: [], total: 0 },
+      { parameters: [] }
+    ]
+  });
 
   useEffect(() => {
     async function fetchData() {
       try {
         const response = await axiosInstanceAccountant.get(
-          `/budget-exercise/get_income_statement/`
+            `/reports/income-statement/`
         );
-
-        console.log(response);
+        // console.log(response);
+        setIncomeStatementData(response.data);
       } catch (error) {
         console.log(error);
       }
@@ -35,12 +29,21 @@ export default function IncomeStatement({ year }) {
     return new Intl.NumberFormat("fr-FR", {
       style: "currency",
       currency: "XAF",
-    }).format(amount);
+    }).format(amount || 0);
   };
 
-  const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
-  const totalIncome = income.reduce((sum, item) => sum + item.amount, 0);
-  const netResult = totalIncome - totalExpenses;
+  const chargesSection = incomeStatementData.data.find(d => d.category === "CHARGES") || { items: [], total: 0 };
+  const productsSection = incomeStatementData.data.find(d => d.category === "PRODUCTS") || { items: [], total: 0 };
+  const parameters = incomeStatementData.data.find(d => d.parameters)?.parameters || [];
+  
+  const expenses = chargesSection.items;
+  const totalExpenses = chargesSection.total;
+  
+  const income = productsSection.items;
+  const totalIncome = productsSection.total;
+
+  const netResultParam = parameters.find(p => p.item === "Net Result");
+  const netResult = netResultParam ? netResultParam.value : totalIncome - totalExpenses;
 
   return (
     <div className="space-y-6">

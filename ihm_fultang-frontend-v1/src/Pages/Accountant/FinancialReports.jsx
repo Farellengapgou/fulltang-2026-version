@@ -37,10 +37,26 @@ export function FinancialReports() {
     fetchFinancialData();
   }, [selectedYear]);
 
-  const handleExport = (format) => {
-    // Enhanced export functionality
-    console.log(`Exporting ${format} with professional formatting`);
-    // Add actual export logic using libraries like xlsx or pdfmake
+  const handleExport = async (format) => {
+    try {
+      const response = await axios.get(
+        "/api/v1/accounting/budget-exercise/get_balance_sheet/",
+        { responseType: "blob" }
+      );
+
+      if (format === "pdf") {
+        const doc = new jsPDF();
+        doc.text("Bilan", 10, 10);
+        doc.save("bilan.pdf");
+      } else {
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Bilan");
+        XLSX.writeFile(wb, "bilan.xlsx");
+      }
+    } catch (error) {
+      toast.error("Erreur export");
+    }
   };
 
   const handlePrint = () => {
@@ -66,7 +82,7 @@ export function FinancialReports() {
             >
               <option value="2025">FY 2025</option>
             </select>
-            {/*<div className="flex gap-2">
+            <div className="flex gap-2">
               <button
                 onClick={() => handleExport("excel")}
                 className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg hover:bg-gray-50 transition-colors"
@@ -82,7 +98,6 @@ export function FinancialReports() {
                 PDF
               </button>
             </div>
-            */}
           </div>
         </div>
 
