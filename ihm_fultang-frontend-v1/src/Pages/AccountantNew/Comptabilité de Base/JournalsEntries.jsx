@@ -267,7 +267,7 @@ export function JournalEntries() {
             newLines[index][field] = value;
 
             if (field === "accountId") {
-                const selectedAccount = sampleChartOfAccounts.find(acc => acc.code === value);
+                const selectedAccount = chartOfAccounts.find(acc => acc.code === value);
                 newLines[index].accountLabel = selectedAccount ? selectedAccount.label : "";
             }
 
@@ -384,7 +384,7 @@ export function JournalEntries() {
                                                     onChange={(e) => handleLineChange(index, 'accountId', e.target.value)}
                                                     className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm ${themeColors.focusRing} transition-all ${!canEdit ? 'bg-gray-100' : 'hover:border-teal-400'}`}>
                                                 <option value="">Choisir un compte</option>
-                                                {sampleChartOfAccounts.map(acc => <option key={acc.code} value={acc.code}>{acc.code} - {acc.label}</option>)}
+                                                {chartOfAccounts.map(acc => <option key={acc.code} value={acc.code}>{acc.code} - {acc.label}</option>)}
                                             </select>
                                         </div>
                                         <div className="col-span-12 md:col-span-4">
