@@ -33,7 +33,7 @@ export default function HospitalisationList() {
         
          try
          {
-             const response = await axiosInstance.get("/hospitalisation/");
+            const response = await axiosInstance.get("/hospital/");
            
              if (response.status === 200)
              {
