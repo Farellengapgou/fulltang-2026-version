@@ -20,22 +20,8 @@ const themeColors = {
     borderPrimary: 'border-teal-600',
 };
 
-// Données d'exemple pour les comptes (normalement viendraient d'une API)
-const sampleChartOfAccounts = [
-    { code: "6132", label: "Loyers", type: "Charge" },
-    { code: "5121", label: "Banque BICEC", type: "Actif" },
-    { code: "7011", label: "Consultations médicales", type: "Produit" },
-    { code: "4011", label: "Fournisseurs", type: "Passif" },
-    { code: "4111", label: "Clients", type: "Actif" },
-];
-
-// Données d'exemple pour les journaux
-const journalTypes = [
-    { code: "AC", name: "Achats" },
-    { code: "VT", name: "Ventes" },
-    { code: "BQ", name: "Banque" },
-    { code: "OD", name: "Opérations Diverses" },
-];
+const sampleChartOfAccounts = [];
+const journalTypes = [];
 
 export function JournalEntries() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -58,36 +44,7 @@ export function JournalEntries() {
         credit: ""
     });
 
-    const sampleEntries = [
-        {
-            id: 'entry1',
-            journal: "OD",
-            date: "2024-07-20",
-            reference: "LOY-2024-07",
-            generalLabel: "Loyer juillet 2024",
-            status: "Validée",
-            totalDebit: 500000,
-            totalCredit: 500000,
-            lines: [
-                { id: uuidv4(), accountId: "6132", accountLabel: "Loyers", lineLabel: "Loyer Bureau Principal", debit: 500000, credit: "" },
-                { id: uuidv4(), accountId: "5121", accountLabel: "Banque BICEC", lineLabel: "Paiement Loyer", debit: "", credit: 500000 }
-            ],
-            validatedAt: "2024-07-21T10:00:00Z"
-        },
-        {
-            id: 'entry2',
-            journal: "AC",
-            date: "2024-07-19",
-            reference: "FAC-00123",
-            generalLabel: "Achat fournitures de bureau",
-            status: "Brouillon",
-            totalDebit: 75000,
-            totalCredit: 0,
-            lines: [
-                { id: uuidv4(), accountId: "6064", accountLabel: "Fournitures de bureau", lineLabel: "", debit: 75000, credit: "" }
-            ]
-        }
-    ];
+    const sampleEntries = [];
 
     const loadJournalEntries = useCallback(async () => {
         setIsLoading(true);

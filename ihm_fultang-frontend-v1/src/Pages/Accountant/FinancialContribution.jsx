@@ -20,12 +20,12 @@ import { AccountantNavLink } from "./AccountantNavLink";
 import axiosInstance from "../../Utils/axiosInstance";
 import { ViewBillDetailsModal } from "./Components/ViewBillDetailsModal";
 
-const operationTypes = ["All", "Accountant", "Cashier", "Pharmacist", "Other"];
+const operationTypes = [];
 
 export function FinancialContributions() {
   const [startDate, setStartDate] = useState(startOfMonth(new Date()));
   const [endDate, setEndDate] = useState(endOfMonth(new Date()));
-  const [operationType, setOperationType] = useState("All");
+  const [operationType, setOperationType] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch] = useDebounce(searchTerm, 300);
   const [contributions, setContributions] = useState([]);
@@ -62,7 +62,9 @@ export function FinancialContributions() {
       const matchesDate =
         contributionDate >= startDate && contributionDate <= endDate;
       const matchesType =
-        operationType === "All" || contribution.operator.role === operationType;
+        operationType === "" ||
+        operationType === "All" ||
+        contribution.operator.role === operationType;
       const matchesSearch =
         contribution.billCode
           .toLowerCase()
@@ -123,7 +125,7 @@ export function FinancialContributions() {
   const resetFilters = () => {
     setStartDate(startOfMonth(new Date()));
     setEndDate(endOfMonth(new Date()));
-    setOperationType("All");
+    setOperationType("");
     setSearchTerm("");
     setFilteredContributions(contributions);
   };

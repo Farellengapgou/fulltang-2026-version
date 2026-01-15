@@ -85,7 +85,9 @@ export const AppRoutesPaths = {
     financialAccountantReports: "/accountant-financial/reports",
     financialAccountPayroll : "/accountant-financial/payroll-journal",
     financialAccountantCostAnalytic : "/accountant-financial/cost-analytic",
+ 
 
+    billing: "/accountant-financial/billing",
     consultationAppointments: "/help-center/consultation-appointments",
     paymentsBilling: "/help-center/payments-billing",
     technicalIssues: "/help-center/technical-issues",
