@@ -110,6 +110,24 @@ class UserProfileView(APIView):
             ),
         }
     )
+    # def get(self, request):
+    #     user_instance = request.user
+    #     # Retourner les informations de l'utilisateur connecté
+    #     user_data = {
+    #         "id": user_instance.id,
+    #         "username": user_instance.username,
+    #         "email": user_instance.email,
+    #         "first_name": user_instance.first_name,
+    #         "last_name": user_instance.last_name,
+    #         "gender": user_instance.gender,
+    #         "cniNumber": user_instance.cniNumber,
+    #         "phoneNumber": user_instance.phoneNumber,
+    #         "birthDate": user_instance.birthDate,
+    #         "address": user_instance.address,
+    #         "userType": user_instance.userType,
+    #         "role": user_instance.role,
+    #     }
+    #     return Response(user_data)
     def get(self, request):
         user_instance = request.user
         # Retourner les informations de l'utilisateur connecté
@@ -126,9 +144,9 @@ class UserProfileView(APIView):
             "address": user_instance.address,
             "userType": user_instance.userType,
             "role": user_instance.role,
+            "profilePicture": request.build_absolute_uri(user_instance.profilePicture.url) if user_instance.profilePicture else None,
         }
         return Response(user_data)
-
 
 class PasswordResetView(APIView):
     @swagger_auto_schema(

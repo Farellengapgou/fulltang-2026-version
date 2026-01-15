@@ -79,5 +79,6 @@ export function NurseNavBar({children})
                 {children}
             </div>
         </div>
+        
     )
 }

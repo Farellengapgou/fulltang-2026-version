@@ -6,9 +6,11 @@ import { AppRoutesPaths } from "../../Router/appRouterPaths.js";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
+import { UserProfileModal } from '../../GlobalComponents/UserProfileModal';
 
 export function CashierNavBar() {
   const { logout, userData } = useAuthentication();
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const navigate = useNavigate();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [profileForm, setProfileForm] = useState({
@@ -67,7 +69,7 @@ export function CashierNavBar() {
                 <FaSignOutAlt />
               </button>
             </Tooltip>
-            <Tooltip placement={"top"} title={"Profile"}>
+            {/* <Tooltip placement={"top"} title={"Profile"}>
               <button className="ml-3 flex">
                 <p className="font-bold text-secondary text-xl mt-2">
                   {"Hello " + userData?.username + "!"}
@@ -78,6 +80,19 @@ export function CashierNavBar() {
                   className="w-12 h-12 ml-2 mr-3"
                 />
               </button>
+            </Tooltip> */}
+            <Tooltip placement={"top"} title={"Mon Profil"}>
+                <div 
+                    className="ml-3 flex cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => setIsProfileModalOpen(true)}
+                >
+                    <p className="font-bold text-secondary text-xl mt-2">{"Hello " + userData?.username + "!"}</p>
+                    <img 
+                        src={userData?.profilePicture || userIcon} 
+                        alt={"user-icon"} 
+                        className="w-12 h-12 ml-2 mr-3 rounded-full object-cover border-2 border-gray-200"
+                    />
+                </div>
             </Tooltip>
           </div>
         </div>
@@ -138,6 +153,10 @@ export function CashierNavBar() {
           </div>
         </div>
       </Modal>
+      <UserProfileModal 
+                isOpen={isProfileModalOpen}
+                onClose={() => setIsProfileModalOpen(false)}
+            />
     </>
   );
 }
