@@ -41,14 +41,17 @@ export const AppRoutesPaths = {
     financialHistory:"/cashier/financial-history",
     accountDetails: "/accountant/account-details/:accountId",
     accountList: "/accountant/account-list",
+
     doctorPatientList: "/doctor/patients",
     doctorConsultationList: "/doctor/consultation-list",
     doctorConsultationDetailsPage: "/doctor/consultation-list/details/:id",
     doctorAppointment: "/doctor/appointments",
+    doctorMessage: "/doctor/messages",
     doctorConsultationHistory: "/doctor/consultation-history",
     doctorConsultationHistoryDetails: "/doctor/consultation-history/details/:id",
     doctorExamList: "/doctor/exams-list",
     doctorPatientMedicalFolderPage:"/doctor/patients/medical-folder/:id",
+
     financialContributions: "/accountant/financial-contributions",
     financialReportsAccountant: "/accountant/financial-reports",
     PharmacyMedication:"/pharmacyMedication",
