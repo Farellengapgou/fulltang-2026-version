@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import {AlertCircle, Search, Calendar, User, DollarSign, Filter, CheckCircle, Activity } from "lucide-react"
 import axiosInstance from "../../Utils/axiosInstance.js";
+import {PaymentModal} from "./PayementModal.jsx";
 
 
 export default function Exams() {
@@ -9,14 +10,12 @@ export default function Exams() {
   const [filterStatus, setFilterStatus] = useState("all")
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedExam, setSelectedExam] = useState(null);
+  const [canOpenPaymentModal, setCanOpenPaymentModal] = useState(false);
 
-  const handlePayment = (examId) => {
-    setExams((prevExams) => {
-      const updatedExams = prevExams.map((exam) =>
-        exam.id === examId ? { ...exam, examStatus: "paid" } : exam
-      );  
-      return updatedExams;
-    });
+  const handlePayment = (exam) => {
+    setSelectedExam(exam);
+    setCanOpenPaymentModal(true);
   };
 
   const filteredExams = exams.filter((exam) => {
@@ -196,6 +195,12 @@ export default function Exams() {
           </table>
         )}
       </div>
+
+      <PaymentModal
+        isOpen={canOpenPaymentModal}
+        onClose={() => setCanOpenPaymentModal(false)}
+        examData={selectedExam}
+      />
     </div>
   )
 }

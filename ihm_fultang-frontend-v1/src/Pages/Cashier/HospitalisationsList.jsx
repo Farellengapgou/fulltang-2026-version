@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
-import {AlertCircle, Search, Filter} from "lucide-react"
+import {AlertCircle, Search, Filter, CheckCircle} from "lucide-react"
 import axiosInstance from "../../Utils/axiosInstance.js";
+import {PaymentModal} from "./PayementModal.jsx";
 
 
 const mockHospitalisations = [      
@@ -10,10 +11,12 @@ export default function HospitalisationList() {
   const [hospitalisations, setHospitalisations] = useState(mockHospitalisations)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
-  
+  const [selectedHospitalisation, setSelectedHospitalisation] = useState(null);
+  const [canOpenPaymentModal, setCanOpenPaymentModal] = useState(false);
 
-   const handlePayment = (hospitalisationId) => {
-     setHospitalisations((prevHospitalisations) => prevHospitalisations.map((hospitalisation) => (hospitalisation.id === hospitalisationId ? { ...hospitalisation, status: "paid" } : hospitalisation)))
+   const handlePayment = (hospitalisation) => {
+     setSelectedHospitalisation(hospitalisation);
+     setCanOpenPaymentModal(true);
    }
 
    const filteredHospitalisations = hospitalisations.filter((hospitalisation) => {
@@ -110,7 +113,9 @@ export default function HospitalisationList() {
 
                     <th className="px-4 py-3 text-center text-md font-semibold  text-white uppercase ">Patient</th>
 
-                    <th className="px-4 py-3 text-center text-md font-semibold  text-white uppercase rounded-r-lg">Medical Staff</th>
+                    <th className="px-4 py-3 text-center text-md font-semibold  text-white uppercase ">Medical Staff</th>
+
+                    <th className="px-4 py-3 text-center text-md font-semibold  text-white uppercase rounded-r-lg">Action</th>
                   </tr>
                   </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -164,7 +169,17 @@ export default function HospitalisationList() {
                             </div>
                           </td>
 
-                          
+                          <td className="px-4 py-3 text-center">
+                            {!hospitalisation.isActive && (
+                              <button
+                                onClick={() => handlePayment(hospitalisation)}
+                                className="flex items-center text-green-600 hover:text-green-800 mx-auto"
+                              >
+                                <CheckCircle className="h-5 w-5 mr-1" />
+                                Pay
+                              </button>
+                            )}
+                          </td>
 
                         </tr>
                     ))}

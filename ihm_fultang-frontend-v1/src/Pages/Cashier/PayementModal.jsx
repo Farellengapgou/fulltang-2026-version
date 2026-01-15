@@ -6,11 +6,13 @@ import { useAuthentication } from "../../Utils/Provider.jsx";
 import axiosInstance from "../../Utils/axiosInstance.js";
 import { formatDateOnly } from "../../Utils/formatDateMethods.js";
 
-export function PaymentModal({ isOpen, onClose, consultationData }) {
+export function PaymentModal({ isOpen, onClose, consultationData, examData, hospitalisationData }) {
   PaymentModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
-    consultationData: PropTypes.object.isRequired,
+    consultationData: PropTypes.object,
+    examData: PropTypes.object,
+    hospitalisationData: PropTypes.object,
   };
 
   const [selectedFinancialOperation, setSelectedFinancialOperation] =
@@ -41,16 +43,23 @@ export function PaymentModal({ isOpen, onClose, consultationData }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setIsProcessing(true);
+    const data = consultationData || examData || hospitalisationData;
     let billData = {
       bill_items: [
-        {
+        consultationData ? {
           designation: "consultation",
           consultation: consultationData?.id,
-        },
+        } : examData ? {
+          designation: "exam",
+          examRequest: examData?.id,
+        } : {
+          designation: "hospitalisation",
+          hospitalisation: hospitalisationData?.id,
+        }
       ],
       // ensure numeric ids when possible
-      patient: consultationData?.idPatient?.id
-        ? Number(consultationData.idPatient.id)
+      patient: data?.idPatient?.id
+        ? Number(data.idPatient.id)
         : undefined,
       operation: selectedFinancialOperation
         ? Number(selectedFinancialOperation)
@@ -116,19 +125,20 @@ export function PaymentModal({ isOpen, onClose, consultationData }) {
 
   const handlePrint = () => {
     // Génère un HTML dédié pour l'impression, comme dans FinancialReport
+    const data = consultationData || examData;
     const patientName =
-      consultationData?.idPatient?.firstName +
+      data?.idPatient?.firstName +
       " " +
-      consultationData?.idPatient?.lastName;
-    const phone = consultationData?.idPatient?.phoneNumber || "Non spécifié";
-    const price = consultationData?.consultationPrice?.toLocaleString() || "";
-    const date = consultationData?.consultationDate
-      ? formatDateOnly(consultationData?.consultationDate)
-      : "Non spécifié";
+      data?.idPatient?.lastName;
+    const phone = data?.idPatient?.phoneNumber || "Non spécifié";
+    const price = consultationData ? (consultationData?.consultationPrice?.toLocaleString() || "") : (examData?.idExam?.examCost?.toLocaleString() || "");
+    const date = consultationData ? (consultationData?.consultationDate ? formatDateOnly(consultationData?.consultationDate) : "Non spécifié") : (examData?.addDate ? formatDateOnly(examData?.addDate) : "Non spécifié");
+    const title = consultationData ? "Facture Consultation" : "Facture Examen";
+    const service = consultationData ? "Consultation" : `Examen: ${examData?.idExam?.examName || 'N/A'}`;
     const html = `
       <html>
         <head>
-          <title>Facture Consultation</title>
+          <title>${title}</title>
           <style>
             body { font-family: Arial, Helvetica, sans-serif; color: #111 }
             table { border-collapse: collapse; width: 100%; font-size: 14px }
@@ -139,12 +149,13 @@ export function PaymentModal({ isOpen, onClose, consultationData }) {
           </style>
         </head>
         <body>
-          <h2>Facture de consultation</h2>
+          <h2>${title}</h2>
           <div class="meta">Généré le: ${new Date().toLocaleString()}</div>
           <table>
             <tbody>
               <tr><th>Patient</th><td>${patientName}</td></tr>
               <tr><th>Téléphone</th><td>${phone}</td></tr>
+              <tr><th>Service</th><td>${service}</td></tr>
               <tr><th>Date</th><td>${date}</td></tr>
               <tr><th>Prix</th><td>${price} FCFA</td></tr>
             </tbody>
@@ -214,22 +225,28 @@ export function PaymentModal({ isOpen, onClose, consultationData }) {
                     <div>
                       <p className="text-sm text-gray-500">Patient</p>
                       <p className="font-medium">
-                        {consultationData.idPatient.firstName +
+                        {(consultationData || examData).idPatient.firstName +
                           " " +
-                          consultationData.idPatient.lastName}
+                          (consultationData || examData).idPatient.lastName}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Phone Number</p>
                       <p className="font-medium">
-                        {consultationData.idPatient.phoneNumber ||
+                        {(consultationData || examData).idPatient.phoneNumber ||
                           "Not specified"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Service</p>
+                      <p className="font-medium">
+                        {consultationData ? "Consultation" : `Exam: ${examData?.idExam?.examName || 'N/A'}`}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Price</p>
                       <p className="font-medium">
-                        {consultationData.consultationPrice.toLocaleString()}{" "}
+                        {(consultationData ? consultationData.consultationPrice : examData?.idExam?.examCost || 0).toLocaleString()}{" "}
                         FCFA
                       </p>
                     </div>
@@ -237,15 +254,8 @@ export function PaymentModal({ isOpen, onClose, consultationData }) {
                       <p className="text-sm text-gray-500">Date</p>
                       <p className="font-medium">
                         {new Date(
-                          consultationData.consultationDate
+                          consultationData ? consultationData.consultationDate : examData?.addDate
                         ).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Price</p>
-                      <p className="font-medium">
-                        {consultationData.consultationPrice.toLocaleString()}{" "}
-                        FCFA
                       </p>
                     </div>
                   </div>

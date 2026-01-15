@@ -23,8 +23,62 @@ export function FinancialHistory() {
         setFilterType(e.target.value)
     }
 
-    const handleGenerateInvoice = (transactionId) => {
-        setShowInvoice(transactionId)
+    const handleGenerateInvoice = (transaction) => {
+        // Generate HTML for printing the invoice
+        const patientName = transaction.patient
+            ? `${transaction.patient.firstName} ${transaction.patient.lastName}`
+            : 'N/A';
+        const phone = transaction.patient?.phoneNumber || 'Non spécifié';
+        const amount = transaction.amount?.toLocaleString() || '0';
+        const date = new Date(transaction.date).toLocaleDateString();
+        const operation = transaction.operation?.name || 'N/A';
+
+        const html = `
+          <html>
+            <head>
+              <title>Facture - ${operation}</title>
+              <style>
+                body { font-family: Arial, Helvetica, sans-serif; color: #111; margin: 20px }
+                table { border-collapse: collapse; width: 100%; font-size: 14px; margin-top: 20px }
+                th, td { padding: 8px; border: 1px solid #ddd; }
+                th { background: #f3f4f6; }
+                h2 { font-size: 18px; margin-bottom: 10px }
+                .header { text-align: center; margin-bottom: 20px }
+                .info { margin-bottom: 10px }
+              </style>
+            </head>
+            <body>
+              <div class="header">
+                <h1>Fultang - Facture</h1>
+                <p>Généré le: ${new Date().toLocaleString()}</p>
+              </div>
+              <div class="info">
+                <p><strong>Numéro de facture:</strong> ${transaction.id}</p>
+                <p><strong>Date:</strong> ${date}</p>
+              </div>
+              <table>
+                <tbody>
+                  <tr><th>Patient</th><td>${patientName}</td></tr>
+                  <tr><th>Téléphone</th><td>${phone}</td></tr>
+                  <tr><th>Service</th><td>${operation}</td></tr>
+                  <tr><th>Montant</th><td>${amount} FCFA</td></tr>
+                </tbody>
+              </table>
+            </body>
+          </html>
+        `;
+
+        const win = window.open("", "_blank", "width=900,height=700");
+        if (!win) {
+          alert("Impossible d'ouvrir une nouvelle fenêtre. Désactive le bloqueur de popups ou autorise le site.");
+          return;
+        }
+        win.document.write(html);
+        win.document.close();
+        win.onload = () => {
+          win.focus();
+          win.print();
+        };
     }
 
     const filteredTransactions = transactions.filter((transaction) => {
@@ -190,7 +244,7 @@ export function FinancialHistory() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-md text-gray-900">
                                             <button
-                                                onClick={() => handleGenerateInvoice(transaction.id)}
+                                                onClick={() => handleGenerateInvoice(transaction)}
                                                 className="flex items-center text-indigo-600 hover:text-indigo-900"
                                             >
                                                 <Printer className="h-4 w-4 mr-1" />
