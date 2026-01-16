@@ -44,7 +44,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/medical/', include(api_urls)),
     path('api/v1/accounting/', include(accounting_urls)),
-    path('api/v1/material-accounting/', include(accounting_urls.material_urlpatterns)),
+    path('api/v1/material-accounting/', include(accounting_urls.router.urls)),
     path('api/v1/auth/', include(authentication_urls)),
     path('api/v1/doc', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/v1/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),

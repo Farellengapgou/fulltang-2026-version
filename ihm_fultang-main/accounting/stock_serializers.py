@@ -5,7 +5,8 @@ from .stock_models import (
     StockMovement,
     GoodsReceiptNote, GoodsReceiptLine,
     GoodsIssueNote, GoodsIssueLine,
-    Inventory, InventoryLine
+    Inventory, InventoryLine,
+    TransferNote, TransferLine
 )
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -144,4 +145,18 @@ class InventorySerializer(serializers.ModelSerializer):
             "status",
             "created_at"
         ]
+
+
+class TransferLineSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransferLine
+        fields = "__all__"
+
+
+class TransferNoteSerializer(serializers.ModelSerializer):
+    lines = TransferLineSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = TransferNote
+        fields = "__all__"
 
