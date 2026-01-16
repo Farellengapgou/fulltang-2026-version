@@ -1,11 +1,21 @@
-
 export const AppRoutesPaths = {
     notFound: "*",
     adminHomePage: "/admin/home",
     welcomePage: "/",
     loginPage: "/login",
     forgottenPasswordPage: "/forgotten-password",
-    pharmacyPage:"/pharmacy",
+    
+
+        // --- PHARMACY ROUTES ---
+    // pharmacyRoot: "/pharmacy",
+    pharmacyPage:"/pharmacy/dashboard",
+    PharmacistPage : "/pharmacy/list",
+    PharmacyMedication:"//pharmacy/Medication",
+    pharmacyAdd: "/pharmacy/add",
+    
+    pharmacyPrescriptions: "/pharmacy/prescriptions",
+
+
     doctorPage: "/doctor/dashboard",
     laboratoryAssistantPage: "/laboratory-assistant/home",
     receptionistPage: "/receptionist/patients",
@@ -24,8 +34,8 @@ export const AppRoutesPaths = {
     receptionistMedicalStaffsPage: "/receptionist/medical-staffs",
     appointmentsPage: "/receptionist/appointments",
     adminPatientListPage: "/admin/patient-list",
-    addDrug: "/admin/add-drug",
-    adminDrugsListPage : "/admin/drugs-list",
+    addMedication: "/admin/add-drug",
+    adminMedicationsListPage : "/admin/drugs-list",
     addMedicalStaff: "/admin/add-medical-staff",
     adminMedicalStaffListPage: "/admin/medical-staff-list",
     adminConsultationListPage: "/admin/consultation-list",
@@ -41,17 +51,20 @@ export const AppRoutesPaths = {
     financialHistory:"/cashier/financial-history",
     accountDetails: "/accountant/account-details/:accountId",
     accountList: "/accountant/account-list",
+
     doctorPatientList: "/doctor/patients",
     doctorConsultationList: "/doctor/consultation-list",
     doctorConsultationDetailsPage: "/doctor/consultation-list/details/:id",
     doctorAppointment: "/doctor/appointments",
+    doctorMessage: "/doctor/messages",
     doctorConsultationHistory: "/doctor/consultation-history",
     doctorConsultationHistoryDetails: "/doctor/consultation-history/details/:id",
     doctorExamList: "/doctor/exams-list",
     doctorPatientMedicalFolderPage:"/doctor/patients/medical-folder/:id",
+
     financialContributions: "/accountant/financial-contributions",
     financialReportsAccountant: "/accountant/financial-reports",
-    PharmacyMedication:"/pharmacyMedication",
+    
     createFactureAccountant: "/accountant/create-facture",
 
     laboratoryPatientList: "/laboratory-assistant/patient-list",
@@ -71,7 +84,12 @@ export const AppRoutesPaths = {
     financialAccountantBudgets: "/accountant-financial/budgets",
     financialAccountantReports: "/accountant-financial/reports",
     financialAccountPayroll : "/accountant-financial/payroll-journal",
-    financialAccountantCostAnalytic : "/accountant-financial/cost-analytic"
+    financialAccountantCostAnalytic : "/accountant-financial/cost-analytic",
+ 
 
-
+    billing: "/accountant-financial/billing",
+    consultationAppointments: "/help-center/consultation-appointments",
+    paymentsBilling: "/help-center/payments-billing",
+    technicalIssues: "/help-center/technical-issues",
+    faq: "/help-center/faq",
 }

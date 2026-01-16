@@ -1,18 +1,19 @@
+# Utiliser une image node stable
 FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package.json .
+# Copier uniquement les fichiers de dépendances pour profiter du cache Docker
+COPY package*.json ./
 
+# Installer les dépendances
 RUN npm install
 
-RUN npm i react-icons && npm i jquery && npm i lucide-react 
-
+# Copier tout le reste du code (en ignorant node_modules grâce au .dockerignore)
 COPY . .
-
-# Comment the line below if you want to run the dev mode
-RUN npm run build
 
 EXPOSE 9000
 
-CMD [ "npm", "run", "preview" ]
+# Utiliser le mode développement pour éviter les erreurs de build Rollup
+# et permettre de voir vos modifications immédiatement.
+CMD [ "npm", "run", "dev", "--", "--host" ]

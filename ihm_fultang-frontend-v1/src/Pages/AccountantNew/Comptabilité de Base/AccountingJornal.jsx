@@ -25,103 +25,15 @@ export function JournauxComptables()
     const [searchTerm, setSearchTerm] = useState('');
     const [showFilters, setShowFilters] = useState(false);
 
-    // Données simulées pour les journaux
-    const journaux = {
-        VTE: {
-            name: 'Journal des Ventes',
-            icon: FileText,
-            color: 'bg-green-500',
-            total: 850000,
-            entries: [
-                { id: 1, date: '07/06/2025', libelle: 'Consultation Dr Mballa', patient: 'M. Kamdem', montant: 15000, status: 'validated' },
-                { id: 2, date: '08/06/2025', libelle: 'Hospitalisation Mme Ngono', patient: 'Mme Ngono', montant: 45000, status: 'validated' },
-                { id: 3, date: '09/06/2025', libelle: 'Analyses laboratoire', patient: 'M. Fouda', montant: 8500, status: 'validated' },
-                { id: 4, date: '10/06/2025', libelle: 'Consultation ORL', patient: 'Mlle Messi', montant: 20000, status: 'pending' },
-                { id: 5, date: '11/06/2025', libelle: 'Échographie', patient: 'Mme Biya', montant: 25000, status: 'validated' }
-            ]
-        },
-        ACH: {
-            name: 'Journal des Achats',
-            icon: CreditCard,
-            color: 'bg-red-500',
-            total: 3750000,
-            entries: [
-                { id: 1, date: '05/06/2025', libelle: 'Facture SANOFI', fournisseur: 'SANOFI Cameroun', montant: 2500000, status: 'validated' },
-                { id: 2, date: '06/06/2025', libelle: 'Équipement médical', fournisseur: 'MedEquip', montant: 850000, status: 'pending' },
-                { id: 3, date: '07/06/2025', libelle: 'Consommables', fournisseur: 'Pharmadis', montant: 400000, status: 'validated' }
-            ]
-        },
-        BQ: {
-            name: 'Journal de Banque',
-            icon: CreditCard,
-            color: 'bg-blue-500',
-            total: 5200000,
-            entries: [
-                { id: 1, date: '08/06/2025', libelle: 'Virement salaires', reference: 'VIR-2025-156', montant: -2800000, status: 'validated' },
-                { id: 2, date: '09/06/2025', libelle: 'Encaissement patients', reference: 'ENC-2025-89', montant: 150000, status: 'validated' },
-                { id: 3, date: '10/06/2025', libelle: 'Paiement fournisseur', reference: 'PAY-2025-45', montant: -750000, status: 'validated' }
-            ]
-        },
-        CAI: {
-            name: 'Journal de Caisse',
-            icon: Wallet,
-            color: 'bg-yellow-500',
-            total: 450000,
-            entries: [
-                { id: 1, date: '10/06/2025', libelle: 'Encaissement consultation', patient: 'M. Fouda', montant: 40000, status: 'validated' },
-                { id: 2, date: '11/06/2025', libelle: 'Paiement pharmacie', patient: 'Mme Ndoye', montant: 15000, status: 'validated' },
-                { id: 3, date: '12/06/2025', libelle: 'Remboursement patient', patient: 'M. Talla', montant: -5000, status: 'pending' }
-            ]
-        },
-        OD: {
-            name: 'Opérations Diverses',
-            icon: Settings,
-            color: 'bg-purple-500',
-            total: 750000,
-            entries: [
-                { id: 1, date: '05/06/2025', libelle: 'Loyer juin 2025', reference: 'LOY-2025-06', montant: -500000, status: 'validated' },
-                { id: 2, date: '08/06/2025', libelle: 'Amortissement équipement', reference: 'AMO-2025-15', montant: -250000, status: 'validated' }
-            ]
-        }
+    const journaux = {};
+    const stats = [];
+    const currentJournal = journaux[selectedJournal] || {
+        name: '',
+        icon: FileText,
+        color: 'bg-gray-200',
+        total: 0,
+        entries: []
     };
-
-    const currentJournal = journaux[selectedJournal];
-
-    // Statistiques dashboard
-    const stats = [
-        {
-            label: 'Total Recettes',
-            value: '1 300 000 FCFA',
-            change: '+12.5%',
-            trend: 'up',
-            icon: TrendingUp,
-            color: 'text-green-600'
-        },
-        {
-            label: 'Total Dépenses',
-            value: '4 500 000 FCFA',
-            change: '+8.2%',
-            trend: 'up',
-            icon: TrendingUp,
-            color: 'text-red-600'
-        },
-        {
-            label: 'Flux Net',
-            value: '-3 200 000 FCFA',
-            change: '-15.3%',
-            trend: 'down',
-            icon: BarChart3,
-            color: 'text-orange-600'
-        },
-        {
-            label: 'Écritures Validées',
-            value: '89%',
-            change: '+2.1%',
-            trend: 'up',
-            icon: CheckCircle,
-            color: 'text-blue-600'
-        }
-    ];
 
     const filteredEntries = currentJournal.entries.filter(entry =>
         entry.libelle.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -409,4 +321,3 @@ export function JournauxComptables()
 
     );
 };
-

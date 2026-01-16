@@ -1,5 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.exceptions import ValidationError
+from rest_framework.filters import SearchFilter
 
 from polyclinic.models import Patient, PatientAccess, MedicalFolder, Consultation
 from authentication.models import MedicalStaff
@@ -106,6 +107,9 @@ class PatientViewSet(ModelViewSet):
 
     permission_classes = [IsAuthenticated, PatientPermission]
     pagination_class = CustomPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['firstName', 'lastName', 'cniNumber', 'phoneNumber']
+
 
     def get_queryset(self):
         """
@@ -264,3 +268,18 @@ class PatientViewSet(ModelViewSet):
             return Response(serializer.data, status.HTTP_200_OK)
         except MedicalStaff.DoesNotExist:
             return Response({"details": "le docteur spécifé n'existe pas"}, status.HTTP_404_NOT_FOUND)
+        
+    @swagger_auto_schema(
+        operation_description="Permet de compter le nombre de patients enregistrés",
+        responses={
+            200: openapi.Response(description="Nombre de patients enregistrés")
+        },
+        tags=tags
+    )
+    @action(methods=['get'], detail=False, url_path='count', permission_classes=[PatientAccessPermission])
+    def number_of_patients(self, request):
+        query = Patient.objects.all()
+        data = {}
+        data['patient_count'] = query.count()
+
+        return Response(data, status=status.HTTP_200_OK)

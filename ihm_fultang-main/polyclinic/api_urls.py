@@ -1,4 +1,3 @@
-from django.urls import path, include
 from .api_views.consultation_type_api_view import ConsultationTypeViewSet
 from .api_views.appointment_api_view import AppointmentViewSet
 from .api_views.bill_api_view import BillViewSet
@@ -20,7 +19,8 @@ from .api_views.room_api_view import RoomViewSet
 from authentication.api_views.medical_staff_api_views import MedicalStaffViewSet
 from rest_framework.routers import DefaultRouter
 from django.urls import path
-#from polyclinic.api_views.chat_api_view import ChatbotView
+from polyclinic.api_views.chat_api_view import ChatbotView
+from polyclinic.api_views.helpcenter_api_view import HelpCenterCategoriesView
 
 
 router = DefaultRouter()
@@ -45,11 +45,10 @@ router.register(r'room', RoomViewSet, basename='room')
 router.register(r'category-product', PolyclinicProductCategoryViewSet, basename='category-product')
 router.register(r'product', PolyclinicProductViewSet, basename='product')
 
-
-#urlpatterns = [path('chatbot/', ChatbotView.as_view(), name='chatbot'),]
-#urlpatterns += router.urls
-
 urlpatterns = [
-    path('', include(router.urls)),
-    # path('chatbot/', ChatbotView.as_view(), name='chatbot'),  # DÉSACTIVÉ
+    path('chatbot/', ChatbotView.as_view(), name='chatbot'),
+    path('help-center/categories/', HelpCenterCategoriesView.as_view(), name='help-categories'),
 ]
+urlpatterns += router.urls
+
+urlpatterns += router.urls

@@ -1,6 +1,6 @@
-import {FaHistory, FaHome, FaNotesMedical, FaPlus, FaQuestionCircle, FaUsers} from "react-icons/fa";
+import {FaHistory, FaHome, FaNotesMedical, FaPlus, FaQuestionCircle, FaUsers, FaEnvelope} from "react-icons/fa";
 import {AppRoutesPaths as appRoutes} from "../../../Router/appRouterPaths.js";
-import { Calendar} from "lucide-react";
+import { Calendar, Bell} from "lucide-react";
 import {FiList} from "react-icons/fi";
 
 
@@ -37,6 +37,11 @@ export const doctorNavLink = [
                 link: appRoutes.doctorAddConsultation
             }*/
         ]
+    },
+    {
+        name: 'Messages',
+        icon: FaEnvelope,
+        link: appRoutes.doctorMessage,
     },
     {
         name: 'Appointments',

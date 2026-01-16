@@ -9,51 +9,40 @@ export function HRAnalyticsDashboard() {
     // Données simulées pour l'analyse RH
     const [timeRange, setTimeRange] = useState('12months');
 
-    // Données historiques de masse salariale (simulées)
-    const masseSalarialeHistory = [
-        { mois: '2024-07', masseSalariale: 42000000, effectif: 82, chargesSociales: 6720000 },
-        { mois: '2024-08', masseSalariale: 42500000, effectif: 83, chargesSociales: 6800000 },
-        { mois: '2024-09', masseSalariale: 43200000, effectif: 84, chargesSociales: 6912000 },
-        { mois: '2024-10', masseSalariale: 43800000, effectif: 85, chargesSociales: 7008000 },
-        { mois: '2024-11', masseSalariale: 44200000, effectif: 86, chargesSociales: 7072000 },
-        { mois: '2024-12', masseSalariale: 44500000, effectif: 86, chargesSociales: 7120000 },
-        { mois: '2025-01', masseSalariale: 44800000, effectif: 87, chargesSociales: 7168000 },
-        { mois: '2025-02', masseSalariale: 44900000, effectif: 87, chargesSociales: 7184000 },
-        { mois: '2025-03', masseSalariale: 45200000, effectif: 87, chargesSociales: 7232000 },
-        { mois: '2025-04', masseSalariale: 45400000, effectif: 88, chargesSociales: 7264000 },
-        { mois: '2025-05', masseSalariale: 45600000, effectif: 88, chargesSociales: 7296000 },
-        { mois: '2025-06', masseSalariale: 45000000, effectif: 87, chargesSociales: 7200000 }
-    ];
-
-    // Répartition par département
-    const departmentBreakdown = [
-        { department: 'Production', effectif: 35, masseSalariale: 18200000, couleur: '#3B82F6' },
-        { department: 'Commercial', effectif: 18, masseSalariale: 12600000, couleur: '#10B981' },
-        { department: 'Administration', effectif: 12, masseSalariale: 8400000, couleur: '#F59E0B' },
-        { department: 'IT', effectif: 8, masseSalariale: 5800000, couleur: '#8B5CF6' },
-        { department: 'RH', effectif: 6, masseSalariale: 3600000, couleur: '#EF4444' },
-        { department: 'Finance', effectif: 8, masseSalariale: 4800000, couleur: '#06B6D4' }
-    ];
-
-    // Benchmarks sectoriels (données du marché camerounais)
+    const masseSalarialeHistory = [];
+    const departmentBreakdown = [];
     const sectorBenchmarks = {
-        salaireMoyenSecteur: 580000, // FCFA par mois
-        chargesSocialesSecteur: 16.8, // % de la masse salariale
-        turnoverSecteur: 12.5, // % annuel
-        productiviteSecteur: 520000 // FCFA de CA par salarié par mois
+        salaireMoyenSecteur: 0,
+        chargesSocialesSecteur: 0,
+        turnoverSecteur: 0,
+        productiviteSecteur: 0
     };
 
     // Calculs des métriques clés
-    const currentMonth = masseSalarialeHistory[masseSalarialeHistory.length - 1];
-    const previousMonth = masseSalarialeHistory[masseSalarialeHistory.length - 2];
+    const currentMonth = masseSalarialeHistory[masseSalarialeHistory.length - 1] || null;
+    const previousMonth = masseSalarialeHistory[masseSalarialeHistory.length - 2] || null;
+    const currentEffectif = currentMonth?.effectif || 0;
 
     const metrics = useMemo(() => {
+        if (!currentMonth || !previousMonth || currentMonth.effectif === 0 || currentMonth.masseSalariale === 0) {
+            return {
+                salaireMoyenActuel: 0,
+                coutTotalParSalarie: 0,
+                tauxChargesSociales: 0,
+                evolutionMasseSalariale: 0,
+                evolutionEffectif: 0,
+                ecartSalaireMoyen: 0,
+                ecartChargesSociales: 0
+            };
+        }
+
         const salaireMoyenActuel = currentMonth.masseSalariale / currentMonth.effectif;
         const coutTotalParSalarie = (currentMonth.masseSalariale + currentMonth.chargesSociales) / currentMonth.effectif;
         const tauxChargesSociales = (currentMonth.chargesSociales / currentMonth.masseSalariale) * 100;
 
         // Évolutions mensuelles
-        const evolutionMasseSalariale = ((currentMonth.masseSalariale - previousMonth.masseSalariale) / previousMonth.masseSalariale) * 100;
+        const evolutionMasseSalariale = previousMonth.masseSalariale === 0 ? 0
+            : ((currentMonth.masseSalariale - previousMonth.masseSalariale) / previousMonth.masseSalariale) * 100;
         const evolutionEffectif = currentMonth.effectif - previousMonth.effectif;
 
         // Comparaisons avec les benchmarks sectoriels
@@ -174,7 +163,7 @@ export function HRAnalyticsDashboard() {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-gray-600">Évolution effectif</p>
-                            <p className="text-2xl font-bold text-gray-900">{currentMonth.effectif}</p>
+                            <p className="text-2xl font-bold text-gray-900">{currentEffectif}</p>
                             <div className="flex items-center mt-1">
                                 {metrics.evolutionEffectif >= 0 ? (
                                     <ArrowUpRight className="h-4 w-4 text-green-600 mr-1" />
@@ -259,7 +248,7 @@ export function HRAnalyticsDashboard() {
                     <div className="space-y-3">
                         {departmentBreakdown.map((dept, index) => {
                             const salaireMoyenDept = dept.masseSalariale / dept.effectif;
-                            const pourcentageEffectif = (dept.effectif / currentMonth.effectif) * 100;
+                            const pourcentageEffectif = currentEffectif === 0 ? 0 : (dept.effectif / currentEffectif) * 100;
 
                             return (
                                 <div key={index} className="border border-gray-200 rounded-lg p-4">
@@ -361,7 +350,7 @@ export function HRAnalyticsDashboard() {
                                 {metrics.tauxChargesSociales > sectorBenchmarks.chargesSocialesSecteur + 2 && (
                                     <li>• Taux de charges sociales élevé - Optimiser la structure de rémunération</li>
                                 )}
-                                <li>• Effectif stable avec {currentMonth.effectif} collaborateurs - Maintenir la dynamique de croissance</li>
+                                <li>• Effectif stable avec {currentEffectif} collaborateurs - Maintenir la dynamique de croissance</li>
                                 <li>• Suivi mensuel recommandé pour anticiper les écarts budgétaires</li>
                             </ul>
                         </div>
@@ -372,4 +361,3 @@ export function HRAnalyticsDashboard() {
             </AccountantDashBoard>
     );
 };
-

@@ -159,7 +159,7 @@ class Migration(migrations.Migration):
             name='Room',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('roomLabel', models.CharField(max_length=100)),
+                ('roomNumber', models.CharField(max_length=100)),
                 ('beds', models.PositiveIntegerField(default=1)),
                 ('busyBeds', models.IntegerField(default=0)),
                 ('price', models.FloatField(default=2000)),

@@ -15,7 +15,7 @@ from datetime import datetime
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-RUNNING_IN_DOCKER = os.path.exists('/.dockerenv')
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -56,7 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    
 ]
 
 # pour le cors origin
@@ -101,7 +102,8 @@ WSGI_APPLICATION = 'fultang.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/app/volumes/db.sqlite3' if RUNNING_IN_DOCKER else BASE_DIR / 'db.sqlite3',
+        # Use local sqlite file for development (was Docker path)
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -152,11 +154,22 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "authentication.MedicalStaff"
 
+# REST_FRAMEWORK = {
+#     # 'DEFAULT_AUTHENTICATION_CLASSES': [
+#     #     'rest_framework_simplejwt.authentication.JWTAuthentication',
+#     # ],
+# }
+
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
 }
+
 # Configuration du token d'authentification
 from datetime import timedelta
 

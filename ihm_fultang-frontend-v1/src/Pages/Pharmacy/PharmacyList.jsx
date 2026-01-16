@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Search, Edit2, Trash2, Settings } from 'lucide-react';
+import { PharmacyDashboard } from './PharmacyDashboard';
 
-export default function PharmacistPage() {
+export  function PharmacistPage() {
     const [medications] = useState([
         {
             id: 1,
@@ -51,6 +52,7 @@ export default function PharmacistPage() {
     ]);
 
     return (
+         <PharmacyDashboard>
         <div className="p-6 max-w-full min-h-screen bg-gray-50">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
@@ -153,5 +155,6 @@ export default function PharmacistPage() {
                 </div>
             </div>
         </div>
+         </PharmacyDashboard>
     );
 }
