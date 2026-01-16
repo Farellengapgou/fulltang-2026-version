@@ -5,7 +5,10 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework import status, permissions
 from rest_framework.response import Response
-from django.db.models import Q
+from django.utils.dateparse import parse_date
+from django.utils import timezone
+from django.db import transaction
+from django.core.exceptions import ValidationError
 
 from accounting.stock_models import TransferNote, TransferLine, StockMovement, Stock
 from accounting.stock_serializers import TransferNoteSerializer, TransferLineSerializer
@@ -21,182 +24,454 @@ auth_header_param = openapi.Parameter(
 tags = ["material-accounting"]
 
 
+def apply_transfer_filters(qs, params):
+    """Applique les filtres sur les transferts"""
+
+    state = params.get("state")
+    if state:
+        qs = qs.filter(status__iexact=state)
+
+    source_depot_id = params.get("source_depot_id")
+    if source_depot_id:
+        qs = qs.filter(source_depot_id=source_depot_id)
+
+    destination_depot_id = params.get("destination_depot_id")
+    if destination_depot_id:
+        qs = qs.filter(destination_depot_id=destination_depot_id)
+
+    # Filtre générique warehouse_id (source OU destination)
+    warehouse_id = params.get("warehouse_id")
+    if warehouse_id:
+        from django.db.models import Q
+
+        qs = qs.filter(
+            Q(source_depot_id=warehouse_id) | Q(destination_depot_id=warehouse_id)
+        )
+
+    start_date = params.get("start_date")
+    end_date = params.get("end_date")
+    if start_date:
+        sd = parse_date(start_date)
+        if sd:
+            qs = qs.filter(transfer_date__gte=sd)
+    if end_date:
+        ed = parse_date(end_date)
+        if ed:
+            qs = qs.filter(transfer_date__lte=ed)
+
+    transfer_number = params.get("transfer_number")
+    if transfer_number:
+        qs = qs.filter(transfer_number__icontains=transfer_number)
+
+    return qs
+
+
 @method_decorator(
     name="list",
-    decorator=swagger_auto_schema(manual_parameters=[auth_header_param], tags=tags),
+    decorator=swagger_auto_schema(
+        operation_summary="Lister les transferts",
+        operation_description="Retourne une liste paginée des transferts inter-dépôts avec filtres optionnels.",
+        manual_parameters=[
+            auth_header_param,
+            openapi.Parameter(
+                "state",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                enum=["DRAFT", "SENT", "RECEIVED", "CANCELLED"],
+            ),
+            openapi.Parameter(
+                "source_depot_id", openapi.IN_QUERY, type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                "destination_depot_id", openapi.IN_QUERY, type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                "warehouse_id",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_INTEGER,
+                description="Filtre source OU destination",
+            ),
+            openapi.Parameter(
+                "start_date", openapi.IN_QUERY, type=openapi.TYPE_STRING, format="date"
+            ),
+            openapi.Parameter(
+                "end_date", openapi.IN_QUERY, type=openapi.TYPE_STRING, format="date"
+            ),
+            openapi.Parameter(
+                "transfer_number", openapi.IN_QUERY, type=openapi.TYPE_STRING
+            ),
+        ],
+        tags=tags,
+    ),
 )
 @method_decorator(
     name="retrieve",
-    decorator=swagger_auto_schema(manual_parameters=[auth_header_param], tags=tags),
+    decorator=swagger_auto_schema(
+        operation_summary="Récupérer un transfert",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    ),
 )
 @method_decorator(
     name="create",
-    decorator=swagger_auto_schema(manual_parameters=[auth_header_param], tags=tags),
+    decorator=swagger_auto_schema(
+        operation_summary="Créer un transfert",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    ),
 )
 @method_decorator(
     name="update",
-    decorator=swagger_auto_schema(manual_parameters=[auth_header_param], tags=tags),
+    decorator=swagger_auto_schema(
+        operation_summary="Mettre à jour un transfert",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    ),
 )
 @method_decorator(
     name="partial_update",
-    decorator=swagger_auto_schema(manual_parameters=[auth_header_param], tags=tags),
+    decorator=swagger_auto_schema(
+        operation_summary="Mise à jour partielle d'un transfert",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    ),
 )
 @method_decorator(
     name="destroy",
-    decorator=swagger_auto_schema(manual_parameters=[auth_header_param], tags=tags),
+    decorator=swagger_auto_schema(
+        operation_summary="Supprimer un transfert",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    ),
 )
 class TransferNoteViewSet(ModelViewSet):
-    queryset = TransferNote.objects.all().order_by('-created_at')
+    """
+    ViewSet pour la gestion des transferts inter-dépôts.
+
+    Actions disponibles:
+    - lines: Lister/Ajouter des lignes
+    - send: Expédier le transfert (sortie du dépôt source)
+    - receive: Réceptionner le transfert (entrée au dépôt destination)
+    - cancel: Annuler le transfert
+    - check-availability: Vérifier la disponibilité au dépôt source
+    """
+
+    queryset = (
+        TransferNote.objects.select_related(
+            "source_depot", "destination_depot", "created_by", "sent_by", "received_by"
+        )
+        .prefetch_related("lines__article", "lines__batch")
+        .order_by("-transfer_date", "-created_at")
+    )
     serializer_class = TransferNoteSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         qs = super().get_queryset()
-        # basic filters: state, source/destination, start_date
-        params = self.request.query_params
-        state = params.get('state')
-        if state:
-            qs = qs.filter(status__iexact=state)
+        return apply_transfer_filters(qs, self.request.query_params)
 
-        src = params.get('source_warehouse_id')
-        if src:
-            qs = qs.filter(source_depot_id=src)
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
 
-        dst = params.get('destination_warehouse_id')
-        if dst:
-            qs = qs.filter(destination_depot_id=dst)
+    def perform_update(self, serializer):
+        instance = serializer.instance
+        if instance.status not in ["DRAFT"]:
+            raise ValidationError(
+                "Seuls les transferts en brouillon peuvent être modifiés"
+            )
+        serializer.save()
 
-        start_date = params.get('start_date')
-        if start_date:
-            from django.utils.dateparse import parse_date
-            sd = parse_date(start_date)
-            if sd:
-                qs = qs.filter(created_at__date__gte=sd)
+    def perform_destroy(self, instance):
+        if instance.status not in ["DRAFT"]:
+            raise ValidationError(
+                "Seuls les transferts en brouillon peuvent être supprimés"
+            )
+        instance.delete()
 
-        return qs
-
+    @swagger_auto_schema(
+        operation_summary="Lister les lignes d'un transfert",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
     @action(detail=True, methods=["get"], url_path="lines")
     def lines(self, request, pk=None):
         transfer = self.get_object()
-        lines = TransferLine.objects.filter(transfer_id=transfer.pk).order_by('sequence')
+        lines = (
+            TransferLine.objects.filter(transfer_id=transfer.pk)
+            .select_related("article", "batch")
+            .order_by("id")
+        )
         serializer = TransferLineSerializer(lines, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=["post"], url_path="lines")
-    def create_line(self, request, pk=None):
+    @swagger_auto_schema(
+        operation_summary="Ajouter une ligne au transfert",
+        request_body=TransferLineSerializer,
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @lines.mapping.post
+    @transaction.atomic
+    def add_line(self, request, pk=None):
+        transfer = self.get_object()
+
+        if transfer.status != "DRAFT":
+            return Response(
+                {
+                    "detail": "Impossible d'ajouter des lignes à un transfert non brouillon"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         data = request.data.copy()
-        data['transfer'] = pk
+        data["transfer"] = pk
+
         serializer = TransferLineSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=["get", "put", "delete"], url_path=r"lines/(?P<line_id>[^/.]+)")
-    def line_detail(self, request, pk=None, line_id=None):
-        try:
-            line = TransferLine.objects.get(transfer_id=pk, pk=line_id)
-        except TransferLine.DoesNotExist:
-            return Response({'detail': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+    @swagger_auto_schema(
+        operation_summary="Vérifier la disponibilité",
+        operation_description="Vérifie si le stock est suffisant au dépôt source pour chaque ligne.",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @action(detail=True, methods=["post"], url_path="check-availability")
+    def check_availability(self, request, pk=None):
+        transfer = self.get_object()
+        result = []
+        all_available = True
 
-        if request.method == 'GET':
-            serializer = TransferLineSerializer(line)
-            return Response(serializer.data)
-        if request.method == 'PUT':
-            serializer = TransferLineSerializer(line, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-        if request.method == 'DELETE':
-            line.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(detail=True, methods=["post"], url_path="send")
-    def send(self, request, pk=None):
-        tr = self.get_object()
-        if tr.status != 'PENDING':
-            return Response({'detail': 'Only pending transfers can be sent'}, status=status.HTTP_400_BAD_REQUEST)
-
-        movements = []
-        for line in tr.lines.all():
-            mv = StockMovement.objects.create(
-                movement_type='OUT',
-                movement_reason='TRANSFER',
-                article=line.article,
-                source_depot=tr.source_depot,
-                destination_depot=tr.destination_depot,
-                quantity=line.quantity,
-                unit_price=getattr(line.article, 'weighted_average_price', 0),
-                total_value=line.quantity * getattr(line.article, 'weighted_average_price', 0),
-                operation_date=None,
-                reference_document=tr.transfer_number,
-                document_type='TRANSFER',
-                status='CONFIRMED',
-                created_by=request.user
-            )
-            movements.append(mv.id)
-
-            stock, _ = Stock.objects.get_or_create(article=line.article, depot=tr.source_depot, defaults={'physical_quantity':0,'theoretical_quantity':0})
-            stock.physical_quantity -= line.quantity
-            stock.theoretical_quantity -= line.quantity
-            stock.update_value()
-
-        tr.status = 'IN_TRANSIT'
-        tr.save()
-        return Response({'detail': 'Transfer sent', 'movements': movements}, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=["post"], url_path="receive")
-    def receive(self, request, pk=None):
-        tr = self.get_object()
-        if tr.status != 'IN_TRANSIT':
-            return Response({'detail': 'Only in-transit transfers can be received'}, status=status.HTTP_400_BAD_REQUEST)
-
-        movements = []
-        for line in tr.lines.all():
-            mv = StockMovement.objects.create(
-                movement_type='IN',
-                movement_reason='TRANSFER',
-                article=line.article,
-                source_depot=tr.source_depot,
-                destination_depot=tr.destination_depot,
-                quantity=line.quantity,
-                unit_price=getattr(line.article, 'weighted_average_price', 0),
-                total_value=line.quantity * getattr(line.article, 'weighted_average_price', 0),
-                operation_date=None,
-                reference_document=tr.transfer_number,
-                document_type='TRANSFER',
-                status='CONFIRMED',
-                created_by=request.user
-            )
-            movements.append(mv.id)
-
-            stock, _ = Stock.objects.get_or_create(article=line.article, depot=tr.destination_depot, defaults={'physical_quantity':0,'theoretical_quantity':0})
-            stock.physical_quantity += line.quantity
-            stock.theoretical_quantity += line.quantity
-            stock.update_value()
-
-        tr.status = 'RECEIVED'
-        tr.save()
-        return Response({'detail': 'Transfer received', 'movements': movements}, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=["post"], url_path="cancel")
-    def cancel(self, request, pk=None):
-        tr = self.get_object()
-        if tr.status == 'PENDING':
-            tr.delete()
-            return Response({'detail': 'Transfer deleted'}, status=status.HTTP_200_OK)
-
-        movements = StockMovement.objects.filter(reference_document=tr.transfer_number)
-        errors = []
-        for mv in movements:
+        for line in transfer.lines.select_related("article").all():
             try:
-                mv.cancel(request.user, reason=f"Cancel transfer {tr.transfer_number}")
-            except Exception as e:
-                errors.append(str(e))
+                stock = Stock.objects.get(
+                    article=line.article, depot=transfer.source_depot
+                )
+                available = float(stock.available_quantity)
+            except Stock.DoesNotExist:
+                available = 0.0
 
-        tr.status = 'CANCELLED'
-        tr.save()
+            required = float(line.quantity)
+            ok = available >= required
+
+            if not ok:
+                all_available = False
+
+            result.append(
+                {
+                    "line_id": line.id,
+                    "article_id": line.article_id,
+                    "article_code": line.article.code,
+                    "article_name": line.article.name,
+                    "required": required,
+                    "available": available,
+                    "shortage": max(0, required - available),
+                    "ok": ok,
+                }
+            )
+
+        return Response(
+            {
+                "source_depot_id": transfer.source_depot_id,
+                "source_depot_code": (
+                    transfer.source_depot.code if transfer.source_depot else None
+                ),
+                "all_available": all_available,
+                "availability": result,
+            }
+        )
+
+    @swagger_auto_schema(
+        operation_summary="Expédier le transfert",
+        operation_description="Confirme l'expédition et crée les mouvements de sortie au dépôt source.",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @action(detail=True, methods=["post"], url_path="send")
+    @transaction.atomic
+    def send(self, request, pk=None):
+        transfer = self.get_object()
+
+        if transfer.status != "DRAFT":
+            return Response(
+                {"detail": f"Le transfert est déjà {transfer.get_status_display()}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not transfer.lines.exists():
+            return Response(
+                {"detail": "Le transfert doit contenir au moins une ligne"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Vérifier la disponibilité
+        errors = []
+        for line in transfer.lines.select_related("article").all():
+            try:
+                stock = Stock.objects.get(
+                    article=line.article, depot=transfer.source_depot
+                )
+                if stock.available_quantity < line.quantity:
+                    errors.append(
+                        f"{line.article.code}: Stock insuffisant ({stock.available_quantity} < {line.quantity})"
+                    )
+            except Stock.DoesNotExist:
+                errors.append(f"{line.article.code}: Pas de stock dans ce dépôt")
 
         if errors:
-            return Response({'detail': 'Some movements failed to cancel', 'errors': errors}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"detail": "Stock insuffisant pour certaines lignes", "errors": errors},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        return Response({'detail': 'Transfer cancelled'}, status=status.HTTP_200_OK)
+        # Créer les mouvements de sortie
+        for line in transfer.lines.select_related("article").all():
+            StockMovement.objects.create(
+                movement_type="OUT",
+                movement_reason="TRANSFER_OUT",
+                article=line.article,
+                batch=line.batch,
+                quantity=line.quantity,
+                unit_price=line.unit_price,
+                total_value=line.quantity * line.unit_price if line.unit_price else 0,
+                source_depot=transfer.source_depot,
+                destination_depot=transfer.destination_depot,
+                reference_document=transfer.transfer_number,
+                # CORRIGÉ: Utiliser timezone.now() au lieu de None
+                operation_date=transfer.transfer_date or timezone.now(),
+                notes=f"Transfert vers {transfer.destination_depot.code if transfer.destination_depot else 'N/A'}",
+                created_by=request.user,
+            )
+
+        transfer.status = "SENT"
+        transfer.sent_by = request.user
+        transfer.sent_at = timezone.now()
+        transfer.save()
+
+        return Response(
+            {
+                "detail": "Transfert expédié avec succès",
+                "transfer_number": transfer.transfer_number,
+                "status": transfer.status,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @swagger_auto_schema(
+        operation_summary="Réceptionner le transfert",
+        operation_description="Confirme la réception et crée les mouvements d'entrée au dépôt destination.",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @action(detail=True, methods=["post"], url_path="receive")
+    @transaction.atomic
+    def receive(self, request, pk=None):
+        transfer = self.get_object()
+
+        if transfer.status != "SENT":
+            return Response(
+                {"detail": "Le transfert doit être expédié pour être réceptionné"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Créer les mouvements d'entrée
+        for line in transfer.lines.select_related("article").all():
+            StockMovement.objects.create(
+                movement_type="IN",
+                movement_reason="TRANSFER_IN",
+                article=line.article,
+                batch=line.batch,
+                quantity=line.quantity,
+                unit_price=line.unit_price,
+                total_value=line.quantity * line.unit_price if line.unit_price else 0,
+                source_depot=transfer.source_depot,
+                destination_depot=transfer.destination_depot,
+                reference_document=transfer.transfer_number,
+                # CORRIGÉ: Utiliser timezone.now()
+                operation_date=timezone.now(),
+                notes=f"Réception depuis {transfer.source_depot.code if transfer.source_depot else 'N/A'}",
+                created_by=request.user,
+            )
+
+        transfer.status = "RECEIVED"
+        transfer.received_by = request.user
+        transfer.received_at = timezone.now()
+        transfer.save()
+
+        return Response(
+            {
+                "detail": "Transfert réceptionné avec succès",
+                "transfer_number": transfer.transfer_number,
+                "status": transfer.status,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @swagger_auto_schema(
+        operation_summary="Annuler le transfert",
+        operation_description="Annule le transfert et inverse les mouvements si expédié.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "reason": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="Raison de l'annulation"
+                )
+            },
+        ),
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @action(detail=True, methods=["post"], url_path="cancel")
+    @transaction.atomic
+    def cancel(self, request, pk=None):
+        transfer = self.get_object()
+        reason = request.data.get("reason", "")
+
+        if transfer.status == "CANCELLED":
+            return Response(
+                {"detail": "Le transfert est déjà annulé"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if transfer.status == "RECEIVED":
+            return Response(
+                {"detail": "Un transfert réceptionné ne peut pas être annulé"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if transfer.status == "DRAFT":
+            transfer.delete()
+            return Response({"detail": "Transfert supprimé"}, status=status.HTTP_200_OK)
+
+        # Si SENT, annuler les mouvements de sortie
+        if transfer.status == "SENT":
+            movements = StockMovement.objects.filter(
+                reference_document=transfer.transfer_number
+            )
+            errors = []
+            for mv in movements:
+                try:
+                    mv.cancel(
+                        request.user,
+                        reason=f"Annulation transfert {transfer.transfer_number}: {reason}",
+                    )
+                except Exception as e:
+                    errors.append(f"Mouvement {mv.movement_number}: {str(e)}")
+
+            if errors:
+                return Response(
+                    {"detail": "Transfert annulé avec des erreurs", "errors": errors},
+                    status=status.HTTP_207_MULTI_STATUS,
+                )
+
+        transfer.status = "CANCELLED"
+        transfer.notes = (
+            transfer.notes or ""
+        ) + f"\n[Annulé le {timezone.now()} par {request.user}] {reason}"
+        transfer.save()
+
+        return Response(
+            {"detail": "Transfert annulé avec succès"}, status=status.HTTP_200_OK
+        )

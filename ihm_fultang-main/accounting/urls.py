@@ -15,34 +15,43 @@ from accounting.api_views.invoice_total_api_view import InvoiceTotalAPI
 
 # Configuration du routeur principal
 router = DefaultRouter()
-router.register(r'acccount-state', AccountStateViewSet, basename='account-state')
-router.register('budget-exercise', BudgetExerciseViewSet, basename='budget-exercise')
-router.register(r'account', AccountViewSet, basename='account')
-router.register(r'facture', FactureViewSet, basename='facture')
-router.register(r'financial-operation', FinancialOperationViewSet, basename='financial-operation')
+router.register(r"acccount-state", AccountStateViewSet, basename="account-state")
+router.register("budget-exercise", BudgetExerciseViewSet, basename="budget-exercise")
+router.register(r"account", AccountViewSet, basename="account")
+router.register(r"facture", FactureViewSet, basename="facture")
+router.register(
+    r"financial-operation", FinancialOperationViewSet, basename="financial-operation"
+)
 
 
 # Nouveau
-router.register(r'chart-of-accounts', ChartOfAccountsViewSet, basename='chartofaccounts')
-router.register(r'journals', JournalViewSet, basename='journal')
-router.register(r'journal-entries', JournalEntryViewSet, basename='journalentry')
-
-urlpatterns = [path('statistics/', AccountingStatsAPI.as_view(), name='account-statistics'),]
-urlpatterns += router.urls
-urlpatterns += [path('invoice/total', InvoiceTotalAPI.as_view(), name='invoice-total')]
-# Register material-accounting viewsets (ModelViewSet-based)
-from accounting.api_views.stock_api_views.stock_viewsets import (
-	StockMovementViewSet,
-	GoodsReceiptNoteViewSet,
-	GoodsIssueNoteViewSet,
-	InventoryViewSet,
-	TransferNoteViewSet,
+router.register(
+    r"chart-of-accounts", ChartOfAccountsViewSet, basename="chartofaccounts"
 )
+router.register(r"journals", JournalViewSet, basename="journal")
+router.register(r"journal-entries", JournalEntryViewSet, basename="journalentry")
 
-router.register(r'movements', StockMovementViewSet, basename='stock-movements')
-router.register(r'receipts', GoodsReceiptNoteViewSet, basename='goods-receipts')
-router.register(r'issues', GoodsIssueNoteViewSet, basename='goods-issues')
-router.register(r'inventories', InventoryViewSet, basename='inventories')
-router.register(r'transfers', TransferNoteViewSet, basename='transfers')
+urlpatterns = [
+    path("statistics/", AccountingStatsAPI.as_view(), name="account-statistics"),
+]
+urlpatterns += router.urls
+urlpatterns += [path("invoice/total", InvoiceTotalAPI.as_view(), name="invoice-total")]
+
+# =============================================================================
+# COMPTABILITÉ MATIÈRE - ViewSets complets avec filtres et actions personnalisées
+# =============================================================================
+from accounting.api_views.stock_api_views.movements_api_view import StockMovementViewSet
+from accounting.api_views.stock_api_views.receipts_api_view import (
+    GoodsReceiptNoteViewSet,
+)
+from accounting.api_views.stock_api_views.issues_api_view import GoodsIssueNoteViewSet
+from accounting.api_views.stock_api_views.inventories_api_view import InventoryViewSet
+from accounting.api_views.stock_api_views.transfers_api_view import TransferNoteViewSet
+
+router.register(r"movements", StockMovementViewSet, basename="stock-movements")
+router.register(r"receipts", GoodsReceiptNoteViewSet, basename="goods-receipts")
+router.register(r"issues", GoodsIssueNoteViewSet, basename="goods-issues")
+router.register(r"inventories", InventoryViewSet, basename="inventories")
+router.register(r"transfers", TransferNoteViewSet, basename="transfers")
 
 material_urlpatterns = router.urls
