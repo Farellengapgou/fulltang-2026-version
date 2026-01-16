@@ -61,6 +61,13 @@ def apply_issue_filters(qs, params):
     if patient_id:
         qs = qs.filter(patient_id=patient_id)
 
+    beneficiary_type = params.get("beneficiary_type")
+    if beneficiary_type:
+        if beneficiary_type.upper() == "PATIENT":
+            qs = qs.filter(patient__isnull=False)
+        elif beneficiary_type.upper() == "DEPARTMENT":
+            qs = qs.filter(department__isnull=False)
+
     start_date = params.get("start_date")
     end_date = params.get("end_date")
     if start_date:
@@ -103,6 +110,7 @@ def apply_issue_filters(qs, params):
                     "DAMAGE",
                     "EXPIRY",
                     "RETURN",
+                    "DISPENSATION",
                 ],
             ),
             openapi.Parameter(
@@ -113,6 +121,12 @@ def apply_issue_filters(qs, params):
             ),
             openapi.Parameter(
                 "patient_id", openapi.IN_QUERY, type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                "beneficiary_type",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                enum=["PATIENT", "DEPARTMENT"],
             ),
             openapi.Parameter(
                 "start_date", openapi.IN_QUERY, type=openapi.TYPE_STRING, format="date"
@@ -173,6 +187,7 @@ class GoodsIssueNoteViewSet(ModelViewSet):
 
     Actions disponibles:
     - lines: Lister/Ajouter des lignes
+    - line_detail: GET/PUT/DELETE sur une ligne spécifique
     - validate: Confirmer le bon (méthode FEFO)
     - cancel: Annuler le bon
     - check-availability: Vérifier la disponibilité du stock
@@ -252,6 +267,94 @@ class GoodsIssueNoteViewSet(ModelViewSet):
         issue.save(update_fields=["total_amount"])
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @swagger_auto_schema(
+        operation_summary="Récupérer une ligne spécifique",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @action(detail=True, methods=["get"], url_path=r"lines/(?P<line_id>\d+)")
+    def line_detail(self, request, pk=None, line_id=None):
+        """Récupère une ligne spécifique"""
+        issue = self.get_object()
+        try:
+            line = GoodsIssueLine.objects.select_related("article", "batch").get(
+                issue_id=pk, pk=line_id
+            )
+        except GoodsIssueLine.DoesNotExist:
+            return Response(
+                {"detail": "Ligne non trouvée"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = GoodsIssueLineSerializer(line)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_summary="Modifier une ligne spécifique",
+        request_body=GoodsIssueLineSerializer,
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @line_detail.mapping.put
+    @transaction.atomic
+    def update_line(self, request, pk=None, line_id=None):
+        """Modifie une ligne spécifique"""
+        issue = self.get_object()
+
+        if issue.status != "DRAFT":
+            return Response(
+                {"detail": "Impossible de modifier les lignes d'un bon non brouillon"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            line = GoodsIssueLine.objects.get(issue_id=pk, pk=line_id)
+        except GoodsIssueLine.DoesNotExist:
+            return Response(
+                {"detail": "Ligne non trouvée"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = GoodsIssueLineSerializer(line, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        # Mettre à jour le total
+        issue.total_amount = sum(l.line_amount for l in issue.lines.all())
+        issue.save(update_fields=["total_amount"])
+
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_summary="Supprimer une ligne spécifique",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @line_detail.mapping.delete
+    @transaction.atomic
+    def delete_line(self, request, pk=None, line_id=None):
+        """Supprime une ligne spécifique"""
+        issue = self.get_object()
+
+        if issue.status != "DRAFT":
+            return Response(
+                {"detail": "Impossible de supprimer les lignes d'un bon non brouillon"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            line = GoodsIssueLine.objects.get(issue_id=pk, pk=line_id)
+        except GoodsIssueLine.DoesNotExist:
+            return Response(
+                {"detail": "Ligne non trouvée"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        line.delete()
+
+        # Mettre à jour le total
+        issue.total_amount = sum(l.line_amount for l in issue.lines.all())
+        issue.save(update_fields=["total_amount"])
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @swagger_auto_schema(
         operation_summary="Valider un bon de sortie",
@@ -421,10 +524,10 @@ class GoodsIssueNoteViewSet(ModelViewSet):
         for line in issue.lines.select_related("article").all():
             needed = float(line.quantity)
 
-            # CORRIGÉ: Filtrer les lots disponibles dans le dépôt source uniquement
+            # Filtrer les lots disponibles dans le dépôt source uniquement
             batches = Batch.objects.filter(
                 article=line.article,
-                depot=issue.depot,  # IMPORTANT: Filtre par dépôt source
+                depot=issue.depot,
                 remaining_quantity__gt=0,
                 is_blocked=False,
             ).order_by("expiry_date", "reception_date")

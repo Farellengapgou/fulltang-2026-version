@@ -161,6 +161,7 @@ class GoodsReceiptNoteViewSet(ModelViewSet):
 
     Actions disponibles:
     - lines: Lister/Ajouter des lignes
+    - line_detail: GET/PUT/DELETE sur une ligne spécifique
     - validate: Confirmer le bon et mettre à jour les stocks
     - cancel: Annuler le bon
     - update-totals: Recalculer les totaux
@@ -235,10 +236,96 @@ class GoodsReceiptNoteViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        # CORRIGÉ: Mettre à jour les totaux après ajout
+        # Mettre à jour les totaux après ajout
         receipt.update_totals()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @swagger_auto_schema(
+        operation_summary="Récupérer une ligne spécifique",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @action(detail=True, methods=["get"], url_path=r"lines/(?P<line_id>\d+)")
+    def line_detail(self, request, pk=None, line_id=None):
+        """Récupère une ligne spécifique"""
+        receipt = self.get_object()
+        try:
+            line = GoodsReceiptLine.objects.select_related("article").get(
+                receipt_id=pk, pk=line_id
+            )
+        except GoodsReceiptLine.DoesNotExist:
+            return Response(
+                {"detail": "Ligne non trouvée"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = GoodsReceiptLineSerializer(line)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_summary="Modifier une ligne spécifique",
+        request_body=GoodsReceiptLineSerializer,
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @line_detail.mapping.put
+    @transaction.atomic
+    def update_line(self, request, pk=None, line_id=None):
+        """Modifie une ligne spécifique"""
+        receipt = self.get_object()
+
+        if receipt.status != "DRAFT":
+            return Response(
+                {"detail": "Impossible de modifier les lignes d'un bon non brouillon"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            line = GoodsReceiptLine.objects.get(receipt_id=pk, pk=line_id)
+        except GoodsReceiptLine.DoesNotExist:
+            return Response(
+                {"detail": "Ligne non trouvée"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = GoodsReceiptLineSerializer(line, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        # Mettre à jour les totaux
+        receipt.update_totals()
+
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_summary="Supprimer une ligne spécifique",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @line_detail.mapping.delete
+    @transaction.atomic
+    def delete_line(self, request, pk=None, line_id=None):
+        """Supprime une ligne spécifique"""
+        receipt = self.get_object()
+
+        if receipt.status != "DRAFT":
+            return Response(
+                {"detail": "Impossible de supprimer les lignes d'un bon non brouillon"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            line = GoodsReceiptLine.objects.get(receipt_id=pk, pk=line_id)
+        except GoodsReceiptLine.DoesNotExist:
+            return Response(
+                {"detail": "Ligne non trouvée"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        line.delete()
+
+        # Mettre à jour les totaux
+        receipt.update_totals()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @swagger_auto_schema(
         operation_summary="Valider un bon d'entrée",

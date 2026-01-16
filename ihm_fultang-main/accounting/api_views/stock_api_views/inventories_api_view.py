@@ -7,7 +7,7 @@ from rest_framework import status, permissions
 from rest_framework.response import Response
 from django.utils.dateparse import parse_date
 from django.utils import timezone
-from django.db.models import Sum, F, DecimalField
+from django.db.models import Sum
 from django.db.models.functions import Coalesce
 from django.db import transaction
 from django.core.exceptions import ValidationError
@@ -34,7 +34,12 @@ def apply_inventory_filters(qs, params):
 
     state = params.get("state")
     if state:
-        qs = qs.filter(status__iexact=state)
+        # Mapping des états pour compatibilité
+        state_mapping = {
+            "COUNTING": "IN_PROGRESS",
+        }
+        mapped_state = state_mapping.get(state.upper(), state)
+        qs = qs.filter(status__iexact=mapped_state)
 
     inventory_type = params.get("inventory_type")
     if inventory_type:
@@ -47,6 +52,10 @@ def apply_inventory_filters(qs, params):
     depot_id = params.get("depot_id")
     if depot_id:
         qs = qs.filter(depot_id=depot_id)
+
+    category_id = params.get("category_id")
+    if category_id:
+        qs = qs.filter(lines__article__category_id=category_id).distinct()
 
     start_date = params.get("start_date")
     end_date = params.get("end_date")
@@ -77,7 +86,7 @@ def apply_inventory_filters(qs, params):
                 "state",
                 openapi.IN_QUERY,
                 type=openapi.TYPE_STRING,
-                enum=["DRAFT", "IN_PROGRESS", "COMPLETED", "CANCELLED"],
+                enum=["DRAFT", "IN_PROGRESS", "COUNTING", "COMPLETED", "CANCELLED"],
             ),
             openapi.Parameter(
                 "inventory_type",
@@ -87,6 +96,9 @@ def apply_inventory_filters(qs, params):
             ),
             openapi.Parameter(
                 "warehouse_id", openapi.IN_QUERY, type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                "category_id", openapi.IN_QUERY, type=openapi.TYPE_INTEGER
             ),
             openapi.Parameter(
                 "start_date", openapi.IN_QUERY, type=openapi.TYPE_STRING, format="date"
@@ -147,9 +159,11 @@ class InventoryViewSet(ModelViewSet):
 
     Actions disponibles:
     - lines: Lister/Ajouter des lignes
+    - line_detail: GET/PUT/PATCH/DELETE sur une ligne spécifique
     - initialize: Initialiser les lignes avec le stock théorique
     - start-counting: Démarrer le comptage
     - validate: Valider l'inventaire et créer les ajustements
+    - cancel: Annuler l'inventaire
     - variances: Calculer les écarts
     - summary: Résumé de l'inventaire
     - export: Exporter en CSV
@@ -228,6 +242,119 @@ class InventoryViewSet(ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @swagger_auto_schema(
+        operation_summary="Récupérer une ligne spécifique",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @action(detail=True, methods=["get"], url_path=r"lines/(?P<line_id>\d+)")
+    def line_detail(self, request, pk=None, line_id=None):
+        """Récupère une ligne spécifique"""
+        inventory = self.get_object()
+        try:
+            line = InventoryLine.objects.select_related("article", "batch").get(
+                inventory_id=pk, pk=line_id
+            )
+        except InventoryLine.DoesNotExist:
+            return Response(
+                {"detail": "Ligne non trouvée"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = InventoryLineSerializer(line)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_summary="Modifier une ligne spécifique (PUT)",
+        request_body=InventoryLineSerializer,
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @line_detail.mapping.put
+    @transaction.atomic
+    def update_line(self, request, pk=None, line_id=None):
+        """Modifie une ligne spécifique (remplacement complet)"""
+        inventory = self.get_object()
+
+        if inventory.status not in ["DRAFT", "IN_PROGRESS"]:
+            return Response(
+                {"detail": "Impossible de modifier les lignes d'un inventaire terminé"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            line = InventoryLine.objects.get(inventory_id=pk, pk=line_id)
+        except InventoryLine.DoesNotExist:
+            return Response(
+                {"detail": "Ligne non trouvée"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = InventoryLineSerializer(line, data=request.data, partial=False)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_summary="Modifier partiellement une ligne (PATCH)",
+        request_body=InventoryLineSerializer,
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @line_detail.mapping.patch
+    @transaction.atomic
+    def partial_update_line(self, request, pk=None, line_id=None):
+        """Modifie partiellement une ligne (utile pour saisir counted_quantity)"""
+        inventory = self.get_object()
+
+        if inventory.status not in ["DRAFT", "IN_PROGRESS"]:
+            return Response(
+                {"detail": "Impossible de modifier les lignes d'un inventaire terminé"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            line = InventoryLine.objects.get(inventory_id=pk, pk=line_id)
+        except InventoryLine.DoesNotExist:
+            return Response(
+                {"detail": "Ligne non trouvée"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = InventoryLineSerializer(line, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_summary="Supprimer une ligne spécifique",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @line_detail.mapping.delete
+    @transaction.atomic
+    def delete_line(self, request, pk=None, line_id=None):
+        """Supprime une ligne spécifique"""
+        inventory = self.get_object()
+
+        if inventory.status not in ["DRAFT", "IN_PROGRESS"]:
+            return Response(
+                {
+                    "detail": "Impossible de supprimer les lignes d'un inventaire terminé"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            line = InventoryLine.objects.get(inventory_id=pk, pk=line_id)
+        except InventoryLine.DoesNotExist:
+            return Response(
+                {"detail": "Ligne non trouvée"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        line.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @swagger_auto_schema(
         operation_summary="Initialiser les lignes d'inventaire",
         operation_description="Crée les lignes avec le stock théorique actuel du dépôt.",
         manual_parameters=[auth_header_param],
@@ -261,7 +388,7 @@ class InventoryViewSet(ModelViewSet):
                 inventory=inventory,
                 article=stock.article,
                 theoretical_quantity=stock.quantity,
-                counted_quantity=None,  # À remplir lors du comptage
+                counted_quantity=None,
                 unit_price=stock.average_unit_price or Decimal("0"),
             )
             lines_created += 1
@@ -352,7 +479,6 @@ class InventoryViewSet(ModelViewSet):
                             inventory.depot if movement_type == "IN" else None
                         ),
                         reference_document=inventory.inventory_number,
-                        # CORRIGÉ: Utiliser inventory_date au lieu de count_date
                         operation_date=inventory.inventory_date or timezone.now(),
                         notes=f"Ajustement inventaire {inventory.inventory_number}",
                         created_by=request.user,
@@ -378,6 +504,69 @@ class InventoryViewSet(ModelViewSet):
             return Response(response_data, status=status.HTTP_207_MULTI_STATUS)
 
         return Response(response_data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_summary="Annuler l'inventaire",
+        operation_description="Annule l'inventaire. Si déjà validé, annule les mouvements d'ajustement.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "reason": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="Raison de l'annulation"
+                )
+            },
+        ),
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @action(detail=True, methods=["post"], url_path="cancel")
+    @transaction.atomic
+    def cancel(self, request, pk=None):
+        inventory = self.get_object()
+        reason = request.data.get("reason", "")
+
+        if inventory.status == "CANCELLED":
+            return Response(
+                {"detail": "L'inventaire est déjà annulé"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if inventory.status == "DRAFT":
+            inventory.delete()
+            return Response(
+                {"detail": "Inventaire supprimé"}, status=status.HTTP_200_OK
+            )
+
+        # Si COMPLETED, annuler les mouvements d'ajustement
+        if inventory.status == "COMPLETED":
+            movements = StockMovement.objects.filter(
+                reference_document=inventory.inventory_number
+            )
+            errors = []
+            for mv in movements:
+                try:
+                    mv.cancel(
+                        request.user,
+                        reason=f"Annulation inventaire {inventory.inventory_number}: {reason}",
+                    )
+                except Exception as e:
+                    errors.append(f"Mouvement {mv.movement_number}: {str(e)}")
+
+            if errors:
+                return Response(
+                    {"detail": "Inventaire annulé avec des erreurs", "errors": errors},
+                    status=status.HTTP_207_MULTI_STATUS,
+                )
+
+        inventory.status = "CANCELLED"
+        inventory.notes = (
+            inventory.notes or ""
+        ) + f"\n[Annulé le {timezone.now()} par {request.user}] {reason}"
+        inventory.save()
+
+        return Response(
+            {"detail": "Inventaire annulé avec succès"}, status=status.HTTP_200_OK
+        )
 
     @swagger_auto_schema(
         operation_summary="Calculer les écarts",

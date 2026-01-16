@@ -7,6 +7,7 @@ from rest_framework import status, permissions
 from rest_framework.response import Response
 from django.utils.dateparse import parse_date
 from django.utils import timezone
+from django.db.models import Q
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
@@ -29,21 +30,34 @@ def apply_transfer_filters(qs, params):
 
     state = params.get("state")
     if state:
-        qs = qs.filter(status__iexact=state)
+        # Mapping pour compatibilité
+        state_mapping = {
+            "PENDING": "DRAFT",
+        }
+        mapped_state = state_mapping.get(state.upper(), state)
+        qs = qs.filter(status__iexact=mapped_state)
 
     source_depot_id = params.get("source_depot_id")
     if source_depot_id:
         qs = qs.filter(source_depot_id=source_depot_id)
 
+    # Alias pour compatibilité
+    source_warehouse_id = params.get("source_warehouse_id")
+    if source_warehouse_id:
+        qs = qs.filter(source_depot_id=source_warehouse_id)
+
     destination_depot_id = params.get("destination_depot_id")
     if destination_depot_id:
         qs = qs.filter(destination_depot_id=destination_depot_id)
 
+    # Alias pour compatibilité
+    destination_warehouse_id = params.get("destination_warehouse_id")
+    if destination_warehouse_id:
+        qs = qs.filter(destination_depot_id=destination_warehouse_id)
+
     # Filtre générique warehouse_id (source OU destination)
     warehouse_id = params.get("warehouse_id")
     if warehouse_id:
-        from django.db.models import Q
-
         qs = qs.filter(
             Q(source_depot_id=warehouse_id) | Q(destination_depot_id=warehouse_id)
         )
@@ -53,11 +67,11 @@ def apply_transfer_filters(qs, params):
     if start_date:
         sd = parse_date(start_date)
         if sd:
-            qs = qs.filter(transfer_date__gte=sd)
+            qs = qs.filter(planned_date__gte=sd)
     if end_date:
         ed = parse_date(end_date)
         if ed:
-            qs = qs.filter(transfer_date__lte=ed)
+            qs = qs.filter(planned_date__lte=ed)
 
     transfer_number = params.get("transfer_number")
     if transfer_number:
@@ -77,13 +91,25 @@ def apply_transfer_filters(qs, params):
                 "state",
                 openapi.IN_QUERY,
                 type=openapi.TYPE_STRING,
-                enum=["DRAFT", "SENT", "RECEIVED", "CANCELLED"],
+                enum=["DRAFT", "PENDING", "SENT", "RECEIVED", "CANCELLED"],
             ),
             openapi.Parameter(
                 "source_depot_id", openapi.IN_QUERY, type=openapi.TYPE_INTEGER
             ),
             openapi.Parameter(
+                "source_warehouse_id",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_INTEGER,
+                description="Alias de source_depot_id",
+            ),
+            openapi.Parameter(
                 "destination_depot_id", openapi.IN_QUERY, type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                "destination_warehouse_id",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_INTEGER,
+                description="Alias de destination_depot_id",
             ),
             openapi.Parameter(
                 "warehouse_id",
@@ -150,6 +176,7 @@ class TransferNoteViewSet(ModelViewSet):
 
     Actions disponibles:
     - lines: Lister/Ajouter des lignes
+    - line_detail: GET/DELETE sur une ligne spécifique
     - send: Expédier le transfert (sortie du dépôt source)
     - receive: Réceptionner le transfert (entrée au dépôt destination)
     - cancel: Annuler le transfert
@@ -161,7 +188,7 @@ class TransferNoteViewSet(ModelViewSet):
             "source_depot", "destination_depot", "created_by", "sent_by", "received_by"
         )
         .prefetch_related("lines__article", "lines__batch")
-        .order_by("-transfer_date", "-created_at")
+        .order_by("-planned_date", "-created_at")
     )
     serializer_class = TransferNoteSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -231,6 +258,57 @@ class TransferNoteViewSet(ModelViewSet):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @swagger_auto_schema(
+        operation_summary="Récupérer une ligne spécifique",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @action(detail=True, methods=["get"], url_path=r"lines/(?P<line_id>\d+)")
+    def line_detail(self, request, pk=None, line_id=None):
+        """Récupère une ligne spécifique"""
+        transfer = self.get_object()
+        try:
+            line = TransferLine.objects.select_related("article", "batch").get(
+                transfer_id=pk, pk=line_id
+            )
+        except TransferLine.DoesNotExist:
+            return Response(
+                {"detail": "Ligne non trouvée"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = TransferLineSerializer(line)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_summary="Supprimer une ligne spécifique",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @line_detail.mapping.delete
+    @transaction.atomic
+    def delete_line(self, request, pk=None, line_id=None):
+        """Supprime une ligne spécifique"""
+        transfer = self.get_object()
+
+        if transfer.status != "DRAFT":
+            return Response(
+                {
+                    "detail": "Impossible de supprimer les lignes d'un transfert non brouillon"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            line = TransferLine.objects.get(transfer_id=pk, pk=line_id)
+        except TransferLine.DoesNotExist:
+            return Response(
+                {"detail": "Ligne non trouvée"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        line.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @swagger_auto_schema(
         operation_summary="Vérifier la disponibilité",
@@ -339,8 +417,7 @@ class TransferNoteViewSet(ModelViewSet):
                 source_depot=transfer.source_depot,
                 destination_depot=transfer.destination_depot,
                 reference_document=transfer.transfer_number,
-                # CORRIGÉ: Utiliser timezone.now() au lieu de None
-                operation_date=transfer.transfer_date or timezone.now(),
+                operation_date=transfer.planned_date or timezone.now(),
                 notes=f"Transfert vers {transfer.destination_depot.code if transfer.destination_depot else 'N/A'}",
                 created_by=request.user,
             )
@@ -389,7 +466,6 @@ class TransferNoteViewSet(ModelViewSet):
                 source_depot=transfer.source_depot,
                 destination_depot=transfer.destination_depot,
                 reference_document=transfer.transfer_number,
-                # CORRIGÉ: Utiliser timezone.now()
                 operation_date=timezone.now(),
                 notes=f"Réception depuis {transfer.source_depot.code if transfer.source_depot else 'N/A'}",
                 created_by=request.user,
