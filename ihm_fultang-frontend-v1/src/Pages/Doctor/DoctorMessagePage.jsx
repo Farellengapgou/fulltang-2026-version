@@ -689,11 +689,6 @@ export function DoctorMessagePage({
                           {getPriorityLabel(notification.priority)}
                         </span>
                       </div>
-                      {!notification.isRead && (
-                        <span className="bg-gradient-to-t from-primary-start to-primary-end text-white text-xs px-2 py-1 rounded-full">
-                          Nouveau
-                        </span>
-                      )}
                     </div>
 
                     <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-1">
@@ -749,11 +744,6 @@ export function DoctorMessagePage({
                         {getPriorityLabel(message.priority)}
                       </span>
                     </div>
-                    {!message.isRead && (
-                      <span className="bg-gradient-to-t from-primary-start to-primary-end text-white text-xs px-2 py-1 rounded-full">
-                        Nouveau
-                      </span>
-                    )}
                   </div>
 
                   <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-1">
@@ -857,11 +847,6 @@ export function DoctorMessagePage({
                   <span className={`${getPriorityStyle(selectedMessage.priority).badge} text-white text-sm px-3 py-1 rounded-full font-semibold`}>
                     {getPriorityLabel(selectedMessage.priority)}
                   </span>
-                  {!selectedMessage.isRead && (
-                    <span className="bg-blue-500 text-white text-sm px-3 py-1 rounded-full">
-                      Nouveau
-                    </span>
-                  )}
                 </div>
                 <button
                   onClick={closeModal}
@@ -962,11 +947,6 @@ export function DoctorMessagePage({
                   <span className={`${getPriorityStyle(selectedNotification.priority === "RED" ? "high" : selectedNotification.priority === "YELLOW" ? "medium" : "low").badge} text-white text-sm px-3 py-1 rounded-full font-semibold`}>
                     {getPriorityLabel(selectedNotification.priority)}
                   </span>
-                  {!selectedNotification.isRead && (
-                    <span className="bg-blue-500 text-white text-sm px-3 py-1 rounded-full">
-                      Nouveau
-                    </span>
-                  )}
                 </div>
                 <button
                   onClick={closeNotificationModal}
