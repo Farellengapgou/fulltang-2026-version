@@ -1,6 +1,8 @@
 amqp==5.3.1
 annotated-types==0.7.0
 asgiref==3.8.1
+channels==4.1.0
+channels-redis==4.2.0
 billiard==4.2.1
 cachetools==5.5.2
 celery==5.4.0

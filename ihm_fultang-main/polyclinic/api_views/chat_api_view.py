@@ -39,56 +39,57 @@ def extract_text_from_pdf(pdf_path):
         print(f"Erreur lors de l'extraction du PDF: {str(e)}")
         return ""
 
+def load_guide_text():
+    try:
+        text = extract_text_from_pdf(PDF_PATH)
+        return text or ""
+    except Exception as e:
+        print(f"Erreur chargement PDF: {str(e)}")
+        return ""
+
+
 # Charger le guide une seule fois au démarrage
-try:
-    guide_text = extract_text_from_pdf(PDF_PATH)
+guide_text = load_guide_text()
+
+
+def build_context(question, max_lines=60):
+    """Sélectionne les passages pertinents du guide."""
     if not guide_text:
-        guide_text = """
-        Guide Fultang - Application de Gestion Hospitalière
-        
-        CONSULTATIONS:
-        - Pour créer une consultation, allez dans le menu Consultations
-        - Sélectionnez le patient et le type de consultation
-        - Les prix sont : Généraliste 5000 FCFA, Spécialiste 10000 FCFA
-        
-        RENDEZ-VOUS:
-        - Créez un rendez-vous depuis le menu Appointments
-        - Sélectionnez la date, l'heure et le médecin
-        - Le patient recevra une confirmation
-        
-        PAIEMENTS:
-        - Les factures sont générées automatiquement
-        - Accepte Cash, Mobile Money, Carte bancaire
-        - Imprimez le reçu après paiement
-        
-        PATIENTS:
-        - Créez un dossier patient avec CNI, nom, prénom
-        - Un dossier médical est automatiquement créé
-        - Recherche par nom, téléphone ou CNI
-        """
-except Exception as e:
-    print(f"Erreur chargement PDF: {str(e)}")
-    guide_text = "Guide non disponible"
+        return ""
+
+    q = (question or "").lower()
+    tokens = [t for t in q.replace("?", " ").replace(",", " ").split() if len(t) > 3]
+    lines = [line.strip() for line in guide_text.splitlines() if line.strip()]
+    if not tokens:
+        return "\n".join(lines[:max_lines])
+
+    matches = []
+    for line in lines:
+        lower_line = line.lower()
+        if any(token in lower_line for token in tokens):
+            matches.append(line)
+        if len(matches) >= max_lines:
+            break
+
+    if not matches:
+        return "\n".join(lines[:max_lines])
+    return "\n".join(matches)
 
 def generate_answer(question):
     """Génère une réponse avec OpenAI via OpenRouter"""
     if openai is None:
         return fallback_answer(question)
     try:
+        context = build_context(question)
         prompt = f"""Tu es un assistant pour l'application Fultang, un système de gestion hospitalière.
-        
-Guide d'utilisation:
-{guide_text[:3000]}  # Limité pour rester dans les tokens
+
+Guide d'utilisation (extraits pertinents):
+{context}
 
 Question de l'utilisateur: {question}
 
-Réponds de manière claire, concise et professionnelle en français. Si la question concerne:
-- Les consultations: explique comment créer, modifier ou annuler
-- Les paiements: explique le processus de facturation
-- Les patients: explique comment gérer les dossiers
-- Technique: donne des solutions de dépannage
-
-Si tu ne trouves pas l'info dans le guide, dis-le honnêtement et suggère de contacter le support.
+Réponds uniquement à partir du guide. Si l'information n'est pas dans le guide, dis-le clairement et propose de contacter le support.
+Réponds de manière claire, concise et professionnelle en français.
 """
 
         response = openai.ChatCompletion.create(

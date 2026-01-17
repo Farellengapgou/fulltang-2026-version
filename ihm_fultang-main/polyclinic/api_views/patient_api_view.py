@@ -250,13 +250,19 @@ class PatientViewSet(ModelViewSet):
     def patient_doctor(self, request, id=None):
         try:
             medical_staff = MedicalStaff.objects.get(id=id)
-            if medical_staff.role != "Doctor":
+            if medical_staff.role not in ["Doctor", "Specialist", "Ophtalmologist", "Dentist"]:
                 return Response({"details": "le medical staff specifie n'est pas un docteur"},
                                 status.HTTP_404_NOT_FOUND)
             # Récupérer les consultations effectuées par ce docteur
             consultations = Consultation.objects.filter(idMedicalStaffGiver=medical_staff)
             # Extraire les patients uniques ayant une consultation avec ce docteur
-            patient_ids = consultations.values_list('idPatient', flat=True).distinct()
+            patient_ids = set(consultations.values_list('idPatient', flat=True).distinct())
+            # Ajouter les patients assignés via PatientAccess
+            access_patient_ids = PatientAccess.objects.filter(
+                idMedicalStaff=medical_staff,
+                access=True
+            ).values_list('idPatient', flat=True)
+            patient_ids.update(access_patient_ids)
             patients = Patient.objects.filter(id__in=patient_ids)
 
             # Sérialiser les patients

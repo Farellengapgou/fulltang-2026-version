@@ -22,6 +22,18 @@ MessageType = [
 
 ]
 
+NOTIFICATION_EVENT_TYPES = [
+    ('PATIENT_CREATED', 'Patient Created'),
+    ('SURGERY_SCHEDULED', 'Surgery Scheduled'),
+    ('SURGERY_REMINDER', 'Surgery Reminder'),
+]
+
+NOTIFICATION_PRIORITIES = [
+    ('GREEN', 'Green'),
+    ('YELLOW', 'Yellow'),
+    ('RED', 'Red'),
+]
+
 CONDITION = [
     ('NoCritical', 'NoCritical'),
     ('Critical', 'Critical'),
@@ -112,6 +124,22 @@ class PatientAccess(models.Model):
 
     idPatient = models.ForeignKey("Patient", on_delete=models.CASCADE, null=False)
     idMedicalStaff = models.ForeignKey("authentication.MedicalStaff", on_delete=models.CASCADE, null=False)
+
+
+class Notification(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    event_type = models.CharField(max_length=30, choices=NOTIFICATION_EVENT_TYPES)
+    priority = models.CharField(max_length=10, choices=NOTIFICATION_PRIORITIES, default='GREEN')
+    message = models.TextField()
+    scheduled_for = models.DateTimeField(null=True, blank=True)
+    data = models.JSONField(default=dict, blank=True)
+    recipient = models.ForeignKey("authentication.MedicalStaff", on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.event_type} -> {self.recipient}"
 
 
 # classe qui definie le patient
@@ -399,6 +427,16 @@ class Hospitalisation(models.Model):
     removeAt = models.DateTimeField(auto_now_add=True)
 
     idRoom = models.ForeignKey("Room", on_delete=models.CASCADE, null=False)
+    idPatient = models.ForeignKey("Patient", on_delete=models.CASCADE, null=False)
+    idMedicalStaff = models.ForeignKey("authentication.MedicalStaff", on_delete=models.CASCADE, null=False)
+
+class Surgery(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    scheduled_at = models.DateTimeField()
+    note = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    reminder_sent = models.BooleanField(default=False)
+
     idPatient = models.ForeignKey("Patient", on_delete=models.CASCADE, null=False)
     idMedicalStaff = models.ForeignKey("authentication.MedicalStaff", on_delete=models.CASCADE, null=False)
 
