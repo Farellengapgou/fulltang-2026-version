@@ -1180,6 +1180,72 @@ class GoodsIssueLine(models.Model):
         super().save(*args, **kwargs)
 
 
+# ==================== TRANSFERTS INTER-DEPOTS ====================
+
+
+class TransferNote(models.Model):
+    """Transferts inter-dépôts (suivi séparé)."""
+    TRANSFER_STATUS = [
+        ('PENDING', 'En attente'),
+        ('IN_TRANSIT', 'En transit'),
+        ('RECEIVED', 'Reçu'),
+        ('CANCELLED', 'Annulé'),
+    ]
+
+    transfer_number = models.CharField(max_length=30, unique=True)
+    source_depot = models.ForeignKey('Depot', on_delete=models.PROTECT, related_name='outgoing_transfers')
+    destination_depot = models.ForeignKey('Depot', on_delete=models.PROTECT, related_name='incoming_transfers')
+    planned_date = models.DateField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=TRANSFER_STATUS, default='PENDING')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        "authentication.MedicalStaff",
+        on_delete=models.PROTECT,
+        related_name='created_transfers'
+    )
+
+    class Meta:
+        verbose_name = 'Transfert'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.transfer_number} {self.source_depot.code}→{self.destination_depot.code}"
+
+    def save(self, *args, **kwargs):
+        if not self.transfer_number:
+            self.transfer_number = self.generate_transfer_number()
+        super().save(*args, **kwargs)
+
+    def generate_transfer_number(self):
+        from django.utils import timezone
+        today = timezone.now()
+        prefix = f"TR{today.strftime('%Y%m')}"
+        last = TransferNote.objects.filter(transfer_number__startswith=prefix).order_by('-transfer_number').first()
+        if last:
+            last_num = int(last.transfer_number[-5:])
+            new_num = last_num + 1
+        else:
+            new_num = 1
+        return f"{prefix}{new_num:05d}"
+
+
+class TransferLine(models.Model):
+    transfer = models.ForeignKey('TransferNote', on_delete=models.CASCADE, related_name='lines')
+    sequence = models.PositiveIntegerField()
+    article = models.ForeignKey('Article', on_delete=models.PROTECT)
+    quantity = models.DecimalField(max_digits=15, decimal_places=3)
+
+    class Meta:
+        verbose_name = 'Ligne transfert'
+        ordering = ['transfer', 'sequence']
+        unique_together = ['transfer', 'sequence']
+
+    def __str__(self):
+        return f"{self.transfer.transfer_number} - L{self.sequence} {self.article.code} x {self.quantity}"
+
+
 # ==================== INVENTAIRES ====================
 
 class Inventory(models.Model):

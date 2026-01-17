@@ -1,12 +1,8 @@
 from django.db import models
 from django.db.models.deletion import CASCADE
-from datetime import date, timedelta
+from datetime import timedelta
 from django.utils.timezone import now
 import uuid
-from django.contrib.contenttypes.models import ContentType
-from django.db.models import Sum
-from django.apps import apps
-
 from mptt.models import MPTTModel, TreeForeignKey
 # Create your models here.
 
@@ -86,18 +82,12 @@ APPOINTMENT_STATE = [
     ("Completed", "Completed"),
 ]
 
-STATUS_PRODUCT_CHOICES = [ 
+STATUS_PRODUCT_CHOICES = [
         ('Available', 'Available'),
-        ('Running low', 'Running Low'),
-        ('Out Of Stock', 'Out Of Stock'),
-        
+        ('Out of Stock', 'Out of Stock'),
+        ('Discontinued', 'Discontinued'),
+        ('Expiring Soon', 'Expiring Soon'),
     ]
-
-EXPIRY_STATUS_CHOICES = [
-    ('Expiring Soon', 'Expiring Soon'),
-    ('Expired', 'Expired'),
-    ('Good','Good')
-] 
 
 # ======================================
 # ======================================== APPOINTMENT DEPARTMENT, PATIENT
