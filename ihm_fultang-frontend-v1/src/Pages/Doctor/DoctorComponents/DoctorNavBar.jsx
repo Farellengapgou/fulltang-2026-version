@@ -3,7 +3,8 @@ import {Tooltip} from "antd";
 import {useAuthentication} from "../../../Utils/Provider.jsx";
 import userIcon from "../../../assets/userIcon.png";
 import { useState } from 'react';
-import { UserProfileModal } from '../../GlobalComponents/UserProfileModal';
+
+
 
 export function DoctorNavBar()
 {
@@ -66,10 +67,10 @@ export function DoctorNavBar()
                     </div>
                 </div>
             </div>
-            <UserProfileModal 
+            {/* <UserProfileModal 
                 isOpen={isProfileModalOpen}
                 onClose={() => setIsProfileModalOpen(false)}
-            />
+            /> */}
         </>
     )
 }
