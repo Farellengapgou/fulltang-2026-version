@@ -1,12 +1,8 @@
 from django.db import models
 from django.db.models.deletion import CASCADE
-from datetime import date, timedelta
+from datetime import timedelta
 from django.utils.timezone import now
 import uuid
-from django.contrib.contenttypes.models import ContentType
-from django.db.models import Sum
-from django.apps import apps
-
 from mptt.models import MPTTModel, TreeForeignKey
 # Create your models here.
 
@@ -86,18 +82,12 @@ APPOINTMENT_STATE = [
     ("Completed", "Completed"),
 ]
 
-STATUS_PRODUCT_CHOICES = [ 
+STATUS_PRODUCT_CHOICES = [
         ('Available', 'Available'),
-        ('Running low', 'Running Low'),
-        ('Out Of Stock', 'Out Of Stock'),
-        
+        ('Out of Stock', 'Out of Stock'),
+        ('Discontinued', 'Discontinued'),
+        ('Expiring Soon', 'Expiring Soon'),
     ]
-
-EXPIRY_STATUS_CHOICES = [
-    ('Expiring Soon', 'Expiring Soon'),
-    ('Expired', 'Expired'),
-    ('Good','Good')
-] 
 
 # ======================================
 # ======================================== APPOINTMENT DEPARTMENT, PATIENT
@@ -299,401 +289,32 @@ class PolyclinicProductCategory(MPTTModel):
     def __str__(self):
         return self.name
 
-class Article(models.Model):
-    """
-    Classe abstraite de base pour les articles de la polyclinique.
-    Hérite conceptuellement de ArticleBase (accounting.models_matiere) 
-    mais implémentée séparément pour éviter les dépendances circulaires.
-    
-    Les sous-classes (PolyclinicProduct, Equipment, Consumable) sont 
-    gérées par le système de comptabilité matière via StockLevel et StockMovement.
-    """
-    ARTICLE_TYPES = [
-        ('MED', 'Médicament'),
-        ('CONS', 'Consommable'),
-        ('EQUIP', 'Équipement'),
-        ('REAG', 'Réactif'),
-        ('FOUR', 'Fourniture'),
-    ]
-    
-    UNIT_TYPES = [
-        ('UNIT', 'Unité'),
-        ('BOX', 'Boîte'),
-        ('BOTTLE', 'Flacon'),
-        ('VIAL', 'Ampoule'),
-        ('BAG', 'Sachet'),
-        ('KG', 'Kilogramme'),
-        ('LITER', 'Litre'),
-        ('METER', 'Mètre'),
-    ]
-    
-    STATUS_CHOICES = [
-        ('ACTIVE', 'Actif'),
-        ('INACTIVE', 'Inactif'),
-        ('DISCONTINUED', 'Arrêté'),
-    ]
-    
-    # Identification
-    code = models.CharField(max_length=50, unique=True, help_text="Code article unique")
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
+class PolyclinicProduct(models.Model):
+
+    category = models.ForeignKey('PolyclinicProductCategory', on_delete=models.CASCADE, related_name='products')
+    name = models.CharField(max_length=100)
+    generic_name = models.CharField(max_length=100, blank=True, null=True)
     brand = models.CharField(max_length=100, blank=True, null=True)
-    
-    # Classification
-    article_type = models.CharField(max_length=10, choices=ARTICLE_TYPES)
-    category = models.ForeignKey(
-        'accounting.ArticleCategory',
-        on_delete=models.PROTECT,
-        related_name='%(class)s_items',
-        help_text="Catégorie comptable de l'article"
-    )
-    
-    # Unité et conditionnement
-    base_unit = models.CharField(
-        max_length=20,
-        choices=UNIT_TYPES,
-        default='UNIT',
-        help_text="Unité de gestion du stock"
-    )
-    units_per_package = models.PositiveIntegerField(
-        default=1,
-        help_text="Nombre d'unités par conditionnement"
-    )
-    
-    # Gestion de stock
-    minimum_stock = models.DecimalField(
-        max_digits=15,
-        decimal_places=3,
-        default=0,
-        help_text="Seuil d'alerte minimum"
-    )
-    reorder_level = models.DecimalField(
-        max_digits=15,
-        decimal_places=3,
-        default=0,
-        help_text="Seuil de réapprovisionnement"
-    )
-    
-    # Valorisation OHADA (PMP)
-    weighted_average_price = models.DecimalField(
-        max_digits=15,
-        decimal_places=2,
-        default=0,
-        help_text="Prix Moyen Pondéré (OHADA)"
-    )
-    last_purchase_price = models.DecimalField(
-        max_digits=15,
-        decimal_places=2,
-        default=0
-    )
-    selling_price = models.DecimalField(
-        max_digits=15,
-        decimal_places=2,
-        default=0,
-        help_text="Prix de vente unitaire"
-    )
-    
-    # Comptes comptables OHADA
-    stock_account = models.ForeignKey(
-        'accounting.ChartOfAccounts',
-        on_delete=models.PROTECT,
-        related_name='%(class)s_stock_items',
-        help_text="Compte de stock classe 3"
-    )
-    variation_account = models.ForeignKey(
-        'accounting.ChartOfAccounts',
-        on_delete=models.PROTECT,
-        related_name='%(class)s_variation_items',
-        help_text="Compte de variation classe 6"
-    )
-    
-    # Péremption
-    is_perishable = models.BooleanField(default=False)
-    default_shelf_life_days = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        help_text="Durée de conservation par défaut (jours)"
-    )
-    
-    # Traçabilité
-    requires_batch_tracking = models.BooleanField(
-        default=True,
-        help_text="Exige une gestion par lots"
-    )
-    
-    # État
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ACTIVE')
-    is_active = models.BooleanField(default=True)
+    description = models.TextField(max_length=500, blank=True, null=True)
+    price = models.FloatField(default=0.0)
+    current_stock = models.IntegerField(default=0)
+    min_stock_level = models.IntegerField(default=5)  # For low stock alerts
+    status = models.CharField(max_length=20, choices=STATUS_PRODUCT_CHOICES, default='Available')
+    requires_prescription = models.BooleanField(default=False)
+    expiry_date = models.DateField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(
-        'authentication.MedicalStaff',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='%(class)s_created'
-    )
 
-    class Meta:
-        abstract = True
-
-    def __str__(self):
-        return f"{self.code} - {self.name}"
-    
-    def get_current_stock(self):
-        """Stock total via le système de comptabilité matière"""
-        StockLevel = apps.get_model('accounting', 'StockLevel')
-        result = StockLevel.objects.filter(
-            article_type=self._meta.model_name,
-            article_id=self.id
-        ).aggregate(total=Sum('quantity'))
-        return result['total'] or 0
-    
-    def get_stock_value(self):
-        """Valorisation du stock au PMP"""
-        return self.get_current_stock() * self.weighted_average_price
-    
-    def is_below_minimum(self):
-        """Vérifie si le stock est en dessous du seuil"""
-        return self.get_current_stock() < self.minimum_stock
-    
-    def recalculate_pmp(self, new_quantity, new_unit_price):
-        """
-        Recalcule le PMP après une entrée selon la méthode OHADA.
-        PMP = (Valeur stock ancien + Valeur entrée) / (Qté ancienne + Qté entrée)
-        """
-        from decimal import Decimal
-        current_stock = Decimal(str(self.get_current_stock()))
-        current_value = current_stock * self.weighted_average_price
-        new_value = Decimal(str(new_quantity)) * Decimal(str(new_unit_price))
-        
-        total_quantity = current_stock + Decimal(str(new_quantity))
-        
-        if total_quantity > 0:
-            new_pmp = (current_value + new_value) / total_quantity
-            self.weighted_average_price = new_pmp
-            self.last_purchase_price = Decimal(str(new_unit_price))
-            self.save(update_fields=['weighted_average_price', 'last_purchase_price', 'updated_at'])
-            return new_pmp
-        
-        return self.weighted_average_price
-
-
-class PolyclinicProduct(Article):
-    """
-    Produits pharmaceutiques et médicaments.
-    Intégré au système de comptabilité matière OHADA.
-    """
-    # Classification spécifique
-    product_category = models.ForeignKey(
-        'PolyclinicProductCategory',
-        on_delete=models.CASCADE,
-        related_name='products',
-        null=True,
-        blank=True,
-        help_text="Catégorie fonctionnelle du produit"
-    )
-    generic_name = models.CharField(max_length=100, blank=True, null=True)
-    
-    # Médicaments
+    # Additional fields for medications specifically
     is_medication = models.BooleanField(default=False)
-    requires_prescription = models.BooleanField(default=False)
-    dosage = models.CharField(max_length=100, blank=True, null=True)  # ex: "500mg"
-    form = models.CharField(max_length=50, blank=True, null=True)  # ex: "tablet", "liquid"
-    price = models.FloatField(default=0.0)
-
-    
-    # Péremption (pour affichage, le suivi réel est par lot)
-    expiry_date = models.DateField(blank=True, null=True, help_text="Date de péremption la plus proche")
-    expiry_status = models.CharField(max_length=20, choices=EXPIRY_STATUS_CHOICES, default='Good')
-
-    class Meta:
-        verbose_name = "Produit pharmaceutique"
-        verbose_name_plural = "Produits pharmaceutiques"
+    dosage = models.CharField(max_length=100, blank=True, null=True)  # e.g., "500mg"
+    form = models.CharField(max_length=50, blank=True, null=True)  # e.g., "tablet", "liquid", etc.
 
     def __str__(self):
-        if self.product_category:
-            return f"{self.name} ({self.product_category.name})"
-        return self.name
-    
-    def save(self, *args, **kwargs):
-        if self.is_medication:
-            self.article_type = 'MED'
-        super().save(*args, **kwargs)
-    
+        return f"{self.name} ({self.category.name})"
 
-class Equipment(Article):
-    """
-    Équipements médicaux.
-    Gérés comme immobilisations avec suivi de maintenance.
-    """
-    # Identification et suivi
-    serial_number = models.CharField(max_length=100, unique=True, blank=True, null=True)
-    asset_tag = models.CharField(max_length=50, unique=True, blank=True, null=True)
-    
-    # Spécifications techniques
-    model_name = models.CharField(max_length=100, blank=True, null=True)
-    manufacturer = models.CharField(max_length=100, blank=True, null=True)
-    power_requirements = models.CharField(max_length=50, blank=True, null=True)
-    dimensions = models.CharField(max_length=100, blank=True, null=True)
-    weight = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
-    
-    # Maintenance
-    maintenance_interval = models.IntegerField(default=365, help_text="Jours entre maintenances")
-    last_maintenance_date = models.DateField(blank=True, null=True)
-    next_maintenance_date = models.DateField(blank=True, null=True)
-    maintenance_contract = models.BooleanField(default=False)
-    maintenance_provider = models.CharField(max_length=100, blank=True, null=True)
-    
-    # Localisation
-    location = models.ForeignKey('Room', on_delete=models.SET_NULL, blank=True, null=True)
-    is_portable = models.BooleanField(default=False)
-    
-    # Garantie et calibration
-    purchase_date = models.DateField(blank=True, null=True)
-    warranty_expiry = models.DateField(blank=True, null=True)
-    requires_calibration = models.BooleanField(default=False)
-    calibration_date = models.DateField(blank=True, null=True)
-    calibration_due_date = models.DateField(blank=True, null=True)
-    calibration_certificate = models.FileField(upload_to='calibration_certs/', blank=True, null=True)
-    
-    # État
-    CONDITION_CHOICES = [
-        ('excellent', 'Excellent'),
-        ('good', 'Bon'),
-        ('fair', 'Correct'),
-        ('poor', 'Mauvais'),
-        ('out_of_service', 'Hors service'),
-    ]
-    condition = models.CharField(max_length=20, choices=CONDITION_CHOICES, default='good')
-    safety_class = models.CharField(max_length=50, blank=True, null=True)
-    
-    # Documentation
-    manual = models.FileField(upload_to='equipment_manuals/', blank=True, null=True)
-    notes = models.TextField(blank=True, null=True)
-
-    class Meta:
-        verbose_name = "Équipement"
-        verbose_name_plural = "Équipements"
-
-    def __str__(self):
-        return f"{self.name} - SN: {self.serial_number or 'N/A'}"
-    
-    def save(self, *args, **kwargs):
-        self.article_type = 'EQUIP'
-        
-        # Calcul automatique de la prochaine maintenance
-        if self.last_maintenance_date and self.maintenance_interval:
-            self.next_maintenance_date = self.last_maintenance_date + timedelta(days=self.maintenance_interval)
-        
-        # Mise à jour du statut basé sur la condition
-        if self.condition in ['poor', 'out_of_service']:
-            self.status = 'INACTIVE'
-        
-        super().save(*args, **kwargs)
-    
-    @property
-    def needs_maintenance(self):
-        """Vérifie si l'équipement nécessite une maintenance"""
-        if not self.next_maintenance_date:
-            return False
-        return date.today() >= self.next_maintenance_date
-    
-    @property
-    def needs_calibration(self):
-        """Vérifie si l'équipement nécessite une calibration"""
-        if not self.requires_calibration or not self.calibration_due_date:
-            return False
-        return date.today() >= self.calibration_due_date
-
-
-class Consumable(Article):
-    """
-    Consommables médicaux.
-    Articles à usage unique ou limité, avec suivi de péremption par lot.
-    """
-    # Conditionnement
-    quantity_per_package = models.IntegerField(default=1)
-    
-    # Caractéristiques
-    STERILIZATION_CHOICES = [
-        ('sterile', 'Stérile'),
-        ('non_sterile', 'Non stérile'),
-        ('disinfected', 'Désinfecté'),
-    ]
-    sterilization_type = models.CharField(max_length=50, blank=True, null=True, choices=STERILIZATION_CHOICES)
-    material = models.CharField(max_length=100, blank=True, null=True)
-    size = models.CharField(max_length=50, blank=True, null=True)
-    color = models.CharField(max_length=50, blank=True, null=True)
-    
-    # Stockage
-    storage_temperature = models.CharField(max_length=50, blank=True, null=True)
-    storage_location = models.CharField(max_length=100, blank=True, null=True)
-    
-    # Usage
-    is_single_use = models.BooleanField(default=True)
-    requires_prescription = models.BooleanField(default=False)
-    average_monthly_usage = models.IntegerField(default=0)
-    last_used_date = models.DateField(blank=True, null=True)
-    
-    # Sécurité
-    hazard_class = models.CharField(max_length=50, blank=True, null=True)
-    
-    # Type de consommable
-    CONSUMABLE_TYPES = [
-        ('ppe', 'Équipement de protection individuelle'),
-        ('disposable', 'Dispositif à usage unique'),
-        ('cleaning', 'Produit de nettoyage/désinfection'),
-        ('diagnostic', 'Diagnostic/réactif'),
-        ('surgical', 'Instrument chirurgical'),
-        ('wound_care', 'Pansement/soin de plaie'),
-        ('dental', 'Dentaire'),
-        ('ophthalmic', 'Ophtalmique'),
-        ('injection', 'Injection/infusion'),
-    ]
-    consumable_type = models.CharField(max_length=50, choices=CONSUMABLE_TYPES, blank=True, null=True)
-    
-    # Péremption (pour affichage, le suivi réel est par lot)
-    expiry_date = models.DateField(blank=True, null=True, help_text="Date de péremption la plus proche")
-    lot_number = models.CharField(max_length=100, blank=True, null=True, help_text="Référence pour compatibilité")
-
-    class Meta:
-        verbose_name = "Consommable"
-        verbose_name_plural = "Consommables"
-
-    def __str__(self):
-        expiry_info = f" - Exp: {self.expiry_date}" if self.expiry_date else ""
-        return f"{self.name} ({self.base_unit}){expiry_info}"
-    
-    def save(self, *args, **kwargs):
-        self.article_type = 'CONS'
-        super().save(*args, **kwargs)
-
-    @property
-    def stock_status(self):
-        """Statut du stock"""
-        stock = self.get_current_stock()
-        if stock <= 0:
-            return "OUT_OF_STOCK"
-        if stock <= self.minimum_stock:
-            return "LOW"
-        return "OK"
-    
-    def is_below_reorder_level(self):
-        """Vérifie si le stock est en dessous du niveau de réapprovisionnement"""
-        return self.get_current_stock() <= self.reorder_level
-
-    @property
-    def expiry_status_computed(self):
-        """Calcule le statut de péremption"""
-        if not self.expiry_date:
-            return "N/A"
-        days = (self.expiry_date - date.today()).days
-        if days <= 0:
-            return "EXPIRED"
-        if days <= 30:
-            return "EXPIRING_SOON"
-        return "GOOD"
+    def is_low_stock(self):
+        return self.current_stock <= self.min_stock_level
 
 class PolyclinicInventoryMovement(models.Model):
     MOVEMENT_TYPES = [
