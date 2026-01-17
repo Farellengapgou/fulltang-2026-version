@@ -47,7 +47,7 @@ export function AddMedicalStaff() {
         {
             medicalStaffData.isStaff = medicalStaffData.role === 'Admin';
         }
-        if(medicalStaffData.role === "Accountant")
+        if(medicalStaffData.role === "Accountant" || medicalStaffData.role === "MaterialAccountant")
         {
            medicalStaffData.userType = "Accountant";
         }
@@ -334,8 +334,9 @@ export function AddMedicalStaff() {
                                     <option value="Labtech">Laboratory Assistant</option>
                                     <option value="Ophthalmologist">Ophthalmologist</option>
                                     <option value="Cashier">Cashier</option>
-                                    <option value="Accountant">Accountant</option>
+                                    <option value="Accountant">Financial Accountant</option>
                                     <option value="Admin">Administrator</option>
+                                    <option value="MaterialAccountant">Material Accountant</option>
                                 </select>
                             </div>
                         </div>

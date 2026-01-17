@@ -14,7 +14,7 @@ USER_TYPE = [
 ]
 
 ROLES = [
-    ('NoRole', 'NoRole'),
+    ('NoRole', 'NoRole'), 
     ('Doctor', 'Doctor'),
     ('Receptionist', 'Receptionist'),
     ('Admin', 'Admin'),
@@ -30,6 +30,7 @@ ROLES_ACCOUNTING = [
     ('Accountant', 'Accountant'),
     ('Auditor', 'Auditor'),
     ('FinanceManager', 'FinanceManager'),
+    ('MaterialAccountant', 'MaterialAccountant'),
 ]
 
 
