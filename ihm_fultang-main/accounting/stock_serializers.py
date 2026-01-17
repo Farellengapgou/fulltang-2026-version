@@ -175,4 +175,3 @@ class TransferNoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = TransferNote
         fields = "__all__"
-

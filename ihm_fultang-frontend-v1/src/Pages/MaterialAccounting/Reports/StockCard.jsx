@@ -63,7 +63,7 @@ export function StockCard() {
     return (
         <AccountantDashBoard
             linkList={MaterialAccountingNavLink}
-            requiredRole={"Accountant"}
+            requiredRole={"MaterialAccountant"}
         >
             <AccountantNavBar />
             <div className="mx-auto p-12">

@@ -27,7 +27,9 @@ from accounting.api_views.stock_api_views.category_api_view import CategoryViewS
 from accounting.api_views.stock_api_views.depot_api_view import DepotViewSet
 from accounting.api_views.stock_api_views.supplier_api_view import SupplierViewSet
 from accounting.api_views.stock_api_views.stocklevels_api_view import StockLevelViewSet
+from accounting.api_views.stock_api_views.article_api_view import ArticleViewSet
 from accounting.api_views.stock_api_views.batch_api_view import BatchViewSet
+from accounting.api_views.stock_api_views.dashboard_api_view import MaterialDashboardAPIView
 from accounting.api_views.stock_api_views.reports_api_view import *
 
 
@@ -53,6 +55,9 @@ financial_router.register(r"journal-entries", JournalEntryViewSet, basename="jou
 # ======================= MATERIAL ACCOUNTING =================================
 # =============================================================================
 material_urlpatterns = [
+    # Dashboard
+    path('dashboard/overview/', MaterialDashboardAPIView.as_view(), name='material-dashboard-overview'),
+    
     # Stocks
     path('report/stock-status/', StockStatusReportAPI.as_view(), name='stock-status-report'),
     path('report/stock-valuation/', StockValuationReportAPI.as_view(), name='stock-valuation-report'),
@@ -90,6 +95,7 @@ material_router.register(r"receipts", GoodsReceiptNoteViewSet, basename="goods-r
 material_router.register(r"issues", GoodsIssueNoteViewSet, basename="goods-issues")
 material_router.register(r"inventories", InventoryViewSet, basename="inventories")
 material_router.register(r"transfers", TransferNoteViewSet, basename="transfers")
+material_router.register(r'articles', ArticleViewSet, basename='material-articles')
 material_router.register(r'categories', CategoryViewSet, basename='material-categories')
 material_router.register(r'warehouses', DepotViewSet, basename='material-warehouses')
 material_router.register(r'suppliers', SupplierViewSet, basename='material-suppliers')

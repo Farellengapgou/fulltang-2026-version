@@ -18,11 +18,15 @@ import {
     deleteWarehouse,
 } from "../../../Utils/api/materialAccounting.js";
 
+import { WarehouseModal } from "../Components/WarehouseModal.jsx";
+
 export function Warehouses() {
     const [warehouses, setWarehouses] = useState([]);
     const [filteredWarehouses, setFilteredWarehouses] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("");
+    const [showModal, setShowModal] = useState(false);
+    const [editingWarehouse, setEditingWarehouse] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const warehouseTypes = {
@@ -80,6 +84,11 @@ export function Warehouses() {
         }).format(amount);
     };
 
+    const handleEdit = (warehouse) => {
+        setEditingWarehouse(warehouse);
+        setShowModal(true);
+    };
+
     const handleDelete = async (id) => {
         if (window.confirm("Voulez-vous vraiment supprimer ce dépôt ?")) {
             try {
@@ -95,7 +104,7 @@ export function Warehouses() {
         return (
             <AccountantDashBoard
                 linkList={MaterialAccountingNavLink}
-                requiredRole={"Accountant"}
+                requiredRole={"MaterialAccountant"}
             >
                 <AccountantNavBar />
                 <div className="flex items-center justify-center min-h-screen">
@@ -111,7 +120,7 @@ export function Warehouses() {
     return (
         <AccountantDashBoard
             linkList={MaterialAccountingNavLink}
-            requiredRole={"Accountant"}
+            requiredRole={"MaterialAccountant"}
         >
             <AccountantNavBar />
             <div className="mx-auto p-12">
@@ -125,7 +134,13 @@ export function Warehouses() {
                             Gestion des lieux de stockage
                         </p>
                     </div>
-                    <button className="flex items-center px-4 py-2 bg-primary-end text-white rounded-lg hover:bg-teal-700 transition-all duration-300">
+                    <button
+                        onClick={() => {
+                            setEditingWarehouse(null);
+                            setShowModal(true);
+                        }}
+                        className="flex items-center px-4 py-2 bg-primary-end text-white rounded-lg hover:bg-teal-700 transition-all duration-300"
+                    >
                         <Plus className="h-5 w-5 mr-2" />
                         Nouveau dépôt
                     </button>
@@ -277,6 +292,7 @@ export function Warehouses() {
                                         <td className="px-6 py-4 bg-gray-50 rounded-r-xl">
                                             <div className="flex items-center justify-center gap-3">
                                                 <button
+                                                    onClick={() => handleEdit(warehouse)}
                                                     className="text-green-600 hover:text-green-800 transition-colors"
                                                     title="Modifier"
                                                 >
@@ -305,12 +321,25 @@ export function Warehouses() {
                         <p className="text-gray-600 mb-4">
                             Créez votre premier dépôt pour commencer
                         </p>
-                        <button className="px-4 py-2 bg-primary-end text-white rounded-lg hover:bg-teal-700 transition-all">
+                        <button
+                            onClick={() => {
+                                setEditingWarehouse(null);
+                                setShowModal(true);
+                            }}
+                            className="px-4 py-2 bg-primary-end text-white rounded-lg hover:bg-teal-700 transition-all"
+                        >
                             Créer un dépôt
                         </button>
                     </div>
                 )}
             </div>
+
+            <WarehouseModal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                onRefresh={loadWarehouses}
+                editingWarehouse={editingWarehouse}
+            />
         </AccountantDashBoard>
     );
 }

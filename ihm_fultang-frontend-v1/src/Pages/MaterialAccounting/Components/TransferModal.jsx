@@ -8,11 +8,11 @@ export function TransferModal({ isOpen, onClose, onRefresh }) {
     const [isLoading, setIsLoading] = useState(false);
 
     const [formData, setFormData] = useState({
-        from_warehouse: "",
-        to_warehouse: "",
+        from_warehouse: "", // Should be ID
+        to_warehouse: "", // Should be ID
         date: new Date().toISOString().split('T')[0],
         reference: "",
-        lines: [{ article: "", quantity: 1 }]
+        lines: [{ article: "", quantity: 1 }] // Article should be ID
     });
 
     useEffect(() => {
@@ -93,7 +93,7 @@ export function TransferModal({ isOpen, onClose, onRefresh }) {
                                 className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-end outline-none"
                             >
                                 <option value="">Sélectionner l'origine</option>
-                                {warehouses.map(w => <option key={w.id} value={w.name}>{w.name}</option>)}
+                                {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                             </select>
                         </div>
 
@@ -112,7 +112,7 @@ export function TransferModal({ isOpen, onClose, onRefresh }) {
                                 className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-end outline-none"
                             >
                                 <option value="">Sélectionner la destination</option>
-                                {warehouses.map(w => <option key={w.id} value={w.name}>{w.name}</option>)}
+                                {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                             </select>
                         </div>
 
@@ -161,7 +161,7 @@ export function TransferModal({ isOpen, onClose, onRefresh }) {
                                         className="w-full p-2 bg-white border border-gray-200 rounded-lg outline-none"
                                     >
                                         <option value="">Choisir un article</option>
-                                        {articles.map(a => <option key={a.id} value={a.article.name}>{a.article.name}</option>)}
+                                        {articles.map(a => <option key={a.id} value={a.article.id}>{a.article.name}</option>)}
                                     </select>
                                 </div>
                                 <div className="col-span-8 md:col-span-3 space-y-1">

@@ -9,9 +9,9 @@ export function GoodsIssueModal({ isOpen, onClose, onRefresh }) {
 
     const [formData, setFormData] = useState({
         type: "SALE",
-        warehouse: "",
+        warehouse: "", // Should be ID
         date: new Date().toISOString().split('T')[0],
-        lines: [{ article: "", quantity: 1 }]
+        lines: [{ article: "", quantity: 1 }] // Article should be ID
     });
 
     useEffect(() => {
@@ -102,7 +102,7 @@ export function GoodsIssueModal({ isOpen, onClose, onRefresh }) {
                                 className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none"
                             >
                                 <option value="">Sélectionner un dépôt</option>
-                                {warehouses.map(w => <option key={w.id} value={w.name}>{w.name}</option>)}
+                                {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                             </select>
                         </div>
                         <div className="space-y-2">
@@ -141,7 +141,7 @@ export function GoodsIssueModal({ isOpen, onClose, onRefresh }) {
                                     >
                                         <option value="">Choisir un article</option>
                                         {articles.map(a => (
-                                            <option key={a.id} value={a.article.name}>
+                                            <option key={a.id} value={a.article.id}>
                                                 {a.article.name} (Dispo: {a.physical_quantity})
                                             </option>
                                         ))}

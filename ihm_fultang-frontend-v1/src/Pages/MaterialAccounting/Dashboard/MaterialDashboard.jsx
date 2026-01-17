@@ -51,7 +51,7 @@ export function MaterialDashboard() {
 
     if (isLoading) {
         return (
-            <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"Accountant"}>
+            <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"MaterialAccountant"}>
                 <AccountantNavBar />
                 <div className="flex items-center justify-center min-h-screen">
                     <div className="text-center">
@@ -65,7 +65,7 @@ export function MaterialDashboard() {
 
     if (error) {
         return (
-            <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"Accountant"}>
+            <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"MaterialAccountant"}>
                 <AccountantNavBar />
                 <div className="flex items-center justify-center min-h-screen">
                     <div className="text-center p-8 bg-red-50 rounded-xl border border-red-200">
@@ -96,7 +96,7 @@ export function MaterialDashboard() {
     ];
 
     return (
-        <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"Accountant"}>
+        <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"MaterialAccountant"}>
             <AccountantNavBar />
             <div className="mx-auto p-12">
                 {/* Header */}

@@ -9,11 +9,11 @@ export function GoodsReceiptModal({ isOpen, onClose, onRefresh }) {
     const [isLoading, setIsLoading] = useState(false);
 
     const [formData, setFormData] = useState({
-        supplier: "",
-        warehouse: "",
+        supplier: "", // Should be ID
+        warehouse: "", // Should be ID
         date: new Date().toISOString().split('T')[0],
         reference: "",
-        lines: [{ article: "", quantity: 1, unit_price: 0 }]
+        lines: [{ article: "", quantity: 1, unit_price: 0 }] // Article should be ID
     });
 
     useEffect(() => {
@@ -92,7 +92,7 @@ export function GoodsReceiptModal({ isOpen, onClose, onRefresh }) {
                                 className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-end outline-none"
                             >
                                 <option value="">Sélectionner un fournisseur</option>
-                                {suppliers.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                                {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                             </select>
                         </div>
                         <div className="space-y-2">
@@ -104,7 +104,7 @@ export function GoodsReceiptModal({ isOpen, onClose, onRefresh }) {
                                 className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-end outline-none"
                             >
                                 <option value="">Sélectionner un dépôt</option>
-                                {warehouses.map(w => <option key={w.id} value={w.name}>{w.name}</option>)}
+                                {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                             </select>
                         </div>
                         <div className="space-y-2">
@@ -152,7 +152,7 @@ export function GoodsReceiptModal({ isOpen, onClose, onRefresh }) {
                                         className="w-full p-2 bg-white border border-gray-200 rounded-lg outline-none"
                                     >
                                         <option value="">Choisir un article</option>
-                                        {articles.map(a => <option key={a.id} value={a.article.name}>{a.article.name}</option>)}
+                                        {articles.map(a => <option key={a.id} value={a.article.id}>{a.article.name}</option>)}
                                     </select>
                                 </div>
                                 <div className="col-span-4 md:col-span-2 space-y-1">

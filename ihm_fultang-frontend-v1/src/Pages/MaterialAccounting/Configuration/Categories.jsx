@@ -17,6 +17,8 @@ import {
     deleteCategory,
 } from "../../../Utils/api/materialAccounting.js";
 
+import { CategoryModal } from "../Components/CategoryModal.jsx";
+
 export function Categories() {
     const [categories, setCategories] = useState([]);
     const [filteredCategories, setFilteredCategories] = useState([]);
@@ -78,7 +80,7 @@ export function Categories() {
         return (
             <AccountantDashBoard
                 linkList={MaterialAccountingNavLink}
-                requiredRole={"Accountant"}
+                requiredRole={"MaterialAccountant"}
             >
                 <AccountantNavBar />
                 <div className="flex items-center justify-center min-h-screen">
@@ -94,7 +96,7 @@ export function Categories() {
     return (
         <AccountantDashBoard
             linkList={MaterialAccountingNavLink}
-            requiredRole={"Accountant"}
+            requiredRole={"MaterialAccountant"}
         >
             <AccountantNavBar />
             <div className="mx-auto p-12">
@@ -231,8 +233,8 @@ export function Categories() {
                                         <td className="px-6 py-4 bg-gray-50 text-center">
                                             <span
                                                 className={`px-3 py-1 rounded-full text-xs font-medium ${category.is_active
-                                                        ? "bg-green-100 text-green-800"
-                                                        : "bg-red-100 text-red-800"
+                                                    ? "bg-green-100 text-green-800"
+                                                    : "bg-red-100 text-red-800"
                                                     }`}
                                             >
                                                 {category.is_active ? "Actif" : "Inactif"}
@@ -282,6 +284,13 @@ export function Categories() {
                     </div>
                 )}
             </div>
+
+            <CategoryModal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                onRefresh={loadCategories}
+                editingCategory={editingCategory}
+            />
         </AccountantDashBoard>
     );
 }

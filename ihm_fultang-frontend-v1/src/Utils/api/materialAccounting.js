@@ -1,8 +1,8 @@
 // Service API pour la Comptabilité Matière
 // Centralise tous les appels API avec possibilité d'utiliser des mock data
 
-const API_BASE_URL = '/api/v1/material-accounting';
-const USE_MOCK_DATA = true; // Switch to false when backend is ready
+const API_BASE_URL = import.meta.env.VITE_BACKEND_FULTANG_API_BASE_URL || 'http://127.0.0.1:8009/api/v1/material-accounting';
+const USE_MOCK_DATA = false; // Switch to false to use the backend
 
 // ==================== PERSISTENCE HELPERS ====================
 
@@ -144,16 +144,30 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Helper pour les appels API réels
 const apiCall = async (endpoint, options = {}) => {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const token = localStorage.getItem("token_key_fultang");
+
+    // Ensure endpoint starts with / if not empty
+    const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+
+    const response = await fetch(url, {
+        ...options,
         headers: {
             'Content-Type': 'application/json',
+            'Authorization': token ? `Bearer ${token}` : '',
             ...options.headers,
-        },
-        ...options,
+        }
     });
 
+    if (response.status === 204) return null; // Handle No Content
+
     if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
+        let errorData;
+        try {
+            errorData = await response.json();
+        } catch (e) {
+            errorData = { message: `API Error: ${response.status}` };
+        }
+        throw errorData;
     }
 
     return response.json();
@@ -205,7 +219,9 @@ export const getCategories = async (params = {}) => {
             results: mockCategories
         };
     }
-    return apiCall('/categories/', { method: 'GET' });
+    const query = new URLSearchParams(params).toString();
+    const response = await apiCall(`/categories/${query ? `?${query}` : ''}`, { method: 'GET' });
+    return Array.isArray(response) ? { results: response } : response;
 };
 
 export const getCategoryTree = async () => {
@@ -257,6 +273,51 @@ export const deleteCategory = async (id) => {
     return apiCall(`/categories/${id}/`, { method: 'DELETE' });
 };
 
+// ==================== ARTICLES ====================
+
+export const getArticles = async (params = {}) => {
+    if (USE_MOCK_DATA) {
+        await delay(600);
+        return {
+            count: 20,
+            results: initialStockLevels.map(s => s.article)
+        };
+    }
+    const query = new URLSearchParams(params).toString();
+    const response = await apiCall(`/articles/${query ? `?${query}` : ''}`, { method: 'GET' });
+    return Array.isArray(response) ? { results: response } : response;
+};
+
+export const createArticle = async (data) => {
+    if (USE_MOCK_DATA) {
+        await delay(700);
+        return { id: Date.now(), ...data };
+    }
+    return apiCall('/articles/', {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+};
+
+export const updateArticle = async (id, data) => {
+    if (USE_MOCK_DATA) {
+        await delay(700);
+        return { id, ...data };
+    }
+    return apiCall(`/articles/${id}/`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+    });
+};
+
+export const deleteArticle = async (id) => {
+    if (USE_MOCK_DATA) {
+        await delay(500);
+        return { success: true };
+    }
+    return apiCall(`/articles/${id}/`, { method: 'DELETE' });
+};
+
 // ==================== WAREHOUSES ====================
 
 export const getWarehouses = async (params = {}) => {
@@ -267,7 +328,9 @@ export const getWarehouses = async (params = {}) => {
             results: mockWarehouses
         };
     }
-    return apiCall('/warehouses/', { method: 'GET' });
+    const query = new URLSearchParams(params).toString();
+    const response = await apiCall(`/warehouses/${query ? `?${query}` : ''}`, { method: 'GET' });
+    return Array.isArray(response) ? { results: response } : response;
 };
 
 export const createWarehouse = async (data) => {
@@ -321,7 +384,9 @@ export const getSuppliers = async (params = {}) => {
             results: mockSuppliers
         };
     }
-    return apiCall('/suppliers/', { method: 'GET' });
+    const query = new URLSearchParams(params).toString();
+    const response = await apiCall(`/suppliers/${query ? `?${query}` : ''}`, { method: 'GET' });
+    return Array.isArray(response) ? { results: response } : response;
 };
 
 export const createSupplier = async (data) => {
@@ -378,7 +443,9 @@ export const getStockLevels = async (params = {}) => {
             results: results
         };
     }
-    return apiCall('/stock-levels/', { method: 'GET' });
+    const query = new URLSearchParams(params).toString();
+    const response = await apiCall(`/stock-levels/${query ? `?${query}` : ''}`, { method: 'GET' });
+    return Array.isArray(response) ? { results: response } : response;
 };
 
 // ==================== BATCHES ====================
@@ -393,7 +460,9 @@ export const getBatches = async (params = {}) => {
             results: results
         };
     }
-    return apiCall('/batches/', { method: 'GET' });
+    const query = new URLSearchParams(params).toString();
+    const response = await apiCall(`/batches/${query ? `?${query}` : ''}`, { method: 'GET' });
+    return Array.isArray(response) ? { results: response } : response;
 };
 
 export const getExpiringBatches = async (days = 90) => {
@@ -401,7 +470,7 @@ export const getExpiringBatches = async (days = 90) => {
         await delay(600);
         return mockBatches.filter(b => b.days_until_expiry <= days);
     }
-    return apiCall(`/batches/expiring-soon/?days=${days}`);
+    return apiCall(`/batches/near-expiry/?days=${days}`);
 };
 
 // ==================== MOVEMENTS ====================
@@ -421,7 +490,9 @@ export const getMovements = async (params = {}) => {
             results: results.reverse()
         };
     }
-    return apiCall('/movements/', { method: 'GET' });
+    const query = new URLSearchParams(params).toString();
+    const response = await apiCall(`/movements/${query ? `?${query}` : ''}`, { method: 'GET' });
+    return Array.isArray(response) ? { results: response } : response;
 };
 
 // ==================== REPORTS & ANALYTICS ====================
@@ -439,7 +510,8 @@ export const getStockCard = async (articleId, warehouseId, dateFrom, dateTo) => 
             ]
         };
     }
-    return apiCall(`/reports/stock-card/?article=${articleId}&warehouse=${warehouseId}`);
+    const response = await apiCall(`/reports/stock-card/?article=${articleId}&warehouse=${warehouseId}`);
+    return Array.isArray(response) ? { results: response } : response;
 };
 
 export const getPerpetualInventory = async (date) => {
@@ -529,7 +601,8 @@ export const getTurnoverRates = async () => {
             ]
         };
     }
-    return apiCall('/reports/turnover-rates/');
+    const response = await apiCall('/reports/turnover-rates/');
+    return Array.isArray(response) ? { results: response } : response;
 };
 
 export const getReconciliation = async () => {
@@ -544,17 +617,20 @@ export const getReconciliation = async () => {
             ]
         };
     }
-    return apiCall('/reports/reconciliation/');
+    const response = await apiCall('/reports/reconciliation/');
+    return Array.isArray(response) ? { results: response } : response;
 };
 
 // ==================== OPERATIONS ====================
 
-export const getGoodsReceipts = async () => {
+export const getGoodsReceipts = async (params = {}) => {
     if (USE_MOCK_DATA) {
         await delay(700);
         return { results: mockGoodsReceipts };
     }
-    return apiCall('/goods-receipts/');
+    const query = new URLSearchParams(params).toString();
+    const response = await apiCall(`/receipts/${query ? `?${query}` : ''}`, { method: 'GET' });
+    return Array.isArray(response) ? { results: response } : response;
 };
 
 export const getGoodsReceiptDetails = async (id) => {
@@ -593,15 +669,51 @@ export const createGoodsReceipt = async (data) => {
         saveToStorage(STORAGE_KEYS.GOODS_RECEIPTS, mockGoodsReceipts);
         return newReceipt;
     }
-    return apiCall('/goods-receipts/', { method: 'POST', body: JSON.stringify(data) });
+
+    // Multi-step creation for real backend
+    const headerPayload = {
+        receipt_date: data.date,
+        document_date: data.date, // Use same date for both
+        depot: data.warehouse,
+        supplier: data.supplier,
+        external_reference: data.reference,
+        receipt_type: 'PURCHASE'
+    };
+
+    const receipt = await apiCall('/receipts/', {
+        method: 'POST',
+        body: JSON.stringify(headerPayload)
+    });
+
+    if (data.lines && data.lines.length > 0) {
+        for (let i = 0; i < data.lines.length; i++) {
+            const line = data.lines[i];
+            await apiCall(`/receipts/${receipt.id}/lines/`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    article: line.article,
+                    quantity_received: line.quantity,
+                    quantity_ordered: line.quantity,
+                    unit_price: line.unit_price,
+                    batch_number: data.reference || `LOT-${Date.now()}`, // Fallback if no reference
+                    sequence: i + 1,
+                    line_amount: line.quantity * line.unit_price
+                })
+            });
+        }
+    }
+
+    return receipt;
 };
 
-export const getGoodsIssues = async () => {
+export const getGoodsIssues = async (params = {}) => {
     if (USE_MOCK_DATA) {
         await delay(700);
         return { results: mockGoodsIssues };
     }
-    return apiCall('/goods-issues/');
+    const query = new URLSearchParams(params).toString();
+    const response = await apiCall(`/issues/${query ? `?${query}` : ''}`, { method: 'GET' });
+    return Array.isArray(response) ? { results: response } : response;
 };
 
 export const createGoodsIssue = async (data) => {
@@ -619,15 +731,46 @@ export const createGoodsIssue = async (data) => {
         saveToStorage(STORAGE_KEYS.GOODS_ISSUES, mockGoodsIssues);
         return newIssue;
     }
-    return apiCall('/goods-issues/', { method: 'POST', body: JSON.stringify(data) });
+
+    // Multi-step creation for real backend
+    const headerPayload = {
+        issue_date: data.date,
+        issue_type: data.type,
+        depot: data.warehouse
+    };
+
+    const issue = await apiCall('/issues/', {
+        method: 'POST',
+        body: JSON.stringify(headerPayload)
+    });
+
+    if (data.lines && data.lines.length > 0) {
+        for (let i = 0; i < data.lines.length; i++) {
+            const line = data.lines[i];
+            await apiCall(`/issues/${issue.id}/lines/`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    article: line.article,
+                    quantity: line.quantity,
+                    sequence: i + 1,
+                    unit_price: 0, // Fallback, normally PMP
+                    line_amount: 0
+                })
+            });
+        }
+    }
+
+    return issue;
 };
 
-export const getTransfers = async () => {
+export const getTransfers = async (params = {}) => {
     if (USE_MOCK_DATA) {
         await delay(700);
         return { results: mockTransfers };
     }
-    return apiCall('/transfers/');
+    const query = new URLSearchParams(params).toString();
+    const response = await apiCall(`/transfers/${query ? `?${query}` : ''}`, { method: 'GET' });
+    return Array.isArray(response) ? { results: response } : response;
 };
 
 export const createTransfer = async (transferData) => {
@@ -644,7 +787,35 @@ export const createTransfer = async (transferData) => {
         saveToStorage(STORAGE_KEYS.TRANSFERS, mockTransfers);
         return newTransfer;
     }
-    return apiCall('/transfers/', { method: 'POST', body: JSON.stringify(transferData) });
+
+    // Multi-step creation for real backend
+    const headerPayload = {
+        planned_date: transferData.date,
+        source_depot: transferData.from_warehouse,
+        destination_depot: transferData.to_warehouse,
+        notes: transferData.reference || ""
+    };
+
+    const transfer = await apiCall('/transfers/', {
+        method: 'POST',
+        body: JSON.stringify(headerPayload)
+    });
+
+    if (transferData.lines && transferData.lines.length > 0) {
+        for (let i = 0; i < transferData.lines.length; i++) {
+            const line = transferData.lines[i];
+            await apiCall(`/transfers/${transfer.id}/lines/`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    article: line.article,
+                    quantity: line.quantity,
+                    sequence: i + 1
+                })
+            });
+        }
+    }
+
+    return transfer;
 };
 
 export const getTransferDetails = async (id) => {
@@ -668,12 +839,14 @@ export const getTransferDetails = async (id) => {
     return apiCall(`/transfers/${id}/`);
 };
 
-export const getPhysicalInventories = async () => {
+export const getPhysicalInventories = async (params = {}) => {
     if (USE_MOCK_DATA) {
         await delay(700);
         return { results: mockInventories };
     }
-    return apiCall('/inventories/');
+    const query = new URLSearchParams(params).toString();
+    const response = await apiCall(`/inventories/${query ? `?${query}` : ''}`, { method: 'GET' });
+    return Array.isArray(response) ? { results: response } : response;
 };
 
 export default {

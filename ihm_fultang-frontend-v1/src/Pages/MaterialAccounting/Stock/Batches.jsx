@@ -71,7 +71,7 @@ export function Batches() {
 
     if (isLoading) {
         return (
-            <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"Accountant"}>
+            <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"MaterialAccountant"}>
                 <AccountantNavBar />
                 <div className="flex items-center justify-center min-h-screen">
                     <div className="text-center">
@@ -84,7 +84,7 @@ export function Batches() {
     }
 
     return (
-        <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"Accountant"}>
+        <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"MaterialAccountant"}>
             <AccountantNavBar />
             <div className="mx-auto p-12">
                 <div className="flex justify-between items-center mb-6">

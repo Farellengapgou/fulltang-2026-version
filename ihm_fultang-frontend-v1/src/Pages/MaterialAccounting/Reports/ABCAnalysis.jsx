@@ -114,7 +114,7 @@ export function ABCAnalysis() {
     };
 
     return (
-        <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"Accountant"}>
+        <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"MaterialAccountant"}>
             <AccountantNavBar />
             <div className="mx-auto p-12">
                 <div className="mb-6">

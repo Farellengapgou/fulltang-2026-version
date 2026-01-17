@@ -1,19 +1,18 @@
 import loginBackground from "../../assets/logIn.png";
-import {FaExclamation} from "react-icons/fa";
-import {Link, useNavigate} from 'react-router-dom';
-import {useState} from "react";
+import { FaExclamation } from "react-icons/fa";
+import { Link, useNavigate } from 'react-router-dom';
+import { useState } from "react";
 import Wait from "../Modals/wait.jsx";
 import { Eye, EyeOff } from 'lucide-react';
-import {AppRoutesPaths as appRouterPaths} from "../../Router/appRouterPaths.js";
-import {useAuthentication} from "../../Utils/Provider.jsx";
+import { AppRoutesPaths as appRouterPaths } from "../../Router/appRouterPaths.js";
+import { useAuthentication } from "../../Utils/Provider.jsx";
 
 
 
 
 
 
-export function LoginPage()
-{
+export function LoginPage() {
 
 
     const [username, setUsername] = useState("");
@@ -21,7 +20,7 @@ export function LoginPage()
     const [loginError, setLoginError] = useState("");
     const [isLoginErrorPresent, setIsLoginErrorPresent] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const {isLoading, setIsLoading, login} = useAuthentication();
+    const { isLoading, setIsLoading, login } = useAuthentication();
     const navigate = useNavigate();
 
 
@@ -38,64 +37,53 @@ export function LoginPage()
         setIsLoading(true);
         const response = await login(data);
         console.log(response);
-        if (response === "Pharmacist")
-        {
+        if (response === "Pharmacist") {
             navigate(appRouterPaths.pharmacyPage);
         }
-        else if (response === "Doctor")
-        {
+        else if (response === "Doctor") {
             navigate(appRouterPaths.doctorPage);
         }
-        else if (response === "Nurse")
-        {
+        else if (response === "Nurse") {
             navigate(appRouterPaths.nursePage)
         }
-        else if (response === "Labtech")
-        {
+        else if (response === "Labtech") {
             navigate(appRouterPaths.laboratoryAssistantPage)
         }
-        else if (response === "Admin")
-        {
+        else if (response === "Admin") {
             navigate(appRouterPaths.adminHomePage)
         }
-        else if (response === "Receptionist")
-        {
+        else if (response === "Receptionist") {
             navigate(appRouterPaths.receptionistPage)
         }
-        else if (response === "Cashier")
-        {
+        else if (response === "Cashier") {
             navigate(appRouterPaths.cashierPage)
         }
-        else if (response === "Specialist")
-        {
+        else if (response === "Specialist") {
             navigate(appRouterPaths.specialistPage)
         }
-        else if (response === "Accountant")
-        {
+        else if (response === "Accountant") {
             navigate(appRouterPaths.financialAccountantHome)
         }
-        else if (response === "bad role")
-        {
+        else if (response === "MaterialAccountant") {
+            navigate(appRouterPaths.materialAccountingDashboard)
+        }
+        else if (response === "bad role") {
             setIsLoginErrorPresent(true);
             setLoginError("bad role")
         }
-        else if (response === "No role")
-        {
+        else if (response === "No role") {
             setIsLoginErrorPresent(true);
             setLoginError("You do not have a specialization, contact an administrator to complete your registration for the application.")
         }
-        if (response === 401)
-        {
+        if (response === 401) {
             setIsLoginErrorPresent(true);
             setLoginError("Invalid username or password, please retry!")
         }
-        else if (response === 404)
-        {
+        else if (response === 404) {
             setIsLoginErrorPresent(true);
             setLoginError("You're not registered in our application!")
         }
-        else
-        {
+        else {
             setIsLoginErrorPresent(true);
             setLoginError("An error occurred, please retry later!")
         }
@@ -107,19 +95,19 @@ export function LoginPage()
     return (
         <>
             <div className="flex flex-col"
-                 style={{
-                     backgroundImage: `url(${loginBackground})`,
-                     height: "100vh",
-                     backgroundSize: "cover",
-                     backgroundRepeat: "no-repeat",
-                 }}
+                style={{
+                    backgroundImage: `url(${loginBackground})`,
+                    height: "100vh",
+                    backgroundSize: "cover",
+                    backgroundRepeat: "no-repeat",
+                }}
             >
-                <p onClick={ ()=>navigate("/") } className="text-3xl text-white font-bold mt-6 ml-8 cursor-pointer">
+                <p onClick={() => navigate("/")} className="text-3xl text-white font-bold mt-6 ml-8 cursor-pointer">
                     FullTang
                 </p>
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <div className="flex ml-56 mt-28 w-[1400px] h-[480px]">
-                        <div className= "flex flex-col w-[620px]">
+                        <div className="flex flex-col w-[620px]">
                             <p className="text-white mt-28 mb-2 font-bold text-5xl ml-4">
                                 WELCOME ON FULTANG
                             </p>
@@ -132,9 +120,9 @@ export function LoginPage()
                             <p className="italic mt-4 text-blue-400 text-xl ">
                                 Note: this page is the hospital staff login page
                             </p>
-                            <button onClick={()=>navigate(appRouterPaths.helpCenterPage)} className="w-44 h-14  py-2 border-secondary border-2 text-secondary rounded-lg px-1 mt-4 font-bold hover:text-white hover:bg-secondary transition-all duration-300">
+                            <button onClick={() => navigate(appRouterPaths.helpCenterPage)} className="w-44 h-14  py-2 border-secondary border-2 text-secondary rounded-lg px-1 mt-4 font-bold hover:text-white hover:bg-secondary transition-all duration-300">
                                 <div className="flex justify-center items-center">
-                                    <FaExclamation className="mr-1 "/>
+                                    <FaExclamation className="mr-1 " />
                                     <p>Notify A problem</p>
                                 </div>
                             </button>
@@ -153,11 +141,11 @@ export function LoginPage()
                                     </label>
                                     <div className="bg-gray-300 h-12 mt-2 rounded-lg mb-4">
                                         <input type="text"
-                                               name="username"
-                                               autoComplete="username"
-                                               onChange={(e) => {setUsername(e.target.value)}}
-                                               className="w-full rounded-lg h-12 ml-2 mr-2 bg-gray-300 border-none outline:none focus:border-none ring-0 focus:outline-none focus:ring-0 autofill:shadow-[inset_0_0_0px_1000px_rgb(209,213,219)]"
-                                               placeholder={"Enter your username here"}/>
+                                            name="username"
+                                            autoComplete="username"
+                                            onChange={(e) => { setUsername(e.target.value) }}
+                                            className="w-full rounded-lg h-12 ml-2 mr-2 bg-gray-300 border-none outline:none focus:border-none ring-0 focus:outline-none focus:ring-0 autofill:shadow-[inset_0_0_0px_1000px_rgb(209,213,219)]"
+                                            placeholder={"Enter your username here"} />
                                     </div>
                                 </div>
                                 <div className="mt-5">
@@ -169,7 +157,7 @@ export function LoginPage()
                                             name="password"
                                             autoComplete="current-password"
                                             type={showPassword ? "text" : "password"}
-                                            onChange={(e) => {setPassword(e.target.value)}}
+                                            onChange={(e) => { setPassword(e.target.value) }}
                                             className="w-full rounded-lg h-12 ml-2 mr-10 bg-gray-300 border-none outline:none ring-0 focus:outline-none focus:ring-0"
                                             placeholder="Enter your password here"
                                         />
@@ -179,9 +167,9 @@ export function LoginPage()
                                             className="absolute right-2 p-2 hover:bg-gray-400 rounded-full transition-all duration-300"
                                         >
                                             {showPassword ? (
-                                                <EyeOff className="w-5 h-5 text-gray-600"/>
+                                                <EyeOff className="w-5 h-5 text-gray-600" />
                                             ) : (
-                                                <Eye className="w-5 h-5 text-gray-600"/>
+                                                <Eye className="w-5 h-5 text-gray-600" />
                                             )}
                                         </button>
                                     </div>
@@ -199,7 +187,7 @@ export function LoginPage()
                                 </div>*/}
 
                                 <button type="submit"
-                                        className="text-white text-2xl bg-gradient-to-r from-primary-start to-primary-end w-full h-12 rounded-lg mt-5 mb-5 font-bold">
+                                    className="text-white text-2xl bg-gradient-to-r from-primary-start to-primary-end w-full h-12 rounded-lg mt-5 mb-5 font-bold">
                                     Log In
                                 </button>
                             </form>
@@ -208,7 +196,7 @@ export function LoginPage()
                 </div>
 
             </div>
-            {isLoading && (<Wait/>)}
+            {isLoading && (<Wait />)}
         </>
     )
 }

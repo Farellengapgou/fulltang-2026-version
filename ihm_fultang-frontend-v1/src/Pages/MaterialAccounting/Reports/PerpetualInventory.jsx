@@ -44,7 +44,7 @@ export function PerpetualInventory() {
         : (inventoryData?.categories || []);
 
     return (
-        <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"Accountant"}>
+        <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"MaterialAccountant"}>
             <AccountantNavBar />
             <div className="mx-auto p-12">
                 <div className="flex justify-between items-center mb-6">

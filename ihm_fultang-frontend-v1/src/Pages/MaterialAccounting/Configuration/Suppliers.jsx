@@ -18,11 +18,15 @@ import {
     deleteSupplier,
 } from "../../../Utils/api/materialAccounting.js";
 
+import { SupplierModal } from "../Components/SupplierModal.jsx";
+
 export function Suppliers() {
     const [suppliers, setSuppliers] = useState([]);
     const [filteredSuppliers, setFilteredSuppliers] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("");
+    const [showModal, setShowModal] = useState(false);
+    const [editingSupplier, setEditingSupplier] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const supplierTypes = {
@@ -86,6 +90,11 @@ export function Suppliers() {
         });
     };
 
+    const handleEdit = (supplier) => {
+        setEditingSupplier(supplier);
+        setShowModal(true);
+    };
+
     const handleDelete = async (id) => {
         if (window.confirm("Voulez-vous vraiment supprimer ce fournisseur ?")) {
             try {
@@ -101,7 +110,7 @@ export function Suppliers() {
         return (
             <AccountantDashBoard
                 linkList={MaterialAccountingNavLink}
-                requiredRole={"Accountant"}
+                requiredRole={"MaterialAccountant"}
             >
                 <AccountantNavBar />
                 <div className="flex items-center justify-center min-h-screen">
@@ -117,7 +126,7 @@ export function Suppliers() {
     return (
         <AccountantDashBoard
             linkList={MaterialAccountingNavLink}
-            requiredRole={"Accountant"}
+            requiredRole={"MaterialAccountant"}
         >
             <AccountantNavBar />
             <div className="mx-auto p-12">
@@ -129,7 +138,13 @@ export function Suppliers() {
                             Gestion des fournisseurs et partenaires
                         </p>
                     </div>
-                    <button className="flex items-center px-4 py-2 bg-primary-end text-white rounded-lg hover:bg-teal-700 transition-all duration-300">
+                    <button
+                        onClick={() => {
+                            setEditingSupplier(null);
+                            setShowModal(true);
+                        }}
+                        className="flex items-center px-4 py-2 bg-primary-end text-white rounded-lg hover:bg-teal-700 transition-all duration-300"
+                    >
                         <Plus className="h-5 w-5 mr-2" />
                         Nouveau fournisseur
                     </button>
@@ -285,6 +300,7 @@ export function Suppliers() {
                                         <td className="px-6 py-4 bg-gray-50 rounded-r-xl">
                                             <div className="flex items-center justify-center gap-3">
                                                 <button
+                                                    onClick={() => handleEdit(supplier)}
                                                     className="text-green-600 hover:text-green-800 transition-colors"
                                                     title="Modifier"
                                                 >
@@ -313,12 +329,25 @@ export function Suppliers() {
                         <p className="text-gray-600 mb-4">
                             Créez votre premier fournisseur pour commencer
                         </p>
-                        <button className="px-4 py-2 bg-primary-end text-white rounded-lg hover:bg-teal-700 transition-all">
+                        <button
+                            onClick={() => {
+                                setEditingSupplier(null);
+                                setShowModal(true);
+                            }}
+                            className="px-4 py-2 bg-primary-end text-white rounded-lg hover:bg-teal-700 transition-all"
+                        >
                             Créer un fournisseur
                         </button>
                     </div>
                 )}
             </div>
+
+            <SupplierModal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                onRefresh={loadSuppliers}
+                editingSupplier={editingSupplier}
+            />
         </AccountantDashBoard>
     );
 }
