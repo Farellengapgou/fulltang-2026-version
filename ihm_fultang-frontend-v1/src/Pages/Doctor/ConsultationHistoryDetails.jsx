@@ -1,3 +1,4 @@
+// ...existing code...
 import {
     Microscope,
     Pill,
@@ -51,6 +52,23 @@ export function ConsultationHistoryDetails() {
     const [medicalParams, setMedicalParams] = useState(null);
     const [isLoadingParams, setIsLoadingParams] = useState(false);
 
+    // helper to build path robustly depending on axios baseURL
+    const buildLastParamsPath = (id) => {
+        try {
+            const base = axiosInstance?.defaults?.baseURL || "";
+            const normalized = base.endsWith("/") ? base.slice(0, -1) : base;
+            // if base already ends with /medical or contains /api/v1/medical, avoid adding extra "medical"
+            const hasMedical = normalized.endsWith("/medical") || normalized.includes("/api/v1/medical") || normalized.includes("/v1/medical");
+            if (hasMedical) {
+                return `/medical-folder/${id}/last-params/`;
+            }
+            // otherwise include /medical prefix
+            return `/medical/medical-folder/${id}/last-params/`;
+        } catch (e) {
+            return `/medical/medical-folder/${id}/last-params/`;
+        }
+    };
+
     // --- RÉCUPÉRATION DES PARAMÈTRES MÉDICAUX ---
     const fetchMedicalParams = async () => {
         if (!medicalFolderPageInfos?.id) {
@@ -64,20 +82,20 @@ export function ConsultationHistoryDetails() {
         try {
             console.log(`📊 Récupération des paramètres pour le dossier: ${medicalFolderPageInfos.id}`);
             
-            // ✅ URL CORRIGÉE - Ajout de /medical/
-            const response = await axiosInstance.get(
-                `/medical/medical-folder/${medicalFolderPageInfos.id}/last-params/`
-            );
+            const path = buildLastParamsPath(medicalFolderPageInfos.id);
+            console.log("🔗 Requête params path:", path, "baseURL:", axiosInstance?.defaults?.baseURL);
+            const response = await axiosInstance.get(path);
 
-            if (response.status === 200 && response.data) {
+            if (response?.status === 200 && response.data) {
                 console.log("✅ Paramètres récupérés depuis l'API:", response.data);
                 setMedicalParams(response.data);
+            } else {
+                console.warn("⚠️ Réponse inattendue lors récupération paramètres:", response);
+                setMedicalParams(medicalFolderPageInfos?.parameters || {});
             }
         } catch (error) {
-            console.error("❌ Erreur récupération paramètres (API):", error.message);
+            console.error("❌ Erreur récupération paramètres (API):", error);
             console.warn("📦 Utilisation des paramètres en cache local");
-            
-            // Fallback: utiliser les paramètres locaux
             setMedicalParams(medicalFolderPageInfos?.parameters || {});
         } finally {
             setIsLoadingParams(false);
@@ -89,6 +107,7 @@ export function ConsultationHistoryDetails() {
         if (medicalFolderPageInfos?.id) {
             fetchMedicalParams();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [medicalFolderPageInfos?.id]);
 
     // --- AFFICHAGE DES PARAMÈTRES ---
@@ -432,3 +451,4 @@ export function ConsultationHistoryDetails() {
         </CustomDashboard>
     )
 }
+// ...existing code...
