@@ -20,22 +20,19 @@ class FamilySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class ArticleSerializer(serializers.ModelSerializer):
-    total_stock = serializers.DecimalField(
-        max_digits=15, decimal_places=3, read_only=True
-    )
-    available_stock = serializers.DecimalField(
-        max_digits=15, decimal_places=3, read_only=True
-    )
+    total_stock = serializers.SerializerMethodField()
+    available_stock = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
         fields = "__all__"
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["total_stock"] = instance.get_total_stock()
-        data["available_stock"] = instance.get_available_stock()
-        return data
+    def get_total_stock(self, obj):
+        return obj.get_total_stock()
+
+    def get_available_stock(self, obj):
+        return obj.get_available_stock()
+
 
 class DepotSerializer(serializers.ModelSerializer):
     total_value = serializers.DecimalField(
@@ -52,27 +49,28 @@ class DepotSerializer(serializers.ModelSerializer):
         return data
 
 class StockSerializer(serializers.ModelSerializer):
-    available_quantity = serializers.DecimalField(
-        max_digits=15, decimal_places=3, read_only=True
-    )
+    available_quantity = serializers.SerializerMethodField()
 
     class Meta:
         model = Stock
         fields = "__all__"
 
+    def get_available_quantity(self, obj):
+        return obj.available_quantity
 class BatchSerializer(serializers.ModelSerializer):
-    is_expired = serializers.BooleanField(read_only=True)
-    days_until_expiry = serializers.IntegerField(read_only=True)
+    is_expired = serializers.SerializerMethodField()
+    days_until_expiry = serializers.SerializerMethodField()
 
     class Meta:
         model = Batch
         fields = "__all__"
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["is_expired"] = instance.is_expired()
-        data["days_until_expiry"] = instance.days_until_expiry()
-        return data
+    def get_is_expired(self, obj):
+        return obj.is_expired()
+
+    def get_days_until_expiry(self, obj):
+        return obj.days_until_expiry()
+
 
 class StockMovementSerializer(serializers.ModelSerializer):
     class Meta:
@@ -85,10 +83,28 @@ class StockMovementSerializer(serializers.ModelSerializer):
             "created_at"
         ]
 
+    def validate(self, data):
+        movement_type = data.get("movement_type")
+
+        if movement_type == "IN" and not data.get("destination_depot"):
+            raise serializers.ValidationError("Une entrée nécessite un dépôt destination")
+
+        if movement_type == "OUT" and not data.get("source_depot"):
+            raise serializers.ValidationError("Une sortie nécessite un dépôt source")
+
+        if data["quantity"] <= 0:
+            raise serializers.ValidationError("La quantité doit être positive")
+
+        return data
+
+
 class GoodsReceiptLineSerializer(serializers.ModelSerializer):
     class Meta:
         model = GoodsReceiptLine
         fields = "__all__"
+
+class GoodsReceiptConfirmSerializer(serializers.Serializer):
+    confirm = serializers.BooleanField()
 
 class GoodsReceiptNoteSerializer(serializers.ModelSerializer):
     lines = GoodsReceiptLineSerializer(many=True, read_only=True)

@@ -289,7 +289,6 @@ class PolyclinicProductCategory(MPTTModel):
     def __str__(self):
         return self.name
 
-
 class PolyclinicProduct(models.Model):
 
     category = models.ForeignKey('PolyclinicProductCategory', on_delete=models.CASCADE, related_name='products')
@@ -316,7 +315,6 @@ class PolyclinicProduct(models.Model):
 
     def is_low_stock(self):
         return self.current_stock <= self.min_stock_level
-
 
 class PolyclinicInventoryMovement(models.Model):
     MOVEMENT_TYPES = [
