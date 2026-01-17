@@ -1,4 +1,4 @@
-import {FaCog, FaEnvelope, FaSignOutAlt, FaPaperPlane} from "react-icons/fa";
+import {FaCog, FaEnvelope, FaSignOutAlt} from "react-icons/fa";
 import {Tooltip} from "antd";
 import {useAuthentication} from "../Utils/Provider.jsx";
 import userIcon from "../assets/userIcon.png"
@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axiosInstance from "../Utils/axiosInstance.js";
 import { AppRoutesPaths } from "../Router/appRouterPaths.js";
+import ChatWindow from "../GlobalComponents/ChatWindow.jsx";
 
 export function HelpCenter () {
     const {logout , userData} = useAuthentication();
@@ -13,14 +14,6 @@ export function HelpCenter () {
     const [categories, setCategories] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     
-    // États pour le chatbot
-    const [chatMessages, setChatMessages] = useState([
-        { sender: 'bot', text: '👋 Bonjour! Je suis votre assistant Fultang. Comment puis-je vous aider aujourd\'hui?' }
-    ]);
-    const [userInput, setUserInput] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [isChatOpen, setIsChatOpen] = useState(false);
-
     // États pour le formulaire de support
     const [supportForm, setSupportForm] = useState({
         topic: '',
@@ -80,37 +73,6 @@ export function HelpCenter () {
     const applyNavLinkBtnStyle = () => {
         return " w-12 h-10 mt-1 border-2 bg-gray-100 flex justify-center items-center rounded-xl shadow-xl hover:bg-secondary text-secondary text-xl hover:text-white transition-all duration-300";
     }
-
-    // Fonction pour envoyer un message au chatbot
-    const handleSendMessage = async () => {
-        if (!userInput.trim()) return;
-
-        const newMessage = { sender: 'user', text: userInput };
-        setChatMessages(prev => [...prev, newMessage]);
-        setUserInput('');
-        setIsLoading(true);
-
-        try {
-            const response = await axiosInstance.post('/chatbot/', {
-                question: userInput
-            });
-
-            const botResponse = { 
-                sender: 'bot', 
-                text: response.data.response || "Désolé, je n'ai pas pu traiter votre demande." 
-            };
-            setChatMessages(prev => [...prev, botResponse]);
-        } catch (error) {
-            console.error("Erreur chatbot:", error);
-            const errorMessage = { 
-                sender: 'bot', 
-                text: "Désolé, une erreur s'est produite. Veuillez réessayer ou contacter le support." 
-            };
-            setChatMessages(prev => [...prev, errorMessage]);
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     // Fonction pour soumettre le formulaire de support
     const handleSupportSubmit = async (e) => {
@@ -209,7 +171,7 @@ export function HelpCenter () {
                 {/* Flèche de retour */}
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex items-center text-blue-800 hover:text-blue-900 mt-4 ml-6"
+                    className="flex items-center text-[#50c2b9] hover:text-[#3aa99f] mt-4 ml-6"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -251,14 +213,14 @@ export function HelpCenter () {
                             .map((category, index) => (
                                 <div
                                     key={index}
-                                    className="bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow"
+                                    className="bg-white p-6 rounded-lg shadow-md cursor-pointer"
                                     onClick={() => {
                                         const target = normalizeHelpLink(category.link);
                                         console.log("Navigating to:", target);
                                         navigate(target);
                                     }}
                                 >
-                                    <h3 className="text-lg font-medium mb-2 text-blue-900">
+                                    <h3 className="text-lg font-medium mb-2">
                                         {category.title}
                                     </h3>
                                     <p className="text-gray-600">{category.description}</p>
@@ -275,78 +237,15 @@ export function HelpCenter () {
                         {popularArticles.map((article, index) => (
                             <div 
                                 key={index}
-                                className="bg-white p-4 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow"
+                                className="bg-white p-4 rounded-lg shadow-md cursor-pointer"
                                 onClick={() => navigate(article.link)}
                             >
-                                <h3 className="text-lg font-medium text-blue-900 mb-1">
+                                <h3 className="text-lg font-medium mb-1">
                                     {article.title}
                                 </h3>
                                 <p className="text-sm text-gray-600">{article.description}</p>
                             </div>
                         ))}
-                    </div>
-                </div>
-
-                {/* Chatbot Section */}
-                <div className="container mx-auto mt-8 px-6">
-                    <h2 className="text-xl font-semibold mb-4">Assistant Virtuel</h2>
-                    <div className="bg-white rounded-lg shadow-md">
-                        <div 
-                            className="p-4 bg-blue-900 text-white rounded-t-lg cursor-pointer flex justify-between items-center"
-                            onClick={() => setIsChatOpen(!isChatOpen)}
-                        >
-                            <h3 className="font-medium">💬 Discutez avec notre assistant</h3>
-                            <span>{isChatOpen ? '▼' : '▶'}</span>
-                        </div>
-                        
-                        {isChatOpen && (
-                            <>
-                                <div className="h-80 overflow-y-auto p-4 space-y-3 bg-gray-50">
-                                    {chatMessages.map((msg, idx) => (
-                                        <div
-                                            key={idx}
-                                            className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                                        >
-                                            <div
-                                                className={`max-w-[70%] p-3 rounded-lg ${
-                                                    msg.sender === 'user'
-                                                        ? 'bg-blue-900 text-white'
-                                                        : 'bg-white border border-gray-200'
-                                                }`}
-                                            >
-                                                <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {isLoading && (
-                                        <div className="flex justify-start">
-                                            <div className="bg-white border border-gray-200 p-3 rounded-lg">
-                                                <p className="text-sm text-gray-500">En train d'écrire...</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                                
-                                <div className="p-4 border-t flex gap-2">
-                                    <input
-                                        type="text"
-                                        value={userInput}
-                                        onChange={(e) => setUserInput(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                                        placeholder="Posez votre question..."
-                                        className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800"
-                                        disabled={isLoading}
-                                    />
-                                    <button
-                                        onClick={handleSendMessage}
-                                        disabled={isLoading || !userInput.trim()}
-                                        className="bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
-                                    >
-                                        <FaPaperPlane />
-                                    </button>
-                                </div>
-                            </>
-                        )}
                     </div>
                 </div>
 
@@ -389,7 +288,7 @@ export function HelpCenter () {
                             
                             <button
                                 type="submit"
-                                className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition"
+                                className="bg-[#50c2b9] text-white px-6 py-2 rounded-lg hover:bg-[#3aa99f] transition"
                             >
                                 Envoyer
                             </button>
@@ -407,18 +306,19 @@ export function HelpCenter () {
                 </div>
 
                 {/* Footer */}
-                <footer className="bg-gray-800 text-white mt-8 py-6">
+                <footer className="bg-primary-end text-white mt-8 py-6">
                     <div className="container mx-auto px-6">
                         <div className="flex justify-between items-center">
                             <p>© 2025 Fultang Clinic. Tous droits réservés.</p>
                             <div className="flex space-x-4">
-                                <a href="#" className="hover:text-blue-500">Politique de confidentialité</a>
-                                <a href="#" className="hover:text-blue-500">Conditions d'utilisation</a>
+                                <a href="#" className="hover:text-gray-200">Politique de confidentialité</a>
+                                <a href="#" className="hover:text-gray-200">Conditions d'utilisation</a>
                             </div>
                         </div>
                     </div>
                 </footer>
             </div>
+            <ChatWindow />
         </div>
     );
 }

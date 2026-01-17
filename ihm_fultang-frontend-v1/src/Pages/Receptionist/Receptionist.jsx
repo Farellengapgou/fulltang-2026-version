@@ -1,5 +1,5 @@
 import {ReceptionistNavBar} from "./ReceptionistNavBar.jsx";
-import {FaArrowLeft, FaArrowRight, FaEdit, FaEye, FaPlus, FaSearch,} from "react-icons/fa";
+import {FaArrowLeft, FaArrowRight, FaEdit, FaEye, FaPlus, FaSearch, FaCalendarPlus} from "react-icons/fa";
 import {Tooltip} from "antd";
 import {DashBoard} from "../../GlobalComponents/DashBoard.jsx";
 import {receptionistNavLink} from "./receptionistNavLink.js";
@@ -9,6 +9,7 @@ import {SuccessModal} from "../Modals/SuccessModal.jsx";
 import Wait from "../Modals/wait.jsx";
 import {ViewPatientDetailsModal} from "./ViewPatientDetailsModal.jsx";
 import {EditPatientInfosModal} from "./EditPatientInfosModal.jsx";
+import { ScheduleSurgeryModal } from "./ScheduleSurgeryModal.jsx";
 import axiosInstance from "../../Utils/axiosInstance.js";
 import Loader from "../../GlobalComponents/Loader.jsx";
 import  noPatientImage from "../../assets/noPatients.png";
@@ -23,6 +24,8 @@ export function Receptionist()
     const [canOpenAddNewPatientModal, setCanOpenAddNewPatientModal] = useState(false);
     const [canOpenSuccessModal, setCanOPenSuccessModal] = useState(false);
     const [canOpenViewPatientDetailModal, setCanOpenViewPatientDetailModal] = useState(false);
+    const [canOpenScheduleSurgeryModal, setCanOpenScheduleSurgeryModal] = useState(false);
+    const [selectedPatientForSurgery, setSelectedPatientForSurgery] = useState(null);
     const [successMessage, setSuccessMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [selectedPatientDetails, setSelectedPatientDetails] = useState({});
@@ -215,6 +218,16 @@ export function Receptionist()
                                                                     <FaEdit/>
                                                                 </button>
                                                             </Tooltip>
+                                                            <Tooltip placement={"right"} title={"Schedule surgery"}>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setSelectedPatientForSurgery(patient);
+                                                                        setCanOpenScheduleSurgeryModal(true);
+                                                                    }}
+                                                                    className="flex items-center justify-center w-9 h-9 text-blue-500 text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300">
+                                                                    <FaCalendarPlus/>
+                                                                </button>
+                                                            </Tooltip>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -305,6 +318,14 @@ export function Receptionist()
                         onClose={() => {
                             setCanOpenViewPatientDetailModal(false)
                         }}
+                    />
+                    <ScheduleSurgeryModal
+                        isOpen={canOpenScheduleSurgeryModal}
+                        onClose={() => setCanOpenScheduleSurgeryModal(false)}
+                        patient={selectedPatientForSurgery}
+                        setCanOpenSuccessModal={setCanOPenSuccessModal}
+                        setSuccessMessage={setSuccessMessage}
+                        setIsLoading={setIsLoading}
                     />
                     {isLoading && <Wait/>}
                 </>

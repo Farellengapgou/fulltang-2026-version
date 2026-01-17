@@ -46,6 +46,8 @@ export function AppRoute()
     const DoctorPatientList = React.lazy(async () => ({default: (await import("../Pages/Doctor/DoctorPatientList.jsx")).DoctorPatientList}));
     const DoctorConsultationList = React.lazy(async () => ({default: (await import("../Pages/Doctor/DoctorConsultationList.jsx")).DoctorConsultationList}));
     const DoctorAppointments = React.lazy(async () => ({default: (await import("../Pages/Doctor/AppointmentList.jsx")).AppointmentList}));
+    const DoctorMessages = React.lazy(async () => ({default: (await import("../Pages/Doctor/DoctorMessagePage.jsx")).DoctorMessagePage}));
+
     const DoctorConsultationHistory = React.lazy(async () => ({default: (await import("../Pages/Doctor/ConsultationHistory.jsx")).ConsultationHistory}));
     const DoctorConsultationDetails = React.lazy(async () => ({default: (await import("../Pages/Doctor/DoctorConsultationDetail.jsx")).DoctorConsultationDetails}));
     const DoctorConsultationHistoryDetails = React.lazy(async () => ({default: (await import("../Pages/Doctor/ConsultationHistoryDetails.jsx")).ConsultationHistoryDetails}));
@@ -122,6 +124,7 @@ export function AppRoute()
                 <Route path={AppRoutesPaths.doctorExamList} element={<DoctorExamList />} />
                 <Route path={AppRoutesPaths.doctorConsultationHistory} element={<DoctorConsultationHistory />} />
                 <Route path={AppRoutesPaths.doctorAppointment} element={<DoctorAppointments />} />
+                <Route path={AppRoutesPaths.doctorMessage} element={<DoctorMessages />} />
                 <Route path={AppRoutesPaths.doctorPatientList} element={<DoctorPatientList />} />
                 <Route path={AppRoutesPaths.doctorConsultationList} element={<DoctorConsultationList />} />
                 <Route path={AppRoutesPaths.doctorConsultationDetailsPage} element={<DoctorConsultationDetails />} />

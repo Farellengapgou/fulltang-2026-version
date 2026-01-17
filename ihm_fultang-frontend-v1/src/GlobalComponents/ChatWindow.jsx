@@ -117,7 +117,7 @@ const ChatWindow = () => {
             />
             <button
               onClick={sendMessage}
-              className="ml-2 p-2 bg-gradient-to-r from-primary-start to-primary-end text-white rounded-full hover:opacity-90 transition-opacity duration-300"
+              className="ml-2 p-2 bg-[#50c2b9] text-white rounded-full hover:bg-[#3aa99f] transition-colors duration-300"
             >
               <SendIcon />
             </button>

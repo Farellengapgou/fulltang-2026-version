@@ -49,7 +49,7 @@ def patient_access_notification(sender, instance, created, **kwargs):
         recipient=recipient,
         event_type="PATIENT_CREATED",
         priority="GREEN",
-        message="Un nouveau patient a été ajouté à votre liste.",
+        message="Nouvelle consultation ajoutée pour un patient.",
         data={"patient_id": instance.idPatient_id},
     )
     if settings.EMAIL_NOTIFICATIONS_ENABLED:
