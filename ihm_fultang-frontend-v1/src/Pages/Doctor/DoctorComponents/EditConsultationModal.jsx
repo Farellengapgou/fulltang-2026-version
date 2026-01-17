@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Calendar } from "lucide-react"
 import Modal from "./Modal"
 import PropTypes from "prop-types";
 
@@ -17,15 +18,45 @@ const EditConsultationModal = ({ isOpen, onClose, consultation, onSave }) => {
 
 
     const [editedConsultation, setEditedConsultation] = useState(consultation);
+    const [dateDisplay, setDateDisplay] = useState("");
+    const [dateError, setDateError] = useState("");
+
+    const MIN_DATE = new Date().toISOString().split("T")[0];
+
+    function formatDateForDisplay(dateString) {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        const options = { day: '2-digit', month: 'long', year: 'numeric' };
+        return date.toLocaleDateString('fr-FR', options);
+    }
 
     console.log(consultation);
 
     useEffect(() => {
-        setEditedConsultation(consultation)
+        setEditedConsultation(consultation);
+        if (consultation?.appointment?.atDate) {
+            setDateDisplay(formatDateForDisplay(consultation.appointment.atDate));
+        }
     }, [consultation])
 
     const handleChange = (e, section, index = null) => {
         const { name, value } = e.target
+
+        if (name === 'appointmentDate' || name === 'atDate') {
+            const selectedDate = new Date(value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            selectedDate.setHours(0, 0, 0, 0);
+
+            if (selectedDate < today) {
+                setDateError('Le rendez-vous ne peut pas être dans le passé');
+                return;
+            }
+
+            setDateError('');
+            setDateDisplay(formatDateForDisplay(value));
+        }
+
         if (section) {
             if (index !== null) {
                 setEditedConsultation((prev) => ({
@@ -164,18 +195,28 @@ const EditConsultationModal = ({ isOpen, onClose, consultation, onSave }) => {
                 {/* Rendez-vous */}
                 <div className="space-y-4">
                     <h3 className="text-xl font-semibold">Rendez-vous</h3>
+                    {dateError && <p className="text-red-500 font-bold text-sm">{dateError}</p>}
                     <div>
                         <label htmlFor="appointmentDate" className="block text-sm font-medium text-gray-700 mb-2">
                             Date du prochain rendez-vous
                         </label>
-                        <input
-                            type="date"
-                            id="appointmentDate"
-                            name="appointmentDate"
-                            value={editedConsultation?.appointment?.atDate}
-                            onChange={(e) => handleChange(e, "appointment")}
-                            className="w-full p-2 border-2 border-gray-300 rounded-lg"
-                        />
+                        <div className="relative">
+                            <input
+                                type="date"
+                                id="appointmentDate"
+                                name="appointmentDate"
+                                value={editedConsultation?.appointment?.atDate}
+                                onChange={(e) => handleChange(e, "appointment")}
+                                min={MIN_DATE}
+                                className="absolute opacity-0 w-full h-full cursor-pointer z-10"
+                            />
+                            <div className="w-full p-2 border-2 border-gray-300 rounded-lg bg-white cursor-pointer flex items-center justify-between">
+                                <span className={`${editedConsultation?.appointment?.atDate ? 'text-gray-900 font-medium' : 'text-gray-400'} text-sm`}>
+                                    {dateDisplay || 'Sélectionner une date de rendez-vous'}
+                                </span>
+                                <Calendar className="w-5 h-5 text-gray-400" />
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label htmlFor="appointmentTime" className="block text-sm font-medium text-gray-700 mb-2">

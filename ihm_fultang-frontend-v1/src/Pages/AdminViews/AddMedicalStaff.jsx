@@ -7,13 +7,18 @@ import axiosInstance from "../../Utils/axiosInstance.js";
 import {SuccessModal} from "../Modals/SuccessModal.jsx";
 import {ErrorModal} from "../Modals/ErrorModal.jsx";
 import Wait from "../Modals/wait.jsx";
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Calendar } from 'lucide-react';
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css';
 
 export function AddMedicalStaff() {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [dateDisplay, setDateDisplay] = useState("");
+    const [dateError, setDateError] = useState("");
+
+    const MIN_DATE = "1900-01-01";
+    const MAX_DATE = new Date().toISOString().split("T")[0];
 
     const [medicalStaffData, setMedicalStaffData] = useState({
         first_name: '',
@@ -33,8 +38,39 @@ export function AddMedicalStaff() {
         userType:'',
     });
 
+    function formatDateForDisplay(dateString) {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        const options = { day: '2-digit', month: 'long', year: 'numeric' };
+        return date.toLocaleDateString('fr-FR', options);
+    }
+
     function handleChange (e) {
         const { name, value } = e.target;
+
+        if (name === 'birthDate') {
+            const selectedDate = new Date(value);
+            const today = new Date();
+            const minDate = new Date(MIN_DATE);
+
+            if (selectedDate > today) {
+                setDateError('La date de naissance ne peut pas être dans le futur');
+                setMedicalStaffData(prevData => ({ ...prevData, birthDate: '' }));
+                setDateDisplay('');
+                return;
+            }
+
+            if (selectedDate < minDate) {
+                setDateError('La date de naissance ne peut pas être antérieure à 1900');
+                setMedicalStaffData(prevData => ({ ...prevData, birthDate: '' }));
+                setDateDisplay('');
+                return;
+            }
+
+            setDateError('');
+            setDateDisplay(formatDateForDisplay(value));
+        }
+
         setMedicalStaffData(prevData => ({
             ...prevData,
             [name]: value
@@ -199,19 +235,30 @@ export function AddMedicalStaff() {
                         </div>
 
 
+                        {dateError && <p className="text-red-500 font-bold text-sm">{dateError}</p>}
                         <div className="grid grid-cols-3 gap-2">
                             <div>
                                 <label className={applyLabelStyle()}>
                                     Birth Date
                                 </label>
-                                <input
-                                    type="date"
-                                    name="birthDate"
-                                    value={medicalStaffData.birthDate}
-                                    onChange={handleChange}
-                                    className={applyInputStyle()}
-                                    required
-                                />
+                                <div className="relative">
+                                    <input
+                                        type="date"
+                                        name="birthDate"
+                                        value={medicalStaffData.birthDate}
+                                        onChange={handleChange}
+                                        max={MAX_DATE}
+                                        min={MIN_DATE}
+                                        className="absolute opacity-0 w-full h-full cursor-pointer z-10"
+                                        required
+                                    />
+                                    <div className={`${applyInputStyle()} flex items-center justify-between bg-white cursor-pointer`}>
+                                        <span className={`${medicalStaffData.birthDate ? 'text-gray-900 font-medium' : 'text-gray-400'} text-sm`}>
+                                            {dateDisplay || 'Sélectionner une date de naissance'}
+                                        </span>
+                                        <Calendar className="w-5 h-5 text-gray-400" />
+                                    </div>
+                                </div>
                             </div>
                             <div>
                                 <label className={applyLabelStyle()}>

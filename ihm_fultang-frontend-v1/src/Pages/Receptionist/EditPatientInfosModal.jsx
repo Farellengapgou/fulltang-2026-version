@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
+import { Calendar } from "lucide-react";
 import axiosInstance from "../../Utils/axiosInstance.js";
 
 export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal, setSuccessMessage, setIsLoading, patientData }) {
@@ -32,6 +33,10 @@ export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal,
     const [isDay, setIsDay] = useState(false);
     const [age, setAge] = useState(0);
     const [dateError, setDateError] = useState("");
+    const [dateDisplay, setDateDisplay] = useState("");
+
+    const MIN_DATE = "1900-01-01";
+    const MAX_DATE = new Date().toISOString().split("T")[0];
     const [checkedFields, setCheckedFields] = useState({
         firstName: false,
         lastName: false,
@@ -49,8 +54,16 @@ export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal,
         if (patientData) {
             setFormData(patientData);
             setAge(calculateAge(patientData.birthDate));
+            setDateDisplay(formatDateForDisplay(patientData.birthDate));
         }
     }, [patientData]);
+
+    function formatDateForDisplay(dateString) {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        const options = { day: '2-digit', month: 'long', year: 'numeric' };
+        return date.toLocaleDateString('fr-FR', options);
+    }
 
 
     function calculateAge(birthDate) {
@@ -99,13 +112,26 @@ export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal,
         if (name === 'birthDate') {
             const selectedDate = new Date(value);
             const today = new Date();
+            const minDate = new Date(MIN_DATE);
+
             if (selectedDate > today) {
-                setDateError('The birth date cannot be in the future');
-            } else {
-                setDateError('');
-                setFormData(prevData => ({ ...prevData, [name]: value }));
-                setAge(calculateAge(value));
+                setDateError('La date de naissance ne peut pas être dans le futur');
+                setFormData(prevData => ({ ...prevData, [name]: '' }));
+                setDateDisplay('');
+                return;
             }
+
+            if (selectedDate < minDate) {
+                setDateError('La date de naissance ne peut pas être antérieure à 1900');
+                setFormData(prevData => ({ ...prevData, [name]: '' }));
+                setDateDisplay('');
+                return;
+            }
+
+            setDateError('');
+            setFormData(prevData => ({ ...prevData, [name]: value }));
+            setDateDisplay(formatDateForDisplay(value));
+            setAge(calculateAge(value));
         }
         else {
             setFormData(prevData => ({ ...prevData, [name]: value }));
@@ -245,17 +271,26 @@ export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal,
                                 <div className="flex-1">
                                     <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-1">Birth
                                         Date</label>
-                                    <input
-                                        type="date"
-                                        id="birthDate"
-                                        name="birthDate"
-                                        placeholder="Enter patient's birth date"
-                                        value={formData.birthDate}
-                                        onChange={handleChange}
-                                        className={applyFormStyle()}
-                                        required={checkedFields.birthDate}
-                                        disabled={!checkedFields.birthDate}
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="date"
+                                            id="birthDate"
+                                            name="birthDate"
+                                            value={formData.birthDate}
+                                            onChange={handleChange}
+                                            max={MAX_DATE}
+                                            min={MIN_DATE}
+                                            className="absolute opacity-0 w-full h-full cursor-pointer z-10"
+                                            required={checkedFields.birthDate}
+                                            disabled={!checkedFields.birthDate}
+                                        />
+                                        <div className={`${applyFormStyle()} flex items-center justify-between bg-white ${!checkedFields.birthDate ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                                            <span className={`${formData.birthDate ? 'text-gray-900 font-medium' : 'text-gray-400'} text-sm`}>
+                                                {dateDisplay || 'Sélectionner une date de naissance'}
+                                            </span>
+                                            <Calendar className="w-5 h-5 text-gray-400" />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 

@@ -38,6 +38,8 @@ export function FinancialReport() {
   const [filterType, setFilterType] = useState("currentMonth");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [startDateDisplay, setStartDateDisplay] = useState("");
+  const [endDateDisplay, setEndDateDisplay] = useState("");
   const [data, setData] = useState([]);
   const [summaryData, setSummaryData] = useState({
     total: 0,
@@ -45,6 +47,13 @@ export function FinancialReport() {
     examTotal: 0,
     consultationTotal: 0,
   });
+
+  function formatDateForDisplay(dateString) {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    return date.toLocaleDateString('fr-FR', options);
+  }
 
   useEffect(() => {
     // Récupérer les factures et statistiques côté backend et construire les séries mensuelles
@@ -313,18 +322,40 @@ export function FinancialReport() {
 
           {filterType === "custom" && (
             <div className="flex gap-4">
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
+              <div className="relative">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => {
+                    setStartDate(e.target.value);
+                    setStartDateDisplay(formatDateForDisplay(e.target.value));
+                  }}
+                  className="absolute opacity-0 w-full h-full cursor-pointer z-10"
+                />
+                <div className="px-4 py-2 border border-gray-300 rounded-lg bg-white cursor-pointer flex items-center space-x-2 min-w-[160px]">
+                  <Calendar className="h-4 w-4 text-gray-400" />
+                  <span className={`${startDate ? 'text-gray-900 font-medium' : 'text-gray-400'} text-sm`}>
+                    {startDateDisplay || 'Date début'}
+                  </span>
+                </div>
+              </div>
+              <div className="relative">
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => {
+                    setEndDate(e.target.value);
+                    setEndDateDisplay(formatDateForDisplay(e.target.value));
+                  }}
+                  className="absolute opacity-0 w-full h-full cursor-pointer z-10"
+                />
+                <div className="px-4 py-2 border border-gray-300 rounded-lg bg-white cursor-pointer flex items-center space-x-2 min-w-[160px]">
+                  <Calendar className="h-4 w-4 text-gray-400" />
+                  <span className={`${endDate ? 'text-gray-900 font-medium' : 'text-gray-400'} text-sm`}>
+                    {endDateDisplay || 'Date fin'}
+                  </span>
+                </div>
+              </div>
             </div>
           )}
         </div>

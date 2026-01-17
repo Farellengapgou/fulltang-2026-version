@@ -150,11 +150,15 @@ export function PrescribeDoctor({isOpen, onClose, patientInfos, setCanOpenSucces
                                         type="date"
                                         id="appointmentDate"
                                         value={new Date().toISOString().split('T')[0]}
-                                        className="block w-full pl-10 pr-4 py-2 text-base border-gray-300 border-2 focus:border-2 focus:border-primary-end transition-all duration-500 focus:outline-none  rounded-md"
+                                        className="absolute opacity-0 w-full h-full"
                                         readOnly
                                     />
-                                    <Calendar
-                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"/>
+                                    <div className="block w-full px-4 py-2 text-base border-gray-300 border-2 rounded-md bg-gray-50 flex items-center justify-between">
+                                        <span className="text-gray-900 font-medium text-sm">
+                                            {new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                                        </span>
+                                        <Calendar className="h-5 w-5 text-gray-400"/>
+                                    </div>
                                 </div>
                             </div>
 

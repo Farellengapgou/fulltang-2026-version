@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react";
-import { Search, Plus, Edit2, Trash2, Eye, BookOpen, CheckCircle, FileText, TrendingDown, TrendingUp, AlertTriangle, Save, Send, Filter } from "lucide-react";
+import { Search, Plus, Edit2, Trash2, Eye, BookOpen, CheckCircle, FileText, TrendingDown, TrendingUp, AlertTriangle, Save, Send, Filter, Calendar } from "lucide-react";
 import {AccountantDashBoard} from "../../Accountant/Components/AccountantDashboard.jsx";
 import { v4 as uuidv4 } from 'uuid';
 import {FinancialAccountantNavLink} from "../NavLink.js";
@@ -162,6 +162,20 @@ export function JournalEntries() {
         const [totalDebit, setTotalDebit] = useState(0);
         const [totalCredit, setTotalCredit] = useState(0);
         const [isBalanced, setIsBalanced] = useState(false);
+        const [dateDisplay, setDateDisplay] = useState("");
+
+        function formatDateForDisplay(dateString) {
+            if (!dateString) return "";
+            const date = new Date(dateString);
+            const options = { day: '2-digit', month: 'long', year: 'numeric' };
+            return date.toLocaleDateString('fr-FR', options);
+        }
+
+        useEffect(() => {
+            if (formData.date) {
+                setDateDisplay(formatDateForDisplay(formData.date));
+            }
+        }, [formData.date]);
 
         useEffect(() => {
             const debits = formData.lines.reduce((sum, line) => sum + (parseFloat(line.debit) || 0), 0);
@@ -258,8 +272,21 @@ export function JournalEntries() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                                    <input type="date" value={formData.date} onChange={(e) => handleInputChange(e, 'date')} disabled={!canEdit}
-                                           className={`w-full px-4 py-3 border border-gray-300 rounded-xl ${themeColors.focusRing} transition-all ${!canEdit ? 'bg-gray-100' : 'hover:border-teal-400'}`} />
+                                    <div className="relative">
+                                        <input
+                                            type="date"
+                                            value={formData.date}
+                                            onChange={(e) => handleInputChange(e, 'date')}
+                                            disabled={!canEdit}
+                                            className="absolute opacity-0 w-full h-full cursor-pointer z-10"
+                                        />
+                                        <div className={`w-full px-4 py-3 border border-gray-300 rounded-xl ${themeColors.focusRing} transition-all ${!canEdit ? 'bg-gray-100 cursor-not-allowed' : 'hover:border-teal-400 bg-white cursor-pointer'} flex items-center justify-between`}>
+                                            <span className={`${formData.date ? 'text-gray-900 font-medium' : 'text-gray-400'} text-sm`}>
+                                                {dateDisplay || 'Sélectionner une date'}
+                                            </span>
+                                            <Calendar className="w-5 h-5 text-gray-400" />
+                                        </div>
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">N° Pièce</label>

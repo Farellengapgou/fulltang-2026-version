@@ -1,4 +1,4 @@
-import {XIcon} from "lucide-react";
+import {XIcon, Calendar} from "lucide-react";
 import {useState} from "react";
 import PropTypes from "prop-types";
 import axiosInstance from "../../Utils/axiosInstance.js";
@@ -33,7 +33,18 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
     const [isWeeks, setIsWeeks] = useState(false);
     const [isDay, setIsDay] = useState(false);
     const [age, setAge] = useState(0);
-    const [dateError, setDateError] =useState("");
+    const [dateError, setDateError] = useState("");
+    const [dateDisplay, setDateDisplay] = useState("");
+
+    const MIN_DATE = "1900-01-01";
+    const MAX_DATE = new Date().toISOString().split("T")[0];
+
+    function formatDateForDisplay(dateString) {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        const options = { day: '2-digit', month: 'long', year: 'numeric' };
+        return date.toLocaleDateString('fr-FR', options);
+    }
 
 
 
@@ -86,23 +97,26 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
         if (name === 'birthDate') {
             const selectedDate = new Date(value);
             const today = new Date();
+            const minDate = new Date(MIN_DATE);
+
             if (selectedDate > today) {
-                setDateError('The birth date cannot be in the future');
-                setFormData({
-                    firstName: '',
-                    lastName: '',
-                    birthDate: '',
-                    gender: 'Male',
-                    address: '',
-                    cniNumber: '',
-                    phoneNumber: '',
-                    email: '',
-                });
-            } else {
-                setDateError('');
-                setFormData(prevData => ({ ...prevData, [name]: value}));
-                setAge(calculateAge(value));
+                setDateError('La date de naissance ne peut pas être dans le futur');
+                setFormData(prevData => ({ ...prevData, birthDate: '' }));
+                setDateDisplay('');
+                return;
             }
+
+            if (selectedDate < minDate) {
+                setDateError('La date de naissance ne peut pas être antérieure à 1900');
+                setFormData(prevData => ({ ...prevData, birthDate: '' }));
+                setDateDisplay('');
+                return;
+            }
+
+            setDateError('');
+            setFormData(prevData => ({ ...prevData, [name]: value}));
+            setDateDisplay(formatDateForDisplay(value));
+            setAge(calculateAge(value));
         }
         else {
             setFormData(prevData => ({ ...prevData, [name]: value }));
@@ -206,16 +220,25 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
                             <div>
                                 <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-1">Birth
                                     Date</label>
+                                <div className="relative">
                                     <input
                                         type="date"
                                         id="birthDate"
                                         name="birthDate"
-                                        placeholder={"enter patient's birth date"}
                                         value={formData.birthDate}
                                         onChange={handleChange}
-                                        className={applyFormStyle()}
+                                        max={MAX_DATE}
+                                        min={MIN_DATE}
+                                        className="absolute opacity-0 w-full h-full cursor-pointer z-10"
                                         required={true}
                                     />
+                                    <div className={`${applyFormStyle()} flex items-center justify-between bg-white cursor-pointer`}>
+                                        <span className={`${formData.birthDate ? 'text-gray-900 font-medium' : 'text-gray-400'} text-sm`}>
+                                            {dateDisplay || 'Sélectionner une date de naissance'}
+                                        </span>
+                                        <Calendar className="w-5 h-5 text-gray-400" />
+                                    </div>
+                                </div>
                             </div>
                             <div>
                                 <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-1">Age</label>

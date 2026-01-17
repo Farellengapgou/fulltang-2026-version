@@ -1,4 +1,5 @@
 import { FaCalendarAlt, FaChartPie, FaUserMd, FaPrescriptionBottle, FaFileMedical } from "react-icons/fa";
+import { Calendar } from "lucide-react";
 import { useState } from "react";
 import PropTypes from "prop-types";
 
@@ -212,7 +213,16 @@ TableStats.propTypes = {
 function CustomReportFilter({ onFilter }) {
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
+    const [startDateDisplay, setStartDateDisplay] = useState("");
+    const [endDateDisplay, setEndDateDisplay] = useState("");
     const [category, setCategory] = useState("all");
+
+    function formatDateForDisplay(dateString) {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+        return date.toLocaleDateString('fr-FR', options);
+    }
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -224,21 +234,43 @@ function CustomReportFilter({ onFilter }) {
             <div className="flex space-x-4 mb-4">
                 <div>
                     <label className="block text-gray-600 mb-2">Date de début</label>
-                    <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        className="border p-2 rounded w-full"
-                    />
+                    <div className="relative">
+                        <input
+                            type="date"
+                            value={startDate}
+                            onChange={(e) => {
+                                setStartDate(e.target.value);
+                                setStartDateDisplay(formatDateForDisplay(e.target.value));
+                            }}
+                            className="absolute opacity-0 w-full h-full cursor-pointer z-10"
+                        />
+                        <div className="border p-2 rounded w-full bg-white cursor-pointer flex items-center space-x-2">
+                            <Calendar className="h-4 w-4 text-gray-400" />
+                            <span className={`${startDate ? 'text-gray-900 font-medium' : 'text-gray-400'} text-sm`}>
+                                {startDateDisplay || 'Date début'}
+                            </span>
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <label className="block text-gray-600 mb-2">Date de fin</label>
-                    <input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        className="border p-2 rounded w-full"
-                    />
+                    <div className="relative">
+                        <input
+                            type="date"
+                            value={endDate}
+                            onChange={(e) => {
+                                setEndDate(e.target.value);
+                                setEndDateDisplay(formatDateForDisplay(e.target.value));
+                            }}
+                            className="absolute opacity-0 w-full h-full cursor-pointer z-10"
+                        />
+                        <div className="border p-2 rounded w-full bg-white cursor-pointer flex items-center space-x-2">
+                            <Calendar className="h-4 w-4 text-gray-400" />
+                            <span className={`${endDate ? 'text-gray-900 font-medium' : 'text-gray-400'} text-sm`}>
+                                {endDateDisplay || 'Date fin'}
+                            </span>
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <label className="block text-gray-600 mb-2">Category</label>

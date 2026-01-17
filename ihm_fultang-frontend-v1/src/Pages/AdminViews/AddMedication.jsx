@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Calendar } from "lucide-react";
 import {CustomDashboard} from "../../GlobalComponents/CustomDashboard.jsx";
 import {adminNavLink} from "./adminNavLink.js";
 import {AdminNavBar} from "./AdminNavBar.jsx";
@@ -19,6 +20,8 @@ export function AddMedication()
     const [canOpenSuccessModal, setCanOpenSuccessModal] = useState(false);
     const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
     const [categories, setCategories] = useState([]);
+    const [dateDisplay, setDateDisplay] = useState("");
+    const [dateError, setDateError] = useState("");
     const [medicationData, setMedicationData] = useState({
         category: '',
         name: '',
@@ -30,9 +33,18 @@ export function AddMedication()
         min_stock_level: 10,
         requires_prescription: false,
         expiry_date: '',
-        created_at: new Date().toISOString(), 
+        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
     });
+
+    const MIN_DATE = new Date().toISOString().split("T")[0];
+
+    function formatDateForDisplay(dateString) {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        const options = { day: '2-digit', month: 'long', year: 'numeric' };
+        return date.toLocaleDateString('fr-FR', options);
+    }
 
     async function fetchCategories() {
         try {
@@ -51,6 +63,24 @@ export function AddMedication()
 
     function handleChange (e) {
         const { name, value, type, checked } = e.target;
+
+        if (name === 'expiry_date') {
+            const selectedDate = new Date(value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            selectedDate.setHours(0, 0, 0, 0);
+
+            if (selectedDate < today) {
+                setDateError('La date d\'expiration ne peut pas être dans le passé');
+                setMedicationData(prevData => ({ ...prevData, expiry_date: '' }));
+                setDateDisplay('');
+                return;
+            }
+
+            setDateError('');
+            setDateDisplay(formatDateForDisplay(value));
+        }
+
         setMedicationData(prevData => ({
             ...prevData,
             [name]: type === "checkbox" ? checked : value
@@ -206,6 +236,7 @@ export function AddMedication()
                                 </div>
                             </div>
 
+                            {dateError && <p className="text-red-500 font-bold text-sm">{dateError}</p>}
                             <div className="grid grid-cols-3 gap-2">
                                 <div>
                                     <label className={applyLabelStyle()}>
@@ -241,14 +272,23 @@ export function AddMedication()
                                     <label className={applyLabelStyle()}>
                                         Expiry date
                                     </label>
-                                    <input
-                                        type="date"
-                                        name="expiry_date"
-                                        value={medicationData.expiry_date}
-                                        onChange={handleChange}
-                                        className={applyInputStyle()}
-                                        required
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="date"
+                                            name="expiry_date"
+                                            value={medicationData.expiry_date}
+                                            onChange={handleChange}
+                                            min={MIN_DATE}
+                                            className="absolute opacity-0 w-full h-full cursor-pointer z-10"
+                                            required
+                                        />
+                                        <div className={`${applyInputStyle()} flex items-center justify-between bg-white cursor-pointer`}>
+                                            <span className={`${medicationData.expiry_date ? 'text-gray-900 font-medium' : 'text-gray-400'} text-sm`}>
+                                                {dateDisplay || 'Date d\'expiration'}
+                                            </span>
+                                            <Calendar className="w-5 h-5 text-gray-400" />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div>

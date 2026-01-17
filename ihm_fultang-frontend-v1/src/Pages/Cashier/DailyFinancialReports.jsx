@@ -15,10 +15,19 @@ const generateDailyData = (date) => {
 export  function DailyFinancialReport() {
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0])
     const [dailyData, setDailyData] = useState([])
+    const [dateDisplay, setDateDisplay] = useState("")
+
+    function formatDateForDisplay(dateString) {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+        return date.toLocaleDateString('fr-FR', options);
+    }
 
     useEffect(() => {
         // Simuler le chargement des données pour la date sélectionnée
-        setDailyData(generateDailyData(selectedDate))
+        setDailyData(generateDailyData(selectedDate));
+        setDateDisplay(formatDateForDisplay(selectedDate));
     }, [selectedDate])
 
     const totalConsultations = dailyData.reduce((sum, hour) => sum + hour.consultations, 0)
@@ -26,7 +35,9 @@ export  function DailyFinancialReport() {
     const totalRevenue = totalConsultations + totalExamens
 
     const handleDateChange = (e) => {
-        setSelectedDate(e.target.value)
+        const value = e.target.value;
+        setSelectedDate(value);
+        setDateDisplay(formatDateForDisplay(value));
     }
 
     const handlePrint = () => {
@@ -43,14 +54,19 @@ export  function DailyFinancialReport() {
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">Rapport Financier Journalier</h1>
                 <div className="flex items-center space-x-4">
-                    <div className="flex items-center">
-                        <Calendar className="h-5 w-5 text-gray-400 mr-2" />
+                    <div className="relative">
                         <input
                             type="date"
                             value={selectedDate}
                             onChange={handleDateChange}
-                            className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="absolute opacity-0 w-full h-full cursor-pointer z-10"
                         />
+                        <div className="border border-gray-300 rounded-md p-2 bg-white cursor-pointer flex items-center space-x-2 min-w-[180px]">
+                            <Calendar className="h-5 w-5 text-gray-400" />
+                            <span className="text-gray-900 font-medium text-sm">
+                                {dateDisplay || 'Sélectionner une date'}
+                            </span>
+                        </div>
                     </div>
                     <button
                         onClick={handlePrint}

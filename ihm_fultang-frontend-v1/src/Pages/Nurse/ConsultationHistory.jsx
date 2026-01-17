@@ -2,6 +2,7 @@ import {NurseNavBar} from "./NurseNavBar.jsx";
 import PatientInformationBoard from "./PatientInformationBoard.jsx";
 import {useLocation} from "react-router-dom";
 import {FaSearch} from "react-icons/fa";
+import { Calendar } from "lucide-react";
 import flecheDeroulanteBas from "../../assets/flecheDeroulanteBas.png"
 import flecheDeroulanteHaut from "../../assets/flecheDeroulanteHaut.png";
 import {useState} from "react";
@@ -72,14 +73,22 @@ export function ConsultationHistory()
 
 
                                 {/*Search content*/}
-                                <div className="ml-4 flex">
-                                    <div className="w-2/5 border rounded-lg bg-gray-200 py-2">
-                                        <input type="date" className="ml-3 w-5/6 border-none bg-gray-200 ring-0 focus:ring-0 focus:border-0 focus:outline-none"/>
+                                <div className="ml-4 flex gap-4">
+                                    <div className="w-2/5 relative">
+                                        <input type="date" className="absolute opacity-0 w-full h-full cursor-pointer z-10"/>
+                                        <div className="border rounded-lg bg-gray-200 py-2 px-3 flex items-center space-x-2">
+                                            <Calendar className="w-4 h-4 text-gray-400" />
+                                            <span className="text-gray-400 text-sm">Date début</span>
+                                        </div>
                                     </div>
-                                    <div className="ml-4 w-2/5 col-span-3 border rounded-lg bg-gray-200 py-2">
-                                        <input type="date" className="ml-3 w-5/6 border-none bg-gray-200 ring-0 focus:ring-0 focus:border-0 focus:outline-none"/>
+                                    <div className="w-2/5 relative">
+                                        <input type="date" className="absolute opacity-0 w-full h-full cursor-pointer z-10"/>
+                                        <div className="border rounded-lg bg-gray-200 py-2 px-3 flex items-center space-x-2">
+                                            <Calendar className="w-4 h-4 text-gray-400" />
+                                            <span className="text-gray-400 text-sm">Date fin</span>
+                                        </div>
                                     </div>
-                                    <div className="ml-6 flex-1 items-center justify-center">
+                                    <div className="flex-1 items-center justify-center">
                                         <button className="px-5 py-2 bg-secondary text-white rounded-lg font-bold">
                                             <FaSearch className="text-2xl text-center"/>
                                         </button>

@@ -15,6 +15,7 @@ export  function AppointmentList() {
     const [filter, setFilter] = useState("Pending");
     const [searchTerm, setSearchTerm] = useState("");
     const [dateFilter, setDateFilter] = useState("");
+    const [dateDisplay, setDateDisplay] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const appointmentsPerPage = 5;
     const [appointmentList, setAppointmentList] = useState([{}]);
@@ -22,6 +23,13 @@ export  function AppointmentList() {
     const [isLoading, setIsLoading] = useState(false);
     const [errorStatus, setErrorStatus] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
+
+    function formatDateForDisplay(dateString) {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+        return date.toLocaleDateString('fr-FR', options);
+    }
 
 
 
@@ -122,14 +130,22 @@ export  function AppointmentList() {
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-0 focus:outline-none focus:border-2 focus:border-primary-end"
                             />
                         </div>
-                        <div className="flex items-center">
-                            <Calendar className="text-gray-400 mr-2" />
+                        <div className="relative">
                             <input
                                 type="date"
                                 value={dateFilter}
-                                onChange={(e) => setDateFilter(e.target.value)}
-                                className="px-4 py-2 border border-gray-300 rounded-md  focus:ring-0 focus:outline-none focus:border-2 focus:border-primary-end "
+                                onChange={(e) => {
+                                    setDateFilter(e.target.value);
+                                    setDateDisplay(formatDateForDisplay(e.target.value));
+                                }}
+                                className="absolute opacity-0 w-full h-full cursor-pointer z-10"
                             />
+                            <div className="px-4 py-2 border border-gray-300 rounded-md bg-white cursor-pointer flex items-center space-x-2 min-w-[160px]">
+                                <Calendar className="text-gray-400 h-5 w-5" />
+                                <span className={`${dateFilter ? 'text-gray-900 font-medium' : 'text-gray-400'} text-sm`}>
+                                    {dateDisplay || 'Filtrer par date'}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
