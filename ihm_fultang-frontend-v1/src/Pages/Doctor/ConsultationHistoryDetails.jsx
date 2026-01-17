@@ -10,379 +10,425 @@ import {
     PillIcon as Pills,
     FileText,
     Stethoscope,
-    ClipboardList, Heart, AlertTriangle, MapPin, Phone, ArrowLeft, Printer, Clock,
+    ClipboardList,
+    Heart,
+    AlertTriangle,
+    MapPin,
+    Phone,
+    ArrowLeft,
+    Printer,
+    Clock,
 } from "lucide-react"
-import {doctorNavLink} from "./lib/doctorNavLink.js";
-import {DoctorNavBar} from "./DoctorComponents/DoctorNavBar.jsx";
-import {useLocation, useNavigate} from "react-router-dom";
-import {useCalculateAge} from "../../Utils/compute.js";
-import {formatDateOnly, formatDateOnlyWithoutWeekDay, formatDateToTime} from "../../Utils/formatDateMethods.js";
+import { doctorNavLink } from "./lib/doctorNavLink.js";
+import { DoctorNavBar } from "./DoctorComponents/DoctorNavBar.jsx";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useCalculateAge } from "../../Utils/compute.js";
+import { formatDateOnly, formatDateOnlyWithoutWeekDay, formatDateToTime } from "../../Utils/formatDateMethods.js";
 import MedicalParametersCard from "./DoctorComponents/MedicalParametersCard.jsx";
-import {CustomDashboard} from "../../GlobalComponents/CustomDashboard.jsx";
-import {useEffect, useState} from "react";
-import {GiMedicines} from "react-icons/gi";
-import {FaEdit} from "react-icons/fa";
+import { CustomDashboard } from "../../GlobalComponents/CustomDashboard.jsx";
+import { useEffect, useState } from "react";
+import { GiMedicines } from "react-icons/gi";
+import { FaEdit } from "react-icons/fa";
 import EditConsultationModal from "./DoctorComponents/EditConsultationModal.jsx";
+import axiosInstance from "../../Utils/axiosInstance.js";
+import { Spin } from "antd";
 
-export  function ConsultationHistoryDetails() {
+export function ConsultationHistoryDetails() {
 
-    const {state} = useLocation();
+    const { state } = useLocation();
     const consultation = state?.consultation || {};
 
     const patientInfos = consultation?.idPatient;
     const medicalFolderPageInfos = consultation?.idMedicalFolderPage;
 
-    const {calculateAge} = useCalculateAge();
+    const { calculateAge } = useCalculateAge();
     const { value: ageValue, unit: ageUnit } = calculateAge(patientInfos?.birthDate);
 
+    const navigate = useNavigate();
+    const [canOpenEditConsultationModal, setCanOpenEditConsultationModal] = useState(false);
+    
+    // --- ÉTATS POUR LES PARAMÈTRES ---
+    const [medicalParams, setMedicalParams] = useState(null);
+    const [isLoadingParams, setIsLoadingParams] = useState(false);
+
+    // --- RÉCUPÉRATION DES PARAMÈTRES MÉDICAUX ---
+    const fetchMedicalParams = async () => {
+        if (!medicalFolderPageInfos?.id) {
+            console.warn("⚠️ ID dossier médical manquant");
+            setMedicalParams(medicalFolderPageInfos?.parameters || {});
+            return;
+        }
+
+        setIsLoadingParams(true);
+
+        try {
+            console.log(`📊 Récupération des paramètres pour le dossier: ${medicalFolderPageInfos.id}`);
+            
+            // ✅ URL CORRIGÉE - Ajout de /medical/
+            const response = await axiosInstance.get(
+                `/medical/medical-folder/${medicalFolderPageInfos.id}/last-params/`
+            );
+
+            if (response.status === 200 && response.data) {
+                console.log("✅ Paramètres récupérés depuis l'API:", response.data);
+                setMedicalParams(response.data);
+            }
+        } catch (error) {
+            console.error("❌ Erreur récupération paramètres (API):", error.message);
+            console.warn("📦 Utilisation des paramètres en cache local");
+            
+            // Fallback: utiliser les paramètres locaux
+            setMedicalParams(medicalFolderPageInfos?.parameters || {});
+        } finally {
+            setIsLoadingParams(false);
+        }
+    };
+
+    // --- INITIALISATION ---
+    useEffect(() => {
+        if (medicalFolderPageInfos?.id) {
+            fetchMedicalParams();
+        }
+    }, [medicalFolderPageInfos?.id]);
+
+    // --- AFFICHAGE DES PARAMÈTRES ---
+    const displayParams = medicalParams || medicalFolderPageInfos?.parameters || {};
 
     const MedicalParametersInfos = [
         {
             icon: Weight,
-            label: 'Weight',
-            value: medicalFolderPageInfos?.parameters?.weight || '-',
-            unit:  medicalFolderPageInfos?.parameters?.weight && ' Kg'
+            label: 'Poids',
+            value: displayParams?.weight ? parseFloat(displayParams.weight) : '-',
+            unit: displayParams?.weight ? ' Kg' : ''
         },
         {
             icon: Ruler,
-            label: 'Height',
-            value: medicalFolderPageInfos?.parameters?.height || '-',
-            unit: medicalFolderPageInfos?.parameters?.height && ' m²'
+            label: 'Taille',
+            value: displayParams?.height ? parseFloat(displayParams.height) : '-',
+            unit: displayParams?.height ? ' m' : ''
         },
         {
             icon: Thermometer,
-            label: 'Temperature',
-            value: medicalFolderPageInfos?.parameters?.temperature || '-',
-            unit:  medicalFolderPageInfos?.parameters?.temperature && '°C'
+            label: 'Température',
+            value: displayParams?.temperature ? parseFloat(displayParams.temperature) : '-',
+            unit: displayParams?.temperature ? '°C' : ''
         },
         {
             icon: Activity,
-            label: 'Blood Pressure',
-            value: medicalFolderPageInfos?.parameters?.bloodPressure || '-',
-            unit: medicalFolderPageInfos?.parameters?.bloodPressure && ' mmHg'
+            label: 'Tension Artérielle',
+            value: displayParams?.bloodPressure || '-',
+            unit: displayParams?.bloodPressure ? ' mmHg' : ''
         },
         {
             icon: Heart,
-            label: 'Heart Rate',
-            value: medicalFolderPageInfos?.parameters?.heartRate || '-',
-            unit: medicalFolderPageInfos?.parameters?.heartRate && ' bpm'
+            label: 'Fréquence Cardiaque',
+            value: displayParams?.heartRate ? parseInt(displayParams.heartRate) : '-',
+            unit: displayParams?.heartRate ? ' bpm' : ''
         },
         {
             icon: AlertTriangle,
             label: 'Allergies',
-            value: medicalFolderPageInfos?.parameters?.allergies || '-'
+            value: displayParams?.allergies || 'Aucune'
         },
         {
             icon: Pills,
-            label: 'Family Medical History',
-            value: medicalFolderPageInfos?.parameters?.familyMedicalHistory || '-'
+            label: 'Antécédents Familiaux',
+            value: displayParams?.familyMedicalHistory || 'N/A'
         },
         {
             icon: FileText,
-            label: 'Current Medication',
-            value: medicalFolderPageInfos?.parameters?.currentMedication || '-'
+            label: 'Médicaments Actuels',
+            value: displayParams?.currentMedication || 'Aucun'
         }
     ];
 
-    useEffect(() => {
-        console.log(consultation);
-    }, []);
-
-
-    const navigate = useNavigate();
-    const [canOpenEditConsultationModal, setCanOpenEditConsultationModal] = useState(false);
-
-
     return (
         <CustomDashboard linkList={doctorNavLink} requiredRole={"Doctor"}>
-            <DoctorNavBar/>
-        <div className="space-y-6">
+            <DoctorNavBar />
+            <div className="space-y-6 p-4">
 
-            {/* Patient Information */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="bg-gradient-to-br from-primary-end to-primary-start rounded-lg shadow-lg p-6 mb-6">
-                    <div className="flex items-center gap-6">
-                        <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center">
-                            <User className="w-12 h-12 text-black"/>
+                {/* INFORMATIONS PATIENT */}
+                <div className="bg-white rounded-lg shadow-md p-6">
+
+                    {/* En-tête Patient */}
+                    <div className="bg-gradient-to-br from-primary-end to-primary-start rounded-xl shadow-lg p-6 mb-6">
+                        <div className="flex items-center gap-6">
+                            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-md">
+                                <User className="w-12 h-12 text-primary-start" />
+                            </div>
+                            <div className="flex-1 flex flex-col gap-3">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <h1 className="text-3xl font-bold text-white uppercase">
+                                            Consultation de {patientInfos?.firstName || 'Patient'} {patientInfos?.lastName || ''}
+                                        </h1>
+                                        <p className="text-white text-sm mt-1 opacity-90">
+                                            ID Dossier: {medicalFolderPageInfos?.id || 'N/A'}
+                                        </p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-white font-bold text-lg">
+                                            {consultation?.consultationDate
+                                                ? formatDateOnly(consultation?.consultationDate)
+                                                : 'Date non spécifiée'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Informations Patient */}
+                                <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4 font-semibold text-white text-sm">
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="w-5 h-5" />
+                                        <span>
+                                            Né(e) le {patientInfos?.birthDate
+                                                ? formatDateOnlyWithoutWeekDay(patientInfos?.birthDate)
+                                                : 'Date inconnue'
+                                            } ({ageValue} {ageUnit})
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <MapPin className="w-5 h-5" />
+                                        <span>{patientInfos?.address || 'Adresse non spécifiée'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Phone className="w-5 h-5" />
+                                        <span>{patientInfos?.phoneNumber || 'Téléphone non spécifié'}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex-1 flex flex-col gap-3">
-                            <div className="flex justify-between">
-                                <h1 className="text-3xl font-bold text-white">CONSULTATION
-                                    OF {patientInfos?.firstName || 'NGOUPAYE DJIO'} {patientInfos?.lastName || 'Thierry'}</h1>
+                    </div>
 
-                                <p className="text-white font-bold text-xl">
-                                    {consultation?.consultationDate ? formatDateOnly(consultation?.consultationDate) : ' Any Date Specified'}
+                    {/* Barre d'Actions */}
+                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 shadow-sm rounded-lg mb-6 p-4 border border-gray-200">
+                        <div className="flex justify-between items-center">
+                            <button
+                                onClick={() => navigate(-1)}
+                                className="text-secondary hover:text-primary-end font-bold flex gap-2 items-center transition-colors duration-200"
+                            >
+                                <div className="w-8 h-8 border-2 border-secondary rounded-full flex justify-center items-center hover:border-primary-end transition-colors">
+                                    <ArrowLeft size={18} />
+                                </div>
+                                <span className="text-sm">Retour à l'historique</span>
+                            </button>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setCanOpenEditConsultationModal(true)}
+                                    className="bg-secondary hover:bg-primary-end text-white px-4 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors duration-200 shadow-sm"
+                                >
+                                    <FaEdit size={16} />
+                                    Modifier la consultation
+                                </button>
+                                <button
+                                    onClick={() => window.print()}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors duration-200 shadow-sm"
+                                >
+                                    <Printer size={16} />
+                                    Imprimer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* SECTION PARAMÈTRES MÉDICAUX */}
+                    <div className="w-full mb-6">
+                        <div className="bg-gradient-to-b from-blue-50 to-gray-50 rounded-xl p-6 border border-blue-100">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-2xl font-bold text-secondary uppercase tracking-wide">
+                                    📊 Paramètres Médicaux
+                                </h2>
+                                {isLoadingParams && (
+                                    <Spin size="small" tip="Chargement..." />
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                {MedicalParametersInfos.map((info, index) => {
+                                    const IconComponent = info.icon;
+                                    return (
+                                        <MedicalParametersCard
+                                            key={index}
+                                            icon={<IconComponent size={24} className="text-primary-start" />}
+                                            label={info.label}
+                                            value={info.value}
+                                            unit={info.unit}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* NOTES ET DÉTAILS DE LA CONSULTATION */}
+                    <div className="bg-white rounded-xl space-y-6 p-6 border border-gray-100">
+
+                        {/* Notes Infirmier */}
+                        <div className="border-l-4 border-blue-500 pl-4">
+                            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                                <ClipboardList className="h-5 w-5 mr-2 text-blue-500" />
+                                Notes de l'Infirmier
+                            </h3>
+                            <div className="bg-blue-50 rounded-lg p-4">
+                                <p className="text-gray-700 leading-relaxed">
+                                    {medicalFolderPageInfos?.nurseNotes || consultation?.consultationNotes || 'Aucune note'}
                                 </p>
                             </div>
-                            <div className="mt-3.5 grid grid-cols-3 gap-4 font-semibold">
-                                <div className="flex items-center gap-2 text-white">
-                                    <Calendar className="w-6 h-6"/>
-                                    <div className="flex">
-                                        <span>Born on {patientInfos?.birthDate && formatDateOnlyWithoutWeekDay(patientInfos?.birthDate) || 'Not Specified'}</span>
-                                        <div className="flex gap-1 mt-0.5 ">
-                                            <span className="ml-2 text-white text-sm">({ageValue}</span>
-                                            <span className="text-white text-sm">{ageUnit})</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2 text-white">
-                                    <MapPin className="w-6 h-6"/>
-                                    <span>{patientInfos?.address || 'Not specified'}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-white">
-                                    <Phone className="w-6 h-6"/>
-                                    <span>{patientInfos?.phoneNumber || 'Not Specified'}</span>
-                                </div>
+                        </div>
+
+                        {/* Notes Médecin */}
+                        <div className="border-l-4 border-green-500 pl-4">
+                            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                                <ClipboardList className="h-5 w-5 mr-2 text-green-500" />
+                                Notes du Médecin
+                            </h3>
+                            <div className="bg-green-50 rounded-lg p-4">
+                                <p className="text-gray-700 leading-relaxed">
+                                    {medicalFolderPageInfos?.doctorNote || 'Aucune note'}
+                                </p>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-
-                {/* Go back */}
-                <div className="bg-gray-100 shadow-md rounded-lg mb-5 p-4 ">
-                    <div className="flex justify-between items-center ">
-                        <div className="flex justify-start">
-                            <button onClick={() => navigate(-1)}
-                                    className="text-secondary text-xl transition-all duration-300 font-bold flex gap-2 items-center">
-                                <div
-                                    className="w-8 h-8 border-2 rounded-full flex justify-center items-center border-secondary">
-                                    <ArrowLeft/>
-                                </div>
-                                <p className="text-[17px] mt-0.5">Back To Consultation History List</p>
-                            </button>
-                        </div>
-                        <div className="flex gap-2">
-                            <div className="flex items-center">
-                                <button
-                                    onClick={() => {setCanOpenEditConsultationModal(true)}}
-                                    className="bg-secondary font-bold duration-300  text-white px-4 py-2 rounded-md hover:bg-primary-end hover:text-white transition-all mr-2">
-                                    <FaEdit size={20} className="inline mr-2"/>
-                                    Edit Consultation
-                                </button>
+                        {/* Diagnostic */}
+                        <div className="border-l-4 border-red-500 pl-4">
+                            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                                <Stethoscope className="h-5 w-5 mr-2 text-red-500" />
+                                Diagnostic
+                            </h3>
+                            <div className="bg-red-50 rounded-lg p-4 border border-red-100">
+                                <p className="text-gray-800 font-semibold text-lg">
+                                    {medicalFolderPageInfos?.diagnostic || 'Diagnostic non spécifié'}
+                                </p>
                             </div>
-
-
-                            <div className="flex items-center">
-                                <button
-                                    onClick={() => {
-                                        window.print();
-                                    }}
-                                    className="bg-secondary font-bold duration-300  text-white px-4 py-2 rounded-md hover:bg-primary-end hover:text-white transition-all mr-2">
-                                    <Printer size={20} className="inline mr-2"/>
-                                    Print Medical Folder Page
-                                </button>
-                            </div>
-
                         </div>
 
-                    </div>
-                </div>
-
-
-                {/* Medical Parameters */}
-                <div className="w-full mx-auto">
-                    <div className="bg-gray-100 flex flex-col w-full rounded-lg  p-6">
-                        <p className="font-bold text-xl ml-5 text-secondary">Patient Medical Parameters</p>
-                        <div className="grid grid-cols-4 gap-4 mt-6">
-                            {MedicalParametersInfos.map((info, index) => (
-                                <MedicalParametersCard
-                                    key={index}
-                                    icon={info.icon}
-                                    label={info.label}
-                                    value={info.value}
-                                    unit={info.unit}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-
-
-
-                {/* Consultation Details */}
-                <div className="bg-white rounded-lg shadow-sm p-6">
-
-                    {/*Nurse Notes*/}
-
-                    <div className="mb-10">
-                        <h3 className="text-lg font-semibold mb-4 flex items-center">
-                            <ClipboardList className="h-5 w-5 mr-2 text-blue-500"/>
-                            Nurse Notes
-                        </h3>
-                        <p className="text-gray-700 ml-10">{medicalFolderPageInfos?.nurseNotes || consultation?.consultationNotes || 'Not Specified'}</p>
-                    </div>
-
-
-                    {/*Doctor notes*/}
-                    <div className="mb-10">
-                        <h3 className="text-lg font-semibold mb-4 flex items-center">
-                            <ClipboardList className="h-5 w-5 mr-2 text-blue-500"/>
-                            Doctor Notes
-                        </h3>
-                        <p className="text-gray-700 ml-10">{medicalFolderPageInfos?.doctorNote || 'Not Specified'}</p>
-                    </div>
-
-
-                    {/* Diagnostic */}
-                    <div className="mb-8">
-                        <h3 className="text-lg font-semibold mb-4 flex items-center">
-                            <Stethoscope className="h-5 w-5 mr-2 text-blue-500"/>
-                            Diagnostic
-                        </h3>
-                        <p className="text-gray-700 ml-10">{medicalFolderPageInfos?.diagnostic || 'Not Specified'}</p>
-                    </div>
-
-
-
-
-                    {/* Prescriptions */}
-                    <div className="mb-10">
-                        <h3 className="text-lg font-semibold mb-4 flex items-center">
-                            <GiMedicines className="h-5 w-5 mr-2 text-blue-500"/>
-                            Prescriptions
-                        </h3>
-                        {medicalFolderPageInfos?.prescriptions && medicalFolderPageInfos?.prescriptions.length > 0 && (
-                            <div className="grid grid-cols-2 gap-5">
-                                {medicalFolderPageInfos?.prescriptions.map((prescription) => {
-                                    let drugsInfo = []
-                                    drugsInfo = prescription?.prescriptionDrug;
-                                    return (
-                                        drugsInfo.length > 0 && drugsInfo.map((drugInfo, index) => (
-                                    <div key={index} className="bg-gray-100 p-4 rounded-lg">
-                                        <div className="grid grid-cols-2 gap-5">
-                                            <div className="flex items-start">
-                                                <Pill className="h-6 w-6 text-blue-500 mt-1" />
-                                                <div className="ml-2">
-                                                    <span className="text-sm text-gray-500">Medicine</span>
-                                                    <p className="font-medium">{drugInfo?.medicament?.name}</p>
+                        {/* PRESCRIPTIONS */}
+                        {medicalFolderPageInfos?.prescriptions?.length > 0 && (
+                            <div className="border-l-4 border-purple-500 pl-4">
+                                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                                    <GiMedicines className="h-6 w-6 mr-2 text-purple-500" />
+                                    Prescriptions ({medicalFolderPageInfos.prescriptions.length})
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {medicalFolderPageInfos.prescriptions.map((prescription, pIndex) =>
+                                        prescription?.prescriptionDrug?.map((drug, dIndex) => (
+                                            <div
+                                                key={`${pIndex}-${dIndex}`}
+                                                className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                                            >
+                                                <div className="flex items-start gap-3 mb-3">
+                                                    <Pill className="text-purple-600 flex-shrink-0 mt-1" size={20} />
+                                                    <p className="font-bold text-gray-800 text-sm">
+                                                        {drug?.medicament?.name || 'Médicament inconnu'}
+                                                    </p>
+                                                </div>
+                                                <div className="space-y-2 text-sm text-gray-700 bg-white bg-opacity-50 rounded p-3">
+                                                    <div className="flex justify-between">
+                                                        <span className="font-semibold">Dosage:</span>
+                                                        <span>{drug?.dosage || '-'}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="font-semibold">Fréquence:</span>
+                                                        <span>{drug?.frequency || '-'}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="font-semibold">Durée:</span>
+                                                        <span>{drug?.duration || '-'}</span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="flex items-start">
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                     className="h-6 w-6 text-blue-500 mt-1" fill="none"
-                                                     viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                                                </svg>
-                                                <div className="ml-2">
-                                                    <span className="text-sm text-gray-500">Dosage</span>
-                                                    <p className="font-medium">{drugInfo?.dosage ? drugInfo?.dosage : "not specified"}</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-start">
-                                                <Clock className="h-6 w-6 text-blue-500 mt-1"/>
-                                                <div className="ml-2">
-                                                    <span className="text-sm text-gray-500">Frequency</span>
-                                                    <p className="font-medium">{drugInfo?.frequency}</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-start">
-                                                <Calendar className="h-6 w-6 text-blue-500 mt-1" />
-                                                <div className="ml-2">
-                                                    <span className="text-sm text-gray-500">Duration</span>
-                                                    <p className="font-medium">{drugInfo?.duration ? drugInfo?.duration : "not specified"}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
                                         ))
-                                    )
-                                })}
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* EXAMENS PRESCRITS */}
+                        {medicalFolderPageInfos?.examRequests?.length > 0 && (
+                            <div className="border-l-4 border-orange-500 pl-4">
+                                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                                    <Microscope className="h-6 w-6 mr-2 text-orange-500" />
+                                    Examens ({medicalFolderPageInfos.examRequests.length})
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {medicalFolderPageInfos.examRequests.map((exam, index) => (
+                                        <div
+                                            key={index}
+                                            className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                                        >
+                                            <div className="flex items-start gap-3 mb-3">
+                                                <Microscope className="text-orange-600 flex-shrink-0 mt-1" size={20} />
+                                                <p className="font-bold text-gray-800">
+                                                    {exam?.idExam?.examName || 'Examen inconnu'}
+                                                </p>
+                                            </div>
+                                            {exam?.notes && (
+                                                <div className="bg-white bg-opacity-50 rounded p-3 text-sm text-gray-700">
+                                                    <p className="font-semibold mb-1">Instructions:</p>
+                                                    <p>{exam?.notes}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* RENDEZ-VOUS */}
+                        {consultation?.appointments?.length > 0 && (
+                            <div className="border-l-4 border-teal-500 pl-4">
+                                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                                    <Clock className="h-6 w-6 mr-2 text-teal-500" />
+                                    Rendez-vous ({consultation.appointments.length})
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {consultation.appointments.map((appointment, index) => (
+                                        <div
+                                            key={index}
+                                            className="bg-gradient-to-br from-teal-50 to-cyan-50 border border-teal-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                                        >
+                                            <div className="space-y-3">
+                                                <div className="flex items-center gap-3">
+                                                    <Calendar className="text-teal-600" size={20} />
+                                                    <div>
+                                                        <p className="text-xs font-semibold text-gray-500 uppercase">Date</p>
+                                                        <p className="font-bold text-gray-800">
+                                                            {appointment?.atDate ? formatDateOnly(appointment?.atDate) : 'N/A'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <Clock className="text-teal-600" size={20} />
+                                                    <div>
+                                                        <p className="text-xs font-semibold text-gray-500 uppercase">Heure</p>
+                                                        <p className="font-bold text-gray-800">
+                                                            {appointment?.atDate ? formatDateToTime(appointment?.atDate) : 'N/A'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                {appointment?.reason && (
+                                                    <div className="bg-white bg-opacity-50 rounded p-2 mt-2">
+                                                        <p className="text-xs font-semibold text-gray-500">Motif</p>
+                                                        <p className="text-gray-700">{appointment?.reason}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </div>
-
-
-
-                    {/* Exams */}
-                    {medicalFolderPageInfos?.examRequests && medicalFolderPageInfos?.examRequests.length > 0 && (
-                        <div className="mb-5">
-                            <h3 className="text-lg font-semibold mb-4 flex items-center">
-                                <FileText className="h-5 w-5 mr-2 text-blue-500"/>
-                                Prescribed Exams
-                            </h3>
-                            <div className="grid grid-cols-2">
-                                {medicalFolderPageInfos?.examRequests.map((exam, index) => (
-
-                                    <div key={index} className="bg-gray-100 p-4 rounded-lg grid grid-cols-2">
-                                        <div className="flex mb-2">
-                                            <Microscope className="h-6 w-6 text-blue-500 mt-1"/>
-                                            <div className="ml-2">
-                                                <span className="text-sm text-gray-500">Exams</span>
-                                                <p className="font-medium">{exam?.idExam?.examName}</p>
-                                            </div>
-                                        </div>
-
-                                        {/*
-                                        <div className="flex mb-2">
-                                            <FileText className="h-6 w-6 text-blue-500 mt-1"/>
-                                            <div className="ml-2">
-                                                <span className="text-sm text-gray-500">Exam Description</span>
-                                                <p className="font-medium">{exam?.idExam?.examDescription}</p>
-                                            </div>
-                                        </div>*/}
-
-                                        <div className="flex mb-2">
-                                            <FileText className="h-6 w-6 text-blue-500 mt-1"/>
-                                            <div className="ml-2">
-                                                <span className="text-sm text-gray-500">Instructions</span>
-                                                <p className="font-medium">{exam?.notes}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Appointment */}
-                    {consultation?.appointments && consultation?.appointments.length > 0 && (
-                        <div>
-                            <h3 className="text-lg font-semibold mb-4 flex items-center">
-                                <Clock className="h-5 w-5 mr-2 text-blue-500"/>
-                                Scheduled Appointments
-                            </h3>
-                            <div className="grid grid-cols-2 gap-5">
-                                {consultation?.appointments.map((appointment, index) => (
-                                    <div key={index} className="bg-gray-100 p-4 rounded-lg">
-                                        <div className="flex gap-20">
-                                            <div className="mb-2">
-                                                <div className="flex gap-2">
-                                                    <Calendar className="text-blue-500"/>
-                                                    <span className="text-sm text-gray-500">Date</span>
-                                                </div>
-                                                <p className="font-medium ml-8">{appointment?.atDate ? formatDateOnly(appointment?.atDate) : 'Not Specified'}</p>
-                                            </div>
-                                            <div>
-                                                <div className="flex gap-2">
-                                                    <Clock className="text-blue-500"/>
-                                                    <span className="text-sm text-gray-500">Time</span>
-                                                </div>
-                                                <p className="text-gray-700 ml-8">{appointment?.atDate ? formatDateToTime(appointment?.atDate) : 'Not Specified'}</p>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <span className="text-sm text-gray-500">Reason</span>
-                                            <p className="text-gray-700">{appointment?.reason}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
-        </div>
 
+            {/* Modal Édition */}
             <EditConsultationModal
                 isOpen={canOpenEditConsultationModal}
                 onClose={() => setCanOpenEditConsultationModal(false)}
                 consultation={consultation}
-                onSave={()=>{alert("save")}}
+                onSave={() => setCanOpenEditConsultationModal(false)}
             />
         </CustomDashboard>
     )
 }
-
