@@ -7,6 +7,7 @@ import {
   FileText,
   Settings,
   WalletCards,
+  Package,
 } from "lucide-react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
@@ -79,6 +80,11 @@ export function Accountant() {
       icon: FileText,
       label: "View Reports",
       onClick: () => navigate("/accountant/financial-reports"),
+    },
+    {
+      icon: Package,
+      label: "Stock & Material",
+      onClick: () => navigate("/material-accounting/dashboard"),
     },
   ];
 

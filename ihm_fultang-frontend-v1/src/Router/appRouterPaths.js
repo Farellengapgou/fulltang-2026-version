@@ -5,7 +5,7 @@ export const AppRoutesPaths = {
     welcomePage: "/",
     loginPage: "/login",
     forgottenPasswordPage: "/forgotten-password",
-    pharmacyPage:"/pharmacy",
+    pharmacyPage: "/pharmacy",
     doctorPage: "/doctor/dashboard",
     laboratoryAssistantPage: "/laboratory-assistant/home",
     receptionistPage: "/receptionist/patients",
@@ -16,16 +16,16 @@ export const AppRoutesPaths = {
     financialReport: "/cashier/financial-report",
     helpCenter: "/cashier/help-center",
     specialistPage: "/specialist",
-    nursePage:"/nurse/patients",
+    nursePage: "/nurse/patients",
     nurseMedicalStaffsPage: "/nurse/medical-staff",
     consultationHistoryPage: "/nurse/patients/consultation-history/:id",
     helpCenterPage: "/help-center",
-    patientDetailsPage:"/nurse/patients/take-parameters/:id",
+    patientDetailsPage: "/nurse/patients/take-parameters/:id",
     receptionistMedicalStaffsPage: "/receptionist/medical-staffs",
     appointmentsPage: "/receptionist/appointments",
     adminPatientListPage: "/admin/patient-list",
     addMedication: "/admin/add-drug",
-    adminMedicationsListPage : "/admin/drugs-list",
+    adminMedicationsListPage: "/admin/drugs-list",
     addMedicalStaff: "/admin/add-medical-staff",
     adminMedicalStaffListPage: "/admin/medical-staff-list",
     adminConsultationListPage: "/admin/consultation-list",
@@ -36,9 +36,9 @@ export const AppRoutesPaths = {
     adminFinancialReportsPage: "/admin/financial-report",
     accountantPage: "/accountant/dashboard",
     adminConsultationDetailsPage: "/admin/consultation-list/details",
-    laboratoryHistory:"/laboratory/exams-history",
-    laboratoryCurrent:"/laboratory/current-exams",
-    financialHistory:"/cashier/financial-history",
+    laboratoryHistory: "/laboratory/exams-history",
+    laboratoryCurrent: "/laboratory/current-exams",
+    financialHistory: "/cashier/financial-history",
     accountDetails: "/accountant/account-details/:accountId",
     accountList: "/accountant/account-list",
     doctorPatientList: "/doctor/patients",
@@ -48,10 +48,10 @@ export const AppRoutesPaths = {
     doctorConsultationHistory: "/doctor/consultation-history",
     doctorConsultationHistoryDetails: "/doctor/consultation-history/details/:id",
     doctorExamList: "/doctor/exams-list",
-    doctorPatientMedicalFolderPage:"/doctor/patients/medical-folder/:id",
+    doctorPatientMedicalFolderPage: "/doctor/patients/medical-folder/:id",
     financialContributions: "/accountant/financial-contributions",
     financialReportsAccountant: "/accountant/financial-reports",
-    PharmacyMedication:"/pharmacyMedication",
+    PharmacyMedication: "/pharmacyMedication",
     createFactureAccountant: "/accountant/create-facture",
 
     laboratoryPatientList: "/laboratory-assistant/patient-list",
@@ -62,7 +62,7 @@ export const AppRoutesPaths = {
     laboratoryNotification: "/laboratory-assistant/notifications",
 
     financialAccountantHome: "/accountant-financial/home",
-    financialAccountantChartOfAccount : "/accountant-financial/chart-account",
+    financialAccountantChartOfAccount: "/accountant-financial/chart-account",
     financialAccountantJournalEntries: "/accountant-financial/journat-entries",
     financialAccountantAccountingJournals: "/accountant-financial/accounting-journals",
     financialAccountantAccountingGrandLivre: "/accountant-financial/accounting-grand-livre",
@@ -70,8 +70,39 @@ export const AppRoutesPaths = {
     financialAccountantPayments: "/accountant-financial/payments",
     financialAccountantBudgets: "/accountant-financial/budgets",
     financialAccountantReports: "/accountant-financial/reports",
-    financialAccountPayroll : "/accountant-financial/payroll-journal",
-    financialAccountantCostAnalytic : "/accountant-financial/cost-analytic"
+    financialAccountPayroll: "/accountant-financial/payroll-journal",
+    financialAccountantCostAnalytic: "/accountant-financial/cost-analytic",
 
+    // Material Accounting (Comptabilité Matière)
+    materialAccountingDashboard: "/material-accounting/dashboard",
+
+    // Configuration
+    materialCategories: "/material-accounting/categories",
+    materialWarehouses: "/material-accounting/warehouses",
+    materialSuppliers: "/material-accounting/suppliers",
+
+    // Stock Management
+    materialStockLevels: "/material-accounting/stock-levels",
+    materialBatches: "/material-accounting/batches",
+    materialMovements: "/material-accounting/movements",
+
+    // Operations
+    materialReceipts: "/material-accounting/receipts",
+    materialReceiptDetails: "/material-accounting/receipts/:id",
+    materialIssues: "/material-accounting/issues",
+    materialIssueDetails: "/material-accounting/issues/:id",
+    materialTransfers: "/material-accounting/transfers",
+    materialTransferDetails: "/material-accounting/transfers/:id",
+
+    // Inventory
+    materialInventories: "/material-accounting/inventories",
+    materialInventoryDetails: "/material-accounting/inventories/:id",
+
+    // Reports (OHADA)
+    materialStockCard: "/material-accounting/reports/stock-card",
+    materialPerpetualInventory: "/material-accounting/reports/perpetual-inventory",
+    materialABCAnalysis: "/material-accounting/reports/abc-analysis",
+    materialTurnoverRate: "/material-accounting/reports/turnover-rate",
+    materialReconciliation: "/material-accounting/reports/reconciliation"
 
 }
