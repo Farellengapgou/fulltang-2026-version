@@ -25,7 +25,7 @@ auth_header_param = openapi.Parameter(
     required=True,
 )
 
-tags = ["material-accounting"]
+tags = ["receipts"]
 
 
 def apply_receipt_filters(qs, params):

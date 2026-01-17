@@ -31,7 +31,7 @@ auth_header_param = openapi.Parameter(
     required=True,
 )
 
-tags = ["material-accounting"]
+tags = ["goods-issue"]
 
 
 def apply_issue_filters(qs, params):

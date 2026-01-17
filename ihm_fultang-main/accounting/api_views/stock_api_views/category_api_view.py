@@ -14,7 +14,7 @@ from accounting.permissions.accounting_staff_permissions import AccountingStaffP
 from accounting.stock_models import Category
 from accounting.stock_serializers import CategorySerializer, FamilySerializer
 
-tags = ["Material Accounting - Categories"]
+tags = ["categories"]
 
 auth_header_param = openapi.Parameter(
     name="Authorization",

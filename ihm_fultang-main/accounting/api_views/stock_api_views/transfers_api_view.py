@@ -22,7 +22,7 @@ auth_header_param = openapi.Parameter(
     required=True,
 )
 
-tags = ["material-accounting"]
+tags = ["transfer"]
 
 
 def apply_transfer_filters(qs, params):

@@ -15,7 +15,7 @@ from accounting.permissions.accounting_staff_permissions import AccountingStaffP
 from accounting.stock_models import Depot, Stock
 from accounting.stock_serializers import DepotSerializer, StockSerializer
 
-tags = ["Material Accounting - Warehouses"]
+tags = ["warehouses"]
 
 auth_header_param = openapi.Parameter(
     name="Authorization",

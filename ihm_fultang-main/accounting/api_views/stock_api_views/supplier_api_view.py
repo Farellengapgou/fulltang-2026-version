@@ -18,7 +18,7 @@ from accounting.serializers import SupplierSerializer
 
 from accounting.stock_models import GoodsReceiptNote, Category
 
-tags = ["Material Accounting - Suppliers"]
+tags = ["supplier"]
 
 auth_header_param = openapi.Parameter(
     name="Authorization",
