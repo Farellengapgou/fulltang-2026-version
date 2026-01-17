@@ -61,6 +61,10 @@ export const AppRoutesPaths = {
     doctorConsultationHistoryDetails: "/doctor/consultation-history/details/:id",
     doctorExamList: "/doctor/exams-list",
     doctorPatientMedicalFolderPage:"/doctor/patients/medical-folder/:id",
+    nurseMessage: "/nurse/messages",
+    receptionistMessage: "/receptionist/messages",
+    laboratoryMessage: "/laboratory-assistant/messages",
+    adminMessage: "/admin/messages",
 
     financialContributions: "/accountant/financial-contributions",
     financialReportsAccountant: "/accountant/financial-reports",
@@ -72,7 +76,6 @@ export const AppRoutesPaths = {
     laboratoryExamenDetail: "/laboratory-assistant/exams-list/details/:id",
     laboratoryExamenHistories: "/laboratory-assistant/exams-history",
     laboratoryExamResultDetails: "/laboratory-assistant/exams-history/details/:id",
-    laboratoryNotification: "/laboratory-assistant/notifications",
 
     financialAccountantHome: "/accountant-financial/home",
     financialAccountantChartOfAccount : "/accountant-financial/chart-account",

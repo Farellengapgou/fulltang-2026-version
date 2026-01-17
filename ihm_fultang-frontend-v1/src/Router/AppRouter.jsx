@@ -47,6 +47,10 @@ export function AppRoute()
     const DoctorConsultationList = React.lazy(async () => ({default: (await import("../Pages/Doctor/DoctorConsultationList.jsx")).DoctorConsultationList}));
     const DoctorAppointments = React.lazy(async () => ({default: (await import("../Pages/Doctor/AppointmentList.jsx")).AppointmentList}));
     const DoctorMessages = React.lazy(async () => ({default: (await import("../Pages/Doctor/DoctorMessagePage.jsx")).DoctorMessagePage}));
+    const NurseMessages = React.lazy(async () => ({default: (await import("../Pages/Nurse/NurseMessagePage.jsx")).NurseMessagePage}));
+    const ReceptionistMessages = React.lazy(async () => ({default: (await import("../Pages/Receptionist/ReceptionistMessagePage.jsx")).ReceptionistMessagePage}));
+    const LaboratoryMessages = React.lazy(async () => ({default: (await import("../Pages/Laboratory/LaboratoryMessagePage.jsx")).LaboratoryMessagePage}));
+    const AdminMessages = React.lazy(async () => ({default: (await import("../Pages/AdminViews/AdminMessagePage.jsx")).AdminMessagePage}));
 
     const DoctorConsultationHistory = React.lazy(async () => ({default: (await import("../Pages/Doctor/ConsultationHistory.jsx")).ConsultationHistory}));
     const DoctorConsultationDetails = React.lazy(async () => ({default: (await import("../Pages/Doctor/DoctorConsultationDetail.jsx")).DoctorConsultationDetails}));
@@ -67,7 +71,6 @@ export function AppRoute()
     const LaboratoryExamenDetails = React.lazy(async () => ({default: (await import("../Pages/Laboratory/ExamenDetails.jsx")).ExamDetails,}));
     const LaboratoryExamenHistories = React.lazy(async () => ({default: (await import("../Pages/Laboratory/LaboratoryExamHistory.jsx")).ExamHistory,}));
     const LaboratoryExamResulDetails = React.lazy(async () => ({default: (await import("../Pages/Laboratory/ExamResultDetail.jsx")).ExamResultDetails,}));
-    const LaboratoryNotifications = React.lazy(async () => ({default: (await import("../Pages/Laboratory/Notification.jsx")).Notification,}));
 
     const FinancialAccountantHome = React.lazy(async () => ({default: (await import("../Pages/AccountantNew/Home/HomePage.jsx")).FinancialAccountantHomePage,}));
     const FinancialAccountantChartOfAccount = React.lazy(async () => ({default: (await import("../Pages/AccountantNew/Comptabilité de Base/PlanComptable.jsx")).ChartOfAccounts,}));
@@ -130,6 +133,10 @@ export function AppRoute()
                 <Route path={AppRoutesPaths.doctorConsultationHistory} element={<DoctorConsultationHistory />} />
                 <Route path={AppRoutesPaths.doctorAppointment} element={<DoctorAppointments />} />
                 <Route path={AppRoutesPaths.doctorMessage} element={<DoctorMessages />} />
+                <Route path={AppRoutesPaths.nurseMessage} element={<NurseMessages />} />
+                <Route path={AppRoutesPaths.receptionistMessage} element={<ReceptionistMessages />} />
+                <Route path={AppRoutesPaths.laboratoryMessage} element={<LaboratoryMessages />} />
+                <Route path={AppRoutesPaths.adminMessage} element={<AdminMessages />} />
                 <Route path={AppRoutesPaths.doctorPatientList} element={<DoctorPatientList />} />
                 <Route path={AppRoutesPaths.doctorConsultationList} element={<DoctorConsultationList />} />
                 <Route path={AppRoutesPaths.doctorConsultationDetailsPage} element={<DoctorConsultationDetails />} />
@@ -146,7 +153,6 @@ export function AppRoute()
                 <Route path={AppRoutesPaths.laboratoryExamenDetail} element={<LaboratoryExamenDetails/>}/>
                 <Route path={AppRoutesPaths.laboratoryExamenHistories} element={<LaboratoryExamenHistories/>}/>
                 <Route path={AppRoutesPaths.laboratoryExamResultDetails} element={<LaboratoryExamResulDetails/>}/>
-                <Route path={AppRoutesPaths.laboratoryNotification} element={<LaboratoryNotifications/>}/>
 
                 <Route path={AppRoutesPaths.financialAccountantHome} element={<FinancialAccountantHome/>}/>
                 <Route path={AppRoutesPaths.financialAccountantChartOfAccount} element={<FinancialAccountantChartOfAccount/>}/>

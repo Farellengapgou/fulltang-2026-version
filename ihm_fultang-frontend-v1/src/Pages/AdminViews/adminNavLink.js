@@ -1,4 +1,4 @@
-import {FaFileInvoiceDollar, FaHome, FaNotesMedical, FaPlus,FaUserMd, FaUsers} from "react-icons/fa";
+import {FaFileInvoiceDollar, FaHome, FaNotesMedical, FaPlus,FaUserMd, FaUsers, FaEnvelope} from "react-icons/fa";
 import {AppRoutesPaths as appRoutes} from "../../Router/appRouterPaths.js";
 import {Bed, BedDouble, Calendar} from "lucide-react";
 import {FiList} from "react-icons/fi";
@@ -33,6 +33,11 @@ export const adminNavLink = [
                 link: appRoutes.addMedicalStaff
             }
         ]
+    },
+    {
+        name: 'Messages',
+        icon: FaEnvelope,
+        link: appRoutes.adminMessage
     },
   /*  {
         name: 'Consultation List',

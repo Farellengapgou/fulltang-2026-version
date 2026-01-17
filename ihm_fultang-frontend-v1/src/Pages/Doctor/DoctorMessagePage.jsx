@@ -14,9 +14,14 @@ import { useNotificationSocket } from "../../Utils/useNotificationSocket.js"
 import SimplePagination from "../../GlobalComponents/SimplePagination.jsx"
 // import Pagination from "../../GlobalComponents/Pagination.jsx" // Décommenter pour pagination backend
 
-import { mockMessages } from "./lib/mockMessages.js"
 
-export function DoctorMessagePage() {
+export function DoctorMessagePage({
+  DashboardComponent = CustomDashboard,
+  NavBarComponent = DoctorNavBar,
+  navLink = doctorNavLink,
+  requiredRole = "Doctor",
+  showComposer = false,
+}) {
   const [searchTerm, setSearchTerm] = useState("")
   const [priorityFilter, setPriorityFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -35,6 +40,14 @@ export function DoctorMessagePage() {
   const [editedContent, setEditedContent] = useState("")
   const [selectedNotification, setSelectedNotification] = useState(null)
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false)
+  const [staffList, setStaffList] = useState([])
+  const [isStaffLoading, setIsStaffLoading] = useState(false)
+  const [composeRole, setComposeRole] = useState("ALL")
+  const [composeSubject, setComposeSubject] = useState("")
+  const [composeMessage, setComposeMessage] = useState("")
+  const [sendStatus, setSendStatus] = useState("")
+  const [isSending, setIsSending] = useState(false)
+  const [selectedRecipientIds, setSelectedRecipientIds] = useState([])
 
   // PAGINATION BACKEND: Décommenter ces états quand vous passerez à la pagination backend
   // const [nextUrl, setNextUrl] = useState(null)
@@ -56,7 +69,6 @@ export function DoctorMessagePage() {
     }
   }
 
-
   // Récupérer les notifications internes du médecin (API)
   async function retrieveDoctorNotifications() {
     setIsNotificationsLoading(true)
@@ -74,16 +86,57 @@ export function DoctorMessagePage() {
     }
   }
 
-  // Récupérer les messages du médecin (VERSION MOCK)
-  function retrieveDoctorMessages() {
+  const normalizeMessage = (message) => {
+    const priorityMap = {
+      REPORT_PROBLEM: "high",
+      HOSPITALISATION_REQUEST: "high",
+      CONSULTATION_REQUEST: "medium",
+      ACCESS_REQUEST: "medium",
+      INFO: "low",
+    }
+    return {
+      id: message?.id,
+      subject: message?.reason || "Message",
+      senderName: "Administration",
+      content: message?.message || "",
+      createdAt: message?.addAt || new Date().toISOString(),
+      isRead: false,
+      priority: priorityMap[message?.messageType] || "low",
+    }
+  }
+
+  async function retrieveDoctorMessages() {
     setIsLoading(true)
-    // Simuler un délai de chargement
-    setTimeout(() => {
-      setMessageList(mockMessages)
-      setIsLoading(false)
+    try {
+      const response = await axiosInstance.get("/message/")
+      const results = response.data?.results ?? response.data ?? []
+      const normalized = results.map(normalizeMessage)
+      setMessageList(normalized)
+      if (userData?.role && userData.role !== "Admin") {
+        const welcomeKey = `fultang_welcome_message_${userData.id}`
+        if (!localStorage.getItem(welcomeKey) && normalized.length === 0) {
+          const displayName = userData?.username || "Utilisateur"
+          const welcomeMessage = {
+            id: `welcome-${userData.id}`,
+            subject: "Bienvenue sur Fultang",
+            senderName: "Fultang",
+            content: `Bonjour ${displayName}, bienvenue sur Fultang. Nous sommes heureux de vous compter parmi nous.`,
+            createdAt: new Date().toISOString(),
+            isRead: false,
+            priority: "low",
+          }
+          setMessageList([welcomeMessage])
+          localStorage.setItem(welcomeKey, "true")
+        }
+      }
       setErrorStatus(null)
       setErrorMessage("")
-    }, 500)
+    } catch (error) {
+      setErrorStatus(error.status)
+      setErrorMessage("Erreur lors de la récupération de vos messages !")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   /* VERSION API AVEC PAGINATION BACKEND - À utiliser quand l'endpoint sera prêt
@@ -150,9 +203,17 @@ export function DoctorMessagePage() {
 
   // Supprimer un message (VERSION MOCK)
   function deleteMessage(messageId) {
+    if (typeof messageId === "string" && messageId.startsWith("welcome-")) {
+      setMessageList(prev => prev.filter(msg => msg.id !== messageId))
+      if (selectedMessage?.id === messageId) {
+        setIsModalOpen(false)
+        setSelectedMessage(null)
+      }
+      return
+    }
     const performDelete = async () => {
       try {
-        await axiosInstance.delete(`/messages/${messageId}/`)
+        await axiosInstance.delete(`/message/${messageId}/`)
         setMessageList(prev => prev.filter(msg => msg.id !== messageId))
         if (selectedMessage?.id === messageId) {
           setIsModalOpen(false)
@@ -226,8 +287,9 @@ export function DoctorMessagePage() {
   async function deleteAllMessages() {
     if (messageList.length === 0) return
     try {
-      await Promise.all(messageList.map((msg) => axiosInstance.delete(`/messages/${msg.id}/`)))
-      setMessageList([])
+      const deletable = messageList.filter((msg) => !(typeof msg.id === "string" && msg.id.startsWith("welcome-")))
+      await Promise.all(deletable.map((msg) => axiosInstance.delete(`/message/${msg.id}/`)))
+      setMessageList(messageList.filter((msg) => typeof msg.id === "string" && msg.id.startsWith("welcome-")))
       setIsModalOpen(false)
       setSelectedMessage(null)
     } catch (error) {
@@ -244,6 +306,44 @@ export function DoctorMessagePage() {
     // }
   }, [])
 
+  useEffect(() => {
+    if (!showComposer) return
+    let isMounted = true
+    const fetchAllStaff = async () => {
+      setIsStaffLoading(true)
+      setSendStatus("")
+      try {
+        let nextUrl = "/medical-staff/?page_size=50"
+        const collected = []
+        while (nextUrl) {
+          const response = await axiosInstance.get(nextUrl)
+          const data = response.data?.results ?? response.data ?? []
+          collected.push(...data)
+          nextUrl = response.data?.next
+          if (nextUrl && nextUrl.startsWith("http")) {
+            nextUrl = nextUrl.replace(import.meta.env.VITE_BACKEND_FULTANG_API_BASE_MEDICALSTAFF_URL, "")
+          }
+        }
+        if (isMounted) {
+          setStaffList(collected)
+        }
+      } catch (error) {
+        console.log(error)
+        if (isMounted) {
+          setSendStatus("Impossible de charger les utilisateurs.")
+        }
+      } finally {
+        if (isMounted) {
+          setIsStaffLoading(false)
+        }
+      }
+    }
+    fetchAllStaff()
+    return () => {
+      isMounted = false
+    }
+  }, [showComposer])
+
   useNotificationSocket((payload) => {
     if (!payload?.id) return
     const incoming = normalizeNotification(payload)
@@ -255,6 +355,95 @@ export function DoctorMessagePage() {
       return [incoming, ...prev]
     })
   })
+
+  useEffect(() => {
+    setSelectedRecipientIds([])
+  }, [composeRole])
+
+  const roleOptions = [
+    { value: "ALL", label: "Tous les acteurs" },
+    { value: "Doctor", label: "Médecins" },
+    { value: "Nurse", label: "Infirmiers" },
+    { value: "Labtech", label: "Laborantins" },
+    { value: "Receptionist", label: "Réceptionnistes" },
+    { value: "Pharmacist", label: "Pharmaciens" },
+    { value: "Cashier", label: "Caissiers" },
+    { value: "Accountant", label: "Comptables" },
+    { value: "Admin", label: "Admins" },
+  ]
+
+  const filteredStaff = staffList.filter((staff) => {
+    if (composeRole === "ALL") return true
+    return staff.role === composeRole
+  })
+
+  const doctorRoles = new Set(["Doctor", "Specialist", "Ophtalmologist", "Dentist"])
+  const roleLabelMap = {
+    Doctor: "Médecins",
+    Nurse: "Infirmiers",
+    Labtech: "Laborantins",
+    Receptionist: "Réceptionnistes",
+    Pharmacist: "Pharmaciens",
+    Cashier: "Caissiers",
+    Accountant: "Comptables",
+    Admin: "Admins",
+  }
+
+  const roleStaff = staffList.filter((staff) => {
+    if (composeRole === "Doctor") {
+      return doctorRoles.has(staff.role)
+    }
+    if (composeRole === "ALL") return false
+    return staff.role === composeRole
+  })
+
+  const selectedRecipients = roleStaff.filter((staff) => selectedRecipientIds.includes(staff.id))
+
+  const toggleRecipient = (staffId) => {
+    setSelectedRecipientIds((prev) =>
+      prev.includes(staffId) ? prev.filter((id) => id !== staffId) : [...prev, staffId]
+    )
+  }
+
+  async function handleSendMessage(e) {
+    e.preventDefault()
+    if (!composeSubject.trim() || !composeMessage.trim()) {
+      setSendStatus("Veuillez remplir le sujet et le message.")
+      return
+    }
+    if (composeRole !== "ALL" && selectedRecipientIds.length === 0) {
+      const roleLabel = roleLabelMap[composeRole] || "destinataire"
+      setSendStatus(`Veuillez sélectionner au moins un ${roleLabel.toLowerCase()}.`)
+      return
+    }
+    const recipientsToSend = composeRole === "ALL" ? filteredStaff : selectedRecipients
+    if (recipientsToSend.length === 0) {
+      setSendStatus("Aucun destinataire trouvé.")
+      return
+    }
+    setIsSending(true)
+    setSendStatus("")
+    try {
+      await Promise.all(
+        recipientsToSend.map((staff) =>
+          axiosInstance.post("/message/", {
+            idMedicalStaff: staff.id,
+            reason: composeSubject,
+            message: composeMessage,
+            messageType: "INFO",
+          })
+        )
+      )
+      setSendStatus("Message(s) envoyé(s) avec succès.")
+      setComposeSubject("")
+      setComposeMessage("")
+    } catch (error) {
+      console.log(error)
+      setSendStatus("Erreur lors de l'envoi des messages.")
+    } finally {
+      setIsSending(false)
+    }
+  }
 
   // FILTRAGE DES MESSAGES
   // NOTE: Avec pagination backend, les filtres devront être envoyés comme paramètres à l'API
@@ -319,14 +508,106 @@ export function DoctorMessagePage() {
   }
 
   return (
-    <CustomDashboard linkList={doctorNavLink} requiredRole={"Doctor"}>
-      <DoctorNavBar messageCount={messageList.filter(m => !m.isRead).length + notifications.filter(n => !n.isRead).length} />
+    <DashboardComponent linkList={navLink} requiredRole={requiredRole}>
+      <NavBarComponent messageCount={messageList.filter(m => !m.isRead).length + notifications.filter(n => !n.isRead).length} />
       <div className="mx-auto p-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
             Messages
           </h1>
         </div>
+
+        {showComposer && (
+          <div className="bg-white p-6 rounded-xl shadow-md mb-6 border border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Envoyer un message</h2>
+            <form onSubmit={handleSendMessage} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Destinataires
+                  </label>
+                  <select
+                    value={composeRole}
+                    onChange={(e) => setComposeRole(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-end focus:border-transparent bg-white"
+                  >
+                    {roleOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {composeRole !== "ALL" && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      {roleLabelMap[composeRole] || "Destinataires"}
+                    </label>
+                    <div className="border border-gray-200 rounded-lg p-3 max-h-40 overflow-auto space-y-2">
+                      {isStaffLoading ? (
+                        <p className="text-sm text-gray-500">Chargement des utilisateurs...</p>
+                      ) : roleStaff.length > 0 ? (
+                        roleStaff.map((staff) => (
+                          <label key={staff.id} className="flex items-center gap-2 text-sm text-gray-700">
+                            <input
+                              type="checkbox"
+                              checked={selectedRecipientIds.includes(staff.id)}
+                              onChange={() => toggleRecipient(staff.id)}
+                              className="h-4 w-4 text-primary-end border-gray-300 rounded"
+                            />
+                            <span>
+                              {composeRole === "Doctor" ? "Dr. " : ""}
+                              {staff.first_name} {staff.last_name}
+                              {staff.role ? ` (${staff.role})` : ""}
+                            </span>
+                          </label>
+                        ))
+                      ) : (
+                        <p className="text-sm text-gray-500">Aucun utilisateur disponible.</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Sujet
+                  </label>
+                  <input
+                    type="text"
+                    value={composeSubject}
+                    onChange={(e) => setComposeSubject(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-end focus:border-transparent"
+                    placeholder="Sujet du message"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Message
+                </label>
+                <textarea
+                  rows={4}
+                  value={composeMessage}
+                  onChange={(e) => setComposeMessage(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-end focus:border-transparent"
+                  placeholder="Ecrivez votre message..."
+                />
+              </div>
+              <div className="flex items-center gap-4">
+                <button
+                  type="submit"
+                  disabled={isSending || isStaffLoading}
+                  className="px-6 py-2 bg-primary-end text-white rounded-lg hover:bg-primary-start transition-colors disabled:opacity-60"
+                >
+                  {isSending ? "Envoi..." : "Envoyer"}
+                </button>
+                {sendStatus && (
+                  <span className="text-sm text-gray-600">{sendStatus}</span>
+                )}
+              </div>
+            </form>
+          </div>
+        )}
 
         {/* Filtres */}
         <div className="bg-white p-6 rounded-xl shadow-md mb-6 border border-gray-100">
@@ -512,7 +793,7 @@ export function DoctorMessagePage() {
             })}
           </div>
         ) : (
-          <div className="p-8 mt-24 flex items-center justify-center">
+          <div className="p-8 mt-8 flex items-center justify-center">
             <div className="flex flex-col">
               <Bell className="h-16 w-16 text-primary-end mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-800 mb-2 mx-auto">
@@ -734,6 +1015,6 @@ export function DoctorMessagePage() {
           </div>
         )}
       </Modal>
-    </CustomDashboard>
+    </DashboardComponent>
   )
 }

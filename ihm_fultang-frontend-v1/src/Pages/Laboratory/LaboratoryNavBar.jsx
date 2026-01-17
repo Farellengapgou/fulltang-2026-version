@@ -1,4 +1,4 @@
-import {FaCog, FaEnvelope, FaSignOutAlt, FaBell} from "react-icons/fa";
+import {FaCog, FaEnvelope, FaSignOutAlt} from "react-icons/fa";
 import {Tooltip} from "antd";
 import {useAuthentication} from "../../Utils/Provider.jsx";
 import userIcon from "../../assets/userIcon.png";
@@ -33,17 +33,10 @@ export function LaboratoryNavBar()
                         </Tooltip>
 
                         <Tooltip placement={"top"} title={"Messages"}>
-                            <button className={applyNavLinkBtnStyle()}>
-                                <FaEnvelope/>
-                            </button>
-                        </Tooltip>
-                        <Tooltip placement={"top"} title={"Notification"}>
                             <button
-                                onClick={
-                                    () => {navigate(AppRoutesPaths.laboratoryNotification)}
-                                }
+                                onClick={() => {navigate(AppRoutesPaths.laboratoryMessage)}}
                                 className={applyNavLinkBtnStyle()}>
-                                <FaBell/>
+                                <FaEnvelope/>
                             </button>
                         </Tooltip>
                         <Tooltip placement={"top"} title={"LogOut"}>
