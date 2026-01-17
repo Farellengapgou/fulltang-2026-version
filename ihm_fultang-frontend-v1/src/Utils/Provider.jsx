@@ -12,6 +12,9 @@ function useLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [userData, setUserData] = useState({});
   const [userRole, setUserRole] = useState("");
+  const authBase =
+    import.meta.env.VITE_BACKEND_FULTANG_API_BASE_AUTH_URL ||
+    "http://127.0.0.1:8009/api/v1/auth";
 
   function saveAuthParameters(token, refreshToken) {
     localStorage.setItem("token_key_fultang", token);
@@ -26,7 +29,7 @@ function useLogin() {
   async function login(data) {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8009/api/v1/auth/login/",
+        `${authBase}/login/`,
         data
       );
       if (response.status === 200) {
@@ -51,7 +54,7 @@ function useLogin() {
     if (token) {
       try {
         const response = await axios.get(
-          "http://127.0.0.1:8009/api/v1/auth/me/",
+          `${authBase}/me/`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (response.status === 200) {

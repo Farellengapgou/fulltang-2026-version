@@ -38,5 +38,5 @@ EXPOSE 8009
 # Définir la variable d'environnement pour désactiver le buffering des sorties (optionnel)
 ENV PYTHONUNBUFFERED=1
 
-# Lancer les migrations et démarrer le serveur Django
-CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8009"]
+# Lancer les migrations et démarrer le serveur ASGI
+CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && daphne -b 0.0.0.0 -p 8009 fultang.asgi:application"]

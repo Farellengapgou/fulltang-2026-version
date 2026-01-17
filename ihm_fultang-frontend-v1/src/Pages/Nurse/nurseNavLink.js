@@ -1,4 +1,4 @@
-import {FaHome, FaQuestionCircle, FaUserMd} from "react-icons/fa";
+import {FaHome, FaQuestionCircle, FaUserMd, FaEnvelope} from "react-icons/fa";
 import {AppRoutesPaths as appRoutes} from "../../Router/appRouterPaths.js";
 import {Calendar} from "lucide-react";
 
@@ -14,6 +14,11 @@ export const nurseNavLink =
         name: 'Medical Staffs',
         icon: FaUserMd,
         link: appRoutes.nurseMedicalStaffsPage,
+    },
+    {
+        name: 'Messages',
+        icon: FaEnvelope,
+        link: appRoutes.nurseMessage,
     },
    /* {
         name: 'Appointments',
