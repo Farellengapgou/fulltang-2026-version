@@ -26,7 +26,7 @@ auth_header_param = openapi.Parameter(
     required=True,
 )
 
-tags = ["material-accounting"]
+tags = ["inventories"]
 
 
 def apply_inventory_filters(qs, params):

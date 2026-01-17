@@ -28,6 +28,7 @@ from accounting.api_views.stock_api_views.depot_api_view import DepotViewSet
 from accounting.api_views.stock_api_views.supplier_api_view import SupplierViewSet
 from accounting.api_views.stock_api_views.stocklevels_api_view import StockLevelViewSet
 from accounting.api_views.stock_api_views.batch_api_view import BatchViewSet
+from accounting.api_views.stock_api_views.reports_api_view import *
 
 
 # =============================================================================
@@ -51,6 +52,39 @@ financial_router.register(r"journal-entries", JournalEntryViewSet, basename="jou
 # =============================================================================
 # ======================= MATERIAL ACCOUNTING =================================
 # =============================================================================
+material_urlpatterns = [
+    # Stocks
+    path('report/stock-status/', StockStatusReportAPI.as_view(), name='stock-status-report'),
+    path('report/stock-valuation/', StockValuationReportAPI.as_view(), name='stock-valuation-report'),
+    path('report/stock-aging/', StockAgingReportAPI.as_view(), name='stock-aging-report'),
+
+    # Mouvements
+    path('report/movements-summary/', MovementsSummaryReportAPI.as_view()),
+    path('report/consumption-analysis/', ConsumptionAnalysisReportAPI.as_view()),
+    path('report/rotation-rate/', RotationRateReportAPI.as_view()),
+
+    # Achats
+    path('report/purchases-by-supplier/', PurchasesBySupplierReportAPI.as_view()),
+    path('report/purchases-by-category/', PurchasesByCategoryReportAPI.as_view()),
+    path('report/purchases-by-period/', PurchasesByPeriodReportAPI.as_view()),
+
+    # Inventaires
+    path('report/inventory-variances/', InventoryVariancesReportAPI.as_view()),
+    path('report/inventory-history/', InventoryHistoryReportAPI.as_view()),
+
+    # Péremption
+    path('report/expiry-alerts/', ExpiryAlertsReportAPI.as_view()),
+    path('report/expired-products/', ExpiredProductsReportAPI.as_view()),
+
+    # Alertes
+    path('report/low-stock-alerts/', LowStockAlertsReportAPI.as_view()),
+    path('report/out-of-stock-alerts/', OutOfStockAlertsReportAPI.as_view()),
+
+    # Exports
+    path('report/export/excel/', ExportExcelReportAPI.as_view()),
+    path('report/export/pdf/', ExportPDFReportAPI.as_view()),
+    path('report/export/csv/', ExportCSVReportAPI.as_view()),
+]
 material_router.register(r"movements", StockMovementViewSet, basename="stock-movements")
 material_router.register(r"receipts", GoodsReceiptNoteViewSet, basename="goods-receipts")
 material_router.register(r"issues", GoodsIssueNoteViewSet, basename="goods-issues")
@@ -62,7 +96,6 @@ material_router.register(r'suppliers', SupplierViewSet, basename='material-suppl
 material_router.register(r'stock-levels', StockLevelViewSet, basename='material-stock-levels')
 material_router.register(r'batches', BatchViewSet, basename='material-batches')
 
-
 # =============================================================================
 # ========================== URL PATTERNS =====================================
 # =============================================================================
@@ -71,4 +104,4 @@ urlpatterns = [
     path("invoice/total", InvoiceTotalAPI.as_view(), name="invoice-total"),
 ]
 urlpatterns += financial_router.urls
-material_urlpatterns = material_router.urls
+material_urlpatterns += material_router.urls

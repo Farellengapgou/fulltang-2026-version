@@ -22,7 +22,7 @@ auth_header_param = openapi.Parameter(
     required=True,
 )
 
-tags = ["material-accounting"]
+tags = ["movements"]
 
 
 def apply_movement_filters(qs, params):

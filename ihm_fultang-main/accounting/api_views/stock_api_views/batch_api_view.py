@@ -15,7 +15,7 @@ from accounting.permissions.accounting_staff_permissions import AccountingStaffP
 from accounting.stock_models import Batch
 from accounting.stock_serializers import BatchSerializer
 
-tags = ["Material Accounting - Batches"]
+tags = ["batches"]
 
 auth_header_param = openapi.Parameter(
     name="Authorization",
