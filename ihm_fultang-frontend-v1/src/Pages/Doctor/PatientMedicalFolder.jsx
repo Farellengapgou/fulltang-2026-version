@@ -47,7 +47,14 @@ export function PatientMedicalFolder() {
     const patient = location.state?.patient;
     const { value: ageValue, unit: ageUnit } = calculateAge(patient?.birthDate);
 
-    // Charger le dossier médical
+    const buildMedicalFolderPath = (id, preferBaseHasMedical = null) => {
+        const base = axiosInstance?.defaults?.baseURL || "";
+        const normalized = base.endsWith("/") ? base.slice(0, -1) : base;
+        const baseHasMedical = normalized.endsWith("/medical") || normalized.includes("/api/v1/medical") || normalized.includes("/v1/medical");
+        const useNoExtraMedical = preferBaseHasMedical !== null ? preferBaseHasMedical : baseHasMedical;
+        return useNoExtraMedical ? `/medical-folder/${id}/` : `/medical/medical-folder/${id}/`;
+    };
+
     const loadMedicalFolder = useCallback(async () => {
         if (!patientId) {
             message.error("ID patient manquant");
@@ -55,31 +62,55 @@ export function PatientMedicalFolder() {
         }
         
         setIsLoading(true);
-        console.log("🔄 Chargement dossier pour patient:", patientId);
+        console.log("🔄 Chargement dossier pour patient:", patientId, "axios baseURL:", axiosInstance?.defaults?.baseURL);
+
+        // build primary and alternate paths to be resilient
+        const primaryPath = buildMedicalFolderPath(patientId);
+        const alternatePath = primaryPath.includes("/medical/medical-folder/") 
+            ? `/medical-folder/${patientId}/` 
+            : `/medical/medical-folder/${patientId}/`;
 
         try {
-            const response = await axiosInstance.get(`/medical/medical-folder/${patientId}/`);
-            console.log("✅ Dossier chargé:", response.data);
-            
-            setMedicalFolder(response.data);
-            setErrorStatus(null);
-            
-            // Sélectionner la première page par défaut si elle existe
-            if (response.data?.pages && response.data.pages.length > 0) {
-                setSelectedPage(response.data.pages[0]);
+            console.log("→ Requête dossier (primary):", primaryPath);
+            let response = await axiosInstance.get(primaryPath);
+            if (response?.status === 200) {
+                console.log("✅ Dossier chargé (primary):", response.data);
+                setMedicalFolder(response.data);
+                setErrorStatus(null);
+                if (response.data?.pages && response.data.pages.length > 0) setSelectedPage(response.data.pages[0]);
+                setIsLoading(false);
+                return;
             }
-            
-        } catch (error) {
-            console.error("❌ Erreur chargement dossier:", error.response || error);
-            
-            if (error.response?.status === 404) {
+            console.warn("⚠️ Réponse inattendue (primary):", response);
+        } catch (errPrimary) {
+            console.warn("❌ Erreur primary:", errPrimary?.response?.status, errPrimary?.response?.data || errPrimary.message);
+        }
+
+        // try alternate
+        try {
+            console.log("→ Requête dossier (alternate):", alternatePath);
+            const response2 = await axiosInstance.get(alternatePath);
+            if (response2?.status === 200) {
+                console.log("✅ Dossier chargé (alternate):", response2.data);
+                setMedicalFolder(response2.data);
+                setErrorStatus(null);
+                if (response2.data?.pages && response2.data.pages.length > 0) setSelectedPage(response2.data.pages[0]);
+                setIsLoading(false);
+                return;
+            }
+            console.warn("⚠️ Réponse inattendue (alternate):", response2);
+        } catch (errAlt) {
+            console.error("❌ Erreur alternate:", errAlt?.response?.status, errAlt?.response?.data || errAlt.message);
+
+            const status = errAlt?.response?.status;
+            if (status === 404) {
                 message.warning("Aucun dossier médical trouvé pour ce patient");
                 setMedicalFolder({ pages: [] });
-            } else if (error.response?.status === 401) {
+            } else if (status === 401) {
                 message.error("Session expirée - Redirection...");
-                setTimeout(() => navigate('/login'), 2000);
+                setTimeout(() => navigate('/login'), 1200);
             } else {
-                setErrorStatus(error.response?.status || 500);
+                setErrorStatus(status || 500);
                 message.error("Erreur lors du chargement du dossier médical");
             }
         } finally {
@@ -160,7 +191,6 @@ export function PatientMedicalFolder() {
             <DoctorNavBar />
             
             <div className="space-y-6">
-                {/* Patient Information Header */}
                 <div className="bg-white rounded-lg shadow-sm p-6">
                     <div className="bg-gradient-to-br from-primary-end to-primary-start rounded-lg shadow-lg p-6 mb-6">
                         <div className="flex items-center gap-6">
@@ -200,7 +230,6 @@ export function PatientMedicalFolder() {
                         </div>
                     </div>
 
-                    {/* Navigation & Actions */}
                     <div className="bg-gray-100 shadow-md rounded-lg mb-5 p-4">
                         <div className="flex justify-between items-center">
                             <div className="flex justify-start">
@@ -226,7 +255,6 @@ export function PatientMedicalFolder() {
                         </div>
                     </div>
 
-                    {/* Pages Navigation */}
                     {medicalFolder?.pages && medicalFolder.pages.length > 0 && (
                         <div className="bg-gray-100 rounded-lg p-4 mb-5">
                             <h3 className="font-bold text-lg mb-3 text-secondary">Pages du dossier ({medicalFolder.pages.length})</h3>
@@ -251,7 +279,6 @@ export function PatientMedicalFolder() {
                         </div>
                     )}
 
-                    {/* Medical Parameters */}
                     {selectedPage && selectedPage.parameters && (
                         <div className="w-full mx-auto mb-6">
                             <div className="bg-gradient-to-b from-blue-50 to-gray-50 rounded-lg p-6 border border-blue-100">
@@ -274,10 +301,8 @@ export function PatientMedicalFolder() {
                         </div>
                     )}
 
-                    {/* Page Content */}
                     {selectedPage ? (
                         <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
-                            {/* Nurse Notes */}
                             {selectedPage.nurseNote && (
                                 <div className="border-l-4 border-blue-500 pl-4">
                                     <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center">
@@ -290,7 +315,6 @@ export function PatientMedicalFolder() {
                                 </div>
                             )}
 
-                            {/* Doctor Notes */}
                             {selectedPage.doctorNote && (
                                 <div className="border-l-4 border-green-500 pl-4">
                                     <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center">
@@ -303,7 +327,6 @@ export function PatientMedicalFolder() {
                                 </div>
                             )}
 
-                            {/* Diagnostic */}
                             {selectedPage.diagnostic && (
                                 <div className="border-l-4 border-red-500 pl-4">
                                     <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center">
@@ -316,7 +339,6 @@ export function PatientMedicalFolder() {
                                 </div>
                             )}
 
-                            {/* Prescriptions */}
                             {selectedPage.prescriptions && selectedPage.prescriptions.length > 0 && (
                                 <div className="border-l-4 border-purple-500 pl-4">
                                     <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
@@ -357,7 +379,6 @@ export function PatientMedicalFolder() {
                                 </div>
                             )}
 
-                            {/* Exam Requests */}
                             {selectedPage.examRequests && selectedPage.examRequests.length > 0 && (
                                 <div className="border-l-4 border-orange-500 pl-4">
                                     <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
@@ -388,7 +409,6 @@ export function PatientMedicalFolder() {
                                 </div>
                             )}
 
-                            {/* Exam Results */}
                             {selectedPage.examResults && selectedPage.examResults.length > 0 && (
                                 <div className="border-l-4 border-teal-500 pl-4">
                                     <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
