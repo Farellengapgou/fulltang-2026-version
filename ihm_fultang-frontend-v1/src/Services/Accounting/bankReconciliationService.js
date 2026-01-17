@@ -1,101 +1,23 @@
-import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
+import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
 
-const BANK_RECONCILIATION_ENDPOINT = "/bank_reconciliation";
+const API_BASE = "/api/v1/accounting/bank-reconciliation";
 
-/**
- * Service pour la gestion de la trésorerie et rapprochement bancaire
- */
-const bankReconciliationService = {
-  /**
-   * Récupère toutes les opérations bancaires ou rapprochements
-   * @param {Object} params
-   * @returns {Promise}
-   */
-  getAllReconciliations: async (params = {}) => {
-    try {
-      const response = await axiosInstanceAccountant.get(BANK_RECONCILIATION_ENDPOINT, { params });
-      return response.data;
-    } catch (error) {
-      console.error("Erreur lors de la récupération des rapprochements:", error);
-      throw error;
-    }
-  },
+export const bankReconciliationService = {
+  getAllReconciliations: (params = {}) =>
+    axiosInstanceFinancial.get(API_BASE, { params }),
 
-  /**
-   * Récupère les détails d'un rapprochement
-   * @param {number} id
-   * @returns {Promise}
-   */
-  getReconciliationById: async (id) => {
-    try {
-      const response = await axiosInstanceAccountant.get(`${BANK_RECONCILIATION_ENDPOINT}/${id}/`);
-      return response.data;
-    } catch (error) {
-      console.error(`Erreur lors de la récupération du rapprochement ${id}:`, error);
-      throw error;
-    }
-  },
+  getReconciliation: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
 
-  /**
-   * Crée un nouveau rapprochement
-   * @param {Object} data
-   * @returns {Promise}
-   */
-  createReconciliation: async (data) => {
-    try {
-      const response = await axiosInstanceAccountant.post(`${BANK_RECONCILIATION_ENDPOINT}/`, data);
-      return response.data;
-    } catch (error) {
-      console.error("Erreur lors de la création du rapprochement:", error);
-      throw error;
-    }
-  },
+  createReconciliation: (data) => axiosInstanceFinancial.post(API_BASE, data),
+  updateReconciliation: (id, data) =>
+    axiosInstanceFinancial.put(`${API_BASE}/${id}/`, data),
 
-  /**
-   * Met à jour un rapprochement
-   * @param {number} id
-   * @param {Object} data
-   * @returns {Promise}
-   */
-  updateReconciliation: async (id, data) => {
-    try {
-      const response = await axiosInstanceAccountant.put(`${BANK_RECONCILIATION_ENDPOINT}/${id}/`, data);
-      return response.data;
-    } catch (error) {
-      console.error(`Erreur lors de la mise à jour du rapprochement ${id}:`, error);
-      throw error;
-    }
-  },
+  deleteReconciliation: (id) =>
+    axiosInstanceFinancial.delete(`${API_BASE}/${id}/`),
 
-  /**
-   * Supprime un rapprochement
-   * @param {number} id
-   * @returns {Promise}
-   */
-  deleteReconciliation: async (id) => {
-    try {
-      const response = await axiosInstanceAccountant.delete(`${BANK_RECONCILIATION_ENDPOINT}/${id}/`);
-      return response.data;
-    } catch (error) {
-      console.error(`Erreur lors de la suppression du rapprochement ${id}:`, error);
-      throw error;
-    }
-  },
+  reconcileBank: (id) =>
+    axiosInstanceFinancial.post(`${API_BASE}/${id}/reconcile/`, {}),
 
-  /**
-   * Récupère les prévisions de trésorerie
-   * @param {Object} params
-   * @returns {Promise}
-   */
-  getCashFlowForecast: async (params = {}) => {
-      try {
-          const response = await axiosInstanceAccountant.get(`${BANK_RECONCILIATION_ENDPOINT}/cash_flow_forecast/`, { params });
-          return response.data;
-      } catch (error) {
-          console.warn("Prévisions de trésorerie API non disponible, fallback.");
-          return [];
-      }
-  }
+  getReconciliationsByBankAccount: (bankAccountId) =>
+    axiosInstanceFinancial.get(`${API_BASE}/?bank_account=${bankAccountId}`),
 };
-
-export default bankReconciliationService;

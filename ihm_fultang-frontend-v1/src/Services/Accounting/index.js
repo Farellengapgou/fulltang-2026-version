@@ -1,15 +1,19 @@
-/**
- * Index des services de comptabilité
- * Exporte tous les services pour faciliter les imports
- */
-
-export * as chartOfAccountsService from './chartOfAccountsService';
-export * as journalEntryService from './journalEntryService';
-export * as journalService from './journalService';
-export * as financialReportService from './financialReportService';
-
-// Exports par défaut
-export { default as chartOfAccountsService } from './chartOfAccountsService';
-export { default as journalEntryService } from './journalEntryService';
-export { default as journalService } from './journalService';
-export { default as financialReportService } from './financialReportService';
+// Barrel export pour tous les services de comptabilité
+export { chartOfAccountsService } from "./chartOfAccountsService";
+export { journalEntryService } from "./journalEntryService";
+export { journalService } from "./journalService";
+export { customerService } from "./customerService";
+export { supplierService } from "./supplierService";
+export { financialReportService } from "./financialReportService";
+export { inventoryService } from "./inventoryService";
+export { fixedAssetService } from "./fixedAssetService";
+export { payrollService } from "./payrollService";
+export { vatService } from "./vatService";
+export { budgetService } from "./budgetService";
+export { accountingPeriodService } from "./accountingPeriodService";
+export { bankReconciliationService } from "./bankReconciliationService";
+export { taxService } from "./taxService";
+export { bankAccountService } from "./bankAccountService";
+export { analyticAccountService } from "./analyticAccountService";
+export { financialRatioService } from "./financialRatioService";
+export { accountingOperationService } from "./accountingOperationService";

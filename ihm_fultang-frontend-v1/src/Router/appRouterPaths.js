@@ -68,57 +68,19 @@ export const AppRoutesPaths = {
   financialAccountantJournalEntries: "/accountant-financial/journat-entries",
   financialAccountantAccountingJournals:
     "/accountant-financial/accounting-journals",
-  financialAccountantAccountingGrandLivre:
-    "/accountant-financial/accounting-grand-livre",
-  financialAccountantPayments: "/accountant-financial/payments",
-  financialAccountantBudgets: "/accountant-financial/budgets",
-  financialAccountantReports: "/accountant-financial/reports",
-  financialSocialCharge: "/accountant-financial/social-charge",
-  financialAccountantCostAnalytic: "/accountant-financial/cost-analytic",
-  // Revenue & Receivables
-  billing: "/accountant-financial/billing",
-  revenueByService: "/accountant-financial/revenue-by-service",
-  accountsReceivable: "/accountant-financial/accounts-receivable",
-
-  // Suppliers & Payables
+  customers: "/accountant-financial/customers",
   suppliers: "/accountant-financial/suppliers",
-  supplierInvoices: "/accountant-financial/supplier-invoices",
-  payables: "/accountant-financial/payables",
-
-  // Cash Management
+  fixedAssetsRegister: "/accountant-financial/fixed-assets-register",
+  inventoryValuation: "/accountant-financial/inventory-valuation",
+  financialAccountPayroll: "/accountant-financial/payroll",
+  vatCalculation: "/accountant-financial/tva",
+  taxDeclarations: "/accountant-financial/tax-declaration",
+  taxCalendar: "/accountant-financial/tax-calendar",
   cashPositions: "/accountant-financial/cash-positions",
   bankReconciliation: "/accountant-financial/bank-reconciliation",
-  cashFlowForecast: "/accountant-financial/cash-flow-forecast",
-
-  // Fixed Assets
-  fixedAssetsRegister: "/accountant-financial/fixed-assets",
-  depreciation: "/accountant-financial/depreciation",
-
-  // Inventory & Stock
-  inventoryValuation: "/accountant-financial/inventory-valuation",
-  physicalInventory: "/accountant-financial/physical-inventory",
-  abcAnalysis: "/accountant-financial/abc-analysis",
-
-  // Payroll & Social Charges
-  financialAccountPayroll: "/accountant-financial/payroll-journal",
-
-  // VAT & Taxation
-  vatCalculation: "/accountant-financial/vat-calculation",
-  taxDeclarations: "/accountant-financial/tax-declarations",
-  taxCalendar: "/accountant-financial/tax-calendar",
-
-  // Financial Analysis
+  budgetEntry: "/accountant-financial/budget-entry",
+  periodClose: "/accountant-financial/period-close",
   financialRatios: "/accountant-financial/financial-ratios",
   profitabilityAnalysis: "/accountant-financial/profitability-analysis",
-  executiveDashboard: "/accountant-financial/executive-dashboard",
-
-  // Budget & Control
-  budgetEntry: "/accountant-financial/budget-entry",
-  budgetVariance: "/accountant-financial/budget-variance",
-  budgetAlerts: "/accountant-financial/budget-alerts",
-
-  // Closing & Reporting
-  periodClose: "/accountant-financial/period-close",
   financialStatements: "/accountant-financial/financial-statements",
-  customReports: "/accountant-financial/custom-reports",
 };

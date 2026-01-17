@@ -1,29 +1,36 @@
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status
-from django.db import transaction
-from ..models_financier import Payroll
-from ..serializers import PayrollSerializer
+from rest_framework.permissions import IsAuthenticated
+
+from accounting.models_financier import Payroll
+from accounting.serializers import PayrollSerializer
 
 
-class PayrollViewSet(ModelViewSet):
-    """
-    ViewSet pour la comptabilisation de la paie
-    """
+class PayrollViewSet(viewsets.ModelViewSet):
     queryset = Payroll.objects.all()
     serializer_class = PayrollSerializer
     permission_classes = [IsAuthenticated]
-    
-    @transaction.atomic
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-    
-    @transaction.atomic
-    def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
-    
-    @transaction.atomic
-    def destroy(self, request, *args, **kwargs):
-        return super().destroy(request, *args, **kwargs)
+    filterset_fields = ['status', 'payroll_period']
+    search_fields = ['payroll_number']
+    ordering_fields = ['-period_end', 'payroll_number']
+
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        payroll = self.get_object()
+        payroll.status = 'APPROVED'
+        payroll.save()
+        return Response(self.get_serializer(payroll).data)
+
+    @action(detail=True, methods=['post'])
+    def pay(self, request, pk=None):
+        payroll = self.get_object()
+        payroll.status = 'PAID'
+        payroll.save()
+        return Response(self.get_serializer(payroll).data)
+
+    @action(detail=True, methods=['post'])
+    def generate_payslips(self, request, pk=None):
+        payroll = self.get_object()
+        # Generate payslips logic
+        return Response({'status': 'Payslips generated'})

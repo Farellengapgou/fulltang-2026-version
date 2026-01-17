@@ -1,332 +1,176 @@
 import {
   FaHome,
   FaChartBar,
-  FaBookOpen,
   FaEdit,
   FaBook,
   FaUserTie,
-  FaFileInvoiceDollar,
   FaChartLine,
   FaCalculator,
   FaBuilding,
   FaFileAlt,
   FaTruck,
   FaBoxes,
-  FaLock,
-  FaCog,
   FaUniversity,
   FaUsers,
-  FaMoneyBillWave,
-  FaBell,
   FaQuestionCircle,
-  // Ajoutez ces icônes qui existent réellement dans 'react-icons/fa'
-  FaFileInvoice,
-  FaMoneyBill,
-  FaCreditCard,
-  FaReceipt,
+  FaLock,
 } from "react-icons/fa";
-import { TrendingUp } from "lucide-react";
 import { AppRoutesPaths as appRoutes } from "../../Router/appRouterPaths.js";
 
 export const FinancialAccountantNavLink = [
   {
-    name: "Dashboard",
-    link: appRoutes.financialAccountantHome,
-    icon: FaHome,
-    description: "Overview of financial KPIs",
-  },
-
-  // Basic Accounting
-  {
-    name: "Basic Accounting",
-    icon: FaBookOpen,
+    name: "Tableau De Bord",
     subLinks: [
       {
-        icon: FaChartBar,
-        name: "Chart of Accounts",
+        name: "Accueil",
+        link: appRoutes.financialAccountantHome,
+        icon: FaHome,
+      },
+    ],
+  },
+  {
+    name: "Comptabilité De Base",
+    subLinks: [
+      {
+        name: "Plan Comptable",
         link: appRoutes.financialAccountantChartOfAccount,
-        description: "Manage the OHADA account structure",
+        icon: FaChartBar,
       },
       {
-        icon: FaEdit,
-        name: "Journal Entries",
+        name: "Écritures",
         link: appRoutes.financialAccountantJournalEntries,
-        description: "Record accounting transactions",
+        icon: FaEdit,
       },
       {
-        icon: FaBook,
-        name: "Accounting Journals",
+        name: "Journaux",
         link: appRoutes.financialAccountantAccountingJournals,
-        description:
-          "View journals (Sales, Purchases, Bank, Cash, Adjustments)",
-      },
-      {
         icon: FaBook,
-        name: "Ledger & Trial Balance",
-        link: appRoutes.financialAccountantAccountingGrandLivre,
-        description: "View the ledger and trial balance",
       },
     ],
   },
-
-  // Revenue & Receivables
   {
-    name: "Revenue & Receivables",
-    icon: FaMoneyBillWave,
+    name: "Tiers",
     subLinks: [
       {
-        icon: FaReceipt, // ✅ Changé ici
-        name: "Billing",
-        link: appRoutes.billing,
-        description: "Manage patient billing",
-      },
-      {
-        icon: TrendingUp,
-        name: "Revenue by Service",
-        link: appRoutes.revenueByService,
-        description: "Analyze revenue by medical service",
-      },
-      {
-        icon: FaCreditCard, // ✅ Changé ici
-        name: "Accounts Receivable",
-        link: appRoutes.accountsReceivable,
-        description: "Track receivables and collections",
-      },
-    ],
-  },
-
-  // Suppliers & Payables
-  {
-    name: "Suppliers & Payables",
-    icon: FaTruck,
-    subLinks: [
-      {
+        name: "Clients",
+        link: appRoutes.customers,
         icon: FaUsers,
-        name: "Supplier Directory",
+      },
+      {
+        name: "Fournisseurs",
         link: appRoutes.suppliers,
-        description: "Manage suppliers and their terms",
-      },
-      {
-        icon: FaFileInvoice, // ✅ Changé ici
-        name: "Supplier Invoices",
-        link: appRoutes.supplierInvoices,
-        description: "Enter and validate received invoices",
-      },
-      {
-        icon: FaMoneyBill, // ✅ Changé ici
-        name: "Payment Schedule & Payments",
-        link: appRoutes.payables,
-        description: "Manage due dates and payments",
+        icon: FaTruck,
       },
     ],
   },
-
-  // Cash Management
   {
-    name: "Cash Management",
-    icon: FaUniversity,
+    name: "Actifs Et Stocks",
     subLinks: [
       {
-        icon: FaUniversity,
-        name: "Bank Balances",
-        link: appRoutes.cashPositions,
-        description: "View real-time bank balances",
-      },
-      {
-        icon: FaCalculator,
-        name: "Bank Reconciliation",
-        link: appRoutes.bankReconciliation,
-        description: "Perform monthly reconciliations",
-      },
-      {
-        icon: FaChartLine,
-        name: "Cash Flow Forecast",
-        link: appRoutes.cashFlowForecast,
-        description: "Forecast cash flows",
-      },
-    ],
-  },
-
-  // Fixed Assets
-  {
-    name: "Fixed Assets",
-    icon: FaBuilding,
-    subLinks: [
-      {
-        icon: FaBuilding,
-        name: "Fixed Assets Register",
+        name: "Immobilisations",
         link: appRoutes.fixedAssetsRegister,
-        description: "Manage capital assets",
+        icon: FaBuilding,
       },
       {
-        icon: FaCalculator,
-        name: "Depreciation Calculation",
-        link: appRoutes.depreciation,
-        description: "Calculate and record depreciation",
-      },
-    ],
-  },
-
-  // Inventory & Stock
-  {
-    name: "Inventory & Stock",
-    icon: FaBoxes,
-    subLinks: [
-      {
-        icon: FaBoxes,
-        name: "Inventory Valuation",
+        name: "Inventaire",
         link: appRoutes.inventoryValuation,
-        description: "Value inventory (FIFO, LIFO, WAC)",
-      },
-      {
-        icon: FaEdit,
-        name: "Inventory Entry",
-        link: appRoutes.physicalInventory,
-        description: "Record physical counts",
-      },
-      {
-        icon: FaChartBar,
-        name: "ABC Analysis",
-        link: appRoutes.abcAnalysis,
-        description: "Classify and analyze stock",
+        icon: FaBoxes,
       },
     ],
   },
-
-  // Payroll & Social Charges
   {
-    name: "Payroll & Social Charges",
-    icon: FaUserTie,
+    name: "Paie",
     subLinks: [
       {
-        icon: FaUserTie,
-        name: "Payroll Accounting",
+        name: "Gestion de Paie",
         link: appRoutes.financialAccountPayroll,
-        description: "Account for payroll",
-      },
-      {
-        icon: FaFileInvoiceDollar,
-        name: "Social Charges",
-        link: appRoutes.financialSocialCharge,
-        description: "Manage social security, training taxes, etc.",
-      },
-      {
-        icon: FaChartLine,
-        name: "HR Cost Analysis",
-        link: appRoutes.financialAccountantCostAnalytic,
-        description: "Analyze costs by department",
+        icon: FaUserTie,
       },
     ],
   },
-
-  // VAT & Taxation
   {
-    name: "VAT & Taxation",
-    icon: FaFileInvoiceDollar,
+    name: "Fiscalité",
     subLinks: [
       {
-        icon: FaCalculator,
-        name: "VAT Calculation",
+        name: "TVA",
         link: appRoutes.vatCalculation,
-        description: "Calculate monthly VAT",
+        icon: FaCalculator,
       },
       {
-        icon: FaFileAlt,
-        name: "Tax Declarations",
+        name: "Taux Fiscaux",
         link: appRoutes.taxDeclarations,
-        description: "Prepare and submit tax returns",
-      },
-      {
-        icon: FaBell,
-        name: "Tax Calendar",
-        link: appRoutes.taxCalendar,
-        description: "Track tax deadlines",
-      },
-    ],
-  },
-
-  // Financial Analysis
-  {
-    name: "Financial Analysis",
-    icon: FaChartLine,
-    subLinks: [
-      {
         icon: FaChartLine,
-        name: "Financial Ratios",
-        link: appRoutes.financialRatios,
-        description: "Compute performance ratios",
       },
       {
-        icon: TrendingUp,
-        name: "Profitability by Service",
-        link: appRoutes.profitabilityAnalysis,
-        description: "Analyze service profitability",
-      },
-      {
-        icon: FaChartBar,
-        name: "Executive Dashboard",
-        link: appRoutes.executiveDashboard,
-        description: "KPIs for management",
-      },
-    ],
-  },
-
-  // Budget & Control
-  {
-    name: "Budget & Control",
-    icon: FaCalculator,
-    subLinks: [
-      {
-        icon: FaEdit,
-        name: "Budget Entry",
-        link: appRoutes.budgetEntry,
-        description: "Create and modify budgets",
-      },
-      {
-        icon: FaChartBar,
-        name: "Variance Analysis",
-        link: appRoutes.budgetVariance,
-        description: "Compare budget vs actual",
-      },
-      {
-        icon: FaBell,
-        name: "Budget Alerts",
-        link: appRoutes.budgetAlerts,
-        description: "Receive overrun alerts",
-      },
-    ],
-  },
-
-  // Closing & Reporting
-  {
-    name: "Closing & Reporting",
-    icon: FaLock,
-    subLinks: [
-      {
-        icon: FaCog,
-        name: "Closing Assistant",
-        link: appRoutes.periodClose,
-        description: "Perform monthly close",
-      },
-      {
+        name: "Déclarations Fiscales",
+        link: appRoutes.taxCalendar,
         icon: FaFileAlt,
-        name: "Financial Statements",
-        link: appRoutes.financialStatements,
-        description: "Generate balance sheet and income statement",
-      },
-      {
-        icon: FaBook,
-        name: "Custom Reports",
-        link: appRoutes.customReports,
-        description: "Create tailored reports",
       },
     ],
   },
-
   {
-    name: "Help Center",
-    icon: FaQuestionCircle,
-    link: appRoutes.helpCenter,
-    description: "Documentation and support",
+    name: "Trésorerie",
+    subLinks: [
+      {
+        name: "Comptes Bancaires",
+        link: appRoutes.cashPositions,
+        icon: FaUniversity,
+      },
+      {
+        name: "Réconciliation Bancaire",
+        link: appRoutes.bankReconciliation,
+        icon: FaCalculator,
+      },
+    ],
+  },
+  {
+    name: "Budget Et Contrôle",
+    subLinks: [
+      {
+        name: "Budget",
+        link: appRoutes.budgetEntry,
+        icon: FaCalculator,
+      },
+    ],
+  },
+  {
+    name: "Analyse Et Ratios",
+    subLinks: [
+      {
+        name: "Ratios Financiers",
+        link: appRoutes.financialRatios,
+        icon: FaChartLine,
+      },
+      {
+        name: "Comptes Analytiques",
+        link: appRoutes.profitabilityAnalysis,
+        icon: FaChartBar,
+      },
+    ],
+  },
+  {
+    name: "Clôture Et Rapports",
+    subLinks: [
+      {
+        name: "Périodes Comptables",
+        link: appRoutes.periodClose,
+        icon: FaLock,
+      },
+      {
+        name: "Rapports Financiers",
+        link: appRoutes.financialStatements,
+        icon: FaFileAlt,
+      },
+    ],
+  },
+  {
+    name: "Support",
+    subLinks: [
+      {
+        name: "Centre d'Aide",
+        link: appRoutes.helpCenter,
+        icon: FaQuestionCircle,
+      },
+    ],
   },
 ];

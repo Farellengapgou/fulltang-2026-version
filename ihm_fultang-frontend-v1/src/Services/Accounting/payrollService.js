@@ -1,51 +1,24 @@
-import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
+import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
 
-const PAYROLL_ENDPOINT = "/payroll";
+const API_BASE = "/api/v1/accounting/payroll";
 
-/**
- * Service pour la gestion de la paie
- */
-const payrollService = {
-  /**
-   * Récupère tous les employés/bulletins
-   * @param {Object} params
-   * @returns {Promise}
-   */
-  getAllPayrolls: async (params = {}) => {
-    try {
-      const response = await axiosInstanceAccountant.get(PAYROLL_ENDPOINT, { params });
-      return response.data;
-    } catch (error) {
-      console.error("Erreur paie:", error);
-      throw error;
-    }
-  },
+export const payrollService = {
+  getAllPayrolls: (params = {}) =>
+    axiosInstanceFinancial.get(API_BASE, { params }),
 
-  /**
-   * Génère les bulletins de paie
-   */
-  generatePayslips: async (period) => {
-      try {
-          const response = await axiosInstanceAccountant.post(`${PAYROLL_ENDPOINT}/generate/`, { period });
-          return response.data;
-      } catch (error) {
-           console.error("Erreur génération paie:", error);
-           throw error;
-      }
-  },
+  getPayroll: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
 
-  /**
-   * Récupère les déclarations sociales et fiscales
-   */
-  getDeclarations: async (params = {}) => {
-       try {
-          const response = await axiosInstanceAccountant.get(`${PAYROLL_ENDPOINT}/declarations/`, { params });
-          return response.data;
-      } catch (error) {
-           console.warn("Déclarations API non dispo fallback");
-           return [];
-      }
-  }
+  createPayroll: (data) => axiosInstanceFinancial.post(API_BASE, data),
+  updatePayroll: (id, data) =>
+    axiosInstanceFinancial.put(`${API_BASE}/${id}/`, data),
+
+  deletePayroll: (id) => axiosInstanceFinancial.delete(`${API_BASE}/${id}/`),
+
+  approvePayroll: (id) =>
+    axiosInstanceFinancial.post(`${API_BASE}/${id}/approve/`, {}),
+
+  payPayroll: (id) => axiosInstanceFinancial.post(`${API_BASE}/${id}/pay/`, {}),
+
+  generatePayslips: (id) =>
+    axiosInstanceFinancial.post(`${API_BASE}/${id}/generate_payslips/`, {}),
 };
-
-export default payrollService;

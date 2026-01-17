@@ -227,7 +227,7 @@ export function AppRoute() {
 
   const FinancialAccountantHome = React.lazy(async () => ({
     default: (await import("../Pages/AccountantNew/Home/HomePage.jsx"))
-      .FinancialAccountantHomePage,
+      .DashBoard,
   }));
   const FinancialAccountantChartOfAccount = React.lazy(async () => ({
     default: (
@@ -246,157 +246,71 @@ export function AppRoute() {
   const FinancialAccountingJournal = React.lazy(async () => ({
     default: (
       await import(
-        "../Pages/AccountantNew/Comptabilité de Base/AccountingJornal.jsx"
+        "../Pages/AccountantNew/Comptabilité de Base/AccountingPeriods.jsx"
       )
-    ).JournauxComptables,
+    ).AccountingPeriods,
   }));
-  const FinancialGrandLivre = React.lazy(async () => ({
+  const FinancialAccountantCustomers = React.lazy(async () => ({
     default: (
-      await import("../Pages/AccountantNew/Comptabilité de Base/GrandLivre.jsx")
-    ).GrandLivreBalance,
+      await import("../Pages/AccountantNew/Suppliers & Customers/Customers.jsx")
+    ).Customers,
   }));
-  const FinancialSocialCharge = React.lazy(async () => ({
+  const FinancialAccountantSuppliers = React.lazy(async () => ({
     default: (
-      await import(
-        "../Pages/AccountantNew/Payroll & Social Charge/SocialCharge.jsx"
-      )
-    ).SocialChargesCalculator,
+      await import("../Pages/AccountantNew/Suppliers & Customers/Suppliers.jsx")
+    ).Suppliers,
   }));
-  const FinancialAccountPayroll = React.lazy(async () => ({
+  const FixedAssetsRegister = React.lazy(async () => ({
     default: (
-      await import(
-        "../Pages/AccountantNew/Payroll & Social Charge/PayrollJournal.jsx"
-      )
-    ).PayrollJournal,
+      await import("../Pages/AccountantNew/Inventory & Stock/Assets.jsx")
+    ).Assets,
   }));
-  const FinancialCostAnalytic = React.lazy(async () => ({
+  const InventoryValuationPage = React.lazy(async () => ({
     default: (
-      await import(
-        "../Pages/AccountantNew/Payroll & Social Charge/CostAnalytic.jsx"
-      )
-    ).HRAnalyticsDashboard,
+      await import("../Pages/AccountantNew/Inventory & Stock/Inventory.jsx")
+    ).Inventory,
   }));
-  // Financial Accountant - Revenue & Receivables
-  const BillingPage = React.lazy(async () => ({
+  const FinancialAccountantPayrollPage = React.lazy(async () => ({
+    default: (await import("../Pages/AccountantNew/Payroll/Payroll.jsx"))
+      .Payroll,
+  }));
+  const VATCalculationPage = React.lazy(async () => ({
+    default: (await import("../Pages/AccountantNew/VAT & Taxation/VAT.jsx"))
+      .VAT,
+  }));
+  const TaxDeclarationsPage = React.lazy(async () => ({
     default: (
-      await import("../Pages/AccountantNew/Revenue & Receivables/Billing.jsx")
-    ).BillingPage,
+      await import("../Pages/AccountantNew/VAT & Taxation/TaxDeclarations.jsx")
+    ).TaxDeclarations,
   }));
-  const RevenueByService = React.lazy(async () => ({
+  const TaxRatesPage = React.lazy(async () => ({
     default: (
-      await import(
-        "../Pages/AccountantNew/Revenue & Receivables/RevenueByService.jsx"
-      )
-    ).RevenueByService,
+      await import("../Pages/AccountantNew/VAT & Taxation/TaxRates.jsx")
+    ).TaxRates,
   }));
-  const AccountsReceivable = React.lazy(async () => ({
-    default: (
-      await import(
-        "../Pages/AccountantNew/Revenue & Receivables/AccountsReceivable.jsx"
-      )
-    ).AccountsReceivable,
-  }));
-
-  // Financial Accountant - Suppliers & Payables
-  const SupplierDirectory = React.lazy(async () => ({
-    default: (
-      await import(
-        "../Pages/AccountantNew/Suppliers & Payables/SupplierDirectory.jsx"
-      )
-    ).SupplierDirectory,
-  }));
-  const SupplierInvoices = React.lazy(async () => ({
-    default: (
-      await import(
-        "../Pages/AccountantNew/Suppliers & Payables/SupplierInvoices.jsx"
-      )
-    ).SupplierInvoices,
-  }));
-  const PayablesManagement = React.lazy(async () => ({
-    default: (
-      await import(
-        "../Pages/AccountantNew/Suppliers & Payables/PayablesManagement.jsx"
-      )
-    ).PayablesManagement,
-  }));
-
-  // Financial Accountant - Cash Management
   const CashPositions = React.lazy(async () => ({
     default: (
-      await import("../Pages/AccountantNew/Cash Management/CashPositions.jsx")
-    ).CashPositions,
+      await import("../Pages/AccountantNew/Cash Management/BankAccounts.jsx")
+    ).BankAccounts,
   }));
-  const BankReconciliation = React.lazy(async () => ({
+  const BankReconciliationPage = React.lazy(async () => ({
     default: (
       await import(
         "../Pages/AccountantNew/Cash Management/BankReconciliation.jsx"
       )
     ).BankReconciliation,
   }));
-  const CashFlowForecast = React.lazy(async () => ({
+  const BudgetEntryPage = React.lazy(async () => ({
     default: (
-      await import(
-        "../Pages/AccountantNew/Cash Management/CashFlowForecast.jsx"
-      )
-    ).CashFlowForecast,
+      await import("../Pages/AccountantNew/Budget & Control/Budget.jsx")
+    ).Budget,
   }));
-
-  // Financial Accountant - Fixed Assets
-  const FixedAssetsRegister = React.lazy(async () => ({
+  const PeriodClose = React.lazy(async () => ({
     default: (
-      await import(
-        "../Pages/AccountantNew/Fixed Assets/FixedAssetsRegister.jsx"
-      )
-    ).FixedAssetsRegister,
+      await import("../Pages/AccountantNew/Cloture & Reports/Periods.jsx")
+    ).Periods,
   }));
-  const DepreciationCalculation = React.lazy(async () => ({
-    default: (
-      await import(
-        "../Pages/AccountantNew/Fixed Assets/DepreciationCalculation.jsx"
-      )
-    ).DepreciationCalculation,
-  }));
-
-  // Financial Accountant - Inventory
-  const InventoryValuation = React.lazy(async () => ({
-    default: (
-      await import(
-        "../Pages/AccountantNew/Inventory & Stock/InventoryValuation.jsx"
-      )
-    ).InventoryValuation,
-  }));
-  const PhysicalInventory = React.lazy(async () => ({
-    default: (
-      await import(
-        "../Pages/AccountantNew/Inventory & Stock/PhysicalInventory.jsx"
-      )
-    ).PhysicalInventory,
-  }));
-  const ABCAnalysis = React.lazy(async () => ({
-    default: (
-      await import("../Pages/AccountantNew/Inventory & Stock/ABCAnalysis.jsx")
-    ).ABCAnalysis,
-  }));
-
-  // Financial Accountant - VAT & Taxation
-  const VATCalculation = React.lazy(async () => ({
-    default: (
-      await import("../Pages/AccountantNew/VAT & Taxation/VATCalculation.jsx")
-    ).VATCalculation,
-  }));
-  const TaxDeclarations = React.lazy(async () => ({
-    default: (
-      await import("../Pages/AccountantNew/VAT & Taxation/TaxDeclarations.jsx")
-    ).TaxDeclarations,
-  }));
-  const TaxCalendar = React.lazy(async () => ({
-    default: (
-      await import("../Pages/AccountantNew/VAT & Taxation/TaxCalendar.jsx")
-    ).TaxCalendar,
-  }));
-
-  // Financial Accountant - Financial Analysis
-  const FinancialRatios = React.lazy(async () => ({
+  const FinancialRatiosPage = React.lazy(async () => ({
     default: (
       await import(
         "../Pages/AccountantNew/Financial Analysis/FinancialRatios.jsx"
@@ -406,54 +320,16 @@ export function AppRoute() {
   const ProfitabilityAnalysis = React.lazy(async () => ({
     default: (
       await import(
-        "../Pages/AccountantNew/Financial Analysis/ProfitabilityAnalysis.jsx"
+        "../Pages/AccountantNew/Financial Analysis/AnalyticAccounts.jsx"
       )
-    ).ProfitabilityAnalysis,
-  }));
-  const ExecutiveDashboard = React.lazy(async () => ({
-    default: (
-      await import(
-        "../Pages/AccountantNew/Financial Analysis/ExecutiveDashboard.jsx"
-      )
-    ).ExecutiveDashboard,
-  }));
-
-  // Financial Accountant - Budget & Control
-  const BudgetEntry = React.lazy(async () => ({
-    default: (
-      await import("../Pages/AccountantNew/Budget & Control/BudgetEntry.jsx")
-    ).BudgetEntry,
-  }));
-  const BudgetVariance = React.lazy(async () => ({
-    default: (
-      await import("../Pages/AccountantNew/Budget & Control/BudgetVariance.jsx")
-    ).BudgetVariance,
-  }));
-  const BudgetAlerts = React.lazy(async () => ({
-    default: (
-      await import("../Pages/AccountantNew/Budget & Control/BudgetAlerts.jsx")
-    ).BudgetAlerts,
-  }));
-
-  // Financial Accountant - Closing & Reporting
-  const PeriodClose = React.lazy(async () => ({
-    default: (
-      await import("../Pages/AccountantNew/Closing & Reporting/PeriodClose.jsx")
-    ).PeriodClose,
+    ).AnalyticAccounts,
   }));
   const FinancialStatements = React.lazy(async () => ({
     default: (
       await import(
-        "../Pages/AccountantNew/Closing & Reporting/FinancialStatements.jsx"
+        "../Pages/AccountantNew/Cloture & Reports/FinancialReports.jsx"
       )
-    ).FinancialStatements,
-  }));
-  const CustomReports = React.lazy(async () => ({
-    default: (
-      await import(
-        "../Pages/AccountantNew/Closing & Reporting/CustomReports.jsx"
-      )
-    ).CustomReports,
+    ).FinancialReports,
   }));
 
   return (
@@ -679,135 +555,84 @@ export function AppRoute() {
           element={<FinancialAccountingJournal />}
         />
         <Route
-          path={AppRoutesPaths.financialAccountantAccountingGrandLivre}
-          element={<FinancialGrandLivre />}
-        />
-        <Route
-          path={AppRoutesPaths.financialSocialCharge}
-          element={<FinancialSocialCharge />}
-        />
-        <Route
-          path={AppRoutesPaths.financialAccountPayroll}
-          element={<FinancialAccountPayroll />}
-        />
-        <Route
-          path={AppRoutesPaths.financialAccountantCostAnalytic}
-          element={<FinancialCostAnalytic />}
-        />
-        <Route
-          path={AppRoutesPaths.suppliers}
-          element={<SupplierDirectory />}
-        />
-        <Route
-          path={AppRoutesPaths.supplierInvoices}
-          element={<SupplierInvoices />}
-        />
-        {/* Revenue & Receivables */}
-        <Route path={AppRoutesPaths.billing} element={<BillingPage />} />
-        <Route
-          path={AppRoutesPaths.revenueByService}
-          element={<RevenueByService />}
-        />
-        <Route
-          path={AppRoutesPaths.accountsReceivable}
-          element={<AccountsReceivable />}
+          path="/accountant-financial/customers"
+          element={<FinancialAccountantCustomers />}
         />
 
-        {/* Suppliers & Payables */}
+        {/* Financial Accountant - Suppliers & Payables */}
         <Route
-          path={AppRoutesPaths.suppliers}
-          element={<SupplierDirectory />}
-        />
-        <Route
-          path={AppRoutesPaths.supplierInvoices}
-          element={<SupplierInvoices />}
-        />
-        <Route
-          path={AppRoutesPaths.payables}
-          element={<PayablesManagement />}
+          path="/accountant-financial/suppliers"
+          element={<FinancialAccountantSuppliers />}
         />
 
-        {/* Cash Management */}
+        {/* Financial Accountant - Fixed Assets */}
         <Route
-          path={AppRoutesPaths.cashPositions}
+          path="/accountant-financial/fixed-assets-register"
+          element={<FixedAssetsRegister />}
+        />
+
+        {/* Financial Accountant - Inventory & Stock */}
+        <Route
+          path="/accountant-financial/inventory-valuation"
+          element={<InventoryValuationPage />}
+        />
+
+        {/* Financial Accountant - Payroll & Social Charges */}
+        <Route
+          path="/accountant-financial/payroll"
+          element={<FinancialAccountantPayrollPage />}
+        />
+
+        {/* Financial Accountant - VAT & Taxation */}
+        <Route
+          path="/accountant-financial/tva"
+          element={<VATCalculationPage />}
+        />
+        <Route
+          path="/accountant-financial/tax-declaration"
+          element={<TaxDeclarationsPage />}
+        />
+        <Route
+          path="/accountant-financial/tax-calendar"
+          element={<TaxRatesPage />}
+        />
+
+        {/* Financial Accountant - Bank & Treasury */}
+        <Route
+          path="/accountant-financial/cash-positions"
           element={<CashPositions />}
         />
         <Route
-          path={AppRoutesPaths.bankReconciliation}
-          element={<BankReconciliation />}
-        />
-        <Route
-          path={AppRoutesPaths.cashFlowForecast}
-          element={<CashFlowForecast />}
+          path="/accountant-financial/bank-reconciliation"
+          element={<BankReconciliationPage />}
         />
 
-        {/* Fixed Assets */}
+        {/* Financial Accountant - Budget & Control */}
         <Route
-          path={AppRoutesPaths.fixedAssetsRegister}
-          element={<FixedAssetsRegister />}
-        />
-        <Route
-          path={AppRoutesPaths.depreciation}
-          element={<DepreciationCalculation />}
+          path="/accountant-financial/budget-entry"
+          element={<BudgetEntryPage />}
         />
 
-        {/* Inventory & Stock */}
+        {/* Financial Accountant - Closing & Reporting */}
         <Route
-          path={AppRoutesPaths.inventoryValuation}
-          element={<InventoryValuation />}
+          path="/accountant-financial/period-close"
+          element={<PeriodClose />}
         />
-        <Route
-          path={AppRoutesPaths.physicalInventory}
-          element={<PhysicalInventory />}
-        />
-        <Route path={AppRoutesPaths.abcAnalysis} element={<ABCAnalysis />} />
 
-        {/* VAT & Taxation */}
+        {/* Financial Accountant - Analysis & Ratios */}
         <Route
-          path={AppRoutesPaths.vatCalculation}
-          element={<VATCalculation />}
+          path="/accountant-financial/financial-ratios"
+          element={<FinancialRatiosPage />}
         />
         <Route
-          path={AppRoutesPaths.taxDeclarations}
-          element={<TaxDeclarations />}
-        />
-        <Route path={AppRoutesPaths.taxCalendar} element={<TaxCalendar />} />
-
-        {/* Financial Analysis */}
-        <Route
-          path={AppRoutesPaths.financialRatios}
-          element={<FinancialRatios />}
-        />
-        <Route
-          path={AppRoutesPaths.profitabilityAnalysis}
+          path="/accountant-financial/profitability-analysis"
           element={<ProfitabilityAnalysis />}
         />
-        <Route
-          path={AppRoutesPaths.executiveDashboard}
-          element={<ExecutiveDashboard />}
-        />
 
-        {/* Budget & Control */}
-        <Route path={AppRoutesPaths.budgetEntry} element={<BudgetEntry />} />
+        {/* Financial Accountant - Financial Statements */}
         <Route
-          path={AppRoutesPaths.budgetVariance}
-          element={<BudgetVariance />}
-        />
-        <Route path={AppRoutesPaths.budgetAlerts} element={<BudgetAlerts />} />
-
-        {/* Closing & Reporting */}
-        <Route path={AppRoutesPaths.periodClose} element={<PeriodClose />} />
-        <Route
-          path={AppRoutesPaths.financialStatements}
+          path="/accountant-financial/financial-statements"
           element={<FinancialStatements />}
-        />
-        <Route
-          path={AppRoutesPaths.customReports}
-          element={<CustomReports />}
-        />
-        <Route
-          path={AppRoutesPaths.financialSocialCharge}
-          element={<FinancialSocialCharge />}
         />
       </Routes>
     </React.Suspense>

@@ -1,29 +1,28 @@
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status
-from django.db import transaction
-from ..models_financier import BankReconciliation
-from ..serializers import BankReconciliationSerializer
+from rest_framework.permissions import IsAuthenticated
+
+from accounting.models_financier import BankReconciliation
+from accounting.serializers import BankReconciliationSerializer
 
 
-class BankReconciliationViewSet(ModelViewSet):
-    """
-    ViewSet pour les rapprochements bancaires
-    """
+class BankReconciliationViewSet(viewsets.ModelViewSet):
     queryset = BankReconciliation.objects.all()
     serializer_class = BankReconciliationSerializer
     permission_classes = [IsAuthenticated]
-    
-    @transaction.atomic
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-    
-    @transaction.atomic
-    def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
-    
-    @transaction.atomic
-    def destroy(self, request, *args, **kwargs):
-        return super().destroy(request, *args, **kwargs)
+    filterset_fields = ['is_reconciled']
+    search_fields = ['bank_account__bank_name']
+    ordering_fields = ['-reconciliation_date']
+
+    @action(detail=True, methods=['post'])
+    def reconcile(self, request, pk=None):
+        reconciliation = self.get_object()
+        is_reconciled = reconciliation.check_reconciliation()
+        reconciliation.is_reconciled = is_reconciled
+        reconciliation.save()
+        return Response({
+            'is_reconciled': is_reconciled,
+            'adjusted_balance': float(reconciliation.calculate_adjusted_balance()),
+            'book_balance': float(reconciliation.book_balance)
+        })

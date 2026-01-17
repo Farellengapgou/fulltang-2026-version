@@ -1,66 +1,19 @@
-import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
+import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
 
-const SUPPLIER_ENDPOINT = "/suppliers";
+const API_BASE = "/api/v1/accounting/suppliers";
 
-/**
- * Service pour la gestion des fournisseurs et dettes
- */
-const supplierService = {
-  /**
-   * Récupère tous les fournisseurs
-   * @param {Object} params
-   * @returns {Promise}
-   */
-  getAllSuppliers: async (params = {}) => {
-    try {
-      const response = await axiosInstanceAccountant.get(SUPPLIER_ENDPOINT, { params });
-      return response.data;
-    } catch (error) {
-      console.error("Erreur fournisseur:", error);
-      throw error;
-    }
-  },
+export const supplierService = {
+  getAllSuppliers: (params = {}) =>
+    axiosInstanceFinancial.get(API_BASE, { params }),
 
-  /**
-   * Crée un fournisseur
-   * @param {Object} data
-   * @returns {Promise}
-   */
-  createSupplier: async (data) => {
-    try {
-      const response = await axiosInstanceAccountant.post(`${SUPPLIER_ENDPOINT}/`, data);
-      return response.data;
-    } catch (error) {
-      console.error("Erreur création fournisseur:", error);
-      throw error;
-    }
-  },
+  getSupplier: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
 
-  /**
-   * Récupère les factures fournisseurs
-   */
-  getInvoices: async (params = {}) => {
-      try {
-          const response = await axiosInstanceAccountant.get(`${SUPPLIER_ENDPOINT}/invoices/`, { params });
-          return response.data;
-      } catch (error) {
-          console.warn("Factures fournisseurs API non dispo fallback");
-          return [];
-      }
-  },
+  createSupplier: (data) => axiosInstanceFinancial.post(API_BASE, data),
+  updateSupplier: (id, data) =>
+    axiosInstanceFinancial.put(`${API_BASE}/${id}/`, data),
 
-  /**
-   * Récupère l'échéancier des paiements
-   */
-  getPaymentSchedule: async (params = {}) => {
-      try {
-          const response = await axiosInstanceAccountant.get(`${SUPPLIER_ENDPOINT}/payment_schedule/`, { params });
-          return response.data;
-      } catch (error) {
-           console.warn("Echéancier API non dispo fallback");
-           return [];
-      }
-  }
+  deleteSupplier: (id) => axiosInstanceFinancial.delete(`${API_BASE}/${id}/`),
+
+  getSupplierBalance: (id) =>
+    axiosInstanceFinancial.get(`${API_BASE}/${id}/balance/`),
 };
-
-export default supplierService;

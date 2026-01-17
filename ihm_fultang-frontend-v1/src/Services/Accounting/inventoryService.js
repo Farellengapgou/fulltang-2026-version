@@ -1,51 +1,21 @@
-import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
+import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
 
-const INVENTORY_ENDPOINT = "/inventory";
+const API_BASE = "/api/v1/accounting/inventory";
 
-/**
- * Service pour la gestion des stocks
- */
-const inventoryService = {
-  /**
-   * Récupère l'état du stock (inventaire physique)
-   * @param {Object} params
-   * @returns {Promise}
-   */
-  getStockItems: async (params = {}) => {
-    try {
-      const response = await axiosInstanceAccountant.get(`${INVENTORY_ENDPOINT}/items/`, { params });
-      return response.data;
-    } catch (error) {
-      console.error("Erreur stock:", error);
-      throw error;
-    }
-  },
+export const inventoryService = {
+  getAllInventory: (params = {}) =>
+    axiosInstanceFinancial.get(API_BASE, { params }),
 
-  /**
-   * Récupère la valorisation du stock
-   */
-  getStockValuation: async (params = {}) => {
-       try {
-          const response = await axiosInstanceAccountant.get(`${INVENTORY_ENDPOINT}/valuation/`, { params });
-          return response.data;
-      } catch (error) {
-          console.warn("Valorisation stock API non dispo fallback");
-          return [];
-      }
-  },
+  getInventoryItem: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
 
-  /**
-   * Ajoute un ajustement de stock (inventaire physique)
-   */
-  adjustStock: async (data) => {
-      try {
-          const response = await axiosInstanceAccountant.post(`${INVENTORY_ENDPOINT}/adjust/`, data);
-          return response.data;
-      } catch (error) {
-           console.error("Erreur ajustement stock:", error);
-           throw error;
-      }
-  }
+  createInventoryItem: (data) => axiosInstanceFinancial.post(API_BASE, data),
+
+  updateInventoryItem: (id, data) =>
+    axiosInstanceFinancial.put(`${API_BASE}/${id}/`, data),
+
+  deleteInventoryItem: (id) =>
+    axiosInstanceFinancial.delete(`${API_BASE}/${id}/`),
+
+  getLowStockItems: () =>
+    axiosInstanceFinancial.get(`${API_BASE}/?low_stock=true`),
 };
-
-export default inventoryService;

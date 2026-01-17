@@ -1,50 +1,41 @@
-import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
+import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
 
-const TAX_ENDPOINT = "/taxation";
+const API_BASE = "/api/v1/accounting";
 
-/**
- * Service pour la gestion fiscale (TVA et impôts)
- */
-const taxService = {
-  /**
-   * Calcul la TVA pour une période
-   */
-  calculateVAT: async (params) => {
-    try {
-      const response = await axiosInstanceAccountant.post(`${TAX_ENDPOINT}/vat_calculation/`, params);
-      return response.data;
-    } catch (error) {
-      console.error("Erreur calcul TVA:", error);
-      throw error;
-    }
-  },
+export const taxService = {
+  // Tax Rates
+  getAllTaxRates: (params = {}) =>
+    axiosInstanceFinancial.get(`${API_BASE}/tax-rates/`, { params }),
 
-  /**
-   * Récupère les déclarations fiscales
-   */
-  getTaxDeclarations: async (params = {}) => {
-      try {
-          // Utilise le même endpoint que SocialCharges si c'est le même modèle, ou un endpoint dédié
-          const response = await axiosInstanceAccountant.get(`${TAX_ENDPOINT}/declarations/`, { params });
-          return response.data;
-      } catch (error) {
-          console.warn("Déclarations fiscales API non disponible, fallback.");
-          return [];
-      }
-  },
+  getTaxRate: (id) =>
+    axiosInstanceFinancial.get(`${API_BASE}/tax-rates/${id}/`),
 
-  /**
-   * Récupère le calendrier fiscal
-   */
-  getTaxCalendar: async () => {
-       try {
-          const response = await axiosInstanceAccountant.get(`${TAX_ENDPOINT}/calendar/`);
-          return response.data;
-      } catch (error) {
-          console.warn("Calendrier fiscal API non disponible, fallback.");
-          return [];
-      }
-  }
+  createTaxRate: (data) =>
+    axiosInstanceFinancial.post(`${API_BASE}/tax-rates/`, data),
+  updateTaxRate: (id, data) =>
+    axiosInstanceFinancial.put(`${API_BASE}/tax-rates/${id}/`, data),
+
+  deleteTaxRate: (id) =>
+    axiosInstanceFinancial.delete(`${API_BASE}/tax-rates/${id}/`),
+
+  // Tax Declarations
+  getAllTaxDeclarations: (params = {}) =>
+    axiosInstanceFinancial.get(`${API_BASE}/tax-declarations/`, { params }),
+
+  getTaxDeclaration: (id) =>
+    axiosInstanceFinancial.get(`${API_BASE}/tax-declarations/${id}/`),
+  createTaxDeclaration: (data) =>
+    axiosInstanceFinancial.post(`${API_BASE}/tax-declarations/`, data),
+
+  updateTaxDeclaration: (id, data) =>
+    axiosInstanceFinancial.put(`${API_BASE}/tax-declarations/${id}/`, data),
+
+  submitTaxDeclaration: (id) =>
+    axiosInstanceFinancial.post(
+      `${API_BASE}/tax-declarations/${id}/submit/`,
+      {}
+    ),
+
+  payTaxDeclaration: (id) =>
+    axiosInstanceFinancial.post(`${API_BASE}/tax-declarations/${id}/pay/`, {}),
 };
-
-export default taxService;

@@ -1,114 +1,25 @@
-import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
+import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
 
-const FIXED_ASSET_ENDPOINT = "/fixed_assets";
+const API_BASE = "/api/v1/accounting/fixed-assets";
 
-/**
- * Service pour la gestion des immobilisations
- */
-const fixedAssetService = {
-  /**
-   * Récupère toutes les immobilisations
-   * @param {Object} params
-   * @returns {Promise}
-   */
-  getAllAssets: async (params = {}) => {
-    try {
-      const response = await axiosInstanceAccountant.get(FIXED_ASSET_ENDPOINT, { params });
-      return response.data;
-    } catch (error) {
-      console.error("Erreur lors de la récupération des immobilisations:", error);
-      throw error;
-    }
-  },
+export const fixedAssetService = {
+  getAllAssets: (params = {}) =>
+    axiosInstanceFinancial.get(API_BASE, { params }),
 
-  /**
-   * Récupère les détails d'une immobilisation
-   * @param {number} id
-   * @returns {Promise}
-   */
-  getAssetById: async (id) => {
-    try {
-      const response = await axiosInstanceAccountant.get(`${FIXED_ASSET_ENDPOINT}/${id}/`);
-      return response.data;
-    } catch (error) {
-      console.error(`Erreur lors de la récupération de l'immobilisation ${id}:`, error);
-      throw error;
-    }
-  },
+  getAsset: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
 
-  /**
-   * Crée une nouvelle immobilisation
-   * @param {Object} data
-   * @returns {Promise}
-   */
-  createAsset: async (data) => {
-    try {
-      const response = await axiosInstanceAccountant.post(`${FIXED_ASSET_ENDPOINT}/`, data);
-      return response.data;
-    } catch (error) {
-      console.error("Erreur lors de la création de l'immobilisation:", error);
-      throw error;
-    }
-  },
+  createAsset: (data) => axiosInstanceFinancial.post(API_BASE, data),
+  updateAsset: (id, data) =>
+    axiosInstanceFinancial.put(`${API_BASE}/${id}/`, data),
 
-  /**
-   * Met à jour une immobilisation
-   * @param {number} id
-   * @param {Object} data
-   * @returns {Promise}
-   */
-  updateAsset: async (id, data) => {
-    try {
-      const response = await axiosInstanceAccountant.put(`${FIXED_ASSET_ENDPOINT}/${id}/`, data);
-      return response.data;
-    } catch (error) {
-      console.error(`Erreur lors de la mise à jour de l'immobilisation ${id}:`, error);
-      throw error;
-    }
-  },
+  deleteAsset: (id) => axiosInstanceFinancial.delete(`${API_BASE}/${id}/`),
 
-  /**
-   * Supprime une immobilisation
-   * @param {number} id
-   * @returns {Promise}
-   */
-  deleteAsset: async (id) => {
-    try {
-      const response = await axiosInstanceAccountant.delete(`${FIXED_ASSET_ENDPOINT}/${id}/`);
-      return response.data;
-    } catch (error) {
-      console.error(`Erreur lors de la suppression de l'immobilisation ${id}:`, error);
-      throw error;
-    }
-  },
+  getAssetDepreciation: (id) =>
+    axiosInstanceFinancial.get(`${API_BASE}/${id}/depreciation/`),
 
-  /**
-   * Calcule les amortissements
-   * @param {Object} params - { year, period, asset_id (optional) }
-   * @returns {Promise}
-   */
-  calculateDepreciation: async (params = {}) => {
-      try {
-          const response = await axiosInstanceAccountant.post(`${FIXED_ASSET_ENDPOINT}/calculate_depreciation/`, params);
-          return response.data;
-      } catch (error) {
-          console.warn("Calcul amortissement API non disponible, fallback vide.");
-          return [];
-      }
-  },
+  getAssetNetValue: (id) =>
+    axiosInstanceFinancial.get(`${API_BASE}/${id}/net_value/`),
 
-  /**
-   * Récupère l'historique des amortissements
-   */
-  getDepreciationHistory: async (params = {}) => {
-       try {
-          const response = await axiosInstanceAccountant.get(`${FIXED_ASSET_ENDPOINT}/depreciation_history/`, { params });
-          return response.data;
-      } catch (error) {
-          console.warn("Historique amortissement API non disponible.");
-          return [];
-      }
-  }
+  getActiveAssets: () =>
+    axiosInstanceFinancial.get(`${API_BASE}/?is_active=true`),
 };
-
-export default fixedAssetService;

@@ -1,104 +1,23 @@
-import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
+import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
 
-const VAT_ENDPOINT = "/vat";
+const API_BASE = "/api/v1/accounting/vat";
 
-/**
- * Service pour la gestion de la TVA et de la fiscalité
- */
-const vatService = {
-  /**
-   * Récupère toutes les déclarations fiscales
-   * @param {Object} params - Filtres (période, type, etc.)
-   * @returns {Promise} Liste des déclarations
-   */
-  getAllDeclarations: async (params = {}) => {
-    try {
-      const response = await axiosInstanceAccountant.get(VAT_ENDPOINT, { params });
-      return response.data;
-    } catch (error) {
-      console.error("Erreur lors de la récupération des déclarations:", error);
-      throw error;
-    }
-  },
+export const vatService = {
+  getAllVAT: (params = {}) => axiosInstanceFinancial.get(API_BASE, { params }),
 
-  /**
-   * Récupère une déclaration par son ID
-   * @param {number} id
-   * @returns {Promise} Détails de la déclaration
-   */
-  getDeclarationById: async (id) => {
-    try {
-      const response = await axiosInstanceAccountant.get(`${VAT_ENDPOINT}/${id}/`);
-      return response.data;
-    } catch (error) {
-      console.error(`Erreur lors de la récupération de la déclaration ${id}:`, error);
-      throw error;
-    }
-  },
+  getVAT: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
 
-  /**
-   * Crée une nouvelle déclaration
-   * @param {Object} declarationData
-   * @returns {Promise} Déclaration créée
-   */
-  createDeclaration: async (declarationData) => {
-    try {
-      const response = await axiosInstanceAccountant.post(`${VAT_ENDPOINT}/`, declarationData);
-      return response.data;
-    } catch (error) {
-      console.error("Erreur lors de la création de la déclaration:", error);
-      throw error;
-    }
-  },
+  createVAT: (data) => axiosInstanceFinancial.post(API_BASE, data),
+  updateVAT: (id, data) =>
+    axiosInstanceFinancial.put(`${API_BASE}/${id}/`, data),
 
-  /**
-   * Met à jour une déclaration
-   * @param {number} id
-   * @param {Object} declarationData
-   * @returns {Promise} Déclaration mise à jour
-   */
-  updateDeclaration: async (id, declarationData) => {
-    try {
-      const response = await axiosInstanceAccountant.put(`${VAT_ENDPOINT}/${id}/`, declarationData);
-      return response.data;
-    } catch (error) {
-      console.error(`Erreur lors de la mise à jour de la déclaration ${id}:`, error);
-      throw error;
-    }
-  },
+  deleteVAT: (id) => axiosInstanceFinancial.delete(`${API_BASE}/${id}/`),
 
-  /**
-   * Supprime une déclaration
-   * @param {number} id
-   * @returns {Promise}
-   */
-  deleteDeclaration: async (id) => {
-    try {
-      const response = await axiosInstanceAccountant.delete(`${VAT_ENDPOINT}/${id}/`);
-      return response.data;
-    } catch (error) {
-      console.error(`Erreur lors de la suppression de la déclaration ${id}:`, error);
-      throw error;
-    }
-  },
+  getVATByPeriod: (month, year) =>
+    axiosInstanceFinancial.get(
+      `${API_BASE}/?period_month=${month}&period_year=${year}`
+    ),
 
-  /**
-   * Calcule la TVA pour une période donnée
-   * @param {Object} params - { start_date, end_date }
-   * @returns {Promise} Données de calcul de TVA (Collectée, Déductible, etc.)
-   */
-  calculateVAT: async (params) => {
-      // Endpoint hypothétique pour le calcul de TVA
-      // Si non existant, on pourrait le faire côté client avec les factures
-      // Mais supposons une action custom sur le ViewSet
-      try {
-          const response = await axiosInstanceAccountant.get(`${VAT_ENDPOINT}/calculate_vat/`, { params });
-          return response.data;
-      } catch (error) {
-          console.warn("Calcul TVA API non disponible, retour vide.");
-          return { collected: 0, deductible: 0, payable: 0 };
-      }
-  }
+  declareVAT: (id) =>
+    axiosInstanceFinancial.post(`${API_BASE}/${id}/declare/`, {}),
 };
-
-export default vatService;

@@ -1,10 +1,8 @@
 # Utiliser une image de base officielle de Python
 FROM python:3.10-slim
 
-# Définir le répertoire de travail dans le conteneur
 WORKDIR /app
 
-# Installer les dépendances système nécessaires pour mysqlclient
 RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
@@ -13,22 +11,21 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     default-libmysqlclient-dev
 
-# Copier les fichiers requirements.txt dans le conteneur
 COPY requirements.txt /app
 
-# Installer les dépendances Python
 RUN pip install --no-cache-dir -r requirements.txt && \
     adduser \
         --disabled-password \
         --no-create-home \
         django-user
 
-# Copier le reste de l'application dans le conteneur
 COPY . /app
 
-# on donne les droits de lecture et ecriture à tous le monde à la bd (pour celery et celery beat)
-RUN chmod 666 db.sqlite3 && \
+# Create db.sqlite3 if it doesn't exist, then set permissions
+RUN touch db.sqlite3 && \
+    chmod 666 db.sqlite3 && \
     chmod -R 777 /app
+
 
 # Exposer le port sur lequel l'application va fonctionner
 EXPOSE 8009

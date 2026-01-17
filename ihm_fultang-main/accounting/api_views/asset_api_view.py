@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
-from ..models_financier import FixedAsset
+from ..models_financier import Asset as FixedAsset
 from ..serializers import FixedAssetSerializer
 
 
