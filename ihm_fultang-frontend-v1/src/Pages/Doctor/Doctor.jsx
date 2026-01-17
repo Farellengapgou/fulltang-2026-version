@@ -228,11 +228,11 @@ export function Doctor() {
             label: "View Consultations List",
             onClick: () => navigate(AppRouterPaths.doctorConsultationList)
         },
-        {
-            icon: Stethoscope,
-            label: "Add Consultation",
-            onClick: () => navigate(AppRouterPaths.doctorAddConsultation)
-        },
+        //{
+        //   icon: Stethoscope,
+        //    label: "Add Consultation",
+        //    onClick: () => navigate(AppRouterPaths.doctorAddConsultation)
+       // },
         // NOUVEAU QUICK ACCESS POUR LES EXAMENS
         {
             icon: FileText,
