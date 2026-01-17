@@ -2,6 +2,9 @@
 import { useState } from 'react';
 import { ArrowLeft, Send, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { ArrowLeft, Send, Lock } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import axiosInstance from "../../Utils/axiosInstance.js";
 import loginBackground from "../../assets/logIn.png";
 import axios from "axios";
@@ -13,7 +16,19 @@ export function ForgottenPassword() {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (password !== confirmPassword) {
+            setError("Les mots de passe ne correspondent pas.");
+            return;
+        }
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (password !== confirmPassword) {
@@ -30,7 +45,42 @@ export function ForgottenPassword() {
             setError("Ce mot de passe est trop commun, veuillez en choisir un autre.");
             return;
         }
+        // Vérification si le mot de passe est trop commun
+        const commonPasswords = [
+            "password", "123456", "12345678", "qwerty", "abc123",
+            "monkey", "letmein", "111111", "1234", "12345", "dragon"
+        ];
+        if (commonPasswords.includes(password.toLowerCase())) {
+            setError("Ce mot de passe est trop commun, veuillez en choisir un autre.");
+            return;
+        }
 
+        setLoading(true);
+        setError("");
+        try {
+            const response = await axios.post(
+                'http://85.214.142.178:8009/api/v1/auth/reset-password/',
+                {
+                    email: email,
+                    password: password,
+                    password_confirmation: confirmPassword
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            if (response.status === 200 || response.status === 201) {
+                setIsSubmitted(true);
+            }
+        } catch (err) {
+            console.error(err);
+            setError("Erreur lors de la réinitialisation du mot de passe.");
+        } finally {
+            setLoading(false);
+        }
+    };
         setLoading(true);
         setError("");
         try {

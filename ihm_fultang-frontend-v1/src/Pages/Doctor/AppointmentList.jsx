@@ -83,7 +83,7 @@ export  function AppointmentList() {
 
     return (
         <CustomDashboard linkList={doctorNavLink} requiredRole={"Doctor"}>
-            <DoctorNavBar/>
+            <DoctorNavBar />
             <div className="mx-auto p-6 h-fit">
                 <h1 className="text-3xl font-bold text-gray-800 mb-6">{`Appointments of Dr. ${userData?.first_name + " " + userData?.last_name}`}</h1>
 

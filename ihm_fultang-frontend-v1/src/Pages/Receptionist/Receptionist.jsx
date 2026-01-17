@@ -1,14 +1,16 @@
-import { ReceptionistNavBar } from "./ReceptionistNavBar.jsx";
-import { FaArrowLeft, FaArrowRight, FaEdit, FaEye, FaPlus, FaSearch, } from "react-icons/fa";
-import { Tooltip } from "antd";
-import { DashBoard } from "../../GlobalComponents/DashBoard.jsx";
-import { receptionistNavLink } from "./receptionistNavLink.js";
-import { useEffect, useState } from "react";
-import { AddNewPatientModal } from "./addNewPatientModal.jsx";
-import { SuccessModal } from "../Modals/SuccessModal.jsx";
+import {ReceptionistNavBar} from "./ReceptionistNavBar.jsx";
+import {FaArrowLeft, FaArrowRight, FaEdit, FaEye, FaPlus, FaSearch, FaCalendarPlus} from "react-icons/fa";
+import {Tooltip} from "antd";
+import {DashBoard} from "../../GlobalComponents/DashBoard.jsx";
+import {receptionistNavLink} from "./receptionistNavLink.js";
+import {useEffect, useState} from "react";
+import {AddNewPatientModal} from "./addNewPatientModal.jsx";
+import {SuccessModal} from "../Modals/SuccessModal.jsx";
 import Wait from "../Modals/wait.jsx";
-import { ViewPatientDetailsModal } from "./ViewPatientDetailsModal.jsx";
-import { EditPatientInfosModal } from "./EditPatientInfosModal.jsx";
+import {ViewPatientDetailsModal} from "./ViewPatientDetailsModal.jsx";
+import {EditPatientInfosModal} from "./EditPatientInfosModal.jsx";
+import { ScheduleSurgeryModal } from "./ScheduleSurgeryModal.jsx";
+ 
 import axiosInstance from "../../Utils/axiosInstance.js";
 import Loader from "../../GlobalComponents/Loader.jsx";
 import noPatientImage from "../../assets/noPatients.png";
@@ -23,6 +25,8 @@ export function Receptionist() {
     const [searchTerm, setSearchTerm] = useState("");
     const [canOpenSuccessModal, setCanOPenSuccessModal] = useState(false);
     const [canOpenViewPatientDetailModal, setCanOpenViewPatientDetailModal] = useState(false);
+    const [canOpenScheduleSurgeryModal, setCanOpenScheduleSurgeryModal] = useState(false);
+    const [selectedPatientForSurgery, setSelectedPatientForSurgery] = useState(null);
     const [successMessage, setSuccessMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [selectedPatientDetails, setSelectedPatientDetails] = useState({});
@@ -195,6 +199,7 @@ export function Receptionist() {
                                                 </tr>
                                             </thead>
                                             <tbody>
+
                                                 {patients.map((patient, index) => (
                                                     <tr key={patient.id || index} className="">
                                                         <td className="p-4 text-md text-blue-900 rounded-l-lg bg-gray-100 text-center">{index + 1}</td>
@@ -226,6 +231,49 @@ export function Receptionist() {
                                                         </td>
                                                     </tr>
                                                 ))}
+
+                                            {patients.map((patient, index) => (
+                                                <tr key={patient.id || index} className="">
+                                                    <td className="p-4 text-md text-blue-900 rounded-l-lg bg-gray-100 text-center">{index + 1}</td>
+                                                    <td className="p-4 text-md text-center bg-gray-100 font-bold">{patient.firstName}</td>
+                                                    <td className="p-4 text-md text-center bg-gray-100">{patient.lastName}</td>
+                                                    <td className="p-4 text-md text-center bg-gray-100">{patient.gender}</td>
+                                                    <td className="p-4 text-center text-md bg-gray-100 ">{patient.address}</td>
+                                                    <td className="p-4 relative bg-gray-100 rounded-r-lg">
+                                                        <div className="w-full items-center justify-center flex gap-6">
+                                                            <Tooltip placement={"left"} title={"view details"}>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setSelectedPatientDetails(patient), setCanOpenViewPatientDetailModal(true)
+                                                                    }}
+                                                                    className="flex items-center justify-center w-9 h-9 text-primary-end text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300">
+                                                                    <FaEye/>
+                                                                </button>
+                                                            </Tooltip>
+                                                            <Tooltip placement={"right"} title={"Edit"}>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setSelectedPatientDetails(patient), setCanOpenEditPatientDetailModal(true)
+                                                                    }}
+                                                                    className="flex items-center justify-center w-9 h-9 text-green-500 text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300">
+                                                                    <FaEdit/>
+                                                                </button>
+                                                            </Tooltip>
+                                                            <Tooltip placement={"right"} title={"Schedule surgery"}>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setSelectedPatientForSurgery(patient);
+                                                                        setCanOpenScheduleSurgeryModal(true);
+                                                                    }}
+                                                                    className="flex items-center justify-center w-9 h-9 text-blue-500 text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300">
+                                                                    <FaCalendarPlus/>
+                                                                </button>
+                                                            </Tooltip>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+
                                             </tbody>
                                         </table>
 
@@ -306,7 +354,19 @@ export function Receptionist() {
                             setCanOpenViewPatientDetailModal(false)
                         }}
                     />
+
                     {isLoading && <Wait />}
+
+                    <ScheduleSurgeryModal
+                        isOpen={canOpenScheduleSurgeryModal}
+                        onClose={() => setCanOpenScheduleSurgeryModal(false)}
+                        patient={selectedPatientForSurgery}
+                        setCanOpenSuccessModal={setCanOPenSuccessModal}
+                        setSuccessMessage={setSuccessMessage}
+                        setIsLoading={setIsLoading}
+                    />
+                    {isLoading && <Wait/>}
+
                 </>
 
                 {/* Add new patient button & modal - Always visible */}

@@ -1,5 +1,5 @@
 import {XIcon} from "lucide-react";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import PropTypes from "prop-types";
 import axiosInstance from "../../Utils/axiosInstance.js";
 import {useAuthentication} from "../../Utils/Provider.jsx";
@@ -28,6 +28,8 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
             idMedicalStaff:'',
         });
     const [error, setError] = useState("");
+    const [doctors, setDoctors] = useState([]);
+    const [selectedDoctorId, setSelectedDoctorId] = useState("");
     const [isYears, setIsYears] = useState(false);
     const [isMonth, setIsMonth] = useState(false);
     const [isWeeks, setIsWeeks] = useState(false);
@@ -81,6 +83,22 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
     }
 
 
+    useEffect(() => {
+        async function fetchDoctors() {
+            if (!isOpen) return;
+            try {
+                const response = await axiosInstance.get("/medical-staff/all-doctors/");
+                if (response.status === 200) {
+                    setDoctors(response.data || []);
+                }
+            } catch (fetchError) {
+                console.log(fetchError);
+            }
+        }
+        fetchDoctors();
+    }, [isOpen]);
+
+
     function handleChange(e) {
         const { name, value } = e.target;
         if (name === 'birthDate') {
@@ -117,6 +135,11 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
         setIsLoading(true);
         if(!dateError)
         {
+            if (!selectedDoctorId) {
+                setIsLoading(false);
+                setError("Please select a doctor.");
+                return;
+            }
             formData.idMedicalStaff = userData.id;
             console.log(formData);
             console.log(userData);
@@ -125,6 +148,18 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
                 const response = await axiosInstance.post("/patient/", formData);
                 if (response.status === 201)
                 {
+                    if (selectedDoctorId) {
+                        const token = localStorage.getItem("token_key_fultang");
+                        const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+                        const createdPatientId = response.data?.id;
+                        if (createdPatientId) {
+                            await axiosInstance.post(
+                                `/patient/${createdPatientId}/add-access/${selectedDoctorId}/`,
+                                null,
+                                { headers: authHeaders }
+                            );
+                        }
+                    }
                     setIsLoading(false);
                     setSuccessMessage("Patient added successfully !");
                     setCanOpenSuccessModal(true);
@@ -200,6 +235,30 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
                                     required={true}
                                 />
                             </div>
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="assignedDoctor"
+                                className="block text-sm font-medium text-gray-700 mb-1"
+                            >
+                                Assign Doctor
+                            </label>
+                            <select
+                                id="assignedDoctor"
+                                name="assignedDoctor"
+                                value={selectedDoctorId}
+                                onChange={(e) => setSelectedDoctorId(e.target.value)}
+                                className={applyFormStyle()}
+                                required={true}
+                            >
+                                <option value="">Select a doctor</option>
+                                {doctors.map((doctor) => (
+                                    <option key={doctor.id} value={doctor.id}>
+                                        {doctor.first_name} {doctor.last_name} ({doctor.role})
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

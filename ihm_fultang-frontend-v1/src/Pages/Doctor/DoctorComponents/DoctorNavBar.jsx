@@ -6,8 +6,12 @@ import { useState } from 'react';
 
 
 
-export function DoctorNavBar()
-{
+import { useNavigate } from "react-router-dom"
+import PropTypes from 'prop-types';
+
+
+export function DoctorNavBar({ messageCount = 2 }) {
+    const navigate = useNavigate()
 
     const {logout , userData} = useAuthentication();
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -32,11 +36,22 @@ export function DoctorNavBar()
 
                         </Tooltip>
 
-                        <Tooltip placement={"top"} title={"Messages"}>
-                            <button className={applyNavLinkBtnStyle()}>
-                                <FaEnvelope/>
-                            </button>
-                        </Tooltip>
+                        <div className="relative">
+                            <Tooltip placement={"top"} title={"Messages"}>
+                                <button
+                                    onClick={() => navigate("/doctor/messages")}
+                                    className={applyNavLinkBtnStyle()}
+                                >
+                                    <FaEnvelope />
+                                </button>
+                            </Tooltip>
+                            {messageCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse pointer-events-none">
+                                    {messageCount > 99 ? "99+" : messageCount}
+                                </span>
+                            )}
+                        </div>
+
                         <Tooltip placement={"top"} title={"LogOut"}>
                             <button
                                 onClick={() => {logout()}}
@@ -74,3 +89,7 @@ export function DoctorNavBar()
         </>
     )
 }
+
+DoctorNavBar.propTypes = {
+    messageCount: PropTypes.number
+};
