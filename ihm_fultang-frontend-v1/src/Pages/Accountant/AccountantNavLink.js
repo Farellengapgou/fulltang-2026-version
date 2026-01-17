@@ -5,6 +5,7 @@ import {
   FaFileInvoice,
   FaCashRegister,
   FaChartLine,
+  FaWarehouse,
 } from "react-icons/fa";
 export const AccountantNavLink = [
   {
@@ -40,5 +41,10 @@ export const AccountantNavLink = [
         icon: FaChartLine,
       },
     ],
+  },
+  {
+    name: "Comptabilité Matière",
+    link: appRoutes.materialAccountingDashboard,
+    icon: FaWarehouse,
   },
 ];
