@@ -11,6 +11,8 @@ from authentication.serializers.profile_serializers import (
     ProfilePictureSerializer,
     ProfilePictureDeleteSerializer
 )
+
+from rest_framework.parsers import MultiPartParser, FormParser
 class ProfileUpdateView(APIView):
     """
     Vue pour mettre à jour les informations personnelles de l'utilisateur.
@@ -135,6 +137,7 @@ class ProfilePictureUploadView(APIView):
     Vue pour uploader une photo de profil.
     """
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
     
     @swagger_auto_schema(
         operation_summary="Uploader une photo de profil",
