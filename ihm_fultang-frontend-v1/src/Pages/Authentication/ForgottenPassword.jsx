@@ -69,7 +69,7 @@ export function ForgottenPassword() {
             }}
         >
             <Link to="/" className="text-3xl text-white font-bold mt-6 ml-8">
-                FullTang
+                Fultang
             </Link>
             <div className="flex-1 flex items-center justify-center px-4">
                 <div className="bg-white bg-opacity-95 shadow-2xl border-2 w-full max-w-5xl rounded-lg overflow-hidden flex">

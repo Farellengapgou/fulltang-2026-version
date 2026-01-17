@@ -95,9 +95,9 @@ export function LandingPage() {
 
 
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen overflow-x-hidden">
 
-            <div className="relative bg-gradient-to-br from-primary-start to-primary-end pb-20 md:pb-28">
+            <div className="relative bg-gradient-to-br from-primary-start to-primary-end pb-20 md:pb-28 overflow-x-hidden">
 
                 <div className="absolute inset-0">
                     <img
@@ -109,7 +109,7 @@ export function LandingPage() {
                 </div>
 
                 <div className="container mx-auto px-6 pt-14 md:pt-20 relative z-10">
-                    <div className="max-w-xl animate-fadein">
+                    <div className="max-w-[650px] animate-fadein">
                         <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight mb-4">
                             Welcome to<br />Fultang Polyclinic
                         </h1>
@@ -118,18 +118,22 @@ export function LandingPage() {
                             The hospital to trust to care about those you love
                         </p>
 
-                        <button
+                        <div className='flex items-end justify-end'>
+                            <button
                             onClick={() => navigate("/login")}
                             className="px-6 md:px-8 py-3 bg-white text-gray-800 rounded-full font-medium 
                             hover:bg-opacity-90 transition shadow-lg shadow-black/10 hover:shadow-black/20"
                         >
                             Log In Now
                         </button>
+                        </div>
+
+                        
                     </div>
                 </div>
             </div>
 
-            <div className="container mx-auto px-6 -mt-10 md:-mt-14">
+            <div className="container mx-auto px-6 -mt-10 md:-mt-14 overflow-hidden">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     {stats.map((stat, index) => (
                         <StatCard key={index} {...stat} />
@@ -137,7 +141,7 @@ export function LandingPage() {
                 </div>
             </div>
 
-            <div className="bg-white mt-16 md:mt-24">
+            <div className="bg-white mt-16 md:mt-24 overflow-hidden">
                 <div className="container mx-auto px-6">
 
                     <section className="py-16 md:py-20">
@@ -172,7 +176,7 @@ export function LandingPage() {
                 </div>
             </div>
 
-            <div className="bg-emerald-800 relative overflow-hidden">
+            <div className="bg-emerald-800 relative overflow-hidden w-full r-0">
                 <div className="container mx-auto px-6">
                     <section className="py-16 md:py-20 relative">
                         <div className="relative z-10 max-w-xl">
@@ -193,7 +197,7 @@ export function LandingPage() {
                 </div>
             </div>
 
-            <footer className="bg-emerald-800 py-4 text-center text-white text-sm md:text-base">
+            <footer className="bg-emerald-800 py-4 text-center text-white w-full text-sm md:text-base overflow-hidden">
                 © {new Date().getFullYear()} Fultang Polyclinic
             </footer>
         </div>

@@ -115,7 +115,7 @@ export function LoginPage()
                  }}
             >
                 <p onClick={ ()=>navigate("/") } className="text-3xl text-white font-bold mt-6 ml-8 cursor-pointer">
-                    FullTang
+                    Fultang
                 </p>
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <div className="flex ml-56 mt-28 w-[1400px] h-[480px]">
