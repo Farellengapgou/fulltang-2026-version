@@ -46,6 +46,8 @@ export function AppRoute()
     const DoctorPatientList = React.lazy(async () => ({default: (await import("../Pages/Doctor/DoctorPatientList.jsx")).DoctorPatientList}));
     const DoctorConsultationList = React.lazy(async () => ({default: (await import("../Pages/Doctor/DoctorConsultationList.jsx")).DoctorConsultationList}));
     const DoctorAppointments = React.lazy(async () => ({default: (await import("../Pages/Doctor/AppointmentList.jsx")).AppointmentList}));
+    const DoctorMessages = React.lazy(async () => ({default: (await import("../Pages/Doctor/DoctorMessagePage.jsx")).DoctorMessagePage}));
+
     const DoctorConsultationHistory = React.lazy(async () => ({default: (await import("../Pages/Doctor/ConsultationHistory.jsx")).ConsultationHistory}));
     const DoctorConsultationDetails = React.lazy(async () => ({default: (await import("../Pages/Doctor/DoctorConsultationDetail.jsx")).DoctorConsultationDetails}));
     const DoctorConsultationHistoryDetails = React.lazy(async () => ({default: (await import("../Pages/Doctor/ConsultationHistoryDetails.jsx")).ConsultationHistoryDetails}));
@@ -74,6 +76,7 @@ export function AppRoute()
     const FinancialGrandLivre = React.lazy(async () => ({default: (await import("../Pages/AccountantNew/Comptabilité de Base/GrandLivre.jsx")).GrandLivreBalance}));
     const FinancialPayrollJournal = React.lazy(async () => ({default: (await import("../Pages/AccountantNew/Payroll & Social Charge/PayrollJournal.jsx")).SocialChargesCalculator}));
     const FinancialCostAnalytic = React.lazy(async () => ({default: (await import("../Pages/AccountantNew/Payroll & Social Charge/CostAnalytic.jsx")).HRAnalyticsDashboard}));
+    const FinancialBilling = React.lazy(async () => ({default: (await import("../Pages/AccountantNew/Billing & Invoicing/Billing.jsx")).BillingDashboard}));
 
     // ✅ HELP CENTER - IMPORTS CORRIGÉS
     const HelpConsultations = React.lazy(async () => ({default: (await import("../Pages/ConsultationAppointments.jsx")).default}));
@@ -126,6 +129,7 @@ export function AppRoute()
                 <Route path={AppRoutesPaths.doctorExamList} element={<DoctorExamList />} />
                 <Route path={AppRoutesPaths.doctorConsultationHistory} element={<DoctorConsultationHistory />} />
                 <Route path={AppRoutesPaths.doctorAppointment} element={<DoctorAppointments />} />
+                <Route path={AppRoutesPaths.doctorMessage} element={<DoctorMessages />} />
                 <Route path={AppRoutesPaths.doctorPatientList} element={<DoctorPatientList />} />
                 <Route path={AppRoutesPaths.doctorConsultationList} element={<DoctorConsultationList />} />
                 <Route path={AppRoutesPaths.doctorConsultationDetailsPage} element={<DoctorConsultationDetails />} />
@@ -152,11 +156,22 @@ export function AppRoute()
                 <Route path={AppRoutesPaths.financialAccountPayroll} element={<FinancialPayrollJournal/>}/>
                 <Route path={AppRoutesPaths.financialAccountantCostAnalytic} element={<FinancialCostAnalytic/>}/>
 
+ 
                 {/* ✅ HELP CENTER ROUTES - CORRIGÉES */}
                 <Route path={AppRoutesPaths.consultationAppointments} element={<HelpConsultations />} />
                 <Route path={AppRoutesPaths.paymentsBilling} element={<HelpPayments />} />
                 <Route path={AppRoutesPaths.technicalIssues} element={<HelpTechnical />} />
                 <Route path={AppRoutesPaths.faq} element={<HelpFAQ />} />
+ 
+                <Route path={AppRoutesPaths.billing} element={<FinancialBilling/>}/>
+
+
+
+
+
+
+
+ 
             </Routes>
         </React.Suspense>
     )

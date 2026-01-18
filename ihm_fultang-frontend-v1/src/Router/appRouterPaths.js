@@ -51,14 +51,17 @@ export const AppRoutesPaths = {
     financialHistory:"/cashier/financial-history",
     accountDetails: "/accountant/account-details/:accountId",
     accountList: "/accountant/account-list",
+
     doctorPatientList: "/doctor/patients",
     doctorConsultationList: "/doctor/consultation-list",
     doctorConsultationDetailsPage: "/doctor/consultation-list/details/:id",
     doctorAppointment: "/doctor/appointments",
+    doctorMessage: "/doctor/messages",
     doctorConsultationHistory: "/doctor/consultation-history",
     doctorConsultationHistoryDetails: "/doctor/consultation-history/details/:id",
     doctorExamList: "/doctor/exams-list",
     doctorPatientMedicalFolderPage:"/doctor/patients/medical-folder/:id",
+
     financialContributions: "/accountant/financial-contributions",
     financialReportsAccountant: "/accountant/financial-reports",
     
@@ -82,7 +85,9 @@ export const AppRoutesPaths = {
     financialAccountantReports: "/accountant-financial/reports",
     financialAccountPayroll : "/accountant-financial/payroll-journal",
     financialAccountantCostAnalytic : "/accountant-financial/cost-analytic",
+ 
 
+    billing: "/accountant-financial/billing",
     consultationAppointments: "/help-center/consultation-appointments",
     paymentsBilling: "/help-center/payments-billing",
     technicalIssues: "/help-center/technical-issues",

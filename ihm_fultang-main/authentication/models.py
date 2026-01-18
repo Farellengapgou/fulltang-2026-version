@@ -55,6 +55,7 @@ class MedicalStaff(AbstractUser):
     userType = models.CharField(max_length=255, choices=USER_TYPE, default='Medical', null=False)
     role = models.CharField(max_length=20, choices=ROLES+ROLES_ACCOUNTING, default='NoRole')
     accessLevel = models.CharField(max_length=20, choices=ACCESS_LEVELS, default='Staff', null=False)
+    profilePicture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
 
     objects = CustomManager()
 

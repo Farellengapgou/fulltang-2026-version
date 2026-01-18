@@ -1,5 +1,11 @@
 import PropTypes from "prop-types";
-import userIcon from "../../assets/userIcon.png";
+import userIcon from "../../assets/userIcon.png"; // Fallback
+import bebeIcon from "../../assets/bebe.png";
+import adoFemaleIcon from "../../assets/ado-female.png";
+import adoMaleIcon from "../../assets/ado-male.png";
+import femaleAvatarIcon from "../../assets/female-avatar.png";
+import maleAvatarIcon from "../../assets/male-avatar.png";
+
 import { Mail, Phone, MapPin, Calendar, CreditCard, User } from 'lucide-react';
 
 
@@ -11,16 +17,46 @@ export function ViewPatientDetailsModal({ isOpen, patient, onClose }) {
     };
 
     if (!isOpen) return null;
+
+    const calculateAge = (birthDateString) => {
+        if (!birthDateString) return 0;
+        const birthDate = new Date(birthDateString);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    };
+
+    const age = calculateAge(patient.birthDate);
+    const gender = patient.gender;
+
+    let avatarSrc = userIcon;
+    if (age >= 0 && age <= 3) {
+        avatarSrc = bebeIcon;
+    } else if (age > 3 && age <= 17) {
+        avatarSrc = gender === "Female" ? adoFemaleIcon : adoMaleIcon;
+    } else {
+        avatarSrc = gender === "Female" ? femaleAvatarIcon : maleAvatarIcon;
+    }
+
+    // Background color logic
+    const mainBgClass = gender === "Female" ? "bg-gradient-to-br from-pink-50 to-pink-100" : "bg-gradient-to-br from-blue-50 to-blue-100";
+    const avatarBgClass = gender === "Female" ? "bg-pink-200 border-4 border-pink-100" : "bg-sky-200 border-4 border-blue-100";
+
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm transition-all duration-300">
             <div className="bg-white rounded-lg shadow-xl w-[600px] ">
                 <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                     <div className="flex flex-row">
                         {/* Left Section - Avatar and Name */}
-                        <div className={`p-6 flex flex-col items-center text-center w-1/3 ${patient.gender === "Female" ? "bg-gradient-to-br from-pink-50 to-pink-100" : "bg-gradient-to-br from-blue-50 to-blue-100"}`}>
-                            <div className={`w-40 h-40 rounded-full overflow-hidden mb-4 ${patient.gender === "Female" ? "bg-pink-200 border-4 border-pink-100" : "bg-sky-200 border-4 border-blue-100"}`}>
+                        <div className={`p-6 flex flex-col items-center text-center w-1/3 ${mainBgClass}`}>
+                            <div className={`w-40 h-40 rounded-full overflow-hidden mb-4 ${avatarBgClass}`}>
                                 <img
-                                    src={userIcon}
+                                    src={avatarSrc}
                                     alt="Profile avatar"
                                     className="w-full h-full object-cover"
                                 />
@@ -31,6 +67,10 @@ export function ViewPatientDetailsModal({ isOpen, patient, onClose }) {
                             <div className="flex items-center text-gray-600">
                                 <User className="w-4 h-4 mr-2" />
                                 <p className="text-xl font-bold">{patient.gender}</p>
+                            </div>
+                            <div className="flex items-center text-gray-500 mt-2">
+                                <Calendar className="w-4 h-4 mr-2" />
+                                <p className="text-sm font-medium">{age} years old</p>
                             </div>
                         </div>
 

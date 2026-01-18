@@ -94,13 +94,21 @@ export function Receptionist() {
 
 
 
-    // Effect to reload patients when search term is cleared
+    // Dynamic search with debounce
     useEffect(() => {
-        if (searchTerm === "") {
-            fetchPatients();
-        }
+        const delayDebounceFn = setTimeout(() => {
+            if (searchTerm) {
+                const url = `/patient/?search=${searchTerm}`;
+                fetchNextOrPreviousPatientList(url);
+            } else {
+                fetchPatients();
+            }
+        }, 500); // 500ms delay
+
+        return () => clearTimeout(delayDebounceFn);
     }, [searchTerm]);
 
+    // Manual search button (optional now, but kept for UX preference if user triggers it immediately)
     async function handleSearch() {
         const url = searchTerm ? `/patient/?search=${searchTerm}` : "/patient/";
         await fetchNextOrPreviousPatientList(url);
