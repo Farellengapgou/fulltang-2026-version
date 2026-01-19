@@ -14,11 +14,6 @@ import {CustomDashboard} from "../../GlobalComponents/CustomDashboard.jsx";
 
 export function DoctorPatientList()
 {
-
-
-
-
-
     const [selectedPatientDetails, setSelectedPatientDetails] = useState({});
     const [canOpenViewPatientDetailModal, setCanOpenViewPatientDetailModal] = useState(false);
     const [patients, setPatients] = useState([]);
@@ -31,14 +26,10 @@ export function DoctorPatientList()
     const [errorStatus, setErrorStatus] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
 
-
-
     function calculateNumberOfSlide() {
         if (numberOfPatients===0) return 1;
         return numberOfPatients % 5 === 0 ? numberOfPatients / 5 : Math.floor(numberOfPatients / 5) + 1;
     }
-
-
 
     function updateActualPageNumber(action) {
         if (action === "next")
@@ -56,7 +47,6 @@ export function DoctorPatientList()
             }
         }
     }
-
 
     async function fetchPatients () {
         setIsLoading(true);
@@ -93,10 +83,6 @@ export function DoctorPatientList()
         fetchPatients();
     }, []);
 
-
-
-
-
     async function fetchNextOrPreviousPatientList(url)
     {
         if(url)
@@ -128,13 +114,7 @@ export function DoctorPatientList()
         }
     }
 
-
-
-
-
-
     const navigate = useNavigate();
-
 
     return (
         <CustomDashboard linkList={doctorNavLink} requiredRole={"Doctor"}>
