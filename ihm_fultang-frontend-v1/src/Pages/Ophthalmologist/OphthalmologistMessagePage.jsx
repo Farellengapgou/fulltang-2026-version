@@ -606,62 +606,62 @@ export function OphthaMessage({
             </div>
 
             {/* Filtres */}
-                    <div className="bg-white p-6 rounded-xl shadow-md mb-6 border border-gray-100">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Rechercher
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Rechercher un message..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg 
-                               focus:outline-none focus:ring-2 focus:ring-primary-end focus:border-transparent
-                               transition-all duration-200 hover:border-gray-400
-                               placeholder:text-gray-400"
-                  />
+            <div className="bg-white p-6 rounded-xl shadow-md mb-6 border border-gray-100">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Rechercher
+                        </label>
+                        <input
+                            type="text"
+                            placeholder="Rechercher un message..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg 
+                                focus:outline-none focus:ring-2 focus:ring-primary-end focus:border-transparent
+                                transition-all duration-200 hover:border-gray-400
+                              placeholder:text-gray-400"
+                        />
+                    </div>
+                    <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Priorité
+                    </label>
+                    <select
+                        value={priorityFilter}
+                        onChange={(e) => setPriorityFilter(e.target.value)}
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg 
+                                focus:outline-none focus:ring-2 focus:ring-primary-end focus:border-transparent
+                                transition-all duration-200 hover:border-gray-400
+                                bg-white cursor-pointer appearance-none"
+                    >
+                        <option value="all">Toutes les priorités</option>
+                        <option value="high">Urgent</option>
+                        <option value="medium">Alerte</option>
+                        <option value="low">Info</option>
+                    </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Statut
+                        </label>
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg 
+                                focus:outline-none focus:ring-2 focus:ring-primary-end focus:border-transparent
+                                transition-all duration-200 hover:border-gray-400
+                                bg-white cursor-pointer appearance-none"
+                        >
+                            <option value="all">Tous les statuts</option>
+                            <option value="unread">Non lus</option>
+                            <option value="read">Lus</option>
+                        </select>
+                    </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Priorité
-                  </label>
-                  <select
-                    value={priorityFilter}
-                    onChange={(e) => setPriorityFilter(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg 
-                               focus:outline-none focus:ring-2 focus:ring-primary-end focus:border-transparent
-                               transition-all duration-200 hover:border-gray-400
-                               bg-white cursor-pointer appearance-none"
-                  >
-                    <option value="all">Toutes les priorités</option>
-                    <option value="high">Urgent</option>
-                    <option value="medium">Alerte</option>
-                    <option value="low">Info</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Statut
-                  </label>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg 
-                               focus:outline-none focus:ring-2 focus:ring-primary-end focus:border-transparent
-                               transition-all duration-200 hover:border-gray-400
-                               bg-white cursor-pointer appearance-none"
-                  >
-                    <option value="all">Tous les statuts</option>
-                    <option value="unread">Non lus</option>
-                    <option value="read">Lus</option>
-                  </select>
-                </div>
-              </div>
             </div>
             
-            <div className="mb-10">
+            <div className="pl-6 mb-10">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">Notifications internes</h2>
                 {isNotificationsLoading ? (
                     <div className="h-[200px] w-full flex justify-center items-center">
