@@ -11,14 +11,16 @@ from .stock_models import (
 from .models import ChartOfAccounts
 
 
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = "__all__"
-
 class FamilySerializer(serializers.ModelSerializer):
     class Meta:
         model = Family
+        fields = "__all__"
+
+class CategorySerializer(serializers.ModelSerializer):
+    families = FamilySerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Category
         fields = "__all__"
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -95,7 +97,8 @@ class StockMovementSerializer(serializers.ModelSerializer):
             "movement_number",
             "total_value",
             "status",
-            "created_at"
+            "created_at",
+            "created_by"
         ]
 
     def validate(self, data):
@@ -132,7 +135,8 @@ class GoodsReceiptNoteSerializer(serializers.ModelSerializer):
             "subtotal",
             "total_amount",
             "status",
-            "created_at"
+            "created_at",
+            "created_by"
         ]
 
 class GoodsIssueLineSerializer(serializers.ModelSerializer):
@@ -150,7 +154,8 @@ class GoodsIssueNoteSerializer(serializers.ModelSerializer):
             "issue_number",
             "total_amount",
             "status",
-            "created_at"
+            "created_at",
+            "created_by"
         ]
 
 class InventoryLineSerializer(serializers.ModelSerializer):

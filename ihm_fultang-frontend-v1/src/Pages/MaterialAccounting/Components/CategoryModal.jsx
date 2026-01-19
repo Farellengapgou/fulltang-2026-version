@@ -42,9 +42,15 @@ export function CategoryModal({ isOpen, onClose, onRefresh, editingCategory }) {
         try {
             const data = await getChartOfAccounts();
             if (data && (data.results || Array.isArray(data))) {
-                const loadedAccounts = data.results || data;
-                if (loadedAccounts.length > 0) {
-                    setAccounts(loadedAccounts);
+                const rawAccounts = data.results || data;
+                if (rawAccounts.length > 0) {
+                    // Normalize data to support both API (code/label) and Fallback (account_number/account_name)
+                    const normalizedAccounts = rawAccounts.map(acc => ({
+                        ...acc,
+                        account_number: acc.code || acc.account_number,
+                        account_name: acc.label || acc.account_name
+                    }));
+                    setAccounts(normalizedAccounts);
                     return;
                 }
             }
