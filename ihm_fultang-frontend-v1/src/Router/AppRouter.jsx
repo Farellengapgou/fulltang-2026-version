@@ -60,8 +60,10 @@ export function AppRoute()
 
     const OphthalmologistPage = React.lazy(async () => ({default: (await import("../Pages/Ophthalmologist/Opthalmologist.jsx")).Ophthalmologist}));
     const OphthaConsultationList = React.lazy(async () => ({default: (await import("../Pages/Ophthalmologist/OphthalmologistConsultationList.jsx")).OphthaConsultationList}));
+    const OphthaConsultationHistory = React.lazy(async () => ({default: (await import("../Pages/Ophthalmologist/ConsultationHistory.jsx")).OphthaConsultationHistory}));
     const OphthaPatientList = React.lazy(async () => ({default: (await import("../Pages/Ophthalmologist/OphthalmologistPatientList.jsx")).OphthaPatientList}));
     const OphthaAppointment = React.lazy(async () => ({default: (await import("../Pages/Ophthalmologist/AppointmentList.jsx")).AppointmentList})); 
+    const OphthaMessage = React.lazy(async () => ({default: (await import("../Pages/Ophthalmologist/OphthalmologistMessagePage.jsx")).OphthaMessage}));
 
     const FinancialContributions = React.lazy(async () => ({default: (await import("../Pages/Accountant/FinancialContribution.jsx")).FinancialContributions,}));
     const FinancialReportsAccountant = React.lazy(async () => ({default: (await import("../Pages/Accountant/FinancialReports.jsx")).FinancialReports,}));
@@ -97,8 +99,10 @@ export function AppRoute()
             <Routes>
                 <Route path={AppRoutesPaths.ophthalmologistPage} element={<OphthalmologistPage />} />
                 <Route path={AppRoutesPaths.ophthaConsultationList} element={<OphthaConsultationList />}/>
+                <Route path={AppRoutesPaths.ophthaConsultationHistory} element={<OphthaConsultationHistory />}/>
                 <Route path={AppRoutesPaths.ophthaPatientList} element={<OphthaPatientList />}/>
-                <Route path={AppRoutesPaths.ophthaAppointment} element={<OphthaAppointment />}/>                
+                <Route path={AppRoutesPaths.ophthaAppointment} element={<OphthaAppointment />}/> 
+                <Route path={AppRoutesPaths.ophthaMessage} element={<OphthaMessage />}/>               
 
                 <Route path={AppRoutesPaths.welcomePage} element={<LandingPage />}/>
                 <Route path={AppRoutesPaths.loginPage} element={<LoginPage />}/>

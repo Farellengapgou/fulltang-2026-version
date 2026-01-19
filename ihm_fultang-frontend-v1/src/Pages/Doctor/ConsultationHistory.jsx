@@ -109,83 +109,85 @@ export function ConsultationHistory() {
                                 < div >
                                     < table className="w-full border-separate border-spacing-y-2 ">
                                         <thead>
-                                        <tr>
-                                            <th className="px-6 py-3  bg-primary-end rounded-l-xl text-center text-md text-white font-bold uppercase">
-                                                Patient
-                                            </th>
-                                            <th className="px-6 py-3 bg-primary-end text-center text-md text-white font-bold uppercase">
-                                                Date & Time
-                                            </th>
-                                            <th className="px-6 py-3 bg-primary-end text-center text-md text-white font-bold uppercase">
-                                                Reason for consultation
-                                            </th>
-                                            <th className="px-6 py-3 bg-primary-end text-center text-md text-white font-bold uppercase">
-                                                patient condition
-                                            </th>
-                                            <th className="px-6 py-3 bg-primary-end text-center text-md text-white font-bold uppercase">Price</th>
-                                            <th className="px-6 py-3 text-center text-md text-white font-bold bg-primary-end rounded-r-xl uppercase ">
-                                                Action
-                                            </th>
-                                        </tr>
+                                            <tr>
+                                                <th className="px-6 py-3  bg-primary-end rounded-l-xl text-center text-md text-white font-bold uppercase">
+                                                    Patient
+                                                </th>
+                                                <th className="px-6 py-3 bg-primary-end text-center text-md text-white font-bold uppercase">
+                                                    Date & Time
+                                                </th>
+                                                <th className="px-6 py-3 bg-primary-end text-center text-md text-white font-bold uppercase">
+                                                    Reason for consultation
+                                                </th>
+                                                <th className="px-6 py-3 bg-primary-end text-center text-md text-white font-bold uppercase">
+                                                    patient condition
+                                                </th>
+                                                <th className="px-6 py-3 bg-primary-end text-center text-md text-white font-bold uppercase">
+                                                    Price
+                                                </th>
+                                                <th className="px-6 py-3 text-center text-md text-white font-bold bg-primary-end rounded-r-xl uppercase ">
+                                                    Action
+                                                </th>
+                                            </tr>
                                         </thead>
                                         <tbody className="bg-white  border-separate ">
-                                        {filteredConsultations.map((consultation) => {
-                                            const patientInfo = consultation?.idPatient;
-                                            return (
-                                                <tr key={consultation.id} className="">
-                                                    <td className={`px-6 py-5 rounded-l-xl bg-gray-100  border-l-4  ${getStateStyles(consultation?.statePatient).container}`}>
-                                                        <div className="w-full flex items-center justify-center">
-                                                            <User className="h-6 w-6 text-gray-400 mr-2"/>
-                                                            <div>
-                                                                <div
-                                                                    className="text-md font-medium text-gray-900">{patientInfo?.firstName + " " + patientInfo?.lastName}</div>
-                                                                <div className="text-md text-gray-500">
-                                                                    {calculateAge(patientInfo?.birthDate).value + " " + calculateAge(patientInfo?.birthDate).unit}
+                                            {filteredConsultations.map((consultation) => {
+                                                const patientInfo = consultation?.idPatient;
+                                                return (
+                                                    <tr key={consultation.id} className="">
+                                                        <td className={`px-6 py-5 rounded-l-xl bg-gray-100  border-l-4  ${getStateStyles(consultation?.statePatient).container}`}>
+                                                            <div className="w-full flex items-center justify-center">
+                                                                <User className="h-6 w-6 text-gray-400 mr-2"/>
+                                                                <div>
+                                                                    <div
+                                                                        className="text-md font-medium text-gray-900">{patientInfo?.firstName + " " + patientInfo?.lastName}</div>
+                                                                    <div className="text-md text-gray-500">
+                                                                        {calculateAge(patientInfo?.birthDate).value + " " + calculateAge(patientInfo?.birthDate).unit}
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-5 bg-gray-100 ">
-                                                        <div className="w-full flex justify-center items-center ">
-                                                            <Clock className="h-5 w-5 text-gray-400 mr-2 mt-2"/>
-                                                            <div>
-                                                                <div className="text-sm text-center text-gray-900">{consultation?.consultationDate ? formatDateOnly(consultation?.consultationDate) : 'Not Specified'}</div>
-                                                                <div className="text-sm  text-center text-gray-500">{consultation?.consultationDate ? formatDateToTime(consultation?.consultationDate) : 'Not Specified'} </div>
+                                                        </td>
+                                                        <td className="px-6 py-5 bg-gray-100 ">
+                                                            <div className="w-full flex justify-center items-center ">
+                                                                <Clock className="h-5 w-5 text-gray-400 mr-2 mt-2"/>
+                                                                <div>
+                                                                    <div className="text-sm text-center text-gray-900">{consultation?.consultationDate ? formatDateOnly(consultation?.consultationDate) : 'Not Specified'}</div>
+                                                                    <div className="text-sm  text-center text-gray-500">{consultation?.consultationDate ? formatDateToTime(consultation?.consultationDate) : 'Not Specified'} </div>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-5 bg-gray-100">
-                                                        <div
-                                                            className="text-sm text-center text-gray-900">{consultation?.consultationNotes || 'Not Specified'}</div>
-                                                    </td>
-                                                    <td className="px-6 py-4 bg-gray-100 ">
-                                                        <div className="flex items-center justify-center text-sm text-gray-900">
-                                                <span
-                                                    className={`px-2 py-1 rounded-full border-2 text-sm font-medium ${getStateStyles(consultation?.statePatient).badge}`}>
-                                                     {consultation?.statePatient || 'Not Critical'}
-                                                </span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-5 bg-gray-100 ">
-                                                        <div className="flex items-center justify-center text-sm text-gray-900">
-                                                            <DollarSign className="h-5 w-5 text-gray-400 mr-1"/>
-                                                            {consultation?.consultationPrice ? consultation?.consultationPrice.toLocaleString() + ' FCFA' : ' - '}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-5  bg-gray-100 rounded-r-xl">
-                                                        <button
-                                                            onClick={() => {
-                                                                navigate(`/doctor/consultation-history/details/${consultation?.id}`, {state: {consultation}})
-                                                            }}
-                                                            className="flex items-center text-primary-end hover:text-primary-start font-semibold hover:text-[17px] transition-all duration-500"
-                                                        >
-                                                            <Eye className="h-5 w-5 "/>
-                                                            <span className="ml-2">Details</span>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            )
-                                        })}
+                                                        </td>
+                                                        <td className="px-6 py-5 bg-gray-100">
+                                                            <div
+                                                                className="text-sm text-center text-gray-900">{consultation?.consultationNotes || 'Not Specified'}</div>
+                                                        </td>
+                                                        <td className="px-6 py-4 bg-gray-100 ">
+                                                            <div className="flex items-center justify-center text-sm text-gray-900">
+                                                    <span
+                                                        className={`px-2 py-1 rounded-full border-2 text-sm font-medium ${getStateStyles(consultation?.statePatient).badge}`}>
+                                                        {consultation?.statePatient || 'Not Critical'}
+                                                    </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-5 bg-gray-100 ">
+                                                            <div className="flex items-center justify-center text-sm text-gray-900">
+                                                                <DollarSign className="h-5 w-5 text-gray-400 mr-1"/>
+                                                                {consultation?.consultationPrice ? consultation?.consultationPrice.toLocaleString() + ' FCFA' : ' - '}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-5  bg-gray-100 rounded-r-xl">
+                                                            <button
+                                                                onClick={() => {
+                                                                    navigate(`/doctor/consultation-history/details/${consultation?.id}`, {state: {consultation}})
+                                                                }}
+                                                                className="flex items-center text-primary-end hover:text-primary-start font-semibold hover:text-[17px] transition-all duration-500"
+                                                            >
+                                                                <Eye className="h-5 w-5 "/>
+                                                                <span className="ml-2">Details</span>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })}
                                         </tbody>
                                     </table>
                                 </div>

@@ -31,6 +31,16 @@ export const ophthaNavLink = [
         ]
     },
     {
+        name: 'Messages',
+        icon: FaEnvelope,
+        link: appRoutes.ophthaMessage,
+    },
+    {
+        name: 'Appointments',
+        icon: Calendar,
+        link: appRoutes.ophthaAppointment,
+    },
+    {
         name: 'Help Center',
         icon: FaQuestionCircle,
         link: appRoutes.helpCenterPage,

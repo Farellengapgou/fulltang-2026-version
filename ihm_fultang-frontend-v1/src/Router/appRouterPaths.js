@@ -65,6 +65,9 @@ export const AppRoutesPaths = {
 
     ophthaPatientList: "/opthalmologist/patients",
     ophthaConsultationList: "/ophthalmologist/consultation-list",
+    ophthaConsultationHistory: "/ophthalmologist/consultation-history",
+    ophthaAppointment: "/ophthalmologist/appointments",
+    ophthaMessage: "/ophthalmologist/messages",
     ophthaAppointment: "/ophthalmologist/appointments",
 
     nurseMessage: "/nurse/messages",

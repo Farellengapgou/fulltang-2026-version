@@ -61,6 +61,91 @@ export function Ophthalmologist() {
         }
     };
 
+    // Récupérer les statistiques du docteur
+    {/*useEffect(() => {
+        const fetchDoctorStats = async () => {
+            const userId = getUserIdFromToken();
+            
+            if (!userId) {
+                console.log("Utilisation des valeurs par défaut - aucun ID utilisateur trouvé dans le token");
+                return;
+            }
+
+            console.log(`Chargement stats pour docteur ID: ${userId}`);
+            setLoading(true);
+
+            try {
+                const token = getToken();
+                if (!token) {
+                    console.log("Aucun token trouvé");
+                    return;
+                }
+
+                // Essayer de récupérer les données réelles
+                const endpoints = [
+                    { 
+                        key: 'appointments', 
+                        url: `http://localhost:8009/api/v1/medical/appointment/doctor/${userId}/`,
+                        fallback: 15
+                    },
+                    { 
+                        key: 'consultations', 
+                        url: `http://localhost:8009/api/v1/medical/consultation/doctor/${userId}/`,
+                        fallback: 8
+                    },
+                    { 
+                        key: 'patients', 
+                        url: `http://localhost:8009/api/v1/medical/patient/doctor/${userId}/`,
+                        fallback: 12
+                    },
+                    { 
+                        key: 'exams', 
+                        url: `http://localhost:8009/api/v1/medical/exam/${userId}/`,
+                        fallback: 6
+                    }
+                ];
+
+                const results = {};
+
+                for (const endpoint of endpoints) {
+                    try {
+                        const response = await axios.get(endpoint.url, {
+                            headers: { Authorization: `Bearer ${token}` },
+                            timeout: 3000
+                        });
+                        
+                        let count = 0;
+                        if (Array.isArray(response.data)) {
+                            count = response.data.length;
+                        } else if (response.data && typeof response.data === 'object') {
+                            count = response.data.count || response.data.length || 0;
+                        }
+                        
+                        results[endpoint.key] = count;
+                        console.log(`${endpoint.key}: ${count} données récupérées`);
+                    } catch (error) {
+                        console.warn(`Erreur ${endpoint.key}:`, error.message);
+                        results[endpoint.key] = endpoint.fallback;
+                    }
+                }
+
+                setStats({
+                    patients: results.patients,
+                    consultations: results.consultations,
+                    appointments: results.appointments,
+                    scheduledExams: results.exams
+                });
+
+            } catch (error) {
+                console.error("Erreur générale:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDoctorStats();
+    }, []);*/}
+
     // Icônes correctement passées en tant que composants React
     const statCards = [
         {
@@ -164,9 +249,6 @@ export function Ophthalmologist() {
                     </div>
                 </div>
             </div>
-
-            
-        
         </CustomDashboard>
     );
 }

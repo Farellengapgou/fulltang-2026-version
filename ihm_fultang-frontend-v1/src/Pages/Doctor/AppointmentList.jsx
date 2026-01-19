@@ -9,8 +9,6 @@ import axiosInstance from "../../Utils/axiosInstance.js";
 import Loader from "../../GlobalComponents/Loader.jsx";
 import ServerErrorPage from "../../GlobalComponents/ServerError.jsx";
 
-
-
 export  function AppointmentList() {
     const [filter, setFilter] = useState("Pending");
     const [searchTerm, setSearchTerm] = useState("");
@@ -34,15 +32,12 @@ export  function AppointmentList() {
         return matchesFilter && matchesSearch && matchesDate
     })
 
-
     const indexOfLastAppointment = currentPage * appointmentsPerPage;
     const indexOfFirstAppointment = indexOfLastAppointment - appointmentsPerPage;
     const currentAppointments = filteredAppointments.slice(indexOfFirstAppointment, indexOfLastAppointment);
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber)
     const {userData} = useAuthentication();
-
-
 
     async function retrieveDoctorAppointments(doctorId)
     {
@@ -68,18 +63,12 @@ export  function AppointmentList() {
         }
     }
 
-
-
-
     useEffect(() => {
         if(userData.id)
         {
             retrieveDoctorAppointments(userData.id);
         }
     }, [userData.id]);
-
-
-
 
     return (
         <CustomDashboard linkList={doctorNavLink} requiredRole={"Doctor"}>
@@ -135,39 +124,37 @@ export  function AppointmentList() {
                 </div>
 
                 {/* Liste des rendez-vous */}
-
-                    {isLoading ? (
-                        <div className="h-[400px] w-full flex justify-center items-center">
-                            <Loader size={"medium"} color={"primary-end"}/>
-                        </div>
-                    ) : (
-                        errorStatus ?  <ServerErrorPage errorStatus={errorStatus} message={errorMessage}/> :(
-                            filteredAppointments.length>0 ? (
-                                    <div className="space-y-6">
-                                        {currentAppointments.map((appointment) => (
-                                        <AppointmentCard key={appointment.id} appointment={appointment} />))}
-                                    </div>
-                            ) : (
-                                <div className="p-8 mt-24 flex items-center justify-center">
-                                    <div className="flex flex-col">
-                                        <Calendar className="h-16 w-16 text-primary-end mx-auto mb-4"/>
-                                        <h2 className="text-2xl font-bold text-gray-800 mb-2 mx-auto">No Appointments
-                                            </h2>
-                                        <p className="text-gray-600 mb-4 mx-auto">There are currently no appointments
-                                            scheduled.</p>
-                                        <button
-                                            className="px-4 hover:bg-primary-start  duration-300 mx-auto py-2 bg-primary-end text-white rounded-lg transition-all "
-                                            onClick={() => {
-                                                window.location.reload()
-                                            }}
-                                        >
-                                            Refresh
-                                        </button>
-                                    </div>
+                {isLoading ? (
+                    <div className="h-[400px] w-full flex justify-center items-center">
+                        <Loader size={"medium"} color={"primary-end"}/>
+                    </div>
+                ) : (
+                    errorStatus ?  <ServerErrorPage errorStatus={errorStatus} message={errorMessage}/> :(
+                        filteredAppointments.length>0 ? (
+                            <div className="space-y-6">
+                                {currentAppointments.map((appointment) => (
+                                    <AppointmentCard key={appointment.id} appointment={appointment} />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="p-8 mt-24 flex items-center justify-center">
+                                <div className="flex flex-col">
+                                    <Calendar className="h-16 w-16 text-primary-end mx-auto mb-4"/>
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-2 mx-auto">No Appointments</h2>
+                                    <p className="text-gray-600 mb-4 mx-auto">There are currently no appointments scheduled.</p>
+                                    <button
+                                        className="px-4 hover:bg-primary-start  duration-300 mx-auto py-2 bg-primary-end text-white rounded-lg transition-all "
+                                        onClick={() => {
+                                            window.location.reload()
+                                        }}
+                                    >
+                                        Refresh
+                                    </button>
                                 </div>
-                            )
+                            </div>
                         )
-                    )}
+                    )
+                )}
 
                 {/* Pagination */}
                 {appointmentList.length > appointmentsPerPage && (
