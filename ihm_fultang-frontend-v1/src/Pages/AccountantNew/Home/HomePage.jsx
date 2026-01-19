@@ -87,7 +87,7 @@ export function DashBoard() {
       requiredRole={"Accountant"}
     >
       <FinancialAccountantNavBar />
-      <div className="p-6 bg-gray-50">
+      <div className="ft-page">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800">
             Tableau de Bord Comptable
@@ -132,7 +132,7 @@ export function DashBoard() {
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Bilan */}
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="ft-card-padded">
             <h2 className="text-xl font-semibold mb-4">Structure du Bilan</h2>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -156,7 +156,7 @@ export function DashBoard() {
           </div>
 
           {/* Résultat */}
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="ft-card-padded">
             <h2 className="text-xl font-semibold mb-4">Compte de Résultat</h2>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={incomeData}>
@@ -171,7 +171,7 @@ export function DashBoard() {
         </div>
 
         {/* Détails Bilan */}
-        <div className="mt-8 bg-white p-6 rounded-lg shadow">
+        <div className="mt-8 ft-card-padded">
           <h2 className="text-xl font-semibold mb-4">Détails du Bilan</h2>
           <div className="grid grid-cols-3 gap-6">
             <div>

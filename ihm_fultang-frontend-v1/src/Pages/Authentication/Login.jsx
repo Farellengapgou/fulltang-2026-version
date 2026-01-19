@@ -1,214 +1,235 @@
+import React, { useState } from "react";
+import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { 
+    Eye, 
+    EyeOff, 
+    User, 
+    Lock, 
+    ArrowLeft, 
+    AlertCircle,
+    Activity,
+    HelpCircle
+} from 'lucide-react';
 import loginBackground from "../../assets/logIn.png";
-import {FaExclamation} from "react-icons/fa";
-import {Link, useNavigate} from 'react-router-dom';
-import {useState} from "react";
 import Wait from "../Modals/wait.jsx";
-import { Eye, EyeOff } from 'lucide-react';
-import {AppRoutesPaths as appRouterPaths} from "../../Router/appRouterPaths.js";
-import {useAuthentication} from "../../Utils/Provider.jsx";
+import { AppRoutesPaths as appRouterPaths } from "../../Router/appRouterPaths.js";
+import { useAuthentication } from "../../Utils/Provider.jsx";
 
-
-
-
-
-
-export function LoginPage()
-{
-
-
+export function LoginPage() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [loginError, setLoginError] = useState("");
     const [isLoginErrorPresent, setIsLoginErrorPresent] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const {isLoading, setIsLoading, login} = useAuthentication();
+    const { isLoading, setIsLoading, login } = useAuthentication();
     const navigate = useNavigate();
-
-
 
     const data = {
         username: username,
         password: password
-    }
-
-
+    };
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        const response = await login(data);
-        console.log(response);
-        if (response === "Pharmacist")
-        {
-            navigate(appRouterPaths.pharmacyPage);
-        }
-        else if (response === "Doctor")
-        {
-            navigate(appRouterPaths.doctorPage);
-        }
-        else if (response === "Nurse")
-        {
-            navigate(appRouterPaths.nursePage)
-        }
-        else if (response === "Labtech")
-        {
-            navigate(appRouterPaths.laboratoryAssistantPage)
-        }
-        else if (response === "Admin")
-        {
-            navigate(appRouterPaths.adminHomePage)
-        }
-        else if (response === "Receptionist")
-        {
-            navigate(appRouterPaths.receptionistPage)
-        }
-        else if (response === "Cashier")
-        {
-            navigate(appRouterPaths.cashierPage)
-        }
-        else if (response === "Specialist")
-        {
-            navigate(appRouterPaths.specialistPage)
-        }
-        else if (response === "Accountant")
-        {
-            navigate(appRouterPaths.financialAccountantHome)
-        }
-        else if (response === "bad role")
-        {
-            setIsLoginErrorPresent(true);
-            setLoginError("bad role")
-        }
-        else if (response === "No role")
-        {
-            setIsLoginErrorPresent(true);
-            setLoginError("You do not have a specialization, contact an administrator to complete your registration for the application.")
-        }
-        if (response === 401)
-        {
-            setIsLoginErrorPresent(true);
-            setLoginError("Invalid username or password, please retry!")
-        }
-        else if (response === 404)
-        {
-            setIsLoginErrorPresent(true);
-            setLoginError("You're not registered in our application!")
-        }
-        else
-        {
-            setIsLoginErrorPresent(true);
-            setLoginError("An error occurred, please retry later!")
-        }
-    }
+        setIsLoginErrorPresent(false);
+        setLoginError("");
 
+        try {
+            const response = await login(data);
+            console.log("Login response:", response);
 
+            const roleRoutes = {
+                "Pharmacist": appRouterPaths.pharmacyPage,
+                "Doctor": appRouterPaths.doctorPage,
+                "Nurse": appRouterPaths.nursePage,
+                "Labtech": appRouterPaths.laboratoryAssistantPage,
+                "Admin": appRouterPaths.adminHomePage,
+                "Receptionist": appRouterPaths.receptionistPage,
+                "Cashier": appRouterPaths.cashierPage,
+                "Specialist": appRouterPaths.specialistPage,
+                "Accountant": appRouterPaths.financialAccountantHome
+            };
 
+            if (roleRoutes[response]) {
+                navigate(roleRoutes[response]);
+            } else if (response === "bad role") {
+                setIsLoginErrorPresent(true);
+                setLoginError("Rôle non reconnu ou invalide.");
+            } else if (response === "No role") {
+                setIsLoginErrorPresent(true);
+                setLoginError("Vous n'avez pas de spécialisation attribuée. Contactez un administrateur.");
+            } else if (response === 401) {
+                setIsLoginErrorPresent(true);
+                setLoginError("Nom d'utilisateur ou mot de passe incorrect.");
+            } else if (response === 404) {
+                setIsLoginErrorPresent(true);
+                setLoginError("Utilisateur non trouvé dans le système.");
+            } else {
+                setIsLoginErrorPresent(true);
+                setLoginError("Une erreur est survenue lors de la connexion.");
+            }
+        } catch (error) {
+            setIsLoginErrorPresent(true);
+            setLoginError("Erreur réseau ou serveur. Veuillez réessayer.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
-        <>
-            <div className="flex flex-col"
-                 style={{
-                     backgroundImage: `url(${loginBackground})`,
-                     height: "100vh",
-                     backgroundSize: "cover",
-                     backgroundRepeat: "no-repeat",
-                 }}
-            >
-                <p onClick={ ()=>navigate("/") } className="text-3xl text-white font-bold mt-6 ml-8 cursor-pointer">
-                    FullTang
-                </p>
-                <div className="flex-1 flex flex-col items-center justify-center">
-                    <div className="flex ml-56 mt-28 w-[1400px] h-[480px]">
-                        <div className= "flex flex-col w-[620px]">
-                            <p className="text-white mt-28 mb-2 font-bold text-5xl ml-4">
-                                WELCOME ON FULTANG
-                            </p>
-                            <p className="text-justify font-bold text-md leading-10">
-                                Polyclinic fultang is a hospital management application, providing care and monitoring of patients from arrival to discharge,
-                                this via the platform. We first register the patient at the reception level, then follow the chain of follow-up according to his problem or his situation.
-                                Polyclinic Fultang has several departments namely the dental service, the ophthalmology service, the general medicine, the laboratory,
-                                as well as a pharmacy.
-                            </p>
-                            <p className="italic mt-4 text-blue-400 text-xl ">
-                                Note: this page is the hospital staff login page
-                            </p>
-                            <button onClick={()=>navigate(appRouterPaths.helpCenterPage)} className="w-44 h-14  py-2 border-secondary border-2 text-secondary rounded-lg px-1 mt-4 font-bold hover:text-white hover:bg-secondary transition-all duration-300">
-                                <div className="flex justify-center items-center">
-                                    <FaExclamation className="mr-1 "/>
-                                    <p>Notify A problem</p>
+        <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-secondary font-sans text-secondary">
+            {/* Background Image with Overlay */}
+            <div className="absolute inset-0 z-0">
+                <img 
+                    src={loginBackground} 
+                    alt="Login Background" 
+                    className="w-full h-full object-cover opacity-30"
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-secondary/90 via-primary-start/70 to-primary-end/50 backdrop-blur-[2px]"></div>
+            </div>
+
+            {/* Content Container */}
+            <div className="container mx-auto px-6 relative z-10">
+                <motion.div 
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="max-w-5xl mx-auto flex flex-col lg:flex-row bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] shadow-2xl overflow-hidden"
+                >
+                    {/* Brand/Welcome Side */}
+                    <div className="lg:w-1/2 p-12 flex flex-col justify-between text-white border-b lg:border-b-0 lg:border-r border-white/10">
+                        <div>
+                            <Link to="/" className="flex items-center gap-2 mb-12 group">
+                                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-md group-hover:bg-primary-end transition-colors">
+                                    <Activity className="text-white w-6 h-6" />
                                 </div>
-                            </button>
+                                <span className="text-2xl font-black tracking-tight">FULTANG</span>
+                            </Link>
+                            
+                            <motion.h1 
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.2 }}
+                                className="text-4xl md:text-5xl font-black mb-6 leading-tight"
+                            >
+                                Portail <br />
+                                d'Excellence <br />
+                                <span className="text-primary-end">Médicale</span>
+                            </motion.h1>
+                            
+                            <p className="text-white/70 text-lg mb-8 leading-relaxed max-w-sm">
+                                Connectez-vous pour accéder à votre espace de travail et contribuer à l'excellence des soins Fultang.
+                            </p>
                         </div>
-                        <div className="bg-white shadow-2xl border-2 w-[550px] mt-6 ml-16 flex flex-col rounded-lg">
-                            <div className="flex mb-10">
-                                <p className="text-3xl font-bold mt-4 ml-4  ">Log In</p>
-                                {isLoginErrorPresent && (
-                                    <p className="text-red-500 text-md font-bold mt-6 ml-8 mr-2">{loginError}</p>)}
 
-                            </div>
-                            <form className="ml-4 mr-8 flex flex-col" onSubmit={handleLogin}>
-                                <div>
-                                    <label className="text-md font-bold">
-                                        username
-                                    </label>
-                                    <div className="bg-gray-300 h-12 mt-2 rounded-lg mb-4">
-                                        <input type="text"
-                                               name="username"
-                                               autoComplete="username"
-                                               onChange={(e) => {setUsername(e.target.value)}}
-                                               className="w-full rounded-lg h-12 ml-2 mr-2 bg-gray-300 border-none outline:none focus:border-none ring-0 focus:outline-none focus:ring-0 autofill:shadow-[inset_0_0_0px_1000px_rgb(209,213,219)]"
-                                               placeholder={"Enter your username here"}/>
-                                    </div>
+                        <div>
+                            <div className="flex flex-col gap-4">
+                                <div className="flex items-center gap-3 text-white/50">
+                                    <div className="w-1 h-1 rounded-full bg-primary-end"></div>
+                                    <span className="text-sm font-semibold tracking-wide uppercase">Système Sécurisé</span>
                                 </div>
-                                <div className="mt-5">
-                                    <label className="text-md font-bold">
-                                        Password
-                                    </label>
-                                    <div className="bg-gray-300 h-12 mt-2 rounded-lg flex items-center relative">
-                                        <input
-                                            name="password"
-                                            autoComplete="current-password"
-                                            type={showPassword ? "text" : "password"}
-                                            onChange={(e) => {setPassword(e.target.value)}}
-                                            className="w-full rounded-lg h-12 ml-2 mr-10 bg-gray-300 border-none outline:none ring-0 focus:outline-none focus:ring-0"
-                                            placeholder="Enter your password here"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-2 p-2 hover:bg-gray-400 rounded-full transition-all duration-300"
-                                        >
-                                            {showPassword ? (
-                                                <EyeOff className="w-5 h-5 text-gray-600"/>
-                                            ) : (
-                                                <Eye className="w-5 h-5 text-gray-600"/>
-                                            )}
-                                        </button>
-                                    </div>
-                                    <Link to={appRouterPaths.forgottenPasswordPage}>
-                                        <p className="text-end mt-1 text-sm text-blue-700 hover:text-secondary hover:font-bold transition-all duration-300 hover:underline">
-                                            Forgotten password?
-                                        </p>
-                                    </Link>
-                                </div>
-
-                                {/*  <div className="flex mt-5">
-                                    <input type="checkbox" id="rememberMeCheckbox" value="yes"
-                                           className="mr-2 w-5 h-5 border-secondary border-2"/>
-                                    <label htmlFor="maCheckbox" className="font-bold text-sm">Remember Me</label>
-                                </div>*/}
-
-                                <button type="submit"
-                                        className="text-white text-2xl bg-gradient-to-r from-primary-start to-primary-end w-full h-12 rounded-lg mt-5 mb-5 font-bold">
-                                    Log In
+                                <button 
+                                    onClick={() => navigate(appRouterPaths.helpCenterPage)}
+                                    className="flex items-center gap-2 text-white/80 hover:text-white transition-colors text-sm font-bold group"
+                                >
+                                    <HelpCircle className="w-4 h-4 text-primary-end group-hover:rotate-12 transition-transform" />
+                                    Signaler un problème technique
                                 </button>
-                            </form>
+                            </div>
                         </div>
                     </div>
-                </div>
 
+                    {/* Login Form Side */}
+                    <div className="lg:w-1/2 p-8 md:p-12 bg-white flex flex-col justify-center">
+                        <div className="mb-10 text-center lg:text-left">
+                            <h2 className="text-3xl font-black text-secondary mb-2">Connexion</h2>
+                            <p className="text-secondary/60 font-medium">Veuillez entrer vos identifiants</p>
+                        </div>
+
+                        {isLoginErrorPresent && (
+                            <motion.div 
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg flex items-start gap-3"
+                            >
+                                <AlertCircle className="text-red-500 w-5 h-5 flex-shrink-0 mt-0.5" />
+                                <p className="text-red-700 text-sm font-bold">{loginError}</p>
+                            </motion.div>
+                        )}
+
+                        <form className="space-y-6" onSubmit={handleLogin}>
+                            <div className="space-y-2">
+                                <label className="text-xs font-black text-secondary tracking-widest uppercase ml-1">Nom d'utilisateur</label>
+                                <div className="relative group">
+                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <User className="text-secondary/40 w-5 h-5 group-focus-within:text-primary-start transition-colors" />
+                                    </div>
+                                    <input 
+                                        type="text"
+                                        required
+                                        autoComplete="username"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        className="w-full pl-12 pr-4 py-4 bg-secondary/5 border-none ring-1 ring-secondary/10 rounded-2xl focus:ring-2 focus:ring-primary-start outline-none transition-all font-medium text-secondary"
+                                        placeholder="votre_identifiant"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center ml-1">
+                                    <label className="text-xs font-black text-secondary tracking-widest uppercase">Mot de passe</label>
+                                    <Link to={appRouterPaths.forgottenPasswordPage} className="text-xs font-bold text-primary-start hover:text-secondary transition-colors">
+                                        Oublié ?
+                                    </Link>
+                                </div>
+                                <div className="relative group">
+                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <Lock className="text-secondary/40 w-5 h-5 group-focus-within:text-primary-start transition-colors" />
+                                    </div>
+                                    <input 
+                                        type={showPassword ? "text" : "password"}
+                                        required
+                                        autoComplete="current-password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="w-full pl-12 pr-12 py-4 bg-secondary/5 border-none ring-1 ring-secondary/10 rounded-2xl focus:ring-2 focus:ring-primary-start outline-none transition-all font-medium text-secondary"
+                                        placeholder="••••••••"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-secondary/40 hover:text-secondary transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button 
+                                type="submit"
+                                disabled={isLoading}
+                                className="w-full py-4 bg-secondary text-white font-black rounded-2xl shadow-xl shadow-secondary/20 hover:bg-primary-start hover:shadow-primary-start/30 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2"
+                            >
+                                {isLoading ? "Connexion en cours..." : "S'identifier"}
+                            </button>
+                        </form>
+
+                        <div className="mt-10 pt-8 border-t border-secondary/5 flex justify-center">
+                            <Link to="/" className="flex items-center gap-2 text-secondary/40 hover:text-secondary transition-colors text-sm font-bold">
+                                <ArrowLeft className="w-4 h-4" />
+                                Retour à l'accueil
+                            </Link>
+                        </div>
+                    </div>
+                </motion.div>
             </div>
-            {isLoading && (<Wait/>)}
-        </>
-    )
+
+            {isLoading && <Wait />}
+        </div>
+    );
 }
+
+export default LoginPage;

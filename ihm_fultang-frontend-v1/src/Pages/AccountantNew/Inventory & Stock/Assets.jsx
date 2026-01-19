@@ -73,12 +73,12 @@ export function Assets() {
       requiredRole={"Accountant"}
     >
       <FinancialAccountantNavBar />
-      <div className="p-6 bg-gray-50">
+      <div className="ft-page">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Immobilisations</h1>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+            className="ft-btn ft-btn-md ft-btn-primary"
           >
             {showForm ? "Fermer" : "+ Nouveau"}
           </button>
@@ -87,7 +87,7 @@ export function Assets() {
         {showForm && (
           <form
             onSubmit={handleSubmit}
-            className="bg-white p-4 rounded shadow mb-4"
+            className="ft-card-padded mb-4"
           >
             <div className="grid grid-cols-2 gap-2 mb-3">
               <input
@@ -98,7 +98,7 @@ export function Assets() {
                   setFormData({ ...formData, asset_number: e.target.value })
                 }
                 required
-                className="border rounded px-2 py-1 text-sm"
+                className="ft-input"
               />
               <input
                 type="text"
@@ -108,7 +108,7 @@ export function Assets() {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
-                className="border rounded px-2 py-1 text-sm"
+                className="ft-input"
               />
               <input
                 type="text"
@@ -118,7 +118,7 @@ export function Assets() {
                   setFormData({ ...formData, category: e.target.value })
                 }
                 required
-                className="border rounded px-2 py-1 text-sm"
+                className="ft-input"
               />
               <input
                 type="date"
@@ -127,7 +127,7 @@ export function Assets() {
                   setFormData({ ...formData, purchase_date: e.target.value })
                 }
                 required
-                className="border rounded px-2 py-1 text-sm"
+                className="ft-input"
               />
               <input
                 type="number"
@@ -141,7 +141,7 @@ export function Assets() {
                   })
                 }
                 required
-                className="border rounded px-2 py-1 text-sm"
+                className="ft-input"
               />
               <input
                 type="number"
@@ -155,20 +155,20 @@ export function Assets() {
                   })
                 }
                 required
-                className="border rounded px-2 py-1 text-sm"
+                className="ft-input"
               />
             </div>
             <div className="flex gap-2">
               <button
                 type="submit"
-                className="bg-green-500 text-white px-3 py-1 rounded text-sm"
+                className="ft-btn ft-btn-sm ft-btn-success"
               >
                 Enregistrer
               </button>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="bg-gray-500 text-white px-3 py-1 rounded text-sm"
+                className="ft-btn ft-btn-sm ft-btn-outline"
               >
                 Annuler
               </button>
@@ -176,9 +176,9 @@ export function Assets() {
           </form>
         )}
 
-        <div className="bg-white rounded shadow overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-200">
+        <div className="ft-card overflow-hidden">
+          <table className="ft-table text-sm">
+            <thead className="ft-thead">
               <tr>
                 <th className="px-4 py-2 text-left">N°</th>
                 <th className="px-4 py-2 text-left">Nom</th>
@@ -190,14 +190,14 @@ export function Assets() {
             </thead>
             <tbody>
               {assets.map((asset) => (
-                <tr key={asset.id} className="border-t hover:bg-gray-50">
+                <tr key={asset.id} className="ft-tr">
                   <td className="px-4 py-2">{asset.asset_number}</td>
                   <td className="px-4 py-2">{asset.name}</td>
                   <td className="px-4 py-2">{asset.category}</td>
-                  <td className="px-4 py-2 text-right">
+                  <td className="px-4 py-2 text-right font-mono">
                     {asset.original_value.toFixed(2)}
                   </td>
-                  <td className="px-4 py-2 text-right">
+                  <td className="px-4 py-2 text-right font-mono">
                     {asset.net_book_value?.toFixed(2)}
                   </td>
                   <td className="px-4 py-2 text-center">
@@ -207,7 +207,7 @@ export function Assets() {
                         setEditingId(asset.id);
                         setShowForm(true);
                       }}
-                      className="text-blue-500 text-xs"
+                      className="text-secondary hover:text-primary-end font-semibold text-xs"
                     >
                       Mod.
                     </button>

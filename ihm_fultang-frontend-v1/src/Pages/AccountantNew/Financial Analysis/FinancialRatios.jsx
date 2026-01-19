@@ -56,18 +56,18 @@ export function FinancialRatios() {
       requiredRole={"Accountant"}
     >
       <FinancialAccountantNavBar />
-      <div className="p-6 bg-gray-50">
+      <div className="ft-page">
         <div className="mb-4">
           <h1 className="text-2xl font-bold mb-3">Ratios Financiers</h1>
           <input
             type="number"
             value={year}
             onChange={(e) => setYear(parseInt(e.target.value))}
-            className="border rounded px-3 py-2 text-sm"
+            className="ft-input w-40"
           />
         </div>
 
-        <div className="bg-white p-4 rounded shadow mb-4">
+        <div className="ft-card-padded mb-4">
           <h2 className="font-bold mb-3">Évolution des Ratios</h2>
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
@@ -104,10 +104,10 @@ export function FinancialRatios() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {ratios.map((r) => (
-            <div key={r.id} className="bg-white p-4 rounded shadow">
-              <h3 className="font-bold text-sm">{r.ratio_name}</h3>
+            <div key={r.id} className="ft-card-padded">
+              <h3 className="font-bold text-sm text-secondary">{r.ratio_name}</h3>
               <p className="text-xs text-gray-500">{r.ratio_type}</p>
-              <p className="text-2xl font-bold text-blue-600 mt-2">
+              <p className="text-2xl font-bold text-secondary mt-2 font-mono">
                 {r.value.toFixed(2)}
               </p>
               <p className="text-xs text-gray-600 mt-1">

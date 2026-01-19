@@ -90,7 +90,7 @@ export function ChartOfAccounts() {
       requiredRole={"Accountant"}
     >
       <FinancialAccountantNavBar />
-      <div className="p-6 bg-gray-50">
+      <div className="ft-page">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Plan Comptable</h1>
           <button
@@ -105,7 +105,7 @@ export function ChartOfAccounts() {
                 is_active: true,
               });
             }}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            className="ft-btn ft-btn-md ft-btn-primary"
           >
             {showForm ? "Fermer" : "+ Nouveau Compte"}
           </button>
@@ -115,7 +115,7 @@ export function ChartOfAccounts() {
         {showForm && (
           <form
             onSubmit={handleSubmit}
-            className="bg-white p-6 rounded-lg shadow mb-6"
+            className="ft-card-padded mb-6"
           >
             <div className="grid grid-cols-2 gap-4">
               <input
@@ -126,7 +126,7 @@ export function ChartOfAccounts() {
                   setFormData({ ...formData, code: e.target.value })
                 }
                 required
-                className="border rounded px-3 py-2"
+                className="ft-input"
               />
               <input
                 type="text"
@@ -136,14 +136,14 @@ export function ChartOfAccounts() {
                   setFormData({ ...formData, label: e.target.value })
                 }
                 required
-                className="border rounded px-3 py-2"
+                className="ft-input"
               />
               <select
                 value={formData.account_class}
                 onChange={(e) =>
                   setFormData({ ...formData, account_class: e.target.value })
                 }
-                className="border rounded px-3 py-2"
+                className="ft-select"
               >
                 <option value="1">Capitaux</option>
                 <option value="2">Immobilisations</option>
@@ -159,7 +159,7 @@ export function ChartOfAccounts() {
                 onChange={(e) =>
                   setFormData({ ...formData, account_type: e.target.value })
                 }
-                className="border rounded px-3 py-2"
+                className="ft-select"
               >
                 <option value="ASSET">Actif</option>
                 <option value="LIABILITY">Passif</option>
@@ -171,14 +171,14 @@ export function ChartOfAccounts() {
             <div className="mt-4 flex gap-2">
               <button
                 type="submit"
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                className="ft-btn ft-btn-md ft-btn-success"
               >
                 {editingId ? "Modifier" : "Créer"}
               </button>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                className="ft-btn ft-btn-md ft-btn-outline"
               >
                 Annuler
               </button>
@@ -196,31 +196,31 @@ export function ChartOfAccounts() {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full border rounded px-4 py-2"
+            className="ft-input"
           />
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-200">
+        <div className="ft-card overflow-hidden">
+          <table className="ft-table">
+            <thead className="ft-thead">
               <tr>
-                <th className="px-6 py-3 text-left">Code</th>
-                <th className="px-6 py-3 text-left">Libellé</th>
-                <th className="px-6 py-3 text-left">Classe</th>
-                <th className="px-6 py-3 text-left">Type</th>
-                <th className="px-6 py-3 text-left">Statut</th>
-                <th className="px-6 py-3 text-left">Actions</th>
+                <th className="ft-th">Code</th>
+                <th className="ft-th">Libellé</th>
+                <th className="ft-th">Classe</th>
+                <th className="ft-th">Type</th>
+                <th className="ft-th">Statut</th>
+                <th className="ft-th">Actions</th>
               </tr>
             </thead>
             <tbody>
               {accounts.map((account) => (
-                <tr key={account.id} className="border-t hover:bg-gray-50">
-                  <td className="px-6 py-4 font-semibold">{account.code}</td>
-                  <td className="px-6 py-4">{account.label}</td>
-                  <td className="px-6 py-4">{account.account_class}</td>
-                  <td className="px-6 py-4">{account.account_type}</td>
-                  <td className="px-6 py-4">
+                <tr key={account.id} className="ft-tr">
+                  <td className="ft-td font-semibold">{account.code}</td>
+                  <td className="ft-td">{account.label}</td>
+                  <td className="ft-td">{account.account_class}</td>
+                  <td className="ft-td">{account.account_type}</td>
+                  <td className="ft-td">
                     <span
                       className={`px-2 py-1 rounded ${
                         account.is_active
@@ -231,16 +231,16 @@ export function ChartOfAccounts() {
                       {account.is_active ? "Actif" : "Inactif"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 flex gap-2">
+                  <td className="ft-td flex gap-2">
                     <button
                       onClick={() => handleEdit(account)}
-                      className="text-blue-500 hover:text-blue-700"
+                      className="text-secondary hover:text-primary-end font-semibold"
                     >
                       Modifier
                     </button>
                     <button
                       onClick={() => handleDelete(account.id)}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-red-600 hover:text-red-800 font-semibold"
                     >
                       Supprimer
                     </button>

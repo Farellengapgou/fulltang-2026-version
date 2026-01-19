@@ -117,7 +117,7 @@ export function Periods() {
       requiredRole={"Accountant"}
     >
       <FinancialAccountantNavBar />
-      <div className="p-6 bg-gray-50">
+      <div className="ft-page">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Périodes Comptables</h1>
           <button
@@ -125,7 +125,7 @@ export function Periods() {
               setShowForm(!showForm);
               resetForm();
             }}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            className="ft-btn ft-btn-md ft-btn-primary"
           >
             {showForm ? "Fermer" : "+ Nouvelle Période"}
           </button>
@@ -135,7 +135,7 @@ export function Periods() {
         {showForm && (
           <form
             onSubmit={handleSubmit}
-            className="bg-white p-6 rounded-lg shadow mb-6"
+            className="ft-card-padded mb-6"
           >
             <div className="grid grid-cols-3 gap-4 mb-6">
               <div>
@@ -152,7 +152,7 @@ export function Periods() {
                     })
                   }
                   required
-                  className="w-full border rounded px-3 py-2"
+                  className="ft-input"
                 />
               </div>
               <div>
@@ -171,7 +171,7 @@ export function Periods() {
                     })
                   }
                   required
-                  className="w-full border rounded px-3 py-2"
+                  className="ft-input"
                 />
               </div>
               <div>
@@ -183,7 +183,7 @@ export function Periods() {
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
-                  className="w-full border rounded px-3 py-2"
+                  className="ft-select"
                 >
                   <option value="OPEN">Ouverte</option>
                   <option value="CLOSED">Fermée</option>
@@ -200,7 +200,7 @@ export function Periods() {
                     setFormData({ ...formData, start_date: e.target.value })
                   }
                   required
-                  className="w-full border rounded px-3 py-2"
+                  className="ft-input"
                 />
               </div>
               <div>
@@ -214,7 +214,7 @@ export function Periods() {
                     setFormData({ ...formData, end_date: e.target.value })
                   }
                   required
-                  className="w-full border rounded px-3 py-2"
+                  className="ft-input"
                 />
               </div>
             </div>
@@ -222,14 +222,14 @@ export function Periods() {
             <div className="flex gap-2">
               <button
                 type="submit"
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                className="ft-btn ft-btn-md ft-btn-success"
               >
                 {editingId ? "Modifier" : "Créer"}
               </button>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                className="ft-btn ft-btn-md ft-btn-outline"
               >
                 Annuler
               </button>
@@ -238,28 +238,28 @@ export function Periods() {
         )}
 
         {/* Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-200">
+        <div className="ft-card overflow-hidden">
+          <table className="ft-table">
+            <thead className="ft-thead">
               <tr>
-                <th className="px-6 py-3 text-left">Période</th>
-                <th className="px-6 py-3 text-left">Année</th>
-                <th className="px-6 py-3 text-left">Date Début</th>
-                <th className="px-6 py-3 text-left">Date Fin</th>
-                <th className="px-6 py-3 text-left">Statut</th>
-                <th className="px-6 py-3 text-left">Actions</th>
+                <th className="ft-th">Période</th>
+                <th className="ft-th">Année</th>
+                <th className="ft-th">Date Début</th>
+                <th className="ft-th">Date Fin</th>
+                <th className="ft-th">Statut</th>
+                <th className="ft-th">Actions</th>
               </tr>
             </thead>
             <tbody>
               {periods.map((period) => (
-                <tr key={period.id} className="border-t hover:bg-gray-50">
-                  <td className="px-6 py-4 font-semibold">
+                <tr key={period.id} className="ft-tr">
+                  <td className="ft-td font-semibold">
                     {period.month}/{period.fiscal_year}
                   </td>
-                  <td className="px-6 py-4">{period.fiscal_year}</td>
-                  <td className="px-6 py-4">{period.start_date}</td>
-                  <td className="px-6 py-4">{period.end_date}</td>
-                  <td className="px-6 py-4">
+                  <td className="ft-td">{period.fiscal_year}</td>
+                  <td className="ft-td">{period.start_date}</td>
+                  <td className="ft-td">{period.end_date}</td>
+                  <td className="ft-td">
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-semibold ${
                         period.status === "OPEN"
@@ -270,18 +270,18 @@ export function Periods() {
                       {period.status === "OPEN" ? "Ouverte" : "Fermée"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 flex gap-2">
+                  <td className="ft-td flex gap-2">
                     {period.status === "OPEN" ? (
                       <>
                         <button
                           onClick={() => handleEdit(period)}
-                          className="text-blue-500 hover:text-blue-700 text-sm"
+                          className="text-secondary hover:text-primary-end font-semibold text-sm"
                         >
                           Modifier
                         </button>
                         <button
                           onClick={() => handleClosePeriod(period.id)}
-                          className="text-orange-500 hover:text-orange-700 text-sm"
+                          className="text-orange-700 hover:text-orange-900 font-semibold text-sm"
                         >
                           Fermer
                         </button>
@@ -290,7 +290,7 @@ export function Periods() {
                       <>
                         <button
                           onClick={() => handleOpenPeriod(period.id)}
-                          className="text-green-500 hover:text-green-700 text-sm"
+                          className="text-emerald-700 hover:text-emerald-900 font-semibold text-sm"
                         >
                           Réouvrir
                         </button>
@@ -298,7 +298,7 @@ export function Periods() {
                     )}
                     <button
                       onClick={() => handleDelete(period.id)}
-                      className="text-red-500 hover:text-red-700 text-sm"
+                      className="text-red-600 hover:text-red-800 font-semibold text-sm"
                     >
                       Supprimer
                     </button>

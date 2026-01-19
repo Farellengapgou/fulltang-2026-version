@@ -51,12 +51,12 @@ export function AnalyticAccounts() {
       requiredRole={"Accountant"}
     >
       <FinancialAccountantNavBar />
-      <div className="p-6 bg-gray-50">
+      <div className="ft-page">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Comptes Analytiques</h1>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="bg-blue-500 text-white px-3 py-2 rounded text-sm"
+            className="ft-btn ft-btn-sm ft-btn-primary"
           >
             + Nouveau Compte
           </button>
@@ -65,7 +65,7 @@ export function AnalyticAccounts() {
         {showForm && (
           <form
             onSubmit={handleSubmit}
-            className="bg-white p-4 rounded shadow mb-4"
+            className="ft-card-padded mb-4"
           >
             <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
               <input
@@ -76,7 +76,7 @@ export function AnalyticAccounts() {
                   setFormData({ ...formData, code: e.target.value })
                 }
                 required
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
               <input
                 type="text"
@@ -86,14 +86,14 @@ export function AnalyticAccounts() {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
               <select
                 value={formData.analytic_type}
                 onChange={(e) =>
                   setFormData({ ...formData, analytic_type: e.target.value })
                 }
-                className="border rounded px-2 py-1"
+                className="ft-select"
               >
                 <option value="COST_CENTER">Centre de Coût</option>
                 <option value="PROJECT">Projet</option>
@@ -102,16 +102,16 @@ export function AnalyticAccounts() {
             </div>
             <button
               type="submit"
-              className="bg-green-500 text-white px-3 py-1 rounded text-sm"
+              className="ft-btn ft-btn-sm ft-btn-success"
             >
               Créer
             </button>
           </form>
         )}
 
-        <div className="bg-white rounded shadow overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-200">
+        <div className="ft-card overflow-x-auto">
+          <table className="ft-table text-sm">
+            <thead className="ft-thead">
               <tr>
                 <th className="px-3 py-2 text-left">Code</th>
                 <th className="px-3 py-2 text-left">Nom</th>
@@ -121,7 +121,7 @@ export function AnalyticAccounts() {
             </thead>
             <tbody>
               {accounts.map((a) => (
-                <tr key={a.id} className="border-t hover:bg-gray-50">
+                <tr key={a.id} className="ft-tr">
                   <td className="px-3 py-2 font-semibold">{a.code}</td>
                   <td className="px-3 py-2">{a.name}</td>
                   <td className="px-3 py-2">{a.analytic_type}</td>

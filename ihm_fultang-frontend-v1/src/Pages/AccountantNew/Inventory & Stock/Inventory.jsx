@@ -69,12 +69,12 @@ export function Inventory() {
       requiredRole={"Accountant"}
     >
       <FinancialAccountantNavBar />
-      <div className="p-6 bg-gray-50">
+      <div className="ft-page">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Inventaire</h1>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="bg-blue-500 text-white px-3 py-2 rounded text-sm"
+            className="ft-btn ft-btn-sm ft-btn-primary"
           >
             + Nouvel Article
           </button>
@@ -83,7 +83,7 @@ export function Inventory() {
         {showForm && (
           <form
             onSubmit={handleSubmit}
-            className="bg-white p-4 rounded shadow mb-4"
+            className="ft-card-padded mb-4"
           >
             <div className="grid grid-cols-3 gap-2 mb-3 text-sm">
               <input
@@ -94,7 +94,7 @@ export function Inventory() {
                   setFormData({ ...formData, inventory_number: e.target.value })
                 }
                 required
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
               <input
                 type="text"
@@ -104,7 +104,7 @@ export function Inventory() {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
               <input
                 type="text"
@@ -113,7 +113,7 @@ export function Inventory() {
                 onChange={(e) =>
                   setFormData({ ...formData, inventory_type: e.target.value })
                 }
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
               <input
                 type="number"
@@ -126,7 +126,7 @@ export function Inventory() {
                   })
                 }
                 required
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
               <input
                 type="number"
@@ -140,7 +140,7 @@ export function Inventory() {
                   })
                 }
                 required
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
               <input
                 type="number"
@@ -152,20 +152,20 @@ export function Inventory() {
                     reorder_level: parseFloat(e.target.value),
                   })
                 }
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
             </div>
             <div className="flex gap-2">
               <button
                 type="submit"
-                className="bg-green-500 text-white px-3 py-1 rounded text-sm"
+                className="ft-btn ft-btn-sm ft-btn-success"
               >
                 Enregistrer
               </button>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="bg-gray-500 text-white px-3 py-1 rounded text-sm"
+                className="ft-btn ft-btn-sm ft-btn-outline"
               >
                 Annuler
               </button>
@@ -173,9 +173,9 @@ export function Inventory() {
           </form>
         )}
 
-        <div className="bg-white rounded shadow overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-200">
+        <div className="ft-card overflow-x-auto">
+          <table className="ft-table text-sm">
+            <thead className="ft-thead">
               <tr>
                 <th className="px-3 py-2 text-left">N°</th>
                 <th className="px-3 py-2 text-left">Nom</th>
@@ -188,14 +188,14 @@ export function Inventory() {
             </thead>
             <tbody>
               {items.map((item) => (
-                <tr key={item.id} className="border-t hover:bg-gray-50">
+                <tr key={item.id} className="ft-tr">
                   <td className="px-3 py-2">{item.inventory_number}</td>
                   <td className="px-3 py-2">{item.name}</td>
                   <td className="px-3 py-2 text-right">{item.quantity}</td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="px-3 py-2 text-right font-mono">
                     {item.unit_price.toFixed(2)}
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="px-3 py-2 text-right font-mono">
                     {(item.quantity * item.unit_price).toFixed(2)}
                   </td>
                   <td className="px-3 py-2">{item.reorder_level}</td>
@@ -206,7 +206,7 @@ export function Inventory() {
                         setEditingId(item.id);
                         setShowForm(true);
                       }}
-                      className="text-blue-500 text-xs"
+                      className="text-secondary hover:text-primary-end font-semibold text-xs"
                     >
                       Edit
                     </button>

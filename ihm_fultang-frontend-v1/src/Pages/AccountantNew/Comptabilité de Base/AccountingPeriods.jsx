@@ -65,12 +65,12 @@ export function AccountingPeriods() {
       requiredRole={"Accountant"}
     >
       <FinancialAccountantNavBar />
-      <div className="p-6 bg-gray-50">
+      <div className="ft-page">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Périodes Comptables</h1>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="bg-blue-500 text-white px-3 py-2 rounded text-sm"
+            className="ft-btn ft-btn-sm ft-btn-primary"
           >
             + Nouvelle Période
           </button>
@@ -79,7 +79,7 @@ export function AccountingPeriods() {
         {showForm && (
           <form
             onSubmit={handleSubmit}
-            className="bg-white p-4 rounded shadow mb-4"
+            className="ft-card-padded mb-4"
           >
             <div className="grid grid-cols-3 gap-2 mb-3 text-sm">
               <input
@@ -93,7 +93,7 @@ export function AccountingPeriods() {
                   })
                 }
                 required
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
               <input
                 type="number"
@@ -105,7 +105,7 @@ export function AccountingPeriods() {
                   setFormData({ ...formData, month: parseInt(e.target.value) })
                 }
                 required
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
               <input
                 type="date"
@@ -114,7 +114,7 @@ export function AccountingPeriods() {
                   setFormData({ ...formData, start_date: e.target.value })
                 }
                 required
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
               <input
                 type="date"
@@ -123,21 +123,21 @@ export function AccountingPeriods() {
                   setFormData({ ...formData, end_date: e.target.value })
                 }
                 required
-                className="border rounded px-2 py-1 col-span-2"
+                className="ft-input col-span-2"
               />
             </div>
             <button
               type="submit"
-              className="bg-green-500 text-white px-3 py-1 rounded text-sm"
+              className="ft-btn ft-btn-sm ft-btn-success"
             >
               Créer
             </button>
           </form>
         )}
 
-        <div className="bg-white rounded shadow overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-200">
+        <div className="ft-card overflow-x-auto">
+          <table className="ft-table text-sm">
+            <thead className="ft-thead">
               <tr>
                 <th className="px-3 py-2 text-left">Période</th>
                 <th className="px-3 py-2 text-left">Début</th>
@@ -148,7 +148,7 @@ export function AccountingPeriods() {
             </thead>
             <tbody>
               {periods.map((p) => (
-                <tr key={p.id} className="border-t hover:bg-gray-50">
+                <tr key={p.id} className="ft-tr">
                   <td className="px-3 py-2">
                     {p.month}/{p.fiscal_year}
                   </td>
@@ -169,7 +169,7 @@ export function AccountingPeriods() {
                     {!p.is_closed && (
                       <button
                         onClick={() => handleClosePeriod(p.id)}
-                        className="text-red-500"
+                        className="text-red-600 hover:text-red-800 font-semibold"
                       >
                         Fermer
                       </button>

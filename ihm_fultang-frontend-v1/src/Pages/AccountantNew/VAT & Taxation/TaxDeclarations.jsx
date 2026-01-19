@@ -76,12 +76,12 @@ export function TaxDeclarations() {
       requiredRole={"Accountant"}
     >
       <FinancialAccountantNavBar />
-      <div className="p-6 bg-gray-50">
+      <div className="ft-page">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Déclarations Fiscales</h1>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="bg-blue-500 text-white px-3 py-2 rounded text-sm"
+            className="ft-btn ft-btn-sm ft-btn-primary"
           >
             + Nouvelle Déclaration
           </button>
@@ -90,7 +90,7 @@ export function TaxDeclarations() {
         {showForm && (
           <form
             onSubmit={handleSubmit}
-            className="bg-white p-4 rounded shadow mb-4"
+            className="ft-card-padded mb-4"
           >
             <div className="grid grid-cols-3 gap-2 mb-3 text-sm">
               <select
@@ -98,7 +98,7 @@ export function TaxDeclarations() {
                 onChange={(e) =>
                   setFormData({ ...formData, declaration_type: e.target.value })
                 }
-                className="border rounded px-2 py-1"
+                className="ft-select"
               >
                 <option value="QUARTERLY">Trimestrielle</option>
                 <option value="ANNUAL">Annuelle</option>
@@ -114,7 +114,7 @@ export function TaxDeclarations() {
                   })
                 }
                 required
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
               <input
                 type="number"
@@ -129,7 +129,7 @@ export function TaxDeclarations() {
                   })
                 }
                 required
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
               <input
                 type="number"
@@ -143,21 +143,21 @@ export function TaxDeclarations() {
                   })
                 }
                 required
-                className="border rounded px-2 py-1 col-span-2"
+                className="ft-input col-span-2"
               />
             </div>
             <button
               type="submit"
-              className="bg-green-500 text-white px-3 py-1 rounded text-sm"
+              className="ft-btn ft-btn-sm ft-btn-success"
             >
               Créer
             </button>
           </form>
         )}
 
-        <div className="bg-white rounded shadow overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-200">
+        <div className="ft-card overflow-x-auto">
+          <table className="ft-table text-sm">
+            <thead className="ft-thead">
               <tr>
                 <th className="px-3 py-2 text-left">Type</th>
                 <th className="px-3 py-2 text-left">Période</th>
@@ -169,15 +169,15 @@ export function TaxDeclarations() {
             </thead>
             <tbody>
               {declarations.map((d) => (
-                <tr key={d.id} className="border-t hover:bg-gray-50">
+                <tr key={d.id} className="ft-tr">
                   <td className="px-3 py-2">{d.declaration_type}</td>
                   <td className="px-3 py-2">
                     {d.period_month}/{d.period_year}
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="px-3 py-2 text-right font-mono">
                     {d.taxable_income.toFixed(2)}
                   </td>
-                  <td className="px-3 py-2 text-right font-bold">
+                  <td className="px-3 py-2 text-right font-bold font-mono">
                     {d.tax_due.toFixed(2)}
                   </td>
                   <td className="px-3 py-2">
@@ -197,7 +197,7 @@ export function TaxDeclarations() {
                     {d.status === "DRAFT" && (
                       <button
                         onClick={() => handleSubmitDeclaration(d.id)}
-                        className="text-blue-500"
+                        className="text-secondary hover:text-primary-end font-semibold"
                       >
                         Soumettre
                       </button>
@@ -205,7 +205,7 @@ export function TaxDeclarations() {
                     {d.status === "SUBMITTED" && (
                       <button
                         onClick={() => handlePayDeclaration(d.id)}
-                        className="text-green-500"
+                        className="text-emerald-700 hover:text-emerald-900 font-semibold"
                       >
                         Payer
                       </button>

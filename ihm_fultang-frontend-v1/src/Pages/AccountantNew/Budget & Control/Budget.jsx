@@ -71,12 +71,12 @@ export function Budget() {
       requiredRole={"Accountant"}
     >
       <FinancialAccountantNavBar />
-      <div className="p-6 bg-gray-50">
+      <div className="ft-page">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Budget</h1>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="bg-blue-500 text-white px-3 py-2 rounded text-sm"
+            className="ft-btn ft-btn-sm ft-btn-primary"
           >
             + Nouveau Budget
           </button>
@@ -85,7 +85,7 @@ export function Budget() {
         {showForm && (
           <form
             onSubmit={handleSubmit}
-            className="bg-white p-4 rounded shadow mb-4"
+            className="ft-card-padded mb-4"
           >
             <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
               <input
@@ -96,7 +96,7 @@ export function Budget() {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
               <input
                 type="number"
@@ -109,7 +109,7 @@ export function Budget() {
                   })
                 }
                 required
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
               <input
                 type="number"
@@ -123,21 +123,21 @@ export function Budget() {
                   })
                 }
                 required
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
             </div>
             <button
               type="submit"
-              className="bg-green-500 text-white px-3 py-1 rounded text-sm"
+              className="ft-btn ft-btn-sm ft-btn-success"
             >
               Créer
             </button>
           </form>
         )}
 
-        <div className="bg-white rounded shadow overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-200">
+        <div className="ft-card overflow-x-auto">
+          <table className="ft-table text-sm">
+            <thead className="ft-thead">
               <tr>
                 <th className="px-3 py-2 text-left">Nom</th>
                 <th className="px-3 py-2 text-left">Exercice</th>
@@ -148,10 +148,10 @@ export function Budget() {
             </thead>
             <tbody>
               {budgets.map((b) => (
-                <tr key={b.id} className="border-t hover:bg-gray-50">
+                <tr key={b.id} className="ft-tr">
                   <td className="px-3 py-2">{b.name}</td>
                   <td className="px-3 py-2">{b.fiscal_year}</td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="px-3 py-2 text-right font-mono">
                     {b.total_amount.toFixed(2)}
                   </td>
                   <td className="px-3 py-2">{b.is_approved ? "✓" : "✗"}</td>
@@ -159,7 +159,7 @@ export function Budget() {
                     {!b.is_approved && (
                       <button
                         onClick={() => handleApprove(b.id)}
-                        className="text-blue-500"
+                        className="text-secondary hover:text-primary-end font-semibold"
                       >
                         Approuver
                       </button>

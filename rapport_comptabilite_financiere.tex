@@ -1,0 +1,271 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{xcolor}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue,
+  citecolor=black
+}
+
+\title{Rapport technique --- Comptabilité financière (Projet Fulltang)}
+\author{Équipe Fulltang}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Message d’introduction}
+\textbf{A tous le monde, j’attends un document présentant comment vous avez fait vos tâches, le problème que vous avez résolu, comment vous l’avez fait.}
+
+\vspace{0.5cm}
+Ce document se limite volontairement à la \textbf{comptabilité financière} (back + front). Il décrit:
+\begin{itemize}[leftmargin=1.2cm]
+  \item les modules et classes principales (backend Django + frontend React),
+  \item les workflows métiers (plan comptable, écritures, clôture, rapports, trésorerie, TVA, budget),
+  \item les problèmes rencontrés et la démarche de résolution (build, fusion front/back, mise à jour backend).
+\end{itemize}
+
+\section{Périmètre et modules du projet (comptabilité financière uniquement)}
+
+\subsection{Backend (Django / DRF)}
+\textbf{Localisation}: \texttt{ihm\_fultang-main/accounting/}
+
+\begin{itemize}[leftmargin=1.2cm]
+  \item \textbf{Modèles}: \texttt{accounting/models\_financier.py}
+  \item \textbf{Serializers}: \texttt{accounting/serializers.py}
+  \item \textbf{API Views (DRF)}: \texttt{accounting/api\_views/*.py}
+  \item \textbf{Routage API}: \texttt{accounting/urls.py}
+\end{itemize}
+
+\subsection{Frontend (React / Vite)}
+\textbf{Localisation}: \texttt{ihm\_fultang-frontend-v1/src/}
+
+\begin{itemize}[leftmargin=1.2cm]
+  \item \textbf{Pages Comptabilité}: \texttt{Pages/AccountantNew/*}
+  \item \textbf{Services API Comptabilité}: \texttt{Services/Accounting/*}
+  \item \textbf{Client HTTP}: \texttt{Utils/axiosInstancefinancial.js}
+\end{itemize}
+
+\section{Problèmes rencontrés et résolutions}
+
+\subsection{Problème 1 --- Build de l’application}
+\begin{itemize}[leftmargin=1.2cm]
+  \item \textbf{Problème}: \textit{le build de l'application (resoulutt grace a une vrai connexion)}.
+  \item \textbf{Impact}: build instable / échec lors du téléchargement des dépendances (pip/npm) et/ou lors des étapes d’installation en container.
+  \item \textbf{Résolution}: mise en place/usage d’une \textbf{connexion réseau fiable} pendant le build (accès registries, DNS, proxy si nécessaire), puis relance des builds Docker.
+  \item \textbf{Validation}: build complet reproductible (installation dépendances, compilation assets, démarrage des services).
+\end{itemize}
+
+\subsection{Problème 2 --- Fusion frontend / backend}
+\begin{itemize}[leftmargin=1.2cm]
+  \item \textbf{Problème}: \textit{la fusion frontend backend (resoulu en changant completement les page du backend pour epouser le nouveau backend)}.
+  \item \textbf{Contexte}: existence de deux générations d’écrans/services côté front (ex: \texttt{Pages/Accountant/} et \texttt{Pages/AccountantNew/}) et d’endpoints côté back (anciens vs nouveaux patterns).
+  \item \textbf{Résolution}: alignement des pages et du routage afin d’\textbf{épouser le nouveau backend}:
+  \begin{itemize}[leftmargin=1.2cm]
+    \item standardisation des bases d’URL \texttt{/api/v1/accounting/*},
+    \item refactor des pages “AccountantNew” pour utiliser \texttt{Services/Accounting/*},
+    \item contrôle d’accès via rôle \texttt{Accountant} (dashboards).
+  \end{itemize}
+  \item \textbf{Validation}: navigation comptable cohérente (plan comptable, journaux/écritures, périodes, rapports) et appels API centralisés.
+\end{itemize}
+
+\subsection{Problème 3 --- Mise à jour de la comptabilité financière côté backend}
+\begin{itemize}[leftmargin=1.2cm]
+  \item \textbf{Problème}: \textit{la mise a jour de la comptabilite financiere cote backend (ajout des models url, serializer view etc)}.
+  \item \textbf{Résolution}:
+  \begin{itemize}[leftmargin=1.2cm]
+    \item ajout/extension des \textbf{models} comptables (plan comptable, journaux, écritures, tiers, TVA, budget, périodes, trésorerie, immobilisations),
+    \item exposition des \textbf{endpoints} via DRF \texttt{ViewSet} et \texttt{DefaultRouter},
+    \item création/extension des \textbf{serializers} avec validations (équilibrage débit/crédit, période ouverte, etc.).
+  \end{itemize}
+  \item \textbf{Validation}: endpoints CRUD + actions métiers (validation d’écritures, rapports, clôture de période) disponibles via \texttt{/api/v1/accounting/}.
+\end{itemize}
+
+\section{Architecture comptabilité financière --- Backend}
+
+\subsection{Modèles (classes) principales}
+Les classes ci-dessous constituent le socle de la comptabilité financière (\texttt{accounting/models\_financier.py}).
+
+\begin{longtable}{|p{4.2cm}|p{10.2cm}|}
+\hline
+\textbf{Classe} & \textbf{Rôle métier / principales responsabilités} \\ \hline
+\texttt{ChartOfAccounts} & Plan comptable: code/label, hiérarchie (parent/enfants), type (actif, passif, produits, charges), calcul de solde (mouvements) et sens normal (débit/crédit). \\ \hline
+\texttt{Journal} & Journaux comptables (ventes, achats, banque, caisse, général, OD) + comptes par défaut. \\ \hline
+\texttt{JournalEntry} & Écriture comptable: date, journal, description, état (DRAFT/POSTED), totaux débit/crédit, numéro de pièce (voucher), validation et mise à jour des soldes. \\ \hline
+\texttt{JournalEntryLine} & Lignes d’écriture: compte, libellé, débit/crédit, tiers (client/fournisseur), analytique. \\ \hline
+\texttt{AccountingPeriod} & Périodes comptables mensuelles: état (OPEN/CLOSED/LOCKED), clôture, contrôle d’ouverture lors des validations. \\ \hline
+\texttt{AccountPeriodBalance} & Soldes par période et par compte: mouvements débit/crédit et soldes d’ouverture/clôture. \\ \hline
+\texttt{Supplier} / \texttt{Customer} & Tiers (fournisseurs/clients) rattachés à un compte comptable. \\ \hline
+\texttt{Asset} (\texttt{FixedAsset}) & Immobilisations: coût, durée, méthode d’amortissement, comptes (immobilisation, amortissement, charge) + calcul VNC/amortissement. \\ \hline
+\texttt{Inventory} & Inventaire/stock: quantités, valorisation, compte de stock associé. \\ \hline
+\texttt{Budget} / \texttt{BudgetLine} & Budgets (annuel/trimestriel/mensuel) et ventilation mensuelle par compte (+ analytique optionnel). \\ \hline
+\texttt{VAT} & TVA (collectée/déductible) par période, statut et lien possible vers écriture. \\ \hline
+\texttt{TaxRate} / \texttt{TaxDeclaration} & Taxes: taux et déclarations (TVA, impôt, charges) avec calcul de pénalités de retard. \\ \hline
+\texttt{BankAccount} / \texttt{BankReconciliation} & Trésorerie: comptes bancaires et rapprochements (solde relevé vs comptable, ajustements). \\ \hline
+\texttt{FinancialRatio} & Ratios financiers (liquidité, rentabilité, etc.) par période. \\ \hline
+\texttt{AccountingOperation} & Lien entre facturation médicale (\texttt{Bill}) et écriture comptable générée. \\ \hline
+\end{longtable}
+
+\subsection{Serializers: validation et règles}
+\textbf{Localisation}: \texttt{accounting/serializers.py}
+
+\begin{itemize}[leftmargin=1.2cm]
+  \item \textbf{Écritures}:
+  \begin{itemize}[leftmargin=1.2cm]
+    \item \texttt{JournalEntrySerializer}: impose \textbf{au moins 2 lignes} et un \textbf{équilibrage} (débit = crédit).
+    \item \texttt{JournalEntryLineSerializer}: empêche débit et crédit simultanés, exige au moins un montant, interdit les montants négatifs.
+  \end{itemize}
+  \item \textbf{Périodes}:
+  \begin{itemize}[leftmargin=1.2cm]
+    \item \texttt{validate\_entry\_date}: empêche la saisie sur période non ouverte (ou crée la période si absente).
+  \end{itemize}
+  \item \textbf{Tiers / trésorerie / taxes}: serializers enrichis avec champs calculés (ex: pénalités, solde ajusté, labels de comptes).
+\end{itemize}
+
+\subsection{Endpoints et URLs (DRF Router)}
+\textbf{Routage}: \texttt{accounting/urls.py} via \texttt{DefaultRouter}.
+
+\begin{longtable}{|p{5.2cm}|p{9.2cm}|}
+\hline
+\textbf{Endpoint} & \textbf{Fonction} \\ \hline
+\texttt{/api/v1/accounting/chart-of-accounts/} & CRUD plan comptable. \\ \hline
+\texttt{/api/v1/accounting/journals/} & CRUD journaux. \\ \hline
+\texttt{/api/v1/accounting/journal-entries/} & CRUD écritures + actions métiers (validation, brouillons). \\ \hline
+\texttt{/api/v1/accounting/periods/} & Gestion des périodes comptables (listing, clôture). \\ \hline
+\texttt{/api/v1/accounting/reports/*} & Rapports financiers: bilan, compte de résultat, balance. \\ \hline
+\texttt{/api/v1/accounting/budgets/} & Budgets + actions (approbation, totaux). \\ \hline
+\texttt{/api/v1/accounting/bank-accounts/} & Comptes bancaires. \\ \hline
+\texttt{/api/v1/accounting/bank-reconciliation/} & Rapprochement bancaire. \\ \hline
+\texttt{/api/v1/accounting/vat/} & TVA. \\ \hline
+\texttt{/api/v1/accounting/tax-rates/} / \texttt{/tax-declarations/} & Taux et déclarations fiscales. \\ \hline
+\texttt{/api/v1/accounting/suppliers/} / \texttt{/customers/} & Tiers. \\ \hline
+\texttt{/api/v1/accounting/fixed-assets/} / \texttt{/inventory/} / \texttt{/payroll/} & Immobilisations, stocks, paie (si activés dans le périmètre). \\ \hline
+\texttt{/api/v1/accounting/statistics/} & Statistiques globales comptables (dont factures comptabilisées). \\ \hline
+\end{longtable}
+
+\section{Workflows Comptabilité financière (Back + Front)}
+
+\subsection{Workflow 1 --- Plan comptable (création/édition/suppression)}
+\textbf{Objectif}: administrer les comptes comptables (actif/passif/produit/charge) et servir de base à toutes les écritures.
+
+\begin{itemize}[leftmargin=1.2cm]
+  \item \textbf{Écran front}: \texttt{Pages/AccountantNew/Comptabilité de Base/PlanComptable.jsx}
+  \item \textbf{Service front}: \texttt{Services/Accounting/chartOfAccountsService.js}
+  \item \textbf{Endpoint back}: \texttt{/api/v1/accounting/chart-of-accounts/}
+  \item \textbf{Étapes}:
+  \begin{itemize}[leftmargin=1.2cm]
+    \item l’utilisateur (rôle \texttt{Accountant}) liste/recherche les comptes,
+    \item crée un compte (code, libellé, classe, type) ou modifie un compte existant,
+    \item supprime si nécessaire (avec confirmation).
+  \end{itemize}
+\end{itemize}
+
+\subsection{Workflow 2 --- Saisie d’une écriture comptable (brouillon)}
+\textbf{Objectif}: saisir une opération en écriture \textbf{équilibrée} (débit = crédit) avec 2 lignes minimum.
+
+\begin{itemize}[leftmargin=1.2cm]
+  \item \textbf{Écran front}: \texttt{Pages/AccountantNew/Comptabilité de Base/JournalsEntries.jsx}
+  \item \textbf{Service front}: \texttt{Services/Accounting/journalEntryService.js}
+  \item \textbf{Endpoint back}: \texttt{/api/v1/accounting/journal-entries/}
+  \item \textbf{Étapes}:
+  \begin{itemize}[leftmargin=1.2cm]
+    \item choix du journal + date + description + référence,
+    \item ajout de lignes (compte, libellé, débit/crédit),
+    \item création (état \texttt{DRAFT}) via POST.
+  \end{itemize}
+\end{itemize}
+
+\subsection{Workflow 3 --- Validation d’une écriture (posting)}
+\textbf{Objectif}: passer une écriture de \texttt{DRAFT} à \texttt{POSTED} en respectant les contrôles:
+\begin{itemize}[leftmargin=1.2cm]
+  \item période comptable \textbf{ouverte},
+  \item écriture \textbf{équilibrée},
+  \item génération du numéro de pièce (\texttt{voucher}) et \textbf{mise à jour des soldes} par période.
+\end{itemize}
+
+\begin{itemize}[leftmargin=1.2cm]
+  \item \textbf{Action backend}: \texttt{JournalEntryViewSet.validate\_entry} (action DRF)
+  \item \textbf{URL attendue}: \texttt{/api/v1/accounting/journal-entries/\{id\}/validate\_entry/}
+  \item \textbf{Effets}: l’écriture devient \texttt{POSTED}, \texttt{validated\_at} est remplie, et \texttt{AccountPeriodBalance} est mis à jour.
+\end{itemize}
+
+\subsection{Workflow 4 --- Clôture de période et contrôle d’accès}
+\textbf{Objectif}: empêcher les écritures sur des périodes clôturées/verrouillées.
+
+\begin{itemize}[leftmargin=1.2cm]
+  \item \textbf{Modèle}: \texttt{AccountingPeriod} (états OPEN/CLOSED/LOCKED).
+  \item \textbf{Règle}: \texttt{JournalEntry.check\_period\_is\_open()} interdit la validation si la période n’est pas OPEN.
+  \item \textbf{Écran front}: \texttt{Pages/AccountantNew/Cloture \& Reports/Periods.jsx} (gestion des périodes).
+\end{itemize}
+
+\subsection{Workflow 5 --- Rapports financiers (Bilan / Compte de résultat / Balance)}
+\textbf{Objectif}: donner une visibilité financière à une période (par dates).
+
+\begin{itemize}[leftmargin=1.2cm]
+  \item \textbf{Écran front}: \texttt{Pages/AccountantNew/Cloture \& Reports/FinancialReports.jsx}
+  \item \textbf{Service front}: \texttt{Services/Accounting/financialReportService.js}
+  \item \textbf{Endpoints back}:
+  \begin{itemize}[leftmargin=1.2cm]
+    \item \texttt{/api/v1/accounting/reports/balance\_sheet/}
+    \item \texttt{/api/v1/accounting/reports/income\_statement/}
+    \item \texttt{/api/v1/accounting/reports/trial\_balance/}
+  \end{itemize}
+  \item \textbf{Principe}: agrégation par \texttt{ChartOfAccounts.get\_balance(start\_date, end\_date)} sur les écritures validées (\texttt{POSTED}).
+\end{itemize}
+
+\subsection{Workflow 6 --- Statistiques (factures comptabilisées)}
+\textbf{Objectif}: suivre les factures médicales et leur statut de comptabilisation.
+\begin{itemize}[leftmargin=1.2cm]
+  \item \textbf{Endpoint back}: \texttt{/api/v1/accounting/statistics/}
+  \item \textbf{Données}: nombre de factures, factures comptabilisées vs non comptabilisées, filtrage date.
+\end{itemize}
+
+\section{Frontend --- Écrans “AccountantNew” (cartographie)}
+\textbf{But}: documenter les workflows comptables visibles par un comptable.
+
+\begin{longtable}{|p{5.3cm}|p{4.3cm}|p{5.0cm}|}
+\hline
+\textbf{Écran} & \textbf{Service} & \textbf{Endpoint principal} \\ \hline
+Plan comptable & \texttt{chartOfAccountsService} & \texttt{/api/v1/accounting/chart-of-accounts/} \\ \hline
+Journaux/Écritures & \texttt{journalService}, \texttt{journalEntryService} & \texttt{/api/v1/accounting/journals/}, \texttt{/api/v1/accounting/journal-entries/} \\ \hline
+Périodes / Clôture & \texttt{accountingPeriodService} & \texttt{/api/v1/accounting/periods/} \\ \hline
+Rapports financiers & \texttt{financialReportService} & \texttt{/api/v1/accounting/reports/*} \\ \hline
+Budgets & \texttt{budgetService} & \texttt{/api/v1/accounting/budgets/} \\ \hline
+Trésorerie (banques) & \texttt{bankAccountService}, \texttt{bankReconciliationService} & \texttt{/api/v1/accounting/bank-accounts/}, \texttt{/api/v1/accounting/bank-reconciliation/} \\ \hline
+TVA \& Fiscalité & \texttt{vatService}, \texttt{taxService} & \texttt{/api/v1/accounting/vat/}, \texttt{/api/v1/accounting/tax-*} \\ \hline
+Fournisseurs/Clients & \texttt{supplierService}, \texttt{customerService} & \texttt{/api/v1/accounting/suppliers/}, \texttt{/api/v1/accounting/customers/} \\ \hline
+Immobilisations / Stock & \texttt{fixedAssetService}, \texttt{inventoryService} & \texttt{/api/v1/accounting/fixed-assets/}, \texttt{/api/v1/accounting/inventory/} \\ \hline
+Paie & \texttt{payrollService} & \texttt{/api/v1/accounting/payroll/} \\ \hline
+\end{longtable}
+
+\section{Conclusion}
+La comptabilité financière du projet Fulltang repose sur:
+\begin{itemize}[leftmargin=1.2cm]
+  \item un \textbf{backend Django/DRF} structuré autour des \textbf{écritures comptables} (\texttt{JournalEntry} + \texttt{JournalEntryLine}) et du \textbf{plan comptable} (\texttt{ChartOfAccounts}),
+  \item des \textbf{contrôles métier} (équilibrage, périodes ouvertes, immutabilité après validation),
+  \item un \textbf{frontend React} “AccountantNew” qui couvre les écrans essentiels (plan comptable, écritures, clôture, rapports, trésorerie, TVA, budget).
+\end{itemize}
+
+\section{Annexes (à compléter si besoin)}
+\begin{itemize}[leftmargin=1.2cm]
+  \item Captures d’écran des pages “AccountantNew”.
+  \item Exemple d’écriture équilibrée (débit/crédit).
+  \item Exemple de génération d’un Bilan / Compte de résultat sur une période.
+\end{itemize}
+
+\end{document}
+
+

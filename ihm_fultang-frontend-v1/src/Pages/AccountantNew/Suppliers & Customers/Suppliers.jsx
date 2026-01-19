@@ -130,7 +130,7 @@ export function Suppliers() {
       requiredRole={"Accountant"}
     >
       <FinancialAccountantNavBar />
-      <div className="p-6 bg-gray-50">
+      <div className="ft-page">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Fournisseurs</h1>
           <button
@@ -138,7 +138,7 @@ export function Suppliers() {
               setShowForm(!showForm);
               resetForm();
             }}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            className="ft-btn ft-btn-md ft-btn-primary"
           >
             {showForm ? "Fermer" : "+ Nouveau Fournisseur"}
           </button>
@@ -148,7 +148,7 @@ export function Suppliers() {
         {showForm && (
           <form
             onSubmit={handleSubmit}
-            className="bg-white p-6 rounded-lg shadow mb-6"
+            className="ft-card-padded mb-6"
           >
             <div className="grid grid-cols-2 gap-4 mb-6">
               <input
@@ -159,7 +159,7 @@ export function Suppliers() {
                   setFormData({ ...formData, code: e.target.value })
                 }
                 required
-                className="border rounded px-3 py-2"
+                className="ft-input"
               />
               <input
                 type="text"
@@ -169,14 +169,14 @@ export function Suppliers() {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
-                className="border rounded px-3 py-2"
+                className="ft-input"
               />
               <select
                 value={formData.supplier_type}
                 onChange={(e) =>
                   setFormData({ ...formData, supplier_type: e.target.value })
                 }
-                className="border rounded px-3 py-2"
+                className="ft-select"
               >
                 <option value="PHARMA">Laboratoire pharmaceutique</option>
                 <option value="EQUIPMENT">Équipementier médical</option>
@@ -188,7 +188,7 @@ export function Suppliers() {
                 onChange={(e) =>
                   setFormData({ ...formData, account: e.target.value })
                 }
-                className="border rounded px-3 py-2"
+                className="ft-select"
               >
                 <option value="">Sélectionner un compte</option>
                 {accounts.map((a) => (
@@ -204,7 +204,7 @@ export function Suppliers() {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className="border rounded px-3 py-2"
+                className="ft-input"
               />
               <input
                 type="tel"
@@ -213,7 +213,7 @@ export function Suppliers() {
                 onChange={(e) =>
                   setFormData({ ...formData, phone: e.target.value })
                 }
-                className="border rounded px-3 py-2"
+                className="ft-input"
               />
               <textarea
                 placeholder="Adresse"
@@ -221,7 +221,7 @@ export function Suppliers() {
                 onChange={(e) =>
                   setFormData({ ...formData, address: e.target.value })
                 }
-                className="border rounded px-3 py-2 col-span-2"
+                className="ft-input col-span-2"
                 rows="2"
               ></textarea>
               <input
@@ -234,7 +234,7 @@ export function Suppliers() {
                     payment_terms: parseInt(e.target.value),
                   })
                 }
-                className="border rounded px-3 py-2"
+                className="ft-input"
               />
               <input
                 type="number"
@@ -247,21 +247,21 @@ export function Suppliers() {
                     credit_limit: parseFloat(e.target.value),
                   })
                 }
-                className="border rounded px-3 py-2"
+                className="ft-input"
               />
             </div>
 
             <div className="flex gap-2">
               <button
                 type="submit"
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                className="ft-btn ft-btn-md ft-btn-success"
               >
                 {editingId ? "Modifier" : "Créer"}
               </button>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                className="ft-btn ft-btn-md ft-btn-outline"
               >
                 Annuler
               </button>
@@ -279,33 +279,33 @@ export function Suppliers() {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full border rounded px-4 py-2"
+            className="ft-input"
           />
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-200">
+        <div className="ft-card overflow-hidden">
+          <table className="ft-table">
+            <thead className="ft-thead">
               <tr>
-                <th className="px-6 py-3 text-left">Code</th>
-                <th className="px-6 py-3 text-left">Nom</th>
-                <th className="px-6 py-3 text-left">Type</th>
-                <th className="px-6 py-3 text-left">Email</th>
-                <th className="px-6 py-3 text-left">Téléphone</th>
-                <th className="px-6 py-3 text-left">Statut</th>
-                <th className="px-6 py-3 text-left">Actions</th>
+                <th className="ft-th">Code</th>
+                <th className="ft-th">Nom</th>
+                <th className="ft-th">Type</th>
+                <th className="ft-th">Email</th>
+                <th className="ft-th">Téléphone</th>
+                <th className="ft-th">Statut</th>
+                <th className="ft-th">Actions</th>
               </tr>
             </thead>
             <tbody>
               {suppliers.map((supplier) => (
-                <tr key={supplier.id} className="border-t hover:bg-gray-50">
-                  <td className="px-6 py-4 font-semibold">{supplier.code}</td>
-                  <td className="px-6 py-4">{supplier.name}</td>
-                  <td className="px-6 py-4">{supplier.supplier_type}</td>
-                  <td className="px-6 py-4">{supplier.email}</td>
-                  <td className="px-6 py-4">{supplier.phone}</td>
-                  <td className="px-6 py-4">
+                <tr key={supplier.id} className="ft-tr">
+                  <td className="ft-td font-semibold">{supplier.code}</td>
+                  <td className="ft-td">{supplier.name}</td>
+                  <td className="ft-td">{supplier.supplier_type}</td>
+                  <td className="ft-td">{supplier.email}</td>
+                  <td className="ft-td">{supplier.phone}</td>
+                  <td className="ft-td">
                     <span
                       className={`px-2 py-1 rounded text-sm ${
                         supplier.is_active
@@ -316,22 +316,22 @@ export function Suppliers() {
                       {supplier.is_active ? "Actif" : "Inactif"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 flex gap-2">
+                  <td className="ft-td flex gap-3">
                     <button
                       onClick={() => handleViewBalance(supplier)}
-                      className="text-purple-500 hover:text-purple-700 text-sm"
+                      className="text-secondary hover:text-primary-end font-semibold text-sm"
                     >
                       Solde
                     </button>
                     <button
                       onClick={() => handleEdit(supplier)}
-                      className="text-blue-500 hover:text-blue-700 text-sm"
+                      className="text-secondary hover:text-primary-end font-semibold text-sm"
                     >
                       Modifier
                     </button>
                     <button
                       onClick={() => handleDelete(supplier.id)}
-                      className="text-red-500 hover:text-red-700 text-sm"
+                      className="text-red-600 hover:text-red-800 font-semibold text-sm"
                     >
                       Supprimer
                     </button>
@@ -350,24 +350,29 @@ export function Suppliers() {
 
         {/* Balance Modal */}
         {showBalance && selectedSupplier && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-8 rounded-lg shadow-lg">
-              <h2 className="text-2xl font-bold mb-4">Solde du Fournisseur</h2>
-              <p className="mb-2">
+          <div className="ft-modal-overlay">
+            <div className="ft-modal">
+              <div className="ft-modal-header">
+                <h2 className="ft-modal-title">Solde du Fournisseur</h2>
+                <button
+                  onClick={() => setShowBalance(false)}
+                  className="ft-btn ft-btn-sm ft-btn-outline"
+                  type="button"
+                >
+                  Fermer
+                </button>
+              </div>
+              <div className="ft-modal-body">
+                <p className="mb-2">
                 <strong>Code:</strong> {selectedSupplier.code}
-              </p>
-              <p className="mb-4">
+                </p>
+                <p className="mb-4">
                 <strong>Nom:</strong> {selectedSupplier.name}
-              </p>
-              <p className="text-2xl font-bold text-blue-600 mb-6">
+                </p>
+                <p className="text-2xl font-bold text-secondary mb-6">
                 Solde: {selectedSupplier.balance?.toFixed(2)} FCFA
-              </p>
-              <button
-                onClick={() => setShowBalance(false)}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                Fermer
-              </button>
+                </p>
+              </div>
             </div>
           </div>
         )}

@@ -50,15 +50,15 @@ export function FinancialReports() {
       requiredRole={"Accountant"}
     >
       <FinancialAccountantNavBar />
-      <div className="p-6 bg-gray-50">
+      <div className="ft-page">
         <h1 className="text-2xl font-bold mb-4">Rapports Financiers</h1>
 
-        <div className="bg-white p-4 rounded shadow mb-4">
+        <div className="ft-card-padded mb-4">
           <div className="flex gap-4 mb-4 flex-wrap">
             <select
               value={reportType}
               onChange={(e) => setReportType(e.target.value)}
-              className="border rounded px-3 py-2 text-sm"
+              className="ft-select w-auto"
             >
               <option value="balance_sheet">Bilan</option>
               <option value="income_statement">Compte de Résultat</option>
@@ -68,23 +68,23 @@ export function FinancialReports() {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="border rounded px-3 py-2 text-sm"
+              className="ft-input w-auto"
             />
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="border rounded px-3 py-2 text-sm"
+              className="ft-input w-auto"
             />
             <button
               onClick={fetchReport}
-              className="bg-blue-500 text-white px-3 py-2 rounded text-sm"
+              className="ft-btn ft-btn-sm ft-btn-primary"
             >
               Générer
             </button>
             <button
               onClick={() => window.print()}
-              className="bg-green-500 text-white px-3 py-2 rounded text-sm"
+              className="ft-btn ft-btn-sm ft-btn-outline"
             >
               Imprimer
             </button>
@@ -92,7 +92,7 @@ export function FinancialReports() {
         </div>
 
         {data && (
-          <div className="bg-white rounded shadow p-4 overflow-x-auto">
+          <div className="ft-card-padded overflow-x-auto">
             {reportType === "balance_sheet" && (
               <div>
                 <h2 className="text-lg font-bold mb-3">BILAN</h2>

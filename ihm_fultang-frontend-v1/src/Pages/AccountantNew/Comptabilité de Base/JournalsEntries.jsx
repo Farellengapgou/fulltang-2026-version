@@ -154,7 +154,7 @@ export function JournalEntries() {
       requiredRole={"Accountant"}
     >
       <FinancialAccountantNavBar />
-      <div className="p-6 bg-gray-50">
+      <div className="ft-page">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Écritures Comptables</h1>
           <button
@@ -162,7 +162,7 @@ export function JournalEntries() {
               setShowForm(!showForm);
               resetForm();
             }}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            className="ft-btn ft-btn-md ft-btn-primary"
           >
             {showForm ? "Fermer" : "+ Nouvelle Écriture"}
           </button>
@@ -172,7 +172,7 @@ export function JournalEntries() {
         {showForm && (
           <form
             onSubmit={handleSubmit}
-            className="bg-white p-6 rounded-lg shadow mb-6"
+            className="ft-card-padded mb-6"
           >
             <div className="grid grid-cols-2 gap-4 mb-6">
               <input
@@ -182,7 +182,7 @@ export function JournalEntries() {
                   setFormData({ ...formData, entry_date: e.target.value })
                 }
                 required
-                className="border rounded px-3 py-2"
+                className="ft-input"
               />
               <select
                 value={formData.journal}
@@ -190,7 +190,7 @@ export function JournalEntries() {
                   setFormData({ ...formData, journal: e.target.value })
                 }
                 required
-                className="border rounded px-3 py-2"
+                className="ft-select"
               >
                 <option value="">Sélectionner un journal</option>
                 {journals.map((j) => (
@@ -206,7 +206,7 @@ export function JournalEntries() {
                 onChange={(e) =>
                   setFormData({ ...formData, reference: e.target.value })
                 }
-                className="border rounded px-3 py-2"
+                className="ft-input"
               />
               <input
                 type="text"
@@ -216,7 +216,7 @@ export function JournalEntries() {
                   setFormData({ ...formData, description: e.target.value })
                 }
                 required
-                className="border rounded px-3 py-2"
+                className="ft-input"
               />
             </div>
 
@@ -224,19 +224,19 @@ export function JournalEntries() {
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-3">Lignes d'Écriture</h3>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-200">
+                <table className="ft-table text-sm">
+                  <thead className="ft-thead">
                     <tr>
-                      <th className="px-2 py-2 text-left">Compte</th>
-                      <th className="px-2 py-2 text-left">Libellé</th>
-                      <th className="px-2 py-2 text-right">Débit</th>
-                      <th className="px-2 py-2 text-right">Crédit</th>
-                      <th className="px-2 py-2">Action</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Compte</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Libellé</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Débit</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Crédit</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {formData.lines.map((line, idx) => (
-                      <tr key={idx} className="border-t">
+                      <tr key={idx} className="border-t hover:bg-gray-50 transition-colors">
                         <td className="px-2 py-2">
                           <select
                             value={line.account}
@@ -244,7 +244,7 @@ export function JournalEntries() {
                               handleLineChange(idx, "account", e.target.value)
                             }
                             required
-                            className="border rounded px-2 py-1 text-sm w-full"
+                            className="ft-select !px-3 !py-2 !text-sm"
                           >
                             <option value="">Sélectionner</option>
                             {accounts.map((a) => (
@@ -262,7 +262,7 @@ export function JournalEntries() {
                               handleLineChange(idx, "label", e.target.value)
                             }
                             required
-                            className="border rounded px-2 py-1 text-sm w-full"
+                            className="ft-input !px-3 !py-2 !text-sm"
                           />
                         </td>
                         <td className="px-2 py-2">
@@ -277,7 +277,7 @@ export function JournalEntries() {
                                 parseFloat(e.target.value) || 0
                               )
                             }
-                            className="border rounded px-2 py-1 text-sm w-full text-right"
+                            className="ft-input !px-3 !py-2 !text-sm text-right"
                           />
                         </td>
                         <td className="px-2 py-2">
@@ -292,14 +292,14 @@ export function JournalEntries() {
                                 parseFloat(e.target.value) || 0
                               )
                             }
-                            className="border rounded px-2 py-1 text-sm w-full text-right"
+                            className="ft-input !px-3 !py-2 !text-sm text-right"
                           />
                         </td>
-                        <td className="px-2 py-2">
+                        <td className="px-2 py-2 text-right">
                           <button
                             type="button"
                             onClick={() => handleRemoveLine(idx)}
-                            className="text-red-500 text-sm"
+                            className="text-red-600 hover:text-red-800 font-semibold text-sm"
                           >
                             Suppr.
                           </button>
@@ -312,7 +312,7 @@ export function JournalEntries() {
               <button
                 type="button"
                 onClick={handleAddLine}
-                className="mt-2 bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600"
+                className="mt-2 ft-btn ft-btn-sm ft-btn-outline"
               >
                 + Ajouter une ligne
               </button>
@@ -321,14 +321,14 @@ export function JournalEntries() {
             <div className="flex gap-2">
               <button
                 type="submit"
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                className="ft-btn ft-btn-md ft-btn-success"
               >
                 {editingId ? "Modifier" : "Créer"}
               </button>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                className="ft-btn ft-btn-md ft-btn-outline"
               >
                 Annuler
               </button>
@@ -337,36 +337,36 @@ export function JournalEntries() {
         )}
 
         {/* Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-200">
+        <div className="ft-card overflow-hidden">
+          <table className="ft-table">
+            <thead className="ft-thead">
               <tr>
-                <th className="px-6 py-3 text-left">N° Écriture</th>
-                <th className="px-6 py-3 text-left">Journal</th>
-                <th className="px-6 py-3 text-left">Date</th>
-                <th className="px-6 py-3 text-left">Description</th>
-                <th className="px-6 py-3 text-right">Débit</th>
-                <th className="px-6 py-3 text-right">Crédit</th>
-                <th className="px-6 py-3 text-left">Statut</th>
-                <th className="px-6 py-3 text-left">Actions</th>
+                <th className="ft-th">N° Écriture</th>
+                <th className="ft-th">Journal</th>
+                <th className="ft-th">Date</th>
+                <th className="ft-th">Description</th>
+                <th className="ft-th text-right">Débit</th>
+                <th className="ft-th text-right">Crédit</th>
+                <th className="ft-th">Statut</th>
+                <th className="ft-th">Actions</th>
               </tr>
             </thead>
             <tbody>
               {entries.map((entry) => (
-                <tr key={entry.id} className="border-t hover:bg-gray-50">
-                  <td className="px-6 py-4 font-semibold">
+                <tr key={entry.id} className="ft-tr">
+                  <td className="ft-td font-semibold">
                     {entry.entry_number}
                   </td>
-                  <td className="px-6 py-4">{entry.journal}</td>
-                  <td className="px-6 py-4">{entry.entry_date}</td>
-                  <td className="px-6 py-4">{entry.description}</td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="ft-td">{entry.journal}</td>
+                  <td className="ft-td">{entry.entry_date}</td>
+                  <td className="ft-td">{entry.description}</td>
+                  <td className="ft-td text-right font-mono">
                     {entry.total_debit.toFixed(2)}
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="ft-td text-right font-mono">
                     {entry.total_credit.toFixed(2)}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="ft-td">
                     <span
                       className={`px-2 py-1 rounded text-sm ${
                         entry.state === "POSTED"
@@ -379,13 +379,13 @@ export function JournalEntries() {
                       {entry.state}
                     </span>
                   </td>
-                  <td className="px-6 py-4 flex gap-2">
+                  <td className="ft-td flex gap-3">
                     <button
                       onClick={() => {
                         setSelectedEntry(entry);
                         setShowDetails(true);
                       }}
-                      className="text-blue-500 hover:text-blue-700 text-sm"
+                      className="text-secondary hover:text-primary-end font-semibold text-sm"
                     >
                       Détails
                     </button>
@@ -393,7 +393,7 @@ export function JournalEntries() {
                       <>
                         <button
                           onClick={() => handlePost(entry.id)}
-                          className="text-green-500 hover:text-green-700 text-sm"
+                          className="text-emerald-700 hover:text-emerald-900 font-semibold text-sm"
                         >
                           Valider
                         </button>
@@ -402,7 +402,7 @@ export function JournalEntries() {
                     {entry.state === "POSTED" && (
                       <button
                         onClick={() => handleReverse(entry.id)}
-                        className="text-orange-500 hover:text-orange-700 text-sm"
+                        className="text-orange-700 hover:text-orange-900 font-semibold text-sm"
                       >
                         Contre-passer
                       </button>
@@ -422,10 +422,19 @@ export function JournalEntries() {
 
         {/* Details Modal */}
         {showDetails && selectedEntry && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl w-full">
-              <h2 className="text-2xl font-bold mb-4">Détails de l'Écriture</h2>
-              <div className="mb-4">
+          <div className="ft-modal-overlay">
+            <div className="ft-modal">
+              <div className="ft-modal-header">
+                <h2 className="ft-modal-title">Détails de l'Écriture</h2>
+                <button
+                  onClick={() => setShowDetails(false)}
+                  className="ft-btn ft-btn-sm ft-btn-outline"
+                  type="button"
+                >
+                  Fermer
+                </button>
+              </div>
+              <div className="ft-modal-body">
                 <p>
                   <strong>N° Écriture:</strong> {selectedEntry.entry_number}
                 </p>
@@ -439,25 +448,25 @@ export function JournalEntries() {
                   <strong>Statut:</strong> {selectedEntry.state}
                 </p>
               </div>
-              <div className="mb-4 overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-200">
+              <div className="ft-modal-body pt-0 overflow-x-auto">
+                <table className="ft-table text-sm">
+                  <thead className="ft-thead">
                     <tr>
-                      <th className="px-3 py-2 text-left">Compte</th>
-                      <th className="px-3 py-2 text-left">Libellé</th>
-                      <th className="px-3 py-2 text-right">Débit</th>
-                      <th className="px-3 py-2 text-right">Crédit</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Compte</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Libellé</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Débit</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Crédit</th>
                     </tr>
                   </thead>
                   <tbody>
                     {selectedEntry.lines?.map((line, idx) => (
-                      <tr key={idx} className="border-t">
+                      <tr key={idx} className="border-t hover:bg-gray-50 transition-colors">
                         <td className="px-3 py-2">{line.account_code}</td>
                         <td className="px-3 py-2">{line.label}</td>
-                        <td className="px-3 py-2 text-right">
+                        <td className="px-3 py-2 text-right font-mono">
                           {line.debit_amount.toFixed(2)}
                         </td>
-                        <td className="px-3 py-2 text-right">
+                        <td className="px-3 py-2 text-right font-mono">
                           {line.credit_amount.toFixed(2)}
                         </td>
                       </tr>
@@ -465,12 +474,6 @@ export function JournalEntries() {
                   </tbody>
                 </table>
               </div>
-              <button
-                onClick={() => setShowDetails(false)}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                Fermer
-              </button>
             </div>
           </div>
         )}

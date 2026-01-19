@@ -51,12 +51,12 @@ export function TaxRates() {
       requiredRole={"Accountant"}
     >
       <FinancialAccountantNavBar />
-      <div className="p-6 bg-gray-50">
+      <div className="ft-page">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Taux de Fiscalité</h1>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="bg-blue-500 text-white px-3 py-2 rounded text-sm"
+            className="ft-btn ft-btn-sm ft-btn-primary"
           >
             + Nouveau Taux
           </button>
@@ -65,7 +65,7 @@ export function TaxRates() {
         {showForm && (
           <form
             onSubmit={handleSubmit}
-            className="bg-white p-4 rounded shadow mb-4"
+            className="ft-card-padded mb-4"
           >
             <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
               <input
@@ -76,14 +76,14 @@ export function TaxRates() {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
               <select
                 value={formData.tax_type}
                 onChange={(e) =>
                   setFormData({ ...formData, tax_type: e.target.value })
                 }
-                className="border rounded px-2 py-1"
+                className="ft-select"
               >
                 <option value="VAT">TVA</option>
                 <option value="INCOME">Impôt sur Revenu</option>
@@ -99,7 +99,7 @@ export function TaxRates() {
                   setFormData({ ...formData, rate: parseFloat(e.target.value) })
                 }
                 required
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
               <input
                 type="date"
@@ -108,21 +108,21 @@ export function TaxRates() {
                   setFormData({ ...formData, effective_date: e.target.value })
                 }
                 required
-                className="border rounded px-2 py-1"
+                className="ft-input"
               />
             </div>
             <button
               type="submit"
-              className="bg-green-500 text-white px-3 py-1 rounded text-sm"
+              className="ft-btn ft-btn-sm ft-btn-success"
             >
               Créer
             </button>
           </form>
         )}
 
-        <div className="bg-white rounded shadow overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-200">
+        <div className="ft-card overflow-x-auto">
+          <table className="ft-table text-sm">
+            <thead className="ft-thead">
               <tr>
                 <th className="px-3 py-2 text-left">Nom</th>
                 <th className="px-3 py-2 text-left">Type</th>
@@ -133,10 +133,10 @@ export function TaxRates() {
             </thead>
             <tbody>
               {rates.map((r) => (
-                <tr key={r.id} className="border-t hover:bg-gray-50">
+                <tr key={r.id} className="ft-tr">
                   <td className="px-3 py-2">{r.name}</td>
                   <td className="px-3 py-2">{r.tax_type}</td>
-                  <td className="px-3 py-2 text-right font-bold">
+                  <td className="px-3 py-2 text-right font-bold font-mono">
                     {r.rate.toFixed(2)}%
                   </td>
                   <td className="px-3 py-2 text-sm">{r.effective_date}</td>
