@@ -10,7 +10,7 @@ import {
     FaChartBar,
     FaQuestionCircle,
 } from "react-icons/fa";
-import { Package, PackageCheck, PackageX, Layers, TrendingUp } from "lucide-react";
+import { Package, PackageCheck, PackageX, Layers, TrendingUp, ShoppingCart } from "lucide-react";
 import { AppRoutesPaths as appRoutes } from "../../Router/appRouterPaths.js";
 
 export const MaterialAccountingNavLink = [
@@ -31,6 +31,12 @@ export const MaterialAccountingNavLink = [
                 name: "Catégories",
                 link: appRoutes.materialCategories,
                 description: "Gestion des catégories d'articles",
+            },
+            {
+                icon: ShoppingCart,
+                name: "Articles",
+                link: appRoutes.materialArticles,
+                description: "Catalogue des articles",
             },
             {
                 icon: FaWarehouse,

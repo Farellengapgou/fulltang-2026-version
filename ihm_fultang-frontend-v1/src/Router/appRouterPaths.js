@@ -78,6 +78,7 @@ export const AppRoutesPaths = {
 
     // Configuration
     materialCategories: "/material-accounting/categories",
+    materialArticles: "/material-accounting/articles",
     materialWarehouses: "/material-accounting/warehouses",
     materialSuppliers: "/material-accounting/suppliers",
 

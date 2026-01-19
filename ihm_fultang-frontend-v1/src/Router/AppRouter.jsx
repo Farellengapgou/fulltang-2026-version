@@ -84,6 +84,7 @@ export function AppRoute() {
     // Material Accounting
     const MaterialDashboard = React.lazy(async () => ({ default: (await import("../Pages/MaterialAccounting/Dashboard/MaterialDashboard.jsx")).MaterialDashboard }));
     const MaterialCategories = React.lazy(async () => ({ default: (await import("../Pages/MaterialAccounting/Configuration/Categories.jsx")).Categories }));
+    const MaterialArticles = React.lazy(async () => ({ default: (await import("../Pages/MaterialAccounting/Configuration/Articles.jsx")).Articles }));
     const MaterialWarehouses = React.lazy(async () => ({ default: (await import("../Pages/MaterialAccounting/Configuration/Warehouses.jsx")).Warehouses }));
     const MaterialSuppliers = React.lazy(async () => ({ default: (await import("../Pages/MaterialAccounting/Configuration/Suppliers.jsx")).Suppliers }));
     const MaterialStockLevels = React.lazy(async () => ({ default: (await import("../Pages/MaterialAccounting/Stock/StockLevels.jsx")).StockLevels }));
@@ -185,6 +186,7 @@ export function AppRoute() {
                 {/* Material Accounting Routes */}
                 <Route path={AppRoutesPaths.materialAccountingDashboard} element={<MaterialDashboard />} />
                 <Route path={AppRoutesPaths.materialCategories} element={<MaterialCategories />} />
+                <Route path={AppRoutesPaths.materialArticles} element={<MaterialArticles />} />
                 <Route path={AppRoutesPaths.materialWarehouses} element={<MaterialWarehouses />} />
                 <Route path={AppRoutesPaths.materialSuppliers} element={<MaterialSuppliers />} />
                 <Route path={AppRoutesPaths.materialStockLevels} element={<MaterialStockLevels />} />

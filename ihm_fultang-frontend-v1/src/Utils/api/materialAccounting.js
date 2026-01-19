@@ -318,6 +318,35 @@ export const deleteArticle = async (id) => {
     return apiCall(`/articles/${id}/`, { method: 'DELETE' });
 };
 
+// ==================== CHART OF ACCOUNTS ====================
+
+export const getChartOfAccounts = async (params = {}) => {
+    // Chart of accounts is under /api/v1/accounting/
+    const baseUrl = import.meta.env.VITE_BACKEND_FULTANG_API_BASE_URL || 'http://127.0.0.1:8009/api/v1/material-accounting';
+    // Replace '/material-accounting' with '/accounting' safely
+    const API_BASE = baseUrl.includes('/material-accounting')
+        ? baseUrl.replace('/material-accounting', '/accounting')
+        : baseUrl.replace(/\/$/, '') + '/accounting'; // Heuristic fallback if URL structure is different
+
+    const query = new URLSearchParams(params).toString();
+    const token = localStorage.getItem("token_key_fultang");
+
+    const response = await fetch(`${API_BASE}/chart-of-accounts/${query ? `?${query}` : ''}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return Array.isArray(data) ? { results: data } : data;
+};
+
 // ==================== WAREHOUSES ====================
 
 export const getWarehouses = async (params = {}) => {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Plus, Trash2, Save } from "lucide-react";
-import { getWarehouses, getStockLevels, createGoodsIssue } from "../../../Utils/api/materialAccounting.js";
+import { getWarehouses, getArticles, createGoodsIssue } from "../../../Utils/api/materialAccounting.js";
 
 export function GoodsIssueModal({ isOpen, onClose, onRefresh }) {
     const [warehouses, setWarehouses] = useState([]);
@@ -24,7 +24,7 @@ export function GoodsIssueModal({ isOpen, onClose, onRefresh }) {
         try {
             const [wData, aData] = await Promise.all([
                 getWarehouses(),
-                getStockLevels()
+                getArticles()
             ]);
             setWarehouses(wData.results || []);
             setArticles(aData.results || []);
@@ -141,8 +141,8 @@ export function GoodsIssueModal({ isOpen, onClose, onRefresh }) {
                                     >
                                         <option value="">Choisir un article</option>
                                         {articles.map(a => (
-                                            <option key={a.id} value={a.article.id}>
-                                                {a.article.name} (Dispo: {a.physical_quantity})
+                                            <option key={a.id} value={a.id}>
+                                                {a.name}
                                             </option>
                                         ))}
                                     </select>

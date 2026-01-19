@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Plus, Trash2, Save } from "lucide-react";
-import { getSuppliers, getWarehouses, getStockLevels, createGoodsReceipt } from "../../../Utils/api/materialAccounting.js";
+import { getSuppliers, getWarehouses, getArticles, createGoodsReceipt } from "../../../Utils/api/materialAccounting.js";
 
 export function GoodsReceiptModal({ isOpen, onClose, onRefresh }) {
     const [suppliers, setSuppliers] = useState([]);
@@ -27,7 +27,7 @@ export function GoodsReceiptModal({ isOpen, onClose, onRefresh }) {
             const [sData, wData, aData] = await Promise.all([
                 getSuppliers(),
                 getWarehouses(),
-                getStockLevels()
+                getArticles()
             ]);
             setSuppliers(sData.results || []);
             setWarehouses(wData.results || []);
@@ -152,7 +152,7 @@ export function GoodsReceiptModal({ isOpen, onClose, onRefresh }) {
                                         className="w-full p-2 bg-white border border-gray-200 rounded-lg outline-none"
                                     >
                                         <option value="">Choisir un article</option>
-                                        {articles.map(a => <option key={a.id} value={a.article.id}>{a.article.name}</option>)}
+                                        {articles.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
                                     </select>
                                 </div>
                                 <div className="col-span-4 md:col-span-2 space-y-1">

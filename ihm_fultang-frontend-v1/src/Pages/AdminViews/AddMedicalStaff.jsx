@@ -1,11 +1,11 @@
-import {useEffect, useState} from 'react';
-import {CustomDashboard} from "../../GlobalComponents/CustomDashboard.jsx";
-import {adminNavLink} from "./adminNavLink.js";
-import {AdminNavBar} from "./AdminNavBar.jsx";
+import { useEffect, useState } from 'react';
+import { CustomDashboard } from "../../GlobalComponents/CustomDashboard.jsx";
+import { adminNavLink } from "./adminNavLink.js";
+import { AdminNavBar } from "./AdminNavBar.jsx";
 import joinOurStaffImage from "../../assets/regoignezNotreStaffMedical.png";
 import axiosInstance from "../../Utils/axiosInstance.js";
-import {SuccessModal} from "../Modals/SuccessModal.jsx";
-import {ErrorModal} from "../Modals/ErrorModal.jsx";
+import { SuccessModal } from "../Modals/SuccessModal.jsx";
+import { ErrorModal } from "../Modals/ErrorModal.jsx";
 import Wait from "../Modals/wait.jsx";
 import { Eye, EyeOff } from 'lucide-react';
 import PhoneInput from "react-phone-input-2";
@@ -23,17 +23,17 @@ export function AddMedicalStaff() {
         cniNumber: '',
         email: '',
         gender: 'Male',
-        password:'',
-        is_staff:false,
+        password: '',
+        is_staff: false,
         is_active: true,
         is_superuser: false,
-        birthDate:'',
+        birthDate: '',
         address: '',
         phoneNumber: '',
-        userType:'',
+        userType: '',
     });
 
-    function handleChange (e) {
+    function handleChange(e) {
         const { name, value } = e.target;
         setMedicalStaffData(prevData => ({
             ...prevData,
@@ -43,16 +43,12 @@ export function AddMedicalStaff() {
     }
 
     useEffect(() => {
-        if (medicalStaffData.role)
-        {
+        if (medicalStaffData.role) {
             medicalStaffData.isStaff = medicalStaffData.role === 'Admin';
         }
-        if(medicalStaffData.role === "Accountant" || medicalStaffData.role === "MaterialAccountant")
-        {
-           medicalStaffData.userType = "Accountant";
-        }
-        else
-        {
+        if (medicalStaffData.role === "Accountant" || medicalStaffData.role === "MaterialAccountant") {
+            medicalStaffData.userType = "Accountant";
+        } else {
             medicalStaffData.userType = "Medical";
         }
     }, [medicalStaffData]);
@@ -71,15 +67,13 @@ export function AddMedicalStaff() {
     const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
 
 
-    async function handleSubmit (e) {
+    async function handleSubmit(e) {
         e.preventDefault();
         setIsLoading(true);
 
-        try
-        {
+        try {
             const response = await axiosInstance.post("/medical-staff/", medicalStaffData);
-            if (response.status === 201)
-            {
+            if (response.status === 201) {
                 setIsLoading(false);
                 setErrorMessage("");
                 setSuccessMessage(`The ${medicalStaffData.role === "Labtech" ? "Laboratory Assistant" : medicalStaffData.role + "" + " " + medicalStaffData.username + " "} created successfully`);
@@ -87,8 +81,7 @@ export function AddMedicalStaff() {
                 setCanOpenErrorModal(false);
             }
         }
-        catch (error)
-        {
+        catch (error) {
             setIsLoading(false);
             console.log(error);
             setSuccessMessage("");
@@ -98,26 +91,24 @@ export function AddMedicalStaff() {
         }
     }
 
-    function applyInputStyle()
-    {
+    function applyInputStyle() {
         return "w-full px-4 py-2 border-2 border-gray-200 rounded-md focus:outline-none  focus:border-2  focus:border-primary-end";
     }
 
-    function applyLabelStyle()
-    {
+    function applyLabelStyle() {
         return "block text-md font-semibold text-gray-600 mb-1";
     }
 
-    
+
     return (
         <CustomDashboard linkList={adminNavLink} requiredRole={"Admin"}>
-            <AdminNavBar/>
+            <AdminNavBar />
             <div className="flex m-5">
                 <div className="w-1/2 mr-6 flex flex-col items-center justify-center">
                     <h1 className="text-4xl font-bold text-secondary mb-4">Add a new medical staff member</h1>
                     <p className="text-justify text-secondary font-normal text-md mb-5">Please complete all
                         fields below to add a new medical staff member to Fultang Clinic.</p>
-                    <img src={joinOurStaffImage} alt={"image"} className={"w-[600px] h-[400px] rounded-2xl"}/>
+                    <img src={joinOurStaffImage} alt={"image"} className={"w-[600px] h-[400px] rounded-2xl"} />
                 </div>
 
                 <div className="w-1/2 p-8 flex items-center justify-center">
@@ -174,26 +165,26 @@ export function AddMedicalStaff() {
                                     Password
                                 </label>
                                 <div className="h-12 mt-2 rounded-lg flex items-center relative">
-                                <input
-                                    type={showPassword ? "text" : "password"}
-                                    name="password"
-                                    value={medicalStaffData.password}
-                                    onChange={handleChange}
-                                    className={applyInputStyle()}
-                                    placeholder="Enter the user's password"
-                                    required
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-2 p-2 hover:bg-gray-400 rounded-full transition-all duration-300"
-                                >
-                                    {showPassword ? (
-                                        <EyeOff className="w-5 h-5 text-gray-600"/>
-                                    ) : (
-                                        <Eye className="w-5 h-5 text-gray-600"/>
-                                    )}
-                                </button>
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        name="password"
+                                        value={medicalStaffData.password}
+                                        onChange={handleChange}
+                                        className={applyInputStyle()}
+                                        placeholder="Enter the user's password"
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-2 p-2 hover:bg-gray-400 rounded-full transition-all duration-300"
+                                    >
+                                        {showPassword ? (
+                                            <EyeOff className="w-5 h-5 text-gray-600" />
+                                        ) : (
+                                            <Eye className="w-5 h-5 text-gray-600" />
+                                        )}
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -273,7 +264,7 @@ export function AddMedicalStaff() {
                                             phoneNumber: value
                                         }));
                                     }}
-                                    
+
                                     countryCodeEditable={false} // IMPORTANT: Rend le code pays non modifiable
 
                                     inputStyle={{
@@ -334,9 +325,9 @@ export function AddMedicalStaff() {
                                     <option value="Labtech">Laboratory Assistant</option>
                                     <option value="Ophthalmologist">Ophthalmologist</option>
                                     <option value="Cashier">Cashier</option>
-                                    <option value="Accountant">Financial Accountant</option>
-                                    <option value="Admin">Administrator</option>
+                                    <option value="Accountant">Accountant</option>
                                     <option value="MaterialAccountant">Material Accountant</option>
+                                    <option value="Admin">Administrator</option>
                                 </select>
                             </div>
                         </div>
@@ -351,9 +342,9 @@ export function AddMedicalStaff() {
                     </form>
                 </div>
             </div>
-            <SuccessModal isOpen={canOpenSuccessModal} canOpenSuccessModal={setCanOpenSuccessModal} message={successMessage}/>
-            <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage}/>
-            {isLoading && <Wait/>}
+            <SuccessModal isOpen={canOpenSuccessModal} canOpenSuccessModal={setCanOpenSuccessModal} message={successMessage} />
+            <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
+            {isLoading && <Wait />}
         </CustomDashboard>
     );
 }

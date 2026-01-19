@@ -117,5 +117,4 @@ export function ViewMedicalStaffDetailsModal({ isOpen, medicalStaff, onClose }) 
             </div>
         </div>
     )
-}   )
-}
+}   

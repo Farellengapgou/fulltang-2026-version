@@ -8,6 +8,8 @@ from .stock_models import (
     Inventory, InventoryLine,
     TransferNote, TransferLine
 )
+from .models import ChartOfAccounts
+
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,6 +24,18 @@ class FamilySerializer(serializers.ModelSerializer):
 class ArticleSerializer(serializers.ModelSerializer):
     total_stock = serializers.SerializerMethodField()
     available_stock = serializers.SerializerMethodField()
+    
+    # Make accounting fields optional for creation
+    stock_account = serializers.PrimaryKeyRelatedField(
+        queryset=ChartOfAccounts.objects.all(),
+        required=False,
+        allow_null=True
+    )
+    purchase_account = serializers.PrimaryKeyRelatedField(
+        queryset=ChartOfAccounts.objects.all(),
+        required=False,
+        allow_null=True
+    )
 
     class Meta:
         model = Article
@@ -32,6 +46,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     def get_available_stock(self, obj):
         return obj.get_available_stock()
+
 
 
 class DepotSerializer(serializers.ModelSerializer):

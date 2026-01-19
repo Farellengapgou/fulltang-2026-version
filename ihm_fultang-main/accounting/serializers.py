@@ -51,6 +51,7 @@ from rest_framework import serializers
 from django.db import transaction
 from django.utils import timezone
 from decimal import Decimal
+from datetime import datetime
 from .models import (
     ChartOfAccounts, Journal, JournalEntry, JournalEntryLine,
     Supplier, Asset, AnalyticAccount, Budget, BudgetLine,
@@ -76,13 +77,32 @@ class ChartOfAccountsSerializer(serializers.ModelSerializer):
 
     def get_balance(self, obj):
         """Calcule le solde du compte"""
+        # Vérifier que le contexte existe
+        if self.context is None:
+            return obj.get_balance(None, None)
+        
         start_date = self.context.get('start_date')
         end_date = self.context.get('end_date')
+        
+        # Convertir les chaînes de date en objets date si nécessaire
+        if isinstance(start_date, str):
+            try:
+                start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            except ValueError:
+                start_date = None
+                
+        if isinstance(end_date, str):
+            try:
+                end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            except ValueError:
+                end_date = None
+                
         return obj.get_balance(start_date, end_date)
 
     def get_children_count(self, obj):
         """Retourne le nombre de sous-comptes"""
-        return obj.chartofaccounts_set.count()
+        # Utiliser sub_accounts car related_name='sub_accounts' dans le modèle
+        return obj.sub_accounts.count()
 
     def validate_code(self, value):
         """Valide le format du code comptable"""

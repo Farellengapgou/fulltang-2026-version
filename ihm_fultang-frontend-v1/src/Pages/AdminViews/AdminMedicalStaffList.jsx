@@ -351,9 +351,4 @@ export function AdminMedicalStaffList() {
             </div>
         </CustomDashboard>
     )
-}                   )
-                }
-            </div >
-        </CustomDashboard >
-    )
 }
