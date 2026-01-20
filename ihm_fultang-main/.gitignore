@@ -15,3 +15,4 @@ media/
 !media/guide_fultang.pdf
 *.qodo/*
 .qodo
+staticfiles/
