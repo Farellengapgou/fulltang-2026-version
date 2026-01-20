@@ -1,22 +1,22 @@
-import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
+import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
 
-const API_BASE = "/api/v1/accounting/financial-ratios";
+const API_BASE = "financial-ratios";
 
 export const financialRatioService = {
   getAllRatios: (params = {}) =>
-    axiosInstanceFinancial.get(API_BASE, { params }),
+    axiosInstanceAccountant.get(API_BASE + "/", { params }),
 
-  getRatio: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
+  getRatio: (id) => axiosInstanceAccountant.get(`${API_BASE}/${id}/`),
 
-  createRatio: (data) => axiosInstanceFinancial.post(API_BASE, data),
+  createRatio: (data) => axiosInstanceAccountant.post(API_BASE + "/", data),
   getRatiosByPeriod: (year, month) =>
-    axiosInstanceFinancial.get(
+    axiosInstanceAccountant.get(
       `${API_BASE}/?period_year=${year}&period_month=${month}`
     ),
 
   getRatiosByType: (ratioType) =>
-    axiosInstanceFinancial.get(`${API_BASE}/?ratio_type=${ratioType}`),
+    axiosInstanceAccountant.get(`${API_BASE}/?ratio_type=${ratioType}`),
 
   calculateRatios: (data) =>
-    axiosInstanceFinancial.post(`${API_BASE}/calculate/`, data),
+    axiosInstanceAccountant.post(`${API_BASE}/calculate/`, data),
 };

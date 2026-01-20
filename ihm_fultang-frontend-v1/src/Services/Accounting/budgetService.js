@@ -1,25 +1,25 @@
-import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
+import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
 
-const API_BASE = "/api/v1/accounting/budgets";
+const API_BASE = "budgets";
 
 export const budgetService = {
   getAllBudgets: (params = {}) =>
-    axiosInstanceFinancial.get(API_BASE, { params }),
+    axiosInstanceAccountant.get(API_BASE + "/", { params }),
 
-  getBudget: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
+  getBudget: (id) => axiosInstanceAccountant.get(`${API_BASE}/${id}/`),
 
-  createBudget: (data) => axiosInstanceFinancial.post(API_BASE, data),
+  createBudget: (data) => axiosInstanceAccountant.post(API_BASE + "/", data),
   updateBudget: (id, data) =>
-    axiosInstanceFinancial.put(`${API_BASE}/${id}/`, data),
+    axiosInstanceAccountant.put(`${API_BASE}/${id}/`, data),
 
-  deleteBudget: (id) => axiosInstanceFinancial.delete(`${API_BASE}/${id}/`),
+  deleteBudget: (id) => axiosInstanceAccountant.delete(`${API_BASE}/${id}/`),
 
   approveBudget: (id) =>
-    axiosInstanceFinancial.post(`${API_BASE}/${id}/approve/`, {}),
+    axiosInstanceAccountant.post(`${API_BASE}/${id}/approve/`, {}),
 
   getBudgetLines: (id) =>
-    axiosInstanceFinancial.get(`${API_BASE}/${id}/lines/`),
+    axiosInstanceAccountant.get(`${API_BASE}/${id}/lines/`),
 
   createBudgetLine: (budgetId, data) =>
-    axiosInstanceFinancial.post(`${API_BASE}/${budgetId}/lines/`, data),
+    axiosInstanceAccountant.post(`${API_BASE}/${budgetId}/lines/`, data),
 };

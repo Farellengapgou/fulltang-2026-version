@@ -101,7 +101,7 @@ WSGI_APPLICATION = 'fultang.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/app/volumes/db.sqlite3',
+        'NAME': BASE_DIR / 'volumes' / 'db.sqlite3',
     }
 }
 

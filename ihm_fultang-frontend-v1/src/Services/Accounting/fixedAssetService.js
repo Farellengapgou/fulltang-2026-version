@@ -1,25 +1,25 @@
-import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
+import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
 
-const API_BASE = "/api/v1/accounting/fixed-assets";
+const API_BASE = "fixed-assets";
 
 export const fixedAssetService = {
   getAllAssets: (params = {}) =>
-    axiosInstanceFinancial.get(API_BASE, { params }),
+    axiosInstanceAccountant.get(API_BASE + "/", { params }),
 
-  getAsset: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
+  getAsset: (id) => axiosInstanceAccountant.get(`${API_BASE}/${id}/`),
 
-  createAsset: (data) => axiosInstanceFinancial.post(API_BASE, data),
+  createAsset: (data) => axiosInstanceAccountant.post(API_BASE + "/", data),
   updateAsset: (id, data) =>
-    axiosInstanceFinancial.put(`${API_BASE}/${id}/`, data),
+    axiosInstanceAccountant.put(`${API_BASE}/${id}/`, data),
 
-  deleteAsset: (id) => axiosInstanceFinancial.delete(`${API_BASE}/${id}/`),
+  deleteAsset: (id) => axiosInstanceAccountant.delete(`${API_BASE}/${id}/`),
 
   getAssetDepreciation: (id) =>
-    axiosInstanceFinancial.get(`${API_BASE}/${id}/depreciation/`),
+    axiosInstanceAccountant.get(`${API_BASE}/${id}/depreciation/`),
 
   getAssetNetValue: (id) =>
-    axiosInstanceFinancial.get(`${API_BASE}/${id}/net_value/`),
+    axiosInstanceAccountant.get(`${API_BASE}/${id}/net_value/`),
 
   getActiveAssets: () =>
-    axiosInstanceFinancial.get(`${API_BASE}/?is_active=true`),
+    axiosInstanceAccountant.get(`${API_BASE}/?is_active=true`),
 };

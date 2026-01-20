@@ -1,41 +1,41 @@
-import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
+import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
 
-const API_BASE = "/api/v1/accounting";
+const API_BASE = "";
 
 export const taxService = {
   // Tax Rates
   getAllTaxRates: (params = {}) =>
-    axiosInstanceFinancial.get(`${API_BASE}/tax-rates/`, { params }),
+    axiosInstanceAccountant.get(`${API_BASE}tax-rates/`, { params }),
 
   getTaxRate: (id) =>
-    axiosInstanceFinancial.get(`${API_BASE}/tax-rates/${id}/`),
+    axiosInstanceAccountant.get(`${API_BASE}tax-rates/${id}/`),
 
   createTaxRate: (data) =>
-    axiosInstanceFinancial.post(`${API_BASE}/tax-rates/`, data),
+    axiosInstanceAccountant.post(`${API_BASE}tax-rates/`, data),
   updateTaxRate: (id, data) =>
-    axiosInstanceFinancial.put(`${API_BASE}/tax-rates/${id}/`, data),
+    axiosInstanceAccountant.put(`${API_BASE}tax-rates/${id}/`, data),
 
   deleteTaxRate: (id) =>
-    axiosInstanceFinancial.delete(`${API_BASE}/tax-rates/${id}/`),
+    axiosInstanceAccountant.delete(`${API_BASE}tax-rates/${id}/`),
 
   // Tax Declarations
   getAllTaxDeclarations: (params = {}) =>
-    axiosInstanceFinancial.get(`${API_BASE}/tax-declarations/`, { params }),
+    axiosInstanceAccountant.get(`${API_BASE}tax-declarations/`, { params }),
 
   getTaxDeclaration: (id) =>
-    axiosInstanceFinancial.get(`${API_BASE}/tax-declarations/${id}/`),
+    axiosInstanceAccountant.get(`${API_BASE}tax-declarations/${id}/`),
   createTaxDeclaration: (data) =>
-    axiosInstanceFinancial.post(`${API_BASE}/tax-declarations/`, data),
+    axiosInstanceAccountant.post(`${API_BASE}tax-declarations/`, data),
 
   updateTaxDeclaration: (id, data) =>
-    axiosInstanceFinancial.put(`${API_BASE}/tax-declarations/${id}/`, data),
+    axiosInstanceAccountant.put(`${API_BASE}tax-declarations/${id}/`, data),
 
   submitTaxDeclaration: (id) =>
-    axiosInstanceFinancial.post(
-      `${API_BASE}/tax-declarations/${id}/submit/`,
+    axiosInstanceAccountant.post(
+      `${API_BASE}tax-declarations/${id}/submit/`,
       {}
     ),
 
   payTaxDeclaration: (id) =>
-    axiosInstanceFinancial.post(`${API_BASE}/tax-declarations/${id}/pay/`, {}),
+    axiosInstanceAccountant.post(`${API_BASE}tax-declarations/${id}/pay/`, {}),
 };

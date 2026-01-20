@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
+import { X, Search } from "lucide-react";
 import { chartOfAccountsService } from "../../../Services/Accounting";
 import Loader from "../../../GlobalComponents/Loader";
 import Pagination from "../../../GlobalComponents/Pagination";
 import { CustomDashboard } from "../../../GlobalComponents/CustomDashboard.jsx";
 import { FinancialAccountantNavBar } from "../NavBar.jsx";
 import { FinancialAccountantNavLink } from "../NavLink.js";
+import { SuccessModal } from "../../Modals/SuccessModal.jsx";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
+import { ConfirmationModal } from "../../Modals/ConfirmAction.Modal.jsx";
 
 export function ChartOfAccounts() {
   const [accounts, setAccounts] = useState([]);
@@ -13,6 +17,14 @@ export function ChartOfAccounts() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [confirmConfig, setConfirmConfig] = useState({ title: "", message: "", onConfirm: () => {} });
+
   const [formData, setFormData] = useState({
     code: "",
     label: "",
@@ -20,11 +32,6 @@ export function ChartOfAccounts() {
     account_type: "ASSET",
     is_active: true,
   });
-  const [editingId, setEditingId] = useState(null);
-
-  useEffect(() => {
-    fetchAccounts();
-  }, [currentPage, searchTerm]);
 
   const fetchAccounts = async () => {
     try {
@@ -42,26 +49,28 @@ export function ChartOfAccounts() {
     }
   };
 
+  useEffect(() => {
+    fetchAccounts();
+  }, [currentPage, searchTerm]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (editingId) {
         await chartOfAccountsService.updateAccount(editingId, formData);
+        setModalMessage("Le compte a été mis à jour avec succès.");
       } else {
         await chartOfAccountsService.createAccount(formData);
+        setModalMessage("Le compte a été créé avec succès.");
       }
       setShowForm(false);
-      setFormData({
-        code: "",
-        label: "",
-        account_class: "1",
-        account_type: "ASSET",
-        is_active: true,
-      });
+      setIsSuccessModalOpen(true);
       setEditingId(null);
       fetchAccounts();
     } catch (error) {
       console.error("Erreur:", error);
+      setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
+      setIsErrorModalOpen(true);
     }
   };
 
@@ -71,15 +80,24 @@ export function ChartOfAccounts() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Êtes-vous sûr?")) {
-      try {
-        await chartOfAccountsService.deleteAccount(id);
-        fetchAccounts();
-      } catch (error) {
-        console.error("Erreur:", error);
+  const handleDelete = (id) => {
+    setConfirmConfig({
+      title: "Supprimer Compte",
+      message: "Êtes-vous sûr de vouloir supprimer ce compte ? Cette action peut impacter vos écritures.",
+      onConfirm: async () => {
+        try {
+          await chartOfAccountsService.deleteAccount(id);
+          setModalMessage("Le compte a été supprimé avec succès.");
+          setIsSuccessModalOpen(true);
+          fetchAccounts();
+        } catch (error) {
+          console.error("Erreur:", error);
+          setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
+          setIsErrorModalOpen(true);
+        }
       }
-    }
+    });
+    setIsConfirmModalOpen(true);
   };
 
   if (loading) return <Loader />;
@@ -92,10 +110,9 @@ export function ChartOfAccounts() {
       <FinancialAccountantNavBar />
       <div className="ft-page">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Plan Comptable</h1>
+          <h1 className="text-2xl font-bold text-secondary">Plan Comptable</h1>
           <button
             onClick={() => {
-              setShowForm(!showForm);
               setEditingId(null);
               setFormData({
                 code: "",
@@ -104,159 +121,224 @@ export function ChartOfAccounts() {
                 account_type: "ASSET",
                 is_active: true,
               });
+              setShowForm(true);
             }}
             className="ft-btn ft-btn-md ft-btn-primary"
           >
-            {showForm ? "Fermer" : "+ Nouveau Compte"}
+            + Nouveau Compte
           </button>
         </div>
 
-        {/* Form */}
-        {showForm && (
-          <form
-            onSubmit={handleSubmit}
-            className="ft-card-padded mb-6"
-          >
-            <div className="grid grid-cols-2 gap-4">
-              <input
-                type="text"
-                placeholder="Code"
-                value={formData.code}
-                onChange={(e) =>
-                  setFormData({ ...formData, code: e.target.value })
-                }
-                required
-                className="ft-input"
-              />
-              <input
-                type="text"
-                placeholder="Libellé"
-                value={formData.label}
-                onChange={(e) =>
-                  setFormData({ ...formData, label: e.target.value })
-                }
-                required
-                className="ft-input"
-              />
-              <select
-                value={formData.account_class}
-                onChange={(e) =>
-                  setFormData({ ...formData, account_class: e.target.value })
-                }
-                className="ft-select"
-              >
-                <option value="1">Capitaux</option>
-                <option value="2">Immobilisations</option>
-                <option value="3">Stocks</option>
-                <option value="4">Tiers</option>
-                <option value="5">Trésorerie</option>
-                <option value="6">Charges</option>
-                <option value="7">Produits</option>
-                <option value="8">Spéciaux</option>
-              </select>
-              <select
-                value={formData.account_type}
-                onChange={(e) =>
-                  setFormData({ ...formData, account_type: e.target.value })
-                }
-                className="ft-select"
-              >
-                <option value="ASSET">Actif</option>
-                <option value="LIABILITY">Passif</option>
-                <option value="EQUITY">Capitaux Propres</option>
-                <option value="REVENUE">Produit</option>
-                <option value="EXPENSE">Charge</option>
-              </select>
-            </div>
-            <div className="mt-4 flex gap-2">
-              <button
-                type="submit"
-                className="ft-btn ft-btn-md ft-btn-success"
-              >
-                {editingId ? "Modifier" : "Créer"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="ft-btn ft-btn-md ft-btn-outline"
-              >
-                Annuler
-              </button>
-            </div>
-          </form>
-        )}
-
-        {/* Search */}
-        <div className="mb-4">
-          <input
-            type="text"
-            placeholder="Rechercher..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="ft-input"
-          />
+        {/* Search Bar Refined */}
+        <div className="mb-6">
+          <div className="relative max-w-md">
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </span>
+            <input
+              type="text"
+              placeholder="Rechercher par code ou libellé..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="ft-input pl-10"
+            />
+          </div>
         </div>
 
-        {/* Table */}
+        {/* Modal pour le formulaire */}
+        {showForm && (
+          <div className="ft-modal-overlay">
+            <div className="ft-modal">
+              <div className="ft-modal-header">
+                <h2 className="ft-modal-title">
+                  {editingId ? "Modifier le Compte" : "Nouveau Compte"}
+                </h2>
+                <button
+                  onClick={() => setShowForm(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              <form onSubmit={handleSubmit}>
+                <div className="ft-modal-body grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">Code</label>
+                    <input
+                      type="text"
+                      placeholder="Ex: 101000"
+                      value={formData.code}
+                      onChange={(e) =>
+                        setFormData({ ...formData, code: e.target.value })
+                      }
+                      required
+                      className="ft-input"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">Libellé</label>
+                    <input
+                      type="text"
+                      placeholder="Ex: Capital social"
+                      value={formData.label}
+                      onChange={(e) =>
+                        setFormData({ ...formData, label: e.target.value })
+                      }
+                      required
+                      className="ft-input"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">Classe de compte</label>
+                    <select
+                      value={formData.account_class}
+                      onChange={(e) =>
+                        setFormData({ ...formData, account_class: e.target.value })
+                      }
+                      className="ft-select"
+                    >
+                      <option value="1">1 - Capitaux</option>
+                      <option value="2">2 - Immobilisations</option>
+                      <option value="3">3 - Stocks</option>
+                      <option value="4">4 - Tiers</option>
+                      <option value="5">5 - Trésorerie</option>
+                      <option value="6">6 - Charges</option>
+                      <option value="7">7 - Produits</option>
+                      <option value="8">8 - Spéciaux</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">Type de compte</label>
+                    <select
+                      value={formData.account_type}
+                      onChange={(e) =>
+                        setFormData({ ...formData, account_type: e.target.value })
+                      }
+                      className="ft-select"
+                    >
+                      <option value="ASSET">Actif</option>
+                      <option value="LIABILITY">Passif</option>
+                      <option value="EQUITY">Capitaux Propres</option>
+                      <option value="REVENUE">Produit</option>
+                      <option value="EXPENSE">Charge</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="ft-modal-footer">
+                  <button
+                    type="button"
+                    onClick={() => setShowForm(false)}
+                    className="ft-btn ft-btn-md ft-btn-outline"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    className="ft-btn ft-btn-md ft-btn-primary"
+                  >
+                    {editingId ? "Mettre à jour" : "Créer le compte"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
         <div className="ft-card overflow-hidden">
           <table className="ft-table">
             <thead className="ft-thead">
               <tr>
                 <th className="ft-th">Code</th>
                 <th className="ft-th">Libellé</th>
-                <th className="ft-th">Classe</th>
-                <th className="ft-th">Type</th>
-                <th className="ft-th">Statut</th>
-                <th className="ft-th">Actions</th>
+                <th className="ft-th text-center">Classe</th>
+                <th className="ft-th text-center">Type</th>
+                <th className="ft-th text-center">Statut</th>
+                <th className="ft-th text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-100">
               {accounts.map((account) => (
                 <tr key={account.id} className="ft-tr">
-                  <td className="ft-td font-semibold">{account.code}</td>
-                  <td className="ft-td">{account.label}</td>
-                  <td className="ft-td">{account.account_class}</td>
-                  <td className="ft-td">{account.account_type}</td>
-                  <td className="ft-td">
+                  <td className="ft-td font-bold text-secondary uppercase tracking-tight">{account.code}</td>
+                  <td className="ft-td font-medium">{account.label}</td>
+                  <td className="ft-td text-center">
+                    <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-600 font-mono">
+                      {account.account_class}
+                    </span>
+                  </td>
+                  <td className="ft-td text-center text-xs font-semibold uppercase text-gray-500">
+                    {account.account_type}
+                  </td>
+                  <td className="ft-td text-center">
                     <span
-                      className={`px-2 py-1 rounded ${
+                      className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
                         account.is_active
-                          ? "bg-green-200 text-green-800"
-                          : "bg-red-200 text-red-800"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
                       }`}
                     >
                       {account.is_active ? "Actif" : "Inactif"}
                     </span>
                   </td>
-                  <td className="ft-td flex gap-2">
-                    <button
-                      onClick={() => handleEdit(account)}
-                      className="text-secondary hover:text-primary-end font-semibold"
-                    >
-                      Modifier
-                    </button>
-                    <button
-                      onClick={() => handleDelete(account.id)}
-                      className="text-red-600 hover:text-red-800 font-semibold"
-                    >
-                      Supprimer
-                    </button>
+                  <td className="ft-td text-right">
+                    <div className="flex justify-end gap-3 transition-opacity">
+                      <button
+                        onClick={() => handleEdit(account)}
+                        className="text-secondary hover:text-primary-end font-semibold text-xs"
+                      >
+                        Modifier
+                      </button>
+                      <button
+                        onClick={() => handleDelete(account.id)}
+                        className="text-red-600 hover:text-red-800 font-semibold text-xs"
+                      >
+                        Supprimer
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
+              {accounts.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="ft-td text-center text-gray-500 py-12">
+                    Aucun compte trouvé.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+        <div className="mt-6 flex justify-center">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
       </div>
+
+      <SuccessModal 
+        isOpen={isSuccessModalOpen} 
+        canOpenSuccessModal={setIsSuccessModalOpen} 
+        message={modalMessage} 
+        makeAction={() => {}} 
+      />
+      <ErrorModal 
+        isOpen={isErrorModalOpen} 
+        onCloseErrorModal={setIsErrorModalOpen} 
+        message={modalMessage} 
+      />
+      <ConfirmationModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={confirmConfig.onConfirm}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+      />
     </CustomDashboard>
   );
 }

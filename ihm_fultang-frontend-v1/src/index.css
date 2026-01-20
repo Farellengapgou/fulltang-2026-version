@@ -6,98 +6,98 @@
     /* === Fultang UI: tokens/patterns réutilisables (boutons, champs, cards, tables, modals) === */
 
     .ft-page {
-        @apply p-6 bg-gray-50;
+        @apply p-6 bg-gray-50 min-h-screen;
     }
 
     .ft-card {
-        @apply bg-white rounded-lg shadow;
+        @apply bg-white rounded-2xl shadow-sm border border-gray-100;
     }
 
     .ft-card-padded {
-        @apply bg-white rounded-lg shadow p-6;
+        @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-8;
     }
 
     .ft-input {
-        @apply w-full border border-gray-200 bg-white rounded-lg px-4 py-2 text-sm text-gray-800 shadow-sm
-        focus:outline-none focus:ring-2 focus:ring-primary-start;
+        @apply w-full border-2 border-gray-100 bg-white rounded-xl px-5 py-3 text-base text-gray-800 transition-all
+        focus:outline-none focus:border-secondary focus:ring-0 shadow-sm;
     }
 
     .ft-select {
-        @apply w-full border border-gray-200 bg-white rounded-lg px-4 py-2 text-sm text-gray-800 shadow-sm
-        focus:outline-none focus:ring-2 focus:ring-primary-start;
+        @apply w-full border-2 border-gray-100 bg-white rounded-xl px-5 py-3 text-base text-gray-800 transition-all
+        focus:outline-none focus:border-secondary focus:ring-0 shadow-sm;
     }
 
     .ft-btn {
-        @apply inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors duration-300
-        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-start;
+        @apply inline-flex items-center justify-center gap-2 rounded-xl font-bold transition-all duration-300
+        focus:outline-none focus:ring-2 focus:ring-offset-2 active:scale-95;
     }
 
     .ft-btn-sm {
-        @apply px-3 py-2 text-sm;
-    }
-
-    .ft-btn-md {
         @apply px-4 py-2 text-sm;
     }
 
+    .ft-btn-md {
+        @apply px-6 py-3 text-base;
+    }
+
     .ft-btn-primary {
-        @apply bg-secondary text-white hover:bg-[#3d9d94];
+        @apply bg-secondary text-white hover:bg-[#3d9d94] shadow-lg shadow-secondary/20;
     }
 
     .ft-btn-outline {
-        @apply bg-white text-gray-700 border border-gray-200 hover:bg-gray-50;
+        @apply bg-white text-gray-700 border-2 border-gray-100 hover:bg-gray-50;
     }
 
     .ft-btn-danger {
-        @apply bg-red-600 text-white hover:bg-red-700;
+        @apply bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-200;
     }
 
     .ft-btn-success {
-        @apply bg-emerald-600 text-white hover:bg-emerald-700;
+        @apply bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-200;
     }
 
     .ft-table {
-        @apply w-full;
+        @apply w-full border-separate border-spacing-y-3;
     }
 
     .ft-thead {
-        @apply bg-gray-50;
+        @apply bg-transparent;
     }
 
     .ft-th {
-        @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+        @apply px-6 py-4 text-center text-white text-lg font-bold bg-primary-end first:rounded-l-2xl last:rounded-r-2xl uppercase tracking-tight;
     }
 
     .ft-td {
-        @apply px-6 py-4 text-sm text-gray-700;
+        @apply px-6 py-4 text-base text-gray-700 bg-gray-100 first:rounded-l-xl last:rounded-r-xl;
     }
 
     .ft-tr {
-        @apply border-t hover:bg-gray-50 transition-colors;
+        @apply hover:scale-[1.01] transition-transform duration-200;
     }
 
     .ft-modal-overlay {
-        @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4;
+        @apply fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-6;
     }
 
     .ft-modal {
-        @apply bg-white rounded-xl shadow-lg w-full max-w-2xl;
+        @apply bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl overflow-hidden duration-300;
     }
 
     .ft-modal-header {
-        @apply px-6 py-4 border-b border-gray-100 flex items-center justify-between;
+        @apply px-10 py-8 border-b border-gray-50 flex items-center justify-between bg-gray-50/50;
     }
 
     .ft-modal-title {
-        @apply text-xl font-bold text-secondary;
+        @apply text-2xl font-black text-secondary uppercase tracking-tight;
     }
 
     .ft-modal-body {
-        @apply p-6;
+        @apply p-10;
     }
 
     .ft-modal-footer {
-        @apply px-6 py-4 border-t border-gray-100 flex justify-end gap-2;
+        @apply px-10 py-8 bg-gray-50/50 border-t border-gray-50 flex justify-end gap-3;
     }
 }
 

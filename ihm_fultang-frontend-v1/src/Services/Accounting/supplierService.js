@@ -1,19 +1,19 @@
-import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
+import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
 
-const API_BASE = "/api/v1/accounting/suppliers";
+const API_BASE = "suppliers";
 
 export const supplierService = {
   getAllSuppliers: (params = {}) =>
-    axiosInstanceFinancial.get(API_BASE, { params }),
+    axiosInstanceAccountant.get(API_BASE + "/", { params }),
 
-  getSupplier: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
+  getSupplier: (id) => axiosInstanceAccountant.get(`${API_BASE}/${id}/`),
 
-  createSupplier: (data) => axiosInstanceFinancial.post(API_BASE, data),
+  createSupplier: (data) => axiosInstanceAccountant.post(API_BASE + "/", data),
   updateSupplier: (id, data) =>
-    axiosInstanceFinancial.put(`${API_BASE}/${id}/`, data),
+    axiosInstanceAccountant.put(`${API_BASE}/${id}/`, data),
 
-  deleteSupplier: (id) => axiosInstanceFinancial.delete(`${API_BASE}/${id}/`),
+  deleteSupplier: (id) => axiosInstanceAccountant.delete(`${API_BASE}/${id}/`),
 
   getSupplierBalance: (id) =>
-    axiosInstanceFinancial.get(`${API_BASE}/${id}/balance/`),
+    axiosInstanceAccountant.get(`${API_BASE}/${id}/balance/`),
 };

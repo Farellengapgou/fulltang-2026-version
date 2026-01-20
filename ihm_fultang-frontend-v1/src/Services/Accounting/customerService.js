@@ -1,22 +1,22 @@
-import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
+import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
 
-const API_BASE = "/api/v1/accounting/customers";
+const API_BASE = "customers";
 
 export const customerService = {
   getAllCustomers: (params = {}) =>
-    axiosInstanceFinancial.get(API_BASE, { params }),
+    axiosInstanceAccountant.get(API_BASE + "/", { params }),
 
-  getCustomer: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
+  getCustomer: (id) => axiosInstanceAccountant.get(`${API_BASE}/${id}/`),
 
-  createCustomer: (data) => axiosInstanceFinancial.post(API_BASE, data),
+  createCustomer: (data) => axiosInstanceAccountant.post(API_BASE + "/", data),
   updateCustomer: (id, data) =>
-    axiosInstanceFinancial.put(`${API_BASE}/${id}/`, data),
+    axiosInstanceAccountant.put(`${API_BASE}/${id}/`, data),
 
-  deleteCustomer: (id) => axiosInstanceFinancial.delete(`${API_BASE}/${id}/`),
+  deleteCustomer: (id) => axiosInstanceAccountant.delete(`${API_BASE}/${id}/`),
 
   getActiveCustomers: () =>
-    axiosInstanceFinancial.get(`${API_BASE}/active_customers/`),
+    axiosInstanceAccountant.get(`${API_BASE}/active_customers/`),
 
   getCustomerBalance: (id) =>
-    axiosInstanceFinancial.get(`${API_BASE}/${id}/balance/`),
+    axiosInstanceAccountant.get(`${API_BASE}/${id}/balance/`),
 };

@@ -559,7 +559,7 @@ class Payroll(models.Model):
     ]
     
     payroll_number = models.CharField(max_length=20, unique=True)
-    payroll_period = models.CharField(max_length=15, choices=PAYROLL_PERIODS, default='MONTHLY')
+    payroll_period = models.CharField(max_length=15, default='MONTHLY')
     period_start = models.DateField()
     period_end = models.DateField()
     
@@ -577,6 +577,13 @@ class Payroll(models.Model):
         ],
         default='DRAFT'
     )
+
+    def save(self, *args, **kwargs):
+        self.total_net_salary = self.total_gross_salary - self.total_deductions
+        if not self.payroll_number:
+            count = Payroll.objects.count() + 1
+            self.payroll_number = f"PAY-{timezone.now().year}-{count:03d}"
+        super().save(*args, **kwargs)
     
     salary_expense_account = models.ForeignKey(
         'ChartOfAccounts',

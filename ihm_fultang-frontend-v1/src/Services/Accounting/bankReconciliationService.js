@@ -1,23 +1,23 @@
-import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
+import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
 
-const API_BASE = "/api/v1/accounting/bank-reconciliation";
+const API_BASE = "bank-reconciliation";
 
 export const bankReconciliationService = {
   getAllReconciliations: (params = {}) =>
-    axiosInstanceFinancial.get(API_BASE, { params }),
+    axiosInstanceAccountant.get(API_BASE + "/", { params }),
 
-  getReconciliation: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
+  getReconciliation: (id) => axiosInstanceAccountant.get(`${API_BASE}/${id}/`),
 
-  createReconciliation: (data) => axiosInstanceFinancial.post(API_BASE, data),
+  createReconciliation: (data) => axiosInstanceAccountant.post(API_BASE + "/", data),
   updateReconciliation: (id, data) =>
-    axiosInstanceFinancial.put(`${API_BASE}/${id}/`, data),
+    axiosInstanceAccountant.put(`${API_BASE}/${id}/`, data),
 
   deleteReconciliation: (id) =>
-    axiosInstanceFinancial.delete(`${API_BASE}/${id}/`),
+    axiosInstanceAccountant.delete(`${API_BASE}/${id}/`),
 
   reconcileBank: (id) =>
-    axiosInstanceFinancial.post(`${API_BASE}/${id}/reconcile/`, {}),
+    axiosInstanceAccountant.post(`${API_BASE}/${id}/reconcile/`, {}),
 
   getReconciliationsByBankAccount: (bankAccountId) =>
-    axiosInstanceFinancial.get(`${API_BASE}/?bank_account=${bankAccountId}`),
+    axiosInstanceAccountant.get(`${API_BASE}/?bank_account=${bankAccountId}`),
 };

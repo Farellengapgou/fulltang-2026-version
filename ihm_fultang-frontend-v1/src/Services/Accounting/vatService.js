@@ -1,23 +1,23 @@
-import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
+import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
 
-const API_BASE = "/api/v1/accounting/vat";
+const API_BASE = "vat";
 
 export const vatService = {
-  getAllVAT: (params = {}) => axiosInstanceFinancial.get(API_BASE, { params }),
+  getAllVAT: (params = {}) => axiosInstanceAccountant.get(API_BASE + "/", { params }),
 
-  getVAT: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
+  getVAT: (id) => axiosInstanceAccountant.get(`${API_BASE}/${id}/`),
 
-  createVAT: (data) => axiosInstanceFinancial.post(API_BASE, data),
+  createVAT: (data) => axiosInstanceAccountant.post(API_BASE + "/", data),
   updateVAT: (id, data) =>
-    axiosInstanceFinancial.put(`${API_BASE}/${id}/`, data),
+    axiosInstanceAccountant.put(`${API_BASE}/${id}/`, data),
 
-  deleteVAT: (id) => axiosInstanceFinancial.delete(`${API_BASE}/${id}/`),
+  deleteVAT: (id) => axiosInstanceAccountant.delete(`${API_BASE}/${id}/`),
 
   getVATByPeriod: (month, year) =>
-    axiosInstanceFinancial.get(
+    axiosInstanceAccountant.get(
       `${API_BASE}/?period_month=${month}&period_year=${year}`
     ),
 
   declareVAT: (id) =>
-    axiosInstanceFinancial.post(`${API_BASE}/${id}/declare/`, {}),
+    axiosInstanceAccountant.post(`${API_BASE}/${id}/declare/`, {}),
 };

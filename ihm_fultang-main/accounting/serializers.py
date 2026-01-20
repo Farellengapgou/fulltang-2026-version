@@ -23,173 +23,28 @@ from accounting.models_financier import (
 )
 
 
-class CustomerSerializer(ModelSerializer):
-    account_details = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Customer
-        fields = '__all__'
-    
-    def get_account_details(self, obj):
-        if obj.account:
-            return {
-                'id': obj.account.id,
-                'code': obj.account.code,
-                'label': obj.account.label
-            }
-        return None
-
-
-class SupplierSerializer(ModelSerializer):
-    account_details = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Supplier
-        fields = '__all__'
-    
-    def get_account_details(self, obj):
-        if obj.account:
-            return {
-                'id': obj.account.id,
-                'code': obj.account.code,
-                'label': obj.account.label
-            }
-        return None
-
-
-class AssetSerializer(ModelSerializer):
-    accumulated_depreciation = serializers.SerializerMethodField()
-    net_book_value = serializers.SerializerMethodField()
-    annual_depreciation = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Asset
-        fields = '__all__'
-    
-    def get_accumulated_depreciation(self, obj):
-        return float(obj.get_accumulated_depreciation())
-    
-    def get_net_book_value(self, obj):
-        return float(obj.get_net_book_value())
-    
-    def get_annual_depreciation(self, obj):
-        return float(obj.calculate_annual_depreciation())
-
-
-class InventorySerializer(ModelSerializer):
-    total_value = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Inventory
-        fields = '__all__'
-    
-    def get_total_value(self, obj):
-        return float(obj.total_value)
-
-
-class PayrollLineSerializer(ModelSerializer):
-    employee_name = serializers.CharField(source='employee.first_name', read_only=True)
-    
-    class Meta:
-        model = PayrollLine
-        fields = '__all__'
-
-
-class PayrollSerializer(ModelSerializer):
-    lines = PayrollLineSerializer(many=True, read_only=True)
-    
-    class Meta:
-        model = Payroll
-        fields = '__all__'
-
-
-class VATSerializer(ModelSerializer):
-    class Meta:
-        model = VAT
-        fields = '__all__'
-
-
-class BudgetLineSerializer(ModelSerializer):
-    class Meta:
-        model = BudgetLine
-        fields = '__all__'
-
-
-class BudgetSerializer(ModelSerializer):
-    lines = BudgetLineSerializer(many=True, read_only=True)
-    
-    class Meta:
-        model = Budget
-        fields = '__all__'
-
-
-class AccountingPeriodSerializer(ModelSerializer):
-    class Meta:
-        model = AccountingPeriod
-        fields = '__all__'
-
-
-class BankAccountSerializer(ModelSerializer):
-    account_details = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = BankAccount
-        fields = '__all__'
-    
-    def get_account_details(self, obj):
-        if obj.account:
-            return {
-                'id': obj.account.id,
-                'code': obj.account.code,
-                'label': obj.account.label
-            }
-        return None
-
-
 class AnalyticAccountSerializer(ModelSerializer):
     class Meta:
         model = AnalyticAccount
         fields = '__all__'
 
 
-class FinancialRatioSerializer(ModelSerializer):
-    class Meta:
-        model = FinancialRatio
-        fields = '__all__'
+class AccountingOperationSerializer(serializers.ModelSerializer):
+    created_by_name = serializers.CharField(
+        source='created_by.get_full_name', read_only=True
+    )
 
-
-class AccountingOperationSerializer(ModelSerializer):
     class Meta:
         model = AccountingOperation
-        fields = '__all__'
+        fields = [
+            'id', 'operation_type', 'operation_id', 'amount', 
+            'journal_entry', 'bill', 'created_at', 'created_by', 'created_by_name'
+        ]
+        read_only_fields = ['created_at', 'created_by']
 
-
-class BankReconciliationSerializer(ModelSerializer):
-    adjusted_balance = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = BankReconciliation
-        fields = '__all__'
-    
-    def get_adjusted_balance(self, obj):
-        return float(obj.calculate_adjusted_balance())
-
-
-class TaxRateSerializer(ModelSerializer):
-    class Meta:
-        model = TaxRate
-        fields = '__all__'
-
-
-class TaxDeclarationSerializer(ModelSerializer):
-    penalties = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = TaxDeclaration
-        fields = '__all__'
-    
-    def get_penalties(self, obj):
-        return float(obj.calculate_penalties())
+    def create(self, validated_data):
+        validated_data['created_by'] = self.context['request'].user
+        return super().create(validated_data)
 
 
 # ============ SERIALIZERS EXISTANTS ============
@@ -256,10 +111,11 @@ class ChartOfAccountsSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at']
 
     def get_balance(self, obj):
+        if not self.context or not isinstance(self.context, dict):
+            return obj.get_balance()
         start_date = self.context.get('start_date')
         end_date = self.context.get('end_date')
         return obj.get_balance(start_date, end_date)
-
     def get_children_count(self, obj):
         return obj.sub_accounts.count()
 
@@ -810,17 +666,27 @@ class PayrollSerializer(serializers.ModelSerializer):
     salary_expense_account_label = serializers.CharField(
         source='salary_expense_account.label', read_only=True
     )
+    total_gross = serializers.DecimalField(
+        source='total_gross_salary', max_digits=15, decimal_places=2, required=False
+    )
+    total_net = serializers.DecimalField(
+        source='total_net_salary', max_digits=15, decimal_places=2, read_only=True
+    )
+
+    salary_expense_account = serializers.PrimaryKeyRelatedField(
+        queryset=ChartOfAccounts.objects.all(), required=False
+    )
 
     class Meta:
         model = Payroll
         fields = [
             'id', 'payroll_number', 'payroll_period', 'period_start', 'period_end',
-            'total_gross_salary', 'total_deductions', 'total_net_salary',
-            'total_employer_contributions', 'status', 'salary_expense_account',
+            'total_gross_salary', 'total_gross', 'total_deductions', 'total_net_salary',
+            'total_net', 'total_employer_contributions', 'status', 'salary_expense_account',
             'salary_expense_account_label', 'created_by', 'created_by_name',
             'created_at', 'lines'
         ]
-        read_only_fields = ['payroll_number', 'created_at', 'created_by']
+        read_only_fields = ['payroll_number', 'created_at', 'created_by', 'total_net_salary']
 
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user

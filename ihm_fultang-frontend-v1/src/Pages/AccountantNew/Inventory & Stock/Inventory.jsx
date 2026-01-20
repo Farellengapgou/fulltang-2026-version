@@ -1,38 +1,54 @@
 import { useState, useEffect } from "react";
-import { inventoryService } from "../../../Services/Accounting";
+import { X } from "lucide-react";
+import { inventoryService, chartOfAccountsService } from "../../../Services/Accounting";
 import Loader from "../../../GlobalComponents/Loader";
-
 import { CustomDashboard } from "../../../GlobalComponents/CustomDashboard.jsx";
 import { FinancialAccountantNavBar } from "../NavBar.jsx";
 import { FinancialAccountantNavLink } from "../NavLink.js";
+import { SuccessModal } from "../../Modals/SuccessModal.jsx";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
 
 export function Inventory() {
   const [items, setItems] = useState([]);
+  const [coa, setCoa] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+
   const [formData, setFormData] = useState({
     inventory_number: "",
     name: "",
-    inventory_type: "",
+    inventory_type: "PHARMA",
+    stock_account: "",
     quantity: 0,
-    unit_price: 0,
-    reorder_level: 0,
+    unit_cost: 0,
+    reorder_level: 10,
+    reorder_quantity: 50,
     location: "",
   });
-  const [editingId, setEditingId] = useState(null);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [invRes, coaRes] = await Promise.all([
+        inventoryService.getAllInventory(),
+        chartOfAccountsService.getAllAccounts(),
+      ]);
+      setItems(invRes.data.results || invRes.data);
+      setCoa(coaRes.data.results || coaRes.data);
+    } catch (error) {
+      console.error("Erreur:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const response = await inventoryService.getAllInventory();
-        setItems(response.data.results || response.data);
-      } catch (error) {
-        console.error("Erreur:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchItems();
+    fetchData();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -40,25 +56,35 @@ export function Inventory() {
     try {
       if (editingId) {
         await inventoryService.updateInventoryItem(editingId, formData);
+        setModalMessage("L'article d'inventaire a été mis à jour avec succès.");
       } else {
         await inventoryService.createInventoryItem(formData);
+        setModalMessage("L'article d'inventaire a été enregistré avec succès.");
       }
       setShowForm(false);
-      setFormData({
-        inventory_number: "",
-        name: "",
-        inventory_type: "",
-        quantity: 0,
-        unit_price: 0,
-        reorder_level: 0,
-        location: "",
-      });
-      setEditingId(null);
-      const response = await inventoryService.getAllInventory();
-      setItems(response.data.results || response.data);
+      setIsSuccessModalOpen(true);
+      resetForm();
+      fetchData();
     } catch (error) {
       console.error("Erreur:", error);
+      setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
+      setIsErrorModalOpen(true);
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      inventory_number: "",
+      name: "",
+      inventory_type: "PHARMA",
+      stock_account: "",
+      quantity: 0,
+      unit_cost: 0,
+      reorder_level: 10,
+      reorder_quantity: 50,
+      location: "",
+    });
+    setEditingId(null);
   };
 
   if (loading) return <Loader />;
@@ -70,136 +96,215 @@ export function Inventory() {
     >
       <FinancialAccountantNavBar />
       <div className="ft-page">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Inventaire</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-secondary">Gestion des Stocks</h1>
           <button
-            onClick={() => setShowForm(!showForm)}
-            className="ft-btn ft-btn-sm ft-btn-primary"
+            onClick={() => {
+              resetForm();
+              setShowForm(true);
+            }}
+            className="ft-btn ft-btn-md ft-btn-primary"
           >
             + Nouvel Article
           </button>
         </div>
 
+        {/* Modal pour le formulaire */}
         {showForm && (
-          <form
-            onSubmit={handleSubmit}
-            className="ft-card-padded mb-4"
-          >
-            <div className="grid grid-cols-3 gap-2 mb-3 text-sm">
-              <input
-                type="text"
-                placeholder="N°"
-                value={formData.inventory_number}
-                onChange={(e) =>
-                  setFormData({ ...formData, inventory_number: e.target.value })
-                }
-                required
-                className="ft-input"
-              />
-              <input
-                type="text"
-                placeholder="Nom"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                required
-                className="ft-input"
-              />
-              <input
-                type="text"
-                placeholder="Type"
-                value={formData.inventory_type}
-                onChange={(e) =>
-                  setFormData({ ...formData, inventory_type: e.target.value })
-                }
-                className="ft-input"
-              />
-              <input
-                type="number"
-                placeholder="Quantité"
-                value={formData.quantity}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    quantity: parseFloat(e.target.value),
-                  })
-                }
-                required
-                className="ft-input"
-              />
-              <input
-                type="number"
-                step="0.01"
-                placeholder="Prix unitaire"
-                value={formData.unit_price}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    unit_price: parseFloat(e.target.value),
-                  })
-                }
-                required
-                className="ft-input"
-              />
-              <input
-                type="number"
-                placeholder="Seuil réappro"
-                value={formData.reorder_level}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    reorder_level: parseFloat(e.target.value),
-                  })
-                }
-                className="ft-input"
-              />
+          <div className="ft-modal-overlay">
+            <div className="ft-modal max-w-4xl">
+              <div className="ft-modal-header">
+                <h2 className="ft-modal-title">
+                  {editingId ? "Modifier l'Article" : "Nouvel Article d'Inventaire"}
+                </h2>
+                <button
+                  onClick={() => setShowForm(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              <form onSubmit={handleSubmit}>
+                <div className="ft-modal-body grid grid-cols-2 gap-x-6 gap-y-4">
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">Référence (N°)</label>
+                    <input
+                      type="text"
+                      placeholder="Ex: REF-INV-001"
+                      value={formData.inventory_number}
+                      onChange={(e) =>
+                        setFormData({ ...formData, inventory_number: e.target.value })
+                      }
+                      required
+                      className="ft-input"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">Désignation</label>
+                    <input
+                      type="text"
+                      placeholder="Ex: Amoxicilline 500mg"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      required
+                      className="ft-input"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">Type d'article</label>
+                    <select
+                      value={formData.inventory_type}
+                      onChange={(e) =>
+                        setFormData({ ...formData, inventory_type: e.target.value })
+                      }
+                      className="ft-select"
+                    >
+                      <option value="PRODUCT">Produit</option>
+                      <option value="SERVICE">Service</option>
+                      <option value="RAW_MATERIAL">Matière Première</option>
+                      <option value="PHARMA">Pharmaceutique</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">Compte de Stock</label>
+                    <select
+                      value={formData.stock_account}
+                      onChange={(e) =>
+                        setFormData({ ...formData, stock_account: e.target.value })
+                      }
+                      required
+                      className="ft-select"
+                    >
+                      <option value="">Sélectionner un compte...</option>
+                      {coa.map(c => (
+                        <option key={c.id} value={c.id}>{c.code} - {c.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">Quantité en Stock</label>
+                    <input
+                      type="number"
+                      value={formData.quantity}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          quantity: parseFloat(e.target.value),
+                        })
+                      }
+                      required
+                      className="ft-input"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">Coût Unitaire (FCFA)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={formData.unit_cost}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          unit_cost: parseFloat(e.target.value),
+                        })
+                      }
+                      required
+                      className="ft-input"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">Seuil de Réapprovisionnement</label>
+                    <input
+                      type="number"
+                      value={formData.reorder_level}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          reorder_level: parseInt(e.target.value),
+                        })
+                      }
+                      className="ft-input"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">Quantité de Réappro.</label>
+                    <input
+                      type="number"
+                      value={formData.reorder_quantity}
+                      onChange={(e) =>
+                        setFormData({ ...formData, reorder_quantity: parseInt(e.target.value) })
+                      }
+                      required
+                      className="ft-input"
+                    />
+                  </div>
+                  <div className="col-span-2 space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">Emplacement</label>
+                    <input
+                      type="text"
+                      placeholder="Ex: Étagère A-12 / Entrepôt Principal"
+                      value={formData.location}
+                      onChange={(e) =>
+                        setFormData({ ...formData, location: e.target.value })
+                      }
+                      className="ft-input"
+                    />
+                  </div>
+                </div>
+                <div className="ft-modal-footer">
+                  <button
+                    type="button"
+                    onClick={() => setShowForm(false)}
+                    className="ft-btn ft-btn-md ft-btn-outline"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    className="ft-btn ft-btn-md ft-btn-primary"
+                  >
+                    {editingId ? "Mettre à jour" : "Enregistrer"}
+                  </button>
+                </div>
+              </form>
             </div>
-            <div className="flex gap-2">
-              <button
-                type="submit"
-                className="ft-btn ft-btn-sm ft-btn-success"
-              >
-                Enregistrer
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="ft-btn ft-btn-sm ft-btn-outline"
-              >
-                Annuler
-              </button>
-            </div>
-          </form>
+          </div>
         )}
 
-        <div className="ft-card overflow-x-auto">
-          <table className="ft-table text-sm">
+        <div className="ft-card overflow-hidden">
+          <table className="ft-table">
             <thead className="ft-thead">
               <tr>
-                <th className="px-3 py-2 text-left">N°</th>
-                <th className="px-3 py-2 text-left">Nom</th>
-                <th className="px-3 py-2 text-right">Quantité</th>
-                <th className="px-3 py-2 text-right">Prix Unit.</th>
-                <th className="px-3 py-2 text-right">Total</th>
-                <th className="px-3 py-2 text-left">Seuil</th>
-                <th className="px-3 py-2">Action</th>
+                <th className="ft-th">Réf</th>
+                <th className="ft-th">Désignation</th>
+                <th className="ft-th text-right">Stock</th>
+                <th className="ft-th text-right">Cout Unit.</th>
+                <th className="ft-th text-right">Valeur Totale</th>
+                <th className="ft-th text-center">Seuil</th>
+                <th className="ft-th text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-100">
               {items.map((item) => (
                 <tr key={item.id} className="ft-tr">
-                  <td className="px-3 py-2">{item.inventory_number}</td>
-                  <td className="px-3 py-2">{item.name}</td>
-                  <td className="px-3 py-2 text-right">{item.quantity}</td>
-                  <td className="px-3 py-2 text-right font-mono">
-                    {item.unit_price.toFixed(2)}
+                  <td className="ft-td font-bold text-secondary uppercase tracking-tight text-xs">{item.inventory_number}</td>
+                  <td className="ft-td font-medium">{item.name}</td>
+                  <td className={`ft-td text-right font-mono ${item.quantity <= item.reorder_level ? 'text-red-600 font-bold' : 'text-gray-700'}`}>
+                    {item.quantity.toLocaleString()}
                   </td>
-                  <td className="px-3 py-2 text-right font-mono">
-                    {(item.quantity * item.unit_price).toFixed(2)}
+                  <td className="ft-td text-right font-mono text-gray-600">
+                    {(item.unit_cost || 0).toLocaleString()}
                   </td>
-                  <td className="px-3 py-2">{item.reorder_level}</td>
-                  <td className="px-3 py-2 text-center">
+                  <td className="ft-td text-right font-mono font-bold text-secondary">
+                    {(item.quantity * item.unit_cost || 0).toLocaleString()}
+                  </td>
+                  <td className="ft-td text-center text-xs text-gray-500">
+                    {item.reorder_level}
+                  </td>
+                  <td className="ft-td text-right">
                     <button
                       onClick={() => {
                         setFormData(item);
@@ -208,15 +313,34 @@ export function Inventory() {
                       }}
                       className="text-secondary hover:text-primary-end font-semibold text-xs"
                     >
-                      Edit
+                      Modifier
                     </button>
                   </td>
                 </tr>
               ))}
+              {items.length === 0 && (
+                <tr>
+                  <td colSpan="7" className="ft-td text-center text-gray-500 py-12">
+                    Aucun article en inventaire.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
+      <SuccessModal 
+        isOpen={isSuccessModalOpen} 
+        canOpenSuccessModal={setIsSuccessModalOpen} 
+        message={modalMessage} 
+        makeAction={() => {}} 
+      />
+      <ErrorModal 
+        isOpen={isErrorModalOpen} 
+        onCloseErrorModal={setIsErrorModalOpen} 
+        message={modalMessage} 
+      />
     </CustomDashboard>
   );
 }

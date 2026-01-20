@@ -15,6 +15,9 @@ class BudgetViewSet(viewsets.ModelViewSet):
     search_fields = ['name']
     ordering_fields = ['-fiscal_year', 'name']
 
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
     @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):
         budget = self.get_object()

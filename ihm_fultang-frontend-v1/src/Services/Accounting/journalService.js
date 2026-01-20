@@ -1,19 +1,19 @@
-import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
+import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
 
-const API_BASE = "/api/v1/accounting/journals";
+const API_BASE = "journals";
 
 export const journalService = {
   getAllJournals: (params = {}) =>
-    axiosInstanceFinancial.get(API_BASE, { params }),
+    axiosInstanceAccountant.get(API_BASE + "/", { params }),
 
-  getJournal: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
+  getJournal: (id) => axiosInstanceAccountant.get(`${API_BASE}/${id}/`),
 
-  createJournal: (data) => axiosInstanceFinancial.post(API_BASE, data),
+  createJournal: (data) => axiosInstanceAccountant.post(API_BASE + "/", data),
   updateJournal: (id, data) =>
-    axiosInstanceFinancial.put(`${API_BASE}/${id}/`, data),
+    axiosInstanceAccountant.put(`${API_BASE}/${id}/`, data),
 
-  deleteJournal: (id) => axiosInstanceFinancial.delete(`${API_BASE}/${id}/`),
+  deleteJournal: (id) => axiosInstanceAccountant.delete(`${API_BASE}/${id}/`),
 
   getActiveJournals: () =>
-    axiosInstanceFinancial.get(`${API_BASE}/?is_active=true`),
+    axiosInstanceAccountant.get(`${API_BASE}/?is_active=true`),
 };

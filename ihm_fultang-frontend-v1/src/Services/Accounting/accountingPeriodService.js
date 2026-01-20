@@ -1,24 +1,24 @@
-import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
+import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
 
-const API_BASE = "/api/v1/accounting/periods";
+const API_BASE = "periods";
 
 export const accountingPeriodService = {
   getAllPeriods: (params = {}) =>
-    axiosInstanceFinancial.get(API_BASE, { params }),
+    axiosInstanceAccountant.get(API_BASE + "/", { params }),
 
-  getPeriod: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
+  getPeriod: (id) => axiosInstanceAccountant.get(`${API_BASE}/${id}/`),
 
-  createPeriod: (data) => axiosInstanceFinancial.post(API_BASE, data),
+  createPeriod: (data) => axiosInstanceAccountant.post(API_BASE + "/", data),
   updatePeriod: (id, data) =>
-    axiosInstanceFinancial.put(`${API_BASE}/${id}/`, data),
+    axiosInstanceAccountant.put(`${API_BASE}/${id}/`, data),
 
-  deletePeriod: (id) => axiosInstanceFinancial.delete(`${API_BASE}/${id}/`),
+  deletePeriod: (id) => axiosInstanceAccountant.delete(`${API_BASE}/${id}/`),
 
   getCurrentPeriod: () =>
-    axiosInstanceFinancial.get(`${API_BASE}/current_period/`),
+    axiosInstanceAccountant.get(`${API_BASE}/current_period/`),
   closePeriod: (id) =>
-    axiosInstanceFinancial.post(`${API_BASE}/${id}/close_period/`, {}),
+    axiosInstanceAccountant.post(`${API_BASE}/${id}/close_period/`, {}),
 
   getPeriodsByYear: (year) =>
-    axiosInstanceFinancial.get(`${API_BASE}/?year=${year}`),
+    axiosInstanceAccountant.get(`${API_BASE}/?year=${year}`),
 };

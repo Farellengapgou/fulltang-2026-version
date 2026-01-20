@@ -104,10 +104,25 @@ class ChartOfAccountsViewSet(ModelViewSet):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context.update({
-            'start_date': self.request.query_params.get('start_date'),
-            'end_date': self.request.query_params.get('end_date'),
-        })
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        # Convert strings to date objects if they exist
+        if start_date:
+            try:
+                from datetime import datetime
+                context['start_date'] = datetime.strptime(start_date, '%Y-%m-%d').date()
+            except (ValueError, TypeError):
+                pass
+        
+        if end_date:
+            try:
+                from datetime import datetime
+                context['end_date'] = datetime.strptime(end_date, '%Y-%m-%d').date()
+            except (ValueError, TypeError):
+                pass
+
+        return context
 
     @transaction.atomic
     def perform_create(self, serializer):

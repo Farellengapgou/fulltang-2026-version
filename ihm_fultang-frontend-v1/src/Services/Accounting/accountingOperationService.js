@@ -1,22 +1,22 @@
-import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
+import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
 
-const API_BASE = "/api/v1/accounting/accounting-operations";
+const API_BASE = "accounting-operations";
 
 export const accountingOperationService = {
   getAllOperations: (params = {}) =>
-    axiosInstanceFinancial.get(API_BASE, { params }),
+    axiosInstanceAccountant.get(API_BASE + "/", { params }),
 
-  getOperation: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
+  getOperation: (id) => axiosInstanceAccountant.get(`${API_BASE}/${id}/`),
 
-  createOperation: (data) => axiosInstanceFinancial.post(API_BASE, data),
+  createOperation: (data) => axiosInstanceAccountant.post(API_BASE + "/", data),
   updateOperation: (id, data) =>
-    axiosInstanceFinancial.put(`${API_BASE}/${id}/`, data),
+    axiosInstanceAccountant.put(`${API_BASE}/${id}/`, data),
 
-  deleteOperation: (id) => axiosInstanceFinancial.delete(`${API_BASE}/${id}/`),
+  deleteOperation: (id) => axiosInstanceAccountant.delete(`${API_BASE}/${id}/`),
 
   getOperationsByBill: (billId) =>
-    axiosInstanceFinancial.get(`${API_BASE}/?bill=${billId}`),
+    axiosInstanceAccountant.get(`${API_BASE}/?bill=${billId}`),
 
   getOperationsByType: (operationType) =>
-    axiosInstanceFinancial.get(`${API_BASE}/?operation_type=${operationType}`),
+    axiosInstanceAccountant.get(`${API_BASE}/?operation_type=${operationType}`),
 };

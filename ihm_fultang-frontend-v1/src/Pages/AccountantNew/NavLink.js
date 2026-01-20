@@ -37,14 +37,19 @@ export const FinancialAccountantNavLink = [
         icon: FaChartBar,
       },
       {
-        name: "Écritures",
+        name: "Écritures Comptable",
         link: appRoutes.financialAccountantJournalEntries,
         icon: FaEdit,
       },
       {
-        name: "Journaux",
+        name: "Journal Comptable",
         link: appRoutes.financialAccountantAccountingJournals,
         icon: FaBook,
+      },
+      {
+        name: "Périodes Comptables",
+        link: appRoutes.periodClose,
+        icon: FaLock,
       },
     ],
   },
@@ -98,12 +103,12 @@ export const FinancialAccountantNavLink = [
       },
       {
         name: "Taux Fiscaux",
-        link: appRoutes.taxDeclarations,
+        link: appRoutes.taxCalendar,
         icon: FaChartLine,
       },
       {
         name: "Déclarations Fiscales",
-        link: appRoutes.taxCalendar,
+        link: appRoutes.taxDeclarations,
         icon: FaFileAlt,
       },
     ],
@@ -151,11 +156,6 @@ export const FinancialAccountantNavLink = [
   {
     name: "Clôture Et Rapports",
     subLinks: [
-      {
-        name: "Périodes Comptables",
-        link: appRoutes.periodClose,
-        icon: FaLock,
-      },
       {
         name: "Rapports Financiers",
         link: appRoutes.financialStatements,

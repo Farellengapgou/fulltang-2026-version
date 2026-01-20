@@ -1,24 +1,24 @@
-import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
+import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
 
-const API_BASE = "/api/v1/accounting/payroll";
+const API_BASE = "payroll";
 
 export const payrollService = {
   getAllPayrolls: (params = {}) =>
-    axiosInstanceFinancial.get(API_BASE, { params }),
+    axiosInstanceAccountant.get(API_BASE + "/", { params }),
 
-  getPayroll: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
+  getPayroll: (id) => axiosInstanceAccountant.get(`${API_BASE}/${id}/`),
 
-  createPayroll: (data) => axiosInstanceFinancial.post(API_BASE, data),
+  createPayroll: (data) => axiosInstanceAccountant.post(API_BASE + "/", data),
   updatePayroll: (id, data) =>
-    axiosInstanceFinancial.put(`${API_BASE}/${id}/`, data),
+    axiosInstanceAccountant.put(`${API_BASE}/${id}/`, data),
 
-  deletePayroll: (id) => axiosInstanceFinancial.delete(`${API_BASE}/${id}/`),
+  deletePayroll: (id) => axiosInstanceAccountant.delete(`${API_BASE}/${id}/`),
 
   approvePayroll: (id) =>
-    axiosInstanceFinancial.post(`${API_BASE}/${id}/approve/`, {}),
+    axiosInstanceAccountant.post(`${API_BASE}/${id}/approve/`, {}),
 
-  payPayroll: (id) => axiosInstanceFinancial.post(`${API_BASE}/${id}/pay/`, {}),
+  payPayroll: (id) => axiosInstanceAccountant.post(`${API_BASE}/${id}/pay/`, {}),
 
   generatePayslips: (id) =>
-    axiosInstanceFinancial.post(`${API_BASE}/${id}/generate_payslips/`, {}),
+    axiosInstanceAccountant.post(`${API_BASE}/${id}/generate_payslips/`, {}),
 };

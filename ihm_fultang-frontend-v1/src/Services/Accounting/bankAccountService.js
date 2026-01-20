@@ -1,20 +1,20 @@
-import axiosInstanceFinancial from "../../Utils/axiosInstancefinancial";
+import axiosInstanceAccountant from "../../Utils/axiosInstanceAccountant";
 
-const API_BASE = "/api/v1/accounting/bank-accounts";
+const API_BASE = "bank-accounts";
 
 export const bankAccountService = {
   getAllBankAccounts: (params = {}) =>
-    axiosInstanceFinancial.get(API_BASE, { params }),
+    axiosInstanceAccountant.get(API_BASE + "/", { params }),
 
-  getBankAccount: (id) => axiosInstanceFinancial.get(`${API_BASE}/${id}/`),
+  getBankAccount: (id) => axiosInstanceAccountant.get(`${API_BASE}/${id}/`),
 
-  createBankAccount: (data) => axiosInstanceFinancial.post(API_BASE, data),
+  createBankAccount: (data) => axiosInstanceAccountant.post(API_BASE + "/", data),
   updateBankAccount: (id, data) =>
-    axiosInstanceFinancial.put(`${API_BASE}/${id}/`, data),
+    axiosInstanceAccountant.put(`${API_BASE}/${id}/`, data),
 
   deleteBankAccount: (id) =>
-    axiosInstanceFinancial.delete(`${API_BASE}/${id}/`),
+    axiosInstanceAccountant.delete(`${API_BASE}/${id}/`),
 
   getActiveBankAccounts: () =>
-    axiosInstanceFinancial.get(`${API_BASE}/?is_active=true`),
+    axiosInstanceAccountant.get(`${API_BASE}/?is_active=true`),
 };

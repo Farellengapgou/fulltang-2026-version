@@ -246,9 +246,9 @@ export function AppRoute() {
   const FinancialAccountingJournal = React.lazy(async () => ({
     default: (
       await import(
-        "../Pages/AccountantNew/Comptabilité de Base/AccountingPeriods.jsx"
+        "../Pages/AccountantNew/Comptabilité de Base/AccountingJournals.jsx"
       )
-    ).AccountingPeriods,
+    ).AccountingJournals,
   }));
   const FinancialAccountantCustomers = React.lazy(async () => ({
     default: (
@@ -307,7 +307,7 @@ export function AppRoute() {
   }));
   const PeriodClose = React.lazy(async () => ({
     default: (
-      await import("../Pages/AccountantNew/Cloture & Reports/Periods.jsx")
+      await import("../Pages/AccountantNew/Comptabilité de Base/AccountingPeriods.jsx")
     ).Periods,
   }));
   const FinancialRatiosPage = React.lazy(async () => ({
