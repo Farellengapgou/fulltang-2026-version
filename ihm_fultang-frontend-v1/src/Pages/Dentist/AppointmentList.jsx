@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react"
 import { Search, Calendar,  ChevronLeft, ChevronRight } from "lucide-react"
-import AppointmentCard from "./DentistComponents/AppointmentCard.jsx";
+import AppointmentCard from "./D/AppointmentCard.jsx";
 import {useAuthentication} from "../../Utils/Provider.jsx";
 import {dentistNavLink} from "./lib/dentistNavLink.js";
 import {DentistNavBar} from "./DentistComponents/DentistNavBar.jsx";
