@@ -21,7 +21,7 @@ export function OphthaConsultationHistory() {
     const [errorStatus, setErrorStatus] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
 
-    {/*async function loadConsultationHistory(idDoctor)
+    async function loadConsultationHistory(idDoctor)
     {
         setIsLoading(true);
         try
@@ -50,7 +50,7 @@ export function OphthaConsultationHistory() {
         {
             loadConsultationHistory(userData.id);
         }
-    }, [userData.id]);*/}
+    }, [userData.id]);
 
     const filteredConsultations = consultationHistoryList.filter((consultation) => {
         const fullName = consultation?.idPatient?.firstName + " "+ consultation?.idPatient?.lastName;

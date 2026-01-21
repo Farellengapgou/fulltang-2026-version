@@ -35,7 +35,7 @@ export function OphthaConsultationList(){
 
     const {userData} = useAuthentication();
 
-    {/*useEffect(() => {
+    useEffect(() => {
         async function loadDoctorConsultations() {
             setIsLoading(true);
             if (userData.id)
@@ -63,7 +63,7 @@ export function OphthaConsultationList(){
 
         }
         loadDoctorConsultations();
-    }, [userData.id]);*/}
+    }, [userData.id]);
 
     return (
         <CustomDashboard linkList={ophthaNavLink} requiredRole={"Ophthalmologist"}>

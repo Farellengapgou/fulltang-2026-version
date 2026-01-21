@@ -36,7 +36,7 @@ export function AppointmentList(){
     const paginate = (pageNumber) => setCurrentPage(pageNumber)
     const {userData} = useAuthentication();
 
-    {/*async function retrieveOphthaAppointments(doctorId)
+    async function retrieveOphthaAppointments(doctorId)
     {
         setIsLoading(true);
         try
@@ -65,7 +65,7 @@ export function AppointmentList(){
         {
             retrieveOphthaAppointments(userData.id);
         }
-    }, [userData.id]);*/}
+    }, [userData.id]);
 
     return (
         <CustomDashboard linkList={ophthaNavLink} requiredRole={"Ophthalmologist"}>
