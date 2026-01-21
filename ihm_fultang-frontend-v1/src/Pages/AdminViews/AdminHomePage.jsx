@@ -19,9 +19,9 @@ export function AdminHomePage() {
         patients: 0,
         medicalStaff: 0,
         consultations: 0,
-        appointments: 3,
-        scheduledExams: 4,
-        totalRooms: 6
+        appointments: 0,
+        scheduledExams: 0,
+        totalRooms: 0
     });
 
     useEffect(() =>{

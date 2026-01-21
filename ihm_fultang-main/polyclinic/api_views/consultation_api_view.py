@@ -203,6 +203,166 @@ class ConsultationViewSet(ModelViewSet):
         data['consultation_count'] = query.count()
 
         return Response(data, status=status.HTTP_200_OK)
+    
+    @swagger_auto_schema(
+        operation_description="Compte les consultations journalières d’un docteur",
+        responses={
+            200: openapi.Response(
+                description="Nombre de consultations journalières",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "doctor_id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "date": openapi.Schema(type=openapi.TYPE_STRING, format="date"),
+                        "history": openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                        "count": openapi.Schema(type=openapi.TYPE_INTEGER),
+                    }
+                )
+            ),
+            404: openapi.Response(description="Docteur inexistant"),
+            400: openapi.Response(description="Bad request"),
+        },
+        manual_parameters=[
+            openapi.Parameter(
+                'id',
+                openapi.IN_PATH,
+                description="ID du docteur",
+                type=openapi.TYPE_INTEGER,
+                required=True
+            ),
+            openapi.Parameter(
+                'history',
+                openapi.IN_QUERY,
+                description="Si true, compte les consultations non pending",
+                type=openapi.TYPE_BOOLEAN,
+                required=False
+            ),
+            auth_header_param
+        ],
+        tags=tags
+    )
+    @action(
+        methods=["get"],
+        detail=False,
+        url_path='doctor/(?P<id>[^/.]+)/daily-count',
+        permission_classes=permission_classes
+    )
+    def consultation_doctor_daily_count(self, request, id):
+        try:
+            medical_staff = MedicalStaff.objects.get(id=id)
 
+            if medical_staff.role not in ["Doctor", "Ophthalmologist", "Dentist"]:
+                return Response(
+                    {"details": "le medical staff spécifié n'est pas un docteur"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
+            today = now().date()
 
+            queryset = Consultation.objects.filter(
+                idMedicalStaffGiver=medical_staff,
+                paymentStatus="Valid",
+                consultationDate__date=today
+            )
+
+            history = request.query_params.get("history", "false").lower() == "true"
+
+            if history:
+                queryset = queryset.exclude(state="Pending")
+            else:
+                queryset = queryset.filter(state="Pending")
+
+            return Response(
+                {
+                    "doctor_id": medical_staff.id,
+                    "date": today,
+                    "history": history,
+                    "count": queryset.count()
+                },
+                status=status.HTTP_200_OK
+            )
+
+        except MedicalStaff.DoesNotExist:
+            return Response(
+                {"details": "le docteur spécifié n'existe pas"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    @swagger_auto_schema(
+        operation_description="Compte les consultations d’un docteur (journalières ou historiques)",
+        responses={
+            200: openapi.Response(
+                description="Nombre de consultations",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "doctor_id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "history": openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                        "count": openapi.Schema(type=openapi.TYPE_INTEGER),
+                    }
+                )
+            ),
+            404: openapi.Response(description="Docteur inexistant"),
+            400: openapi.Response(description="Bad request"),
+        },
+        manual_parameters=[
+            openapi.Parameter(
+                'id',
+                openapi.IN_PATH,
+                description="ID du medical staff concerné",
+                type=openapi.TYPE_INTEGER,
+                required=True
+            ),
+            openapi.Parameter(
+                'history',
+                openapi.IN_QUERY,
+                description="Si true, compte les consultations non pending",
+                type=openapi.TYPE_BOOLEAN,
+                required=False
+            ),
+            auth_header_param
+        ],
+        tags=tags
+    )
+    @action(
+        methods=["get"],
+        detail=False,
+        url_path='doctor/(?P<id>[^/.]+)/count',
+        permission_classes=permission_classes
+    )
+    def consultation_doctor_count(self, request, id):
+        try:
+            medical_staff = MedicalStaff.objects.get(id=id)
+
+            if medical_staff.role not in ["Doctor", "Ophthalmologist", "Dentist"]:
+                return Response(
+                    {"details": "le medical staff spécifié n'est pas un docteur"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            queryset = Consultation.objects.filter(
+                idMedicalStaffGiver=medical_staff,
+                paymentStatus="Valid"
+            )
+
+            history = request.query_params.get("history", "false").lower() == "true"
+
+            if history:
+                queryset = queryset.exclude(state="Pending")
+            else:
+                queryset = queryset.filter(state="Pending")
+
+            return Response(
+                {
+                    "doctor_id": medical_staff.id,
+                    "history": history,
+                    "count": queryset.count()
+                },
+                status=status.HTTP_200_OK
+            )
+
+        except MedicalStaff.DoesNotExist:
+            return Response(
+                {"details": "le docteur spécifié n'existe pas"},
+                status=status.HTTP_404_NOT_FOUND
+            )

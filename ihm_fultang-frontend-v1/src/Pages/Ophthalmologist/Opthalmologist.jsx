@@ -13,10 +13,10 @@ export function Ophthalmologist() {
     const navigate = useNavigate();
 
     const [stats, setStats] = useState({
-        patients: 12,
-        consultations: 8,
-        appointments: 15,
-        scheduledExams: 6
+        patients: 0,
+        consultations: 0,
+        appointments: 0,
+        scheduledExams: 0
     });
 
     const [loading, setLoading] = useState(false);
@@ -62,7 +62,7 @@ export function Ophthalmologist() {
     };
 
     // Récupérer les statistiques du docteur
-    {/*useEffect(() => {
+    useEffect(() => {
         const fetchDoctorStats = async () => {
             const userId = getUserIdFromToken();
             
@@ -85,24 +85,24 @@ export function Ophthalmologist() {
                 const endpoints = [
                     { 
                         key: 'appointments', 
-                        url: `http://localhost:8009/api/v1/medical/appointment/doctor/${userId}/`,
+                        url: `http://localhost:8009/api/v1/medical/appointment/planned/doctor/${userId}/count/`,
                         fallback: 15
                     },
                     { 
                         key: 'consultations', 
-                        url: `http://localhost:8009/api/v1/medical/consultation/doctor/${userId}/`,
-                        fallback: 8
+                        url: `http://localhost:8009/api/v1/medical/consultation/doctor/${userId}/daily-count/`,
+                        fallback: 7
                     },
                     { 
                         key: 'patients', 
-                        url: `http://localhost:8009/api/v1/medical/patient/doctor/${userId}/`,
+                        url: `http://localhost:8009/api/v1/medical/patient/doctor/${userId}/count/`,
                         fallback: 12
                     },
                     { 
                         key: 'exams', 
-                        url: `http://localhost:8009/api/v1/medical/exam/${userId}/`,
+                        url: `http://localhost:8009/api/v1/medical/exam-request/doctor/${userId}/count/`,
                         fallback: 6
-                    }
+                    },
                 ];
 
                 const results = {};
@@ -144,7 +144,7 @@ export function Ophthalmologist() {
         };
 
         fetchDoctorStats();
-    }, []);*/}
+    }, []);
 
     // Icônes correctement passées en tant que composants React
     const statCards = [

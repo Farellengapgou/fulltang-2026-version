@@ -13,6 +13,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
+from django.utils.timezone import now
+
 
 tags = ["appointment"]
 auth_header_param = openapi.Parameter(
@@ -171,9 +173,77 @@ class AppointmentViewSet(ModelViewSet):
             return Response({"details": "le docteur spécifé n'existe pas"}, status.HTTP_404_NOT_FOUND)
         
     @swagger_auto_schema(
+        operation_description="Compte le nombre de rendez-vous du jour encore à l'état Pending pour un docteur",
+        responses={
+            200: openapi.Response(
+                description="Nombre de rendez-vous pending du jour",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "doctor_id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "date": openapi.Schema(type=openapi.TYPE_STRING, format="date"),
+                        "count": openapi.Schema(type=openapi.TYPE_INTEGER),
+                    }
+                )
+            ),
+            404: openapi.Response(description="Docteur inexistant"),
+            400: openapi.Response(description="Bad request"),
+        },
+        manual_parameters=[
+            openapi.Parameter(
+                'id',
+                openapi.IN_PATH,
+                description="ID du medical staff concerné",
+                type=openapi.TYPE_INTEGER,
+                required=True
+            ),
+            auth_header_param
+        ],
+        tags=tags
+    )
+    @action(
+        methods=["get"],
+        detail=False,
+        url_path="planned/doctor/(?P<id>[^/.]+)/count",
+        permission_classes=[IsAuthenticated]
+    )
+    def appointment_pending_doctor_daily_count(self, request, id=None):
+        try:
+            medical_staff = MedicalStaff.objects.get(id=id)
+
+            if medical_staff.role not in ["Doctor", "Specialist", "Ophthalmologist", "Dentist"]:
+                return Response(
+                    {"details": "le medical staff spécifié n'est pas un docteur"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            today = now().date()
+
+            count = Appointment.objects.filter(
+                idMedicalStaff=medical_staff,
+                atDate__date=today,
+                state="Pending"
+            ).count()
+
+            return Response(
+                {
+                    "doctor_id": medical_staff.id,
+                    "date": today,
+                    "count": count
+                },
+                status=status.HTTP_200_OK
+            )
+
+        except MedicalStaff.DoesNotExist:
+            return Response(
+                {"details": "le docteur spécifié n'existe pas"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+   
+    @swagger_auto_schema(
         operation_description="Permet de compter le nombre de rendez-vous enregistrés",
         responses={
-            200: openapi.Response(description="Nombre de rendez-vous enregistrés")
+            200: openapi.Response(description="Nombre de rendez-vous enregistrés",) 
         },
         tags=tags
     )
