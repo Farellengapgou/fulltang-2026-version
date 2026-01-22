@@ -24,7 +24,7 @@ ROLES = [
     ('Pharmacist', 'Pharmacist'),
     ('Cashier', 'Cashier'),
     ('Specialist', 'Specialist'),
-    ('Ophtalmologist', 'Ophtalmologist'),
+    ('Ophthalmologist', 'Ophthalmologist'),
     ('Dentist', 'Dentist'),
 ]
 
