@@ -279,7 +279,7 @@ export function JournalEntries() {
                     </div>
                     <div className="border border-gray-100 rounded-lg overflow-hidden">
                       <table className="ft-table">
-                        <thead className="bg-gray-50">
+                        <thead className="ft-thead">
                           <tr>
                             <th className="ft-th !py-2">Compte</th>
                             <th className="ft-th !py-2">Libellé</th>

@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer components {
-    /* === Fultang UI: tokens/patterns réutilisables (boutons, champs, cards, tables, modals) === */
+    /* === Fultang UI Standardized === */
 
     .ft-page {
         @apply p-6 bg-gray-50 min-h-screen;
@@ -17,23 +17,33 @@
         @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-8;
     }
 
+    /* === Form Inputs (Matching AddMedicalStaff & AddMedication) === */
     .ft-input {
-        @apply w-full border-2 border-gray-100 bg-white rounded-xl px-5 py-3 text-base text-gray-800 transition-all
-        focus:outline-none focus:border-secondary focus:ring-0 shadow-sm;
+        @apply w-full px-4 py-2 border-2 border-gray-200 rounded-md 
+        focus:outline-none focus:border-2 focus:border-primary-end
+        text-base text-gray-800 transition-all duration-300;
     }
 
     .ft-select {
-        @apply w-full border-2 border-gray-100 bg-white rounded-xl px-5 py-3 text-base text-gray-800 transition-all
-        focus:outline-none focus:border-secondary focus:ring-0 shadow-sm;
+        @apply w-full px-4 py-2 border-2 border-gray-200 rounded-md 
+        focus:outline-none focus:border-2 focus:border-primary-end
+        text-base text-gray-800 transition-all duration-300;
     }
 
+    /* === Labels (Matching AddMedicalStaff & AddMedication) === */
+    .ft-label {
+        @apply block text-md font-semibold text-gray-600 mb-1;
+    }
+
+    /* === Buttons (Matching across all pages) === */
     .ft-btn {
-        @apply inline-flex items-center justify-center gap-2 rounded-xl font-bold transition-all duration-300
-        focus:outline-none focus:ring-2 focus:ring-offset-2 active:scale-95;
+        @apply inline-flex items-center justify-center gap-2 rounded-lg font-bold 
+        transition-all duration-500 ease-in-out focus:outline-none focus:ring-2 
+        focus:ring-offset-2 active:scale-95;
     }
 
     .ft-btn-sm {
-        @apply px-4 py-2 text-sm;
+        @apply px-3 py-1.5 text-sm;
     }
 
     .ft-btn-md {
@@ -41,96 +51,377 @@
     }
 
     .ft-btn-primary {
-        @apply bg-secondary text-white hover:bg-[#3d9d94] shadow-lg shadow-secondary/20;
+        @apply bg-secondary text-white hover:bg-[#3d9d94] 
+        transition-colors duration-500 ease-in-out shadow-md hover:shadow-lg;
     }
 
     .ft-btn-outline {
-        @apply bg-white text-gray-700 border-2 border-gray-100 hover:bg-gray-50;
+        @apply bg-white text-gray-700 border-2 border-gray-200 
+        hover:bg-gray-50 shadow-sm transition-all duration-500 ease-in-out;
     }
 
     .ft-btn-danger {
-        @apply bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-200;
+        @apply bg-red-400 text-white hover:bg-red-500 
+        shadow-md hover:shadow-lg transition-all duration-500 ease-in-out;
     }
 
     .ft-btn-success {
-        @apply bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-200;
+        @apply bg-emerald-500 text-white hover:bg-emerald-600 
+        shadow-emerald-200 transition-all duration-500 ease-in-out;
     }
 
+    /* === Standardized Table Styles (Matching AdminHospitalRooms) === */
     .ft-table {
-        @apply w-full border-separate border-spacing-y-3;
+        @apply w-full border-separate border-spacing-y-2;
     }
 
     .ft-thead {
         @apply bg-transparent;
     }
 
-    .ft-th {
-        @apply px-6 py-4 text-center text-white text-lg font-bold bg-primary-end first:rounded-l-2xl last:rounded-r-2xl uppercase tracking-tight;
+    .ft-thead tr {
+        @apply bg-gradient-to-l from-primary-start to-primary-end;
     }
 
-    .ft-td {
-        @apply px-6 py-4 text-base text-gray-700 bg-gray-100 first:rounded-l-xl last:rounded-r-xl;
+    .ft-th {
+        @apply px-4 py-4 text-center text-white text-xl font-bold border-gray-200 
+        first:rounded-l-2xl last:rounded-r-2xl;
+    }
+
+    .ft-tbody {
+        @apply bg-transparent;
     }
 
     .ft-tr {
-        @apply hover:scale-[1.01] transition-transform duration-200;
+        @apply bg-gray-100 cursor-pointer hover:bg-gray-200 transition-all duration-300;
     }
 
+    .ft-td {
+        @apply px-6 py-4 text-gray-700 font-semibold
+        first:rounded-l-xl last:rounded-r-xl;
+    }
+
+    /* === Standardized Modal Styles === */
     .ft-modal-overlay {
-        @apply fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-6;
+        @apply fixed inset-0 bg-black/60 backdrop-blur-sm 
+        flex items-center justify-center z-50 p-4 
+        transition-all duration-300;
     }
 
     .ft-modal {
-        @apply bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl overflow-hidden duration-300;
+        @apply bg-white rounded-2xl shadow-2xl w-full max-w-2xl 
+        overflow-hidden duration-300 transform transition-all;
     }
 
     .ft-modal-header {
-        @apply px-10 py-8 border-b border-gray-50 flex items-center justify-between bg-gray-50/50;
+        @apply px-6 py-4 flex justify-between items-center 
+        bg-gradient-to-r from-primary-end to-primary-start 
+        rounded-t-lg;
     }
 
     .ft-modal-title {
-        @apply text-2xl font-black text-secondary uppercase tracking-tight;
+        @apply text-xl font-black text-white uppercase tracking-widest;
+    }
+
+    .ft-modal-close {
+        @apply text-white/80 hover:text-white transition-colors duration-200 
+        cursor-pointer p-1 hover:bg-white/10 rounded-full;
+    }
+
+    .ft-modal-subtitle {
+        @apply text-white/60 font-medium text-sm mt-1;
     }
 
     .ft-modal-body {
-        @apply p-10;
+        @apply p-8 space-y-6 bg-white;
     }
 
     .ft-modal-footer {
-        @apply px-10 py-8 bg-gray-50/50 border-t border-gray-50 flex justify-end gap-3;
+        @apply px-8 py-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-4;
+    }
+
+    /* === Search Bar (Matching AdminMedicalStaffList, AdminMedicationsList) === */
+    .ft-search-container {
+        @apply flex items-center w-80 bg-white border border-gray-200 rounded-full px-4 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-primary-end/20 focus-within:border-primary-end transition-all;
+    }
+
+    .ft-search-icon {
+        @apply text-gray-400 mr-3;
+    }
+
+    .ft-search-input {
+        @apply border-none focus:outline-none focus:ring-0 w-full text-sm bg-transparent text-gray-700 placeholder-gray-400;
+    }
+
+    /* === Page Headers (Matching AdminHomePage, ConsultationList) === */
+    .ft-page-header {
+        @apply bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-8 flex items-center justify-between;
+    }
+
+    .ft-page-header-title {
+        @apply text-3xl font-black text-secondary tracking-tight;
+    }
+
+    .ft-page-header-description {
+        @apply text-gray-500 font-medium mt-1;
+    }
+
+    /* === Pagination (Matching AdminHospitalRooms) === */
+    .ft-pagination-container {
+        @apply flex justify-center items-center gap-4 mt-6 mb-4;
+    }
+
+    .ft-pagination-btn {
+        @apply w-14 h-14 border-2 rounded-lg flex justify-center items-center mt-2 shadow-xl
+        text-secondary text-xl font-bold bg-white
+        hover:bg-secondary hover:text-white hover:text-2xl 
+        transition-all duration-300 ease-in-out
+        disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-none;
+    }
+
+    .ft-pagination-text {
+        @apply text-2xl font-bold text-secondary mt-4;
+    }
+
+    /* === Action Buttons (Matching AdminMedicationsList) === */
+    .ft-action-btn {
+        @apply flex items-center justify-center w-9 h-9 text-xl 
+        hover:bg-gray-300 hover:rounded-full transition-all duration-500 ease-in-out;
+    }
+
+    .ft-action-btn-view {
+        @apply text-primary-end;
+    }
+
+    .ft-action-btn-edit {
+        @apply text-green-500;
+    }
+
+    .ft-action-btn-delete {
+        @apply text-red-400;
+    }
+
+    /* === Floating Add Button (Matching AdminMedicationsList, AdminMedicalStaffList) === */
+    .ft-fab {
+        @apply flex justify-center items-center fixed bottom-5 right-16 
+        rounded-full w-14 h-14 bg-gradient-to-r text-3xl font-bold 
+        text-white from-primary-start to-primary-end 
+        hover:text-4xl transition-all duration-500 ease-in-out;
+    }
+
+    /* === Checkbox Styles (Matching EditModals) === */
+    .ft-checkbox {
+        @apply form-checkbox h-3 w-3 mt-4 text-primary-end;
+    }
+
+    /* === Empty State (Matching AdminMedicationsList, AdminMedicalStaffList) === */
+    .ft-empty-state {
+        @apply flex flex-col items-center justify-center h-[600px] 
+        bg-gradient-to-b from-white to-teal-50 p-8;
+    }
+
+    .ft-empty-state-icon {
+        @apply w-24 h-24 text-primary-end mb-6 relative;
+    }
+
+    .ft-empty-state-title {
+        @apply text-2xl font-bold text-teal-700 mb-4;
+    }
+
+    .ft-empty-state-description {
+        @apply text-gray-600 text-center mb-8 max-w-xl;
+    }
+
+    .ft-empty-state-btn {
+        @apply bg-primary-end hover:bg-primary-start text-white 
+        font-bold py-2 px-4 rounded-full transition-all duration-500 ease-in-out 
+        flex items-center;
+    }
+
+    /* === Filter Dropdown (Matching AdminMedicationsList, AdminMedicalStaffList) === */
+    .ft-filter-label {
+        @apply mr-4 font-bold;
+    }
+
+    .ft-filter-select {
+        @apply ml-2 w-40 h-10 text-white bg-gray-300 px-2 
+        border-gray-200 rounded-lg;
+    }
+
+    /* === Consultation Card (Matching AdminConsultationList) === */
+    .ft-consultation-card {
+        @apply bg-gray-100 rounded-lg shadow-md overflow-hidden 
+        hover:shadow-lg transition-shadow duration-500 ease-in-out;
+    }
+
+    .ft-consultation-status-finished {
+        @apply bg-green-100 text-green-800;
+    }
+
+    .ft-consultation-status-progress {
+        @apply bg-blue-100 text-blue-800;
+    }
+
+    .ft-consultation-status-upcoming {
+        @apply bg-yellow-100 text-yellow-800;
+    }
+
+    /* === Navbar Styles (Matching AdminNavBar) === */
+    .ft-navbar {
+        @apply border-b-2 m-3 border-b-gray-300;
+    }
+
+    .ft-navbar-container {
+        @apply w-full h-[70px] flex justify-between;
+    }
+
+    .ft-navbar-title {
+        @apply ml-3 text-4xl text-secondary mt-3.5 font-bold;
+    }
+
+    .ft-navbar-actions {
+        @apply flex gap-3 mt-3.5 mb-4 mr-5;
+    }
+
+    .ft-navbar-btn {
+        @apply w-12 h-10 mt-1 border-2 bg-gray-100 flex justify-center 
+        items-center rounded-xl shadow-xl hover:bg-secondary 
+        text-secondary text-xl hover:text-white transition-all duration-500 ease-in-out;
+    }
+
+    .ft-navbar-logout-btn {
+        @apply w-12 h-10 mt-1 border-2 bg-red-400 flex justify-center 
+        items-center rounded-xl shadow-xl hover:bg-white 
+        text-white text-xl hover:text-red-500 transition-all duration-500 ease-in-out;
+    }
+
+    .ft-navbar-profile {
+        @apply ml-3 flex;
+    }
+
+    .ft-navbar-profile-text {
+        @apply font-bold text-secondary text-xl mt-2;
+    }
+
+    .ft-navbar-profile-img {
+        @apply w-12 h-12 ml-2 mr-3;
     }
 }
 
 @layer utilities {
-    /* Largeur de la barre de défilement */
     .scrollbar::-webkit-scrollbar {
-        width: 5px;
-        height: 5px;
+        width: 6px;
+        height: 6px;
     }
-
-    /* Piste de la barre de défilement */
     .scrollbar::-webkit-scrollbar-track {
-        border-radius: 100vh;
-        background: #f7f4ed;
+        background: transparent;
     }
-
-    /* Pouce de la barre de défilement */
     .scrollbar::-webkit-scrollbar-thumb {
-
-        border-radius: 100vh;
-        border: 2px solid #f6f7ed;
+        background-color: rgba(156, 163, 175, 0.5);
+        border-radius: 20px;
     }
-
-    /* Effet hover sur le pouce */
     .scrollbar::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(to bottom, #3d9d94, #1976D2);
+        background-color: rgba(107, 114, 128, 0.8);
     }
 }
 
-/* Pour Firefox */
-@supports (scrollbar-color: #E5E7EB #f6f7ed) {
+/* === PRINT STYLES === */
+@media print {
+    @page {
+        size: A4;
+        margin: 1cm;
+    }
+
+    body {
+        background: white;
+        color: black;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    nav, 
+    aside, 
+    button, 
+    .ft-btn, 
+    .ft-fab,
+    .ft-pagination-container,
+    .no-print, 
+    input[type="text"], 
+    input[type="search"],
+    .ft-page > div:first-child,
+    [class*="sidebar"],
+    [class*="navbar"] {
+        display: none !important;
+    }
+
+    .ft-page {
+        padding: 0;
+        margin: 0;
+        background: white;
+        min-height: auto;
+    }
+
+    .ml-\[17\.5\%\] {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+    
+    .fixed {
+        position: static !important;
+    }
+    
+    .overflow-x-hidden {
+        overflow: visible !important;
+    }
+
+    .ft-table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .ft-th {
+        background: #f3f4f6 !important;
+        color: black !important;
+        border: 1px solid #000;
+        box-shadow: none;
+        text-shadow: none;
+    }
+
+    .ft-td {
+        background: white !important;
+        color: black !important;
+        border: 1px solid #ddd;
+        page-break-inside: avoid;
+    }
+
+    .ft-tr {
+        transform: none !important;
+    }
+
+    .ft-card, .ft-card-padded, .bg-white {
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    .ft-modal {
+        box-shadow: none;
+        max-width: 100%;
+        width: 100%;
+    }
+    
+    .ft-modal-overlay {
+        position: static;
+        background: white;
+        padding: 0;
+    }
+}
+
+/* Firefox Scrollbar */
+@supports (scrollbar-color: auto) {
     * {
-        scrollbar-color:#E5E7EB #f6f7ed;
         scrollbar-width: thin;
+        scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
     }
 }

@@ -165,7 +165,8 @@ export function AdminHospitalRooms() {
                                 <p className="text-white font-semibold text-md">Total Rooms</p>
                                 <h3 className="text-white text-3xl font-bold">{stats.total}</h3>
                             </div>
-                            <BedDouble className="text-white h-12 w-12 opacity-80"/>
+                            <BedDouble className="text-white h-12 w
+                            -12 opacity-80"/>
                         </div>
                     </div>
 

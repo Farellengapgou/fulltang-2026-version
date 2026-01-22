@@ -8,8 +8,7 @@ import {
     Lock, 
     ArrowLeft, 
     AlertCircle,
-    Activity,
-    HelpCircle
+    Activity
 } from 'lucide-react';
 import loginBackground from "../../assets/logIn.png";
 import Wait from "../Modals/wait.jsx";
@@ -79,92 +78,73 @@ export function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-secondary font-sans text-secondary">
-            {/* Background Image with Overlay */}
-            <div className="absolute inset-0 z-0">
-                <img 
+        <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gray-50 font-sans text-gray-800">
+            {/* Background Elements */}
+            <div className="absolute inset-0 z-0 opacity-5">
+                 <img 
                     src={loginBackground} 
-                    alt="Login Background" 
-                    className="w-full h-full object-cover opacity-30"
+                    alt="Background Pattern" 
+                    className="w-full h-full object-cover grayscale"
                 />
-                <div className="absolute inset-0 bg-gradient-to-br from-secondary/90 via-primary-start/70 to-primary-end/50 backdrop-blur-[2px]"></div>
             </div>
-
-            {/* Content Container */}
+            
             <div className="container mx-auto px-6 relative z-10">
                 <motion.div 
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="max-w-5xl mx-auto flex flex-col lg:flex-row bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] shadow-2xl overflow-hidden"
+                    className="max-w-4xl mx-auto flex flex-col md:flex-row bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
                 >
-                    {/* Brand/Welcome Side */}
-                    <div className="lg:w-1/2 p-12 flex flex-col justify-between text-white border-b lg:border-b-0 lg:border-r border-white/10">
-                        <div>
-                            <Link to="/" className="flex items-center gap-2 mb-12 group">
-                                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-md group-hover:bg-primary-end transition-colors">
-                                    <Activity className="text-white w-6 h-6" />
+                    {/* Brand Side - Matching AdminHomePage gradient */}
+                    <div className="md:w-5/12 p-10 bg-gradient-to-r from-primary-end to-primary-start flex flex-col justify-between text-white relative overflow-hidden">
+                        <div className="relative z-10">
+                            <Link to="/" className="flex items-center gap-3 mb-10 group">
+                                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-lg transition-transform duration-500 ease-in-out group-hover:scale-105">
+                                    <Activity className="text-secondary w-6 h-6" />
                                 </div>
-                                <span className="text-2xl font-black tracking-tight">FULTANG</span>
+                                <span className="text-2xl font-bold">FULTANG</span>
                             </Link>
                             
-                            <motion.h1 
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.2 }}
-                                className="text-4xl md:text-5xl font-black mb-6 leading-tight"
-                            >
-                                Portail <br />
-                                d'Excellence <br />
-                                <span className="text-primary-end">Médicale</span>
-                            </motion.h1>
-                            
-                            <p className="text-white/70 text-lg mb-8 leading-relaxed max-w-sm">
-                                Connectez-vous pour accéder à votre espace de travail et contribuer à l'excellence des soins Fultang.
+                            <h2 className="text-3xl font-bold mb-4 leading-tight">
+                                Bienvenue sur votre Espace Pro
+                            </h2>
+                            <p className="text-white/80 text-base leading-relaxed">
+                                Accédez à vos outils de gestion et de suivi clinique en toute sécurité.
                             </p>
                         </div>
 
-                        <div>
-                            <div className="flex flex-col gap-4">
-                                <div className="flex items-center gap-3 text-white/50">
-                                    <div className="w-1 h-1 rounded-full bg-primary-end"></div>
-                                    <span className="text-sm font-semibold tracking-wide uppercase">Système Sécurisé</span>
-                                </div>
-                                <button 
-                                    onClick={() => navigate(appRouterPaths.helpCenterPage)}
-                                    className="flex items-center gap-2 text-white/80 hover:text-white transition-colors text-sm font-bold group"
-                                >
-                                    <HelpCircle className="w-4 h-4 text-primary-end group-hover:rotate-12 transition-transform" />
-                                    Signaler un problème technique
-                                </button>
+                        <div className="relative z-10 mt-8">
+                            <div className="flex items-center gap-2 text-xs font-semibold text-white/70 bg-white/10 px-4 py-2 rounded-lg w-fit">
+                                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                                Système Opérationnel
                             </div>
                         </div>
                     </div>
 
                     {/* Login Form Side */}
-                    <div className="lg:w-1/2 p-8 md:p-12 bg-white flex flex-col justify-center">
-                        <div className="mb-10 text-center lg:text-left">
-                            <h2 className="text-3xl font-black text-secondary mb-2">Connexion</h2>
-                            <p className="text-secondary/60 font-medium">Veuillez entrer vos identifiants</p>
+                    <div className="md:w-7/12 p-10 bg-white flex flex-col justify-center">
+                        <div className="mb-8">
+                            <h2 className="text-2xl font-bold text-secondary mb-2">Connexion</h2>
+                            <p className="text-gray-600 text-sm">Entrez vos identifiants pour continuer</p>
                         </div>
 
                         {isLoginErrorPresent && (
                             <motion.div 
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg flex items-start gap-3"
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                className="mb-6 p-4 bg-red-50 border border-red-100 rounded-lg flex items-start gap-3"
                             >
                                 <AlertCircle className="text-red-500 w-5 h-5 flex-shrink-0 mt-0.5" />
-                                <p className="text-red-700 text-sm font-bold">{loginError}</p>
+                                <p className="text-red-700 text-sm font-semibold">{loginError}</p>
                             </motion.div>
                         )}
 
-                        <form className="space-y-6" onSubmit={handleLogin}>
-                            <div className="space-y-2">
-                                <label className="text-xs font-black text-secondary tracking-widest uppercase ml-1">Nom d'utilisateur</label>
+                        <form className="space-y-5" onSubmit={handleLogin}>
+                            <div className="space-y-1.5">
+                                <label className="text-md font-semibold text-gray-600 mb-1 block">Nom d'utilisateur</label>
                                 <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <User className="text-secondary/40 w-5 h-5 group-focus-within:text-primary-start transition-colors" />
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <User className="text-gray-400 w-5 h-5 transition-colors duration-500 ease-in-out group-focus-within:text-secondary" />
                                     </div>
                                     <input 
                                         type="text"
@@ -172,22 +152,22 @@ export function LoginPage() {
                                         autoComplete="username"
                                         value={username}
                                         onChange={(e) => setUsername(e.target.value)}
-                                        className="w-full pl-12 pr-4 py-4 bg-secondary/5 border-none ring-1 ring-secondary/10 rounded-2xl focus:ring-2 focus:ring-primary-start outline-none transition-all font-medium text-secondary"
-                                        placeholder="votre_identifiant"
+                                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-md bg-white focus:outline-none focus:border-2 focus:border-primary-end transition-all duration-300 text-gray-800"
+                                        placeholder="Votre identifiant"
                                     />
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <div className="flex justify-between items-center ml-1">
-                                    <label className="text-xs font-black text-secondary tracking-widest uppercase">Mot de passe</label>
-                                    <Link to={appRouterPaths.forgottenPasswordPage} className="text-xs font-bold text-primary-start hover:text-secondary transition-colors">
+                            <div className="space-y-1.5">
+                                <div className="flex justify-between items-center">
+                                    <label className="text-md font-semibold text-gray-600 mb-1 block">Mot de passe</label>
+                                    <Link to={appRouterPaths.forgottenPasswordPage} className="text-xs font-bold text-secondary hover:underline transition-colors duration-300">
                                         Oublié ?
                                     </Link>
                                 </div>
                                 <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <Lock className="text-secondary/40 w-5 h-5 group-focus-within:text-primary-start transition-colors" />
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Lock className="text-gray-400 w-5 h-5 transition-colors duration-500 ease-in-out group-focus-within:text-secondary" />
                                     </div>
                                     <input 
                                         type={showPassword ? "text" : "password"}
@@ -195,13 +175,13 @@ export function LoginPage() {
                                         autoComplete="current-password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full pl-12 pr-12 py-4 bg-secondary/5 border-none ring-1 ring-secondary/10 rounded-2xl focus:ring-2 focus:ring-primary-start outline-none transition-all font-medium text-secondary"
+                                        className="w-full pl-10 pr-12 py-3 border-2 border-gray-200 rounded-md bg-white focus:outline-none focus:border-2 focus:border-primary-end transition-all duration-300 text-gray-800"
                                         placeholder="••••••••"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-secondary/40 hover:text-secondary transition-colors"
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-500 ease-in-out"
                                     >
                                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                     </button>
@@ -211,20 +191,24 @@ export function LoginPage() {
                             <button 
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full py-4 bg-secondary text-white font-black rounded-2xl shadow-xl shadow-secondary/20 hover:bg-primary-start hover:shadow-primary-start/30 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2"
+                                className="w-full py-4 bg-secondary text-white font-bold rounded-lg shadow-md hover:shadow-lg hover:bg-[#3d9d94] transition-all duration-500 ease-in-out flex items-center justify-center gap-2 mt-4"
                             >
                                 {isLoading ? "Connexion en cours..." : "S'identifier"}
                             </button>
                         </form>
 
-                        <div className="mt-10 pt-8 border-t border-secondary/5 flex justify-center">
-                            <Link to="/" className="flex items-center gap-2 text-secondary/40 hover:text-secondary transition-colors text-sm font-bold">
+                        <div className="mt-8 text-center">
+                            <Link to="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-secondary transition-colors duration-500 ease-in-out text-sm font-semibold">
                                 <ArrowLeft className="w-4 h-4" />
                                 Retour à l'accueil
                             </Link>
                         </div>
                     </div>
                 </motion.div>
+                
+                <p className="text-center text-gray-400 text-xs mt-8 font-medium">
+                    © {new Date().getFullYear()} Fultang Polyclinic. Tous droits réservés.
+                </p>
             </div>
 
             {isLoading && <Wait />}

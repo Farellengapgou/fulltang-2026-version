@@ -25,12 +25,20 @@ import {
   PieChart,
   Pie,
   Cell,
-  AreaChart,
-  Area
 } from "recharts";
-import { Wallet, Landmark, Landmark as Bank, TrendingUp, Calendar, ChevronRight, ArrowUpRight, ArrowDownRight, Hash, PieChart as PieIcon, BarChart3 } from "lucide-react";
+import { 
+  Wallet, 
+  Landmark, 
+  TrendingUp, 
+  Calendar, 
+  DollarSign,
+  TrendingDown,
+  ArrowUpRight,
+  ArrowDownRight
+} from "lucide-react";
 
 export function DashBoard() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [balanceSheet, setBalanceSheet] = useState(null);
   const [incomeStatement, setIncomeStatement] = useState(null);
@@ -60,275 +68,224 @@ export function DashBoard() {
     fetchData();
   }, []);
 
-  if (loading) return <Loader />;
-  if (error) return <div className="text-red-500 p-10 font-black uppercase tracking-widest bg-red-50 rounded-[2rem] border-2 border-dashed border-red-100 m-10">Oups! Erreur de synchronisation: {error}</div>;
+  if (loading) return <Loader size="medium" color="primary-end" />;
+  
+  if (error) {
+    return (
+      <CustomDashboard linkList={FinancialAccountantNavLink} requiredRole={"Accountant"}>
+        <FinancialAccountantNavBar />
+        <div className="flex items-center justify-center h-[600px]">
+          <div className="text-center">
+            <div className="text-red-500 text-6xl mb-4">⚠️</div>
+            <h3 className="text-2xl font-bold text-red-600 mb-2">Error Loading Data</h3>
+            <p className="text-gray-600">{error}</p>
+          </div>
+        </div>
+      </CustomDashboard>
+    );
+  }
 
-  const totalAssets =
-    balanceSheet?.assets?.reduce((sum, a) => sum + a.balance, 0) || 0;
-  const totalLiabilities =
-    balanceSheet?.liabilities?.reduce((sum, l) => sum + l.balance, 0) || 0;
-  const totalEquity =
-    balanceSheet?.equity?.reduce((sum, e) => sum + e.balance, 0) || 0;
+  const totalAssets = balanceSheet?.assets?.reduce((sum, a) => sum + a.balance, 0) || 0;
+  const totalLiabilities = balanceSheet?.liabilities?.reduce((sum, l) => sum + l.balance, 0) || 0;
+  const totalEquity = balanceSheet?.equity?.reduce((sum, e) => sum + e.balance, 0) || 0;
+  const totalRevenue = incomeStatement?.total_revenue || 0;
+  const totalExpense = incomeStatement?.total_expense || 0;
   const netIncome = incomeStatement?.net_income || 0;
 
-  const chartData = [
-    { name: "Actif", value: totalAssets },
-    { name: "Passif", value: totalLiabilities },
-    { name: "Capitaux", value: totalEquity },
+  const balanceChartData = [
+    { name: "Assets", value: totalAssets },
+    { name: "Liabilities", value: totalLiabilities },
+    { name: "Equity", value: totalEquity },
   ];
 
-  const incomeData = [
-    { name: "PRODUITS", value: incomeStatement?.total_revenue || 0 },
-    { name: "CHARGES", value: incomeStatement?.total_expense || 0 },
+  const incomeChartData = [
+    { name: "Revenue", value: totalRevenue },
+    { name: "Expenses", value: totalExpense },
   ];
 
-  const COLORS = ["#3b82f6", "#ef4444", "#10b981"];
+  const COLORS = ["#4DB6AC", "#FF6B6B", "#4ECDC4"];
 
   return (
-    <CustomDashboard
-      linkList={FinancialAccountantNavLink}
-      requiredRole={"Accountant"}
-    >
+    <CustomDashboard linkList={FinancialAccountantNavLink} requiredRole={"Accountant"}>
       <FinancialAccountantNavBar />
-      <div className="ft-page">
-        <div className="flex justify-between items-end mb-12">
-          <div>
-            <h1 className="text-4xl font-black text-secondary tracking-tighter uppercase mb-1">
-              Cockpit Comptable
-            </h1>
-            <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                <p className="text-gray-400 text-xs font-black uppercase tracking-[0.2em]">
-                    Session Active • {currentPeriod?.month}/{currentPeriod?.year}
-                </p>
-            </div>
+      
+      <div className="p-6 space-y-6">
+        {/* Page Header */}
+        <div className="bg-gradient-to-r from-primary-end to-primary-start rounded-lg p-6 text-white">
+          <h1 className="text-3xl font-bold mb-2">Accounting Dashboard</h1>
+          <p className="opacity-90 font-semibold text-md">
+            Financial overview for period {currentPeriod?.month}/{currentPeriod?.year}
+          </p>
+        </div>
+
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            icon={Wallet}
+            title="Total Assets"
+            value={totalAssets.toLocaleString() + " FCFA"}
+            description="Current assets"
+            color="bg-blue-500"
+          />
+          <StatCard
+            icon={Landmark}
+            title="Total Liabilities"
+            value={totalLiabilities.toLocaleString() + " FCFA"}
+            description="Current liabilities"
+            color="bg-red-500"
+          />
+          <StatCard
+            icon={DollarSign}
+            title="Equity"
+            value={totalEquity.toLocaleString() + " FCFA"}
+            description="Owner's equity"
+            color="bg-teal-500"
+          />
+          <StatCard
+            icon={netIncome >= 0 ? TrendingUp : TrendingDown}
+            title="Net Income"
+            value={netIncome.toLocaleString() + " FCFA"}
+            description={netIncome >= 0 ? "Profit" : "Loss"}
+            color={netIncome >= 0 ? "bg-green-500" : "bg-orange-500"}
+          />
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Balance Sheet Chart */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Balance Sheet Distribution</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={balanceChartData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {balanceChartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
-          <div className="flex gap-2">
-            <button className="ft-btn ft-btn-md ft-btn-primary gap-2">
-                <Calendar size={18} /> Clôturer la période
-            </button>
+
+          {/* Income Statement Chart */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Revenue vs Expenses</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={incomeChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="value" fill="#4DB6AC" radius={[10, 10, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        {/* KPI Cards section stylized */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 group hover:border-blue-500/20 transition-all cursor-default">
-            <div className="flex justify-between items-start mb-4">
-                <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
-                    <Wallet size={24} />
-                </div>
-                <span className="text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg">+2.4%</span>
+        {/* Detailed Tables */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Assets */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <ArrowUpRight className="text-blue-500" size={20} />
+              <h3 className="text-lg font-bold text-gray-800">Assets</h3>
             </div>
-            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Actif</h3>
-            <div className="text-2xl font-black text-secondary tracking-tight">
-                {totalAssets.toLocaleString()} <span className="text-[10px] opacity-40 ml-1">FCFA</span>
+            <div className="space-y-3">
+              {balanceSheet?.assets?.map((asset) => (
+                <div key={asset.id} className="flex justify-between items-center border-b border-gray-100 pb-2">
+                  <div>
+                    <p className="text-xs text-gray-500">{asset.code}</p>
+                    <p className="text-sm font-semibold text-gray-700">{asset.label}</p>
+                  </div>
+                  <p className="text-sm font-bold text-secondary">{asset.balance.toLocaleString()}</p>
+                </div>
+              ))}
+              {balanceSheet?.assets?.length === 0 && (
+                <p className="text-center text-gray-400 py-4">No assets recorded</p>
+              )}
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 group hover:border-red-500/20 transition-all cursor-default">
-            <div className="flex justify-between items-start mb-4">
-                <div className="p-3 bg-red-50 text-red-600 rounded-2xl">
-                    <Bank size={24} />
-                </div>
-                <span className="text-[10px] font-black text-rose-500 bg-rose-50 px-2 py-1 rounded-lg">+1.8%</span>
+          {/* Liabilities */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <ArrowDownRight className="text-red-500" size={20} />
+              <h3 className="text-lg font-bold text-gray-800">Liabilities</h3>
             </div>
-            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Passif</h3>
-            <div className="text-2xl font-black text-secondary tracking-tight">
-                {totalLiabilities.toLocaleString()} <span className="text-[10px] opacity-40 ml-1">FCFA</span>
+            <div className="space-y-3">
+              {balanceSheet?.liabilities?.map((liability) => (
+                <div key={liability.id} className="flex justify-between items-center border-b border-gray-100 pb-2">
+                  <div>
+                    <p className="text-xs text-gray-500">{liability.code}</p>
+                    <p className="text-sm font-semibold text-gray-700">{liability.label}</p>
+                  </div>
+                  <p className="text-sm font-bold text-secondary">{liability.balance.toLocaleString()}</p>
+                </div>
+              ))}
+              {balanceSheet?.liabilities?.length === 0 && (
+                <p className="text-center text-gray-400 py-4">No liabilities recorded</p>
+              )}
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 group hover:border-emerald-500/20 transition-all cursor-default">
-            <div className="flex justify-between items-start mb-4">
-                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
-                    <Landmark size={24} />
+          {/* Equity */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Landmark className="text-teal-500" size={20} />
+              <h3 className="text-lg font-bold text-gray-800">Equity</h3>
+            </div>
+            <div className="space-y-3">
+              {balanceSheet?.equity?.map((eq) => (
+                <div key={eq.id} className="flex justify-between items-center border-b border-gray-100 pb-2">
+                  <div>
+                    <p className="text-xs text-gray-500">{eq.code}</p>
+                    <p className="text-sm font-semibold text-gray-700">{eq.label}</p>
+                  </div>
+                  <p className="text-sm font-bold text-secondary">{eq.balance.toLocaleString()}</p>
                 </div>
-                <span className="text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg">Stable</span>
-            </div>
-            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Capitaux Propres</h3>
-            <div className="text-2xl font-black text-secondary tracking-tight">
-                {totalEquity.toLocaleString()} <span className="text-[10px] opacity-40 ml-1">FCFA</span>
-            </div>
-          </div>
-
-          <div className={`p-6 rounded-[2rem] shadow-sm border border-gray-100 transition-all cursor-default ${
-            netIncome >= 0 ? 'bg-secondary text-white' : 'bg-rose-600 text-white'
-          }`}>
-            <div className="flex justify-between items-start mb-4">
-                <div className="p-3 bg-white/10 text-white rounded-2xl">
-                    <TrendingUp size={24} />
-                </div>
-            </div>
-            <h3 className="text-[10px] font-black opacity-60 uppercase tracking-widest mb-1">Résultat Net</h3>
-            <div className="text-2xl font-black tracking-tight">
-                {netIncome.toLocaleString()} <span className="text-[10px] opacity-40 ml-1 uppercase">FCFA</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Charts & Reports section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
-          <div className="lg:col-span-2 bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-50">
-            <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
-                        <BarChart3 size={20} />
-                    </div>
-                    <h2 className="text-lg font-black text-secondary tracking-tight uppercase italic">Flux de Résultat</h2>
-                </div>
-            </div>
-            
-            <div className="h-[350px]">
-                <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={incomeData} barGap={12}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                    <XAxis 
-                        dataKey="name" 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{fontSize: 10, fontWeight: 900, fill: '#9ca3af'}}
-                    />
-                    <YAxis 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{fontSize: 10, fontWeight: 900, fill: '#9ca3af'}}
-                    />
-                    <Tooltip 
-                        contentStyle={{borderRadius: '1.5rem', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', padding: '1rem'}}
-                        cursor={{fill: '#f9fafb'}}
-                    />
-                    <Bar 
-                        dataKey="value" 
-                        fill="#3b82f6" 
-                        radius={[10, 10, 0, 0]} 
-                        barSize={60}
-                    />
-                </BarChart>
-                </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-50 flex flex-col items-center justify-center">
-            <div className="self-start mb-8 flex items-center gap-3">
-                <div className="p-2 bg-secondary/10 text-secondary rounded-xl">
-                    <PieIcon size={20} />
-                </div>
-                <h2 className="text-lg font-black text-secondary tracking-tight uppercase italic">Répartition du Bilan</h2>
-            </div>
-            
-            <div className="h-[280px] w-full relative">
-                <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                        <Pie
-                        data={chartData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={70}
-                        outerRadius={100}
-                        paddingAngle={8}
-                        dataKey="value"
-                        stroke="none"
-                        >
-                        {chartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                        </Pie>
-                        <Tooltip />
-                    </PieChart>
-                </ResponsiveContainer>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
-                    <div className="text-[8px] font-black text-gray-400 uppercase tracking-widest line-clamp-1">Balance</div>
-                    <div className="text-sm font-black text-secondary">OK</div>
-                </div>
-            </div>
-            
-            <div className="w-full space-y-3 mt-6">
-                {chartData.map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-[11px] font-black">
-                        <div className="flex items-center gap-2 uppercase tracking-tight text-gray-500">
-                            <div className="w-2 h-2 rounded-full" style={{backgroundColor: COLORS[idx]}}></div>
-                            {item.name}
-                        </div>
-                        <div className="text-secondary">{((item.value / (totalAssets + totalLiabilities + totalEquity)) * 100).toFixed(1)}%</div>
-                    </div>
-                ))}
+              ))}
+              {balanceSheet?.equity?.length === 0 && (
+                <p className="text-center text-gray-400 py-4">No equity recorded</p>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Financial details listing premium */}
-        <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-gray-50 overflow-hidden">
-            <div className="flex items-center gap-4 mb-10 underline decoration-secondary/10 decoration-8 underline-offset-8">
-                <Hash className="text-secondary" size={28} />
-                <h2 className="text-2xl font-black text-secondary uppercase tracking-tight italic">Comptabilité des Actifs & Passifs</h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between border-b pb-4">
-                        <h3 className="text-sm font-black text-blue-600 uppercase tracking-widest">Actifs du Bilan</h3>
-                        <ArrowUpRight className="text-blue-600" size={20} />
-                    </div>
-                    <div className="space-y-4">
-                        {balanceSheet?.assets?.map((asset) => (
-                            <div key={asset.id} className="flex justify-between items-center group">
-                                <div className="space-y-0.5">
-                                    <div className="text-[10px] font-black text-gray-300 uppercase leading-none">{asset.code}</div>
-                                    <div className="text-xs font-bold text-gray-600 group-hover:text-secondary transition-colors uppercase italic">{asset.label}</div>
-                                </div>
-                                <div className="text-sm font-black text-secondary tabular-nums">
-                                    {asset.balance.toLocaleString()}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between border-b pb-4">
-                        <h3 className="text-sm font-black text-rose-600 uppercase tracking-widest">Passifs & Dettes</h3>
-                        <ArrowDownRight className="text-rose-600" size={20} />
-                    </div>
-                    <div className="space-y-4">
-                        {balanceSheet?.liabilities?.map((liability) => (
-                            <div key={liability.id} className="flex justify-between items-center group">
-                                <div className="space-y-0.5">
-                                    <div className="text-[10px] font-black text-gray-300 uppercase leading-none">{liability.code}</div>
-                                    <div className="text-xs font-bold text-gray-600 group-hover:text-secondary transition-colors uppercase italic">{liability.label}</div>
-                                </div>
-                                <div className="text-sm font-black text-secondary tabular-nums">
-                                    {liability.balance.toLocaleString()}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between border-b pb-4">
-                        <h3 className="text-sm font-black text-emerald-600 uppercase tracking-widest">Fonds & Capitaux</h3>
-                        <Landmark className="text-emerald-600" size={20} />
-                    </div>
-                    <div className="space-y-4">
-                        {balanceSheet?.equity?.map((eq) => (
-                            <div key={eq.id} className="flex justify-between items-center group">
-                                <div className="space-y-0.5">
-                                    <div className="text-[10px] font-black text-gray-300 uppercase leading-none">{eq.code}</div>
-                                    <div className="text-xs font-bold text-gray-600 group-hover:text-secondary transition-colors uppercase italic">{eq.label}</div>
-                                </div>
-                                <div className="text-sm font-black text-secondary tabular-nums">
-                                    {eq.balance.toLocaleString()}
-                                </div>
-                            </div>
-                        ))}
-                        {balanceSheet?.equity?.length === 0 && (
-                            <div className="text-center py-10 text-gray-300 font-black uppercase text-[10px] tracking-widest">
-                                Aucun mouvement de capitaux.
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
+        {/* Quick Actions */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <QuickActionButton
+              icon={Calendar}
+              label="Close Period"
+              onClick={() => alert("Close period functionality")}
+            />
+            <QuickActionButton
+              icon={Wallet}
+              label="View Accounts"
+              onClick={() => navigate(AppRouterPaths.accountantChartOfAccountsPage)}
+            />
+            <QuickActionButton
+              icon={DollarSign}
+              label="Journal Entries"
+              onClick={() => navigate(AppRouterPaths.accountantJournalEntriesPage)}
+            />
+            <QuickActionButton
+              icon={TrendingUp}
+              label="Reports"
+              onClick={() => navigate(AppRouterPaths.accountantFinancialReportsPage)}
+            />
+          </div>
         </div>
       </div>
     </CustomDashboard>

@@ -28,7 +28,7 @@ export function BankReconciliation() {
   const [formData, setFormData] = useState({
     bank_account: "",
     reconciliation_date: new Date().toISOString().split("T")[0],
-    bank_balance: 0,
+    statement_balance: 0,
     book_balance: 0,
     variance: 0,
   });
@@ -63,7 +63,7 @@ export function BankReconciliation() {
       setFormData({
         bank_account: "",
         reconciliation_date: new Date().toISOString().split("T")[0],
-        bank_balance: 0,
+        statement_balance: 0,
         book_balance: 0,
         variance: 0,
       });
@@ -169,8 +169,8 @@ export function BankReconciliation() {
                             type="number"
                             step="0.01"
                             placeholder="0.00"
-                            value={formData.bank_balance}
-                            onChange={(e) => setFormData({ ...formData, bank_balance: parseFloat(e.target.value) })}
+                            value={formData.statement_balance}
+                            onChange={(e) => setFormData({ ...formData, statement_balance: parseFloat(e.target.value) })}
                             required
                             className="ft-input pl-12 font-mono font-bold"
                         />
