@@ -22,7 +22,10 @@ ROLES = [
     ('Labtech', 'Labtech'),
     ('HRM', 'HRM'),
     ('Pharmacist', 'Pharmacist'),
-    ('Cashier', 'Cashier')
+    ('Cashier', 'Cashier'),
+    ('Specialist', 'Specialist'),
+    ('Ophtalmologist', 'Ophtalmologist'),
+    ('Dentist', 'Dentist'),
 ]
 
 ROLES_ACCOUNTING = [
@@ -37,12 +40,6 @@ ACCESS_LEVELS = [
     ('Executive', 'Executive'),
     ('Lead', 'Lead'),
     ('Staff', 'Staff'),
-]
-
-TYPEDOCTOR = [
-    ('Specialist', 'Specialist'),
-    ('Ophtalmologist', 'Ophtalmologist'),
-    ('Dentist', 'Dentist'),
 ]
 
 # cette classe définie notre classe d'utilsateur par défaut

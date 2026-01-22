@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react"
 import { Search, Calendar, Eye, User, Clock, DollarSign } from "lucide-react"
-import {doctorNavLink} from "./lib/doctorNavLink.js";
-import {DoctorNavBar} from "./DoctorComponents/DoctorNavBar.jsx";
+import {ophthaNavLink} from "./lib/OphthalmologistNavLink.js";
+import {OphthalmologistNavBar} from "./OphthalmologistComponents/OphthalmologistNavBar.jsx";
 import {useCalculateAge} from "../../Utils/compute.js";
 import {formatDateOnly, formatDateToTime} from "../../Utils/formatDateMethods.js";
 import {getStateStyles} from "./lib/applyStyleFunction.js";
@@ -12,8 +12,7 @@ import axiosInstance from "../../Utils/axiosInstance.js";
 import Loader from "../../GlobalComponents/Loader.jsx";
 import ServerErrorPage from "../../GlobalComponents/ServerError.jsx";
 
-
-export function ConsultationHistory() {
+export function OphthaConsultationHistory() {
     const [searchTerm, setSearchTerm] = useState("");
     const [dateFilter, setDateFilter] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -21,7 +20,6 @@ export function ConsultationHistory() {
     const [consultationHistoryList, setConsultationHistoryList] = useState([]);
     const [errorStatus, setErrorStatus] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
-
 
     async function loadConsultationHistory(idDoctor)
     {
@@ -54,7 +52,6 @@ export function ConsultationHistory() {
         }
     }, [userData.id]);
 
-
     const filteredConsultations = consultationHistoryList.filter((consultation) => {
         const fullName = consultation?.idPatient?.firstName + " "+ consultation?.idPatient?.lastName;
         const matchesSearch = fullName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -62,18 +59,16 @@ export function ConsultationHistory() {
         return matchesSearch && matchesDate
     })
 
-
     const navigate = useNavigate();
 
     const {calculateAge} = useCalculateAge();
 
-
     return (
-        <CustomDashboard linkList={doctorNavLink} requiredRole={"Doctor"}>
-            <DoctorNavBar/>
+        <CustomDashboard linkList={ophthaNavLink} requiredRole={"Ophthalmologist"}>
+            <OphthalmologistNavBar/>
             <div className="mx-auto p-6">
                 <h1 className="text-2xl font-bold text-gray-800 mb-6">History of Consultations</h1>
-
+            
                 {/* Filters */}
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
                     <div className="relative flex-1">
@@ -139,8 +134,9 @@ export function ConsultationHistory() {
                                                             <div className="w-full flex items-center justify-center">
                                                                 <User className="h-6 w-6 text-gray-400 mr-2"/>
                                                                 <div>
-                                                                    <div
-                                                                        className="text-md font-medium text-gray-900">{patientInfo?.firstName + " " + patientInfo?.lastName}</div>
+                                                                    <div className="text-md font-medium text-gray-900">
+                                                                        {patientInfo?.firstName + " " + patientInfo?.lastName}
+                                                                    </div>
                                                                     <div className="text-md text-gray-500">
                                                                         {calculateAge(patientInfo?.birthDate).value + " " + calculateAge(patientInfo?.birthDate).unit}
                                                                     </div>
@@ -151,21 +147,25 @@ export function ConsultationHistory() {
                                                             <div className="w-full flex justify-center items-center ">
                                                                 <Clock className="h-5 w-5 text-gray-400 mr-2 mt-2"/>
                                                                 <div>
-                                                                    <div className="text-sm text-center text-gray-900">{consultation?.consultationDate ? formatDateOnly(consultation?.consultationDate) : 'Not Specified'}</div>
-                                                                    <div className="text-sm  text-center text-gray-500">{consultation?.consultationDate ? formatDateToTime(consultation?.consultationDate) : 'Not Specified'} </div>
+                                                                    <div className="text-sm text-center text-gray-900">
+                                                                        {consultation?.consultationDate ? formatDateOnly(consultation?.consultationDate) : 'Not Specified'}
+                                                                    </div>
+                                                                    <div className="text-sm  text-center text-gray-500">
+                                                                        {consultation?.consultationDate ? formatDateToTime(consultation?.consultationDate) : 'Not Specified'} 
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-5 bg-gray-100">
-                                                            <div
-                                                                className="text-sm text-center text-gray-900">{consultation?.consultationNotes || 'Not Specified'}</div>
+                                                            <div className="text-sm text-center text-gray-900">
+                                                                {consultation?.consultationNotes || 'Not Specified'}
+                                                            </div>
                                                         </td>
                                                         <td className="px-6 py-4 bg-gray-100 ">
                                                             <div className="flex items-center justify-center text-sm text-gray-900">
-                                                    <span
-                                                        className={`px-2 py-1 rounded-full border-2 text-sm font-medium ${getStateStyles(consultation?.statePatient).badge}`}>
-                                                        {consultation?.statePatient || 'Not Critical'}
-                                                    </span>
+                                                                <span className={`px-2 py-1 rounded-full border-2 text-sm font-medium ${getStateStyles(consultation?.statePatient).badge}`}>
+                                                                    {consultation?.statePatient || 'Not Critical'}
+                                                                </span>
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-5 bg-gray-100 ">
@@ -195,8 +195,9 @@ export function ConsultationHistory() {
                                 <div className="p-8 mt-24 flex items-center justify-center">
                                     <div className="flex flex-col">
                                         <Calendar className="h-16 w-16 text-primary-end mx-auto mb-4"/>
-                                        <h2 className="text-2xl font-bold text-gray-800 mb-2 mx-auto">No Consultations
-                                            History</h2>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-2 mx-auto">
+                                            No Consultations History
+                                        </h2>
                                         <p className="text-gray-600 mb-4 mx-auto text-center">You don't have any saved consultations yet. Once your medical consultations have been carried out, their history will appear here for better monitoring of your patients.</p>
                                         <button
                                             className="px-4 hover:bg-primary-start  duration-300 mx-auto py-2 bg-primary-end text-white rounded-lg transition-all "
@@ -214,6 +215,5 @@ export function ConsultationHistory() {
                 }
             </div>
         </CustomDashboard>
-    )
+    );
 }
-

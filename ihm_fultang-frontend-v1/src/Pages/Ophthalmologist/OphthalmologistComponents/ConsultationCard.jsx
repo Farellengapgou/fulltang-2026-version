@@ -10,13 +10,12 @@ export default function ConsultationCard ({ consultation }) {
         consultation: PropTypes.array.isRequired,
     }
 
-
     const patientInfos = consultation.idPatient;
     const { calculateAge } = useCalculateAge();
     const { value: ageValue, unit: ageUnit } = calculateAge('2000-01-01');
     const navigate = useNavigate();
 
-    function getStateStyles  (state)  {
+    function getStateStyles (state)  {
         const styles = {
             Critical: {
                 container: "border-l-red-600",
@@ -95,12 +94,12 @@ export default function ConsultationCard ({ consultation }) {
 
                 <div className="justify-end flex">
                     <button onClick={() => {navigate(`/doctor/consultation-list/details/${consultation.id}`, {state: {consultation}})}}
-                            className="px-4 py-2 bg-primary-end text-white rounded-lg  transition-colors flex items-center justify-center">
+                        className="px-4 py-2 bg-primary-end text-white rounded-lg  transition-colors flex items-center justify-center">
                         <Stethoscope className="h-5 w-5 mr-2"/>
                         Consult Now
                     </button>
                 </div>
             </div>
         </div>
-    )
+    );
 }

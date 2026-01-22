@@ -69,6 +69,10 @@ export function LoginPage()
         {
             navigate(appRouterPaths.financialAccountantHome)
         }
+        else if (response === "Ophthalmologist")
+        {
+            navigate(appRouterPaths.ophthalmologistPage)
+        }
         else if (response === "bad role")
         {
             setIsLoginErrorPresent(true);

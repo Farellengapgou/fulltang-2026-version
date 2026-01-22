@@ -1,15 +1,15 @@
 import {useEffect, useState} from "react"
 import { Search, Calendar,  ChevronLeft, ChevronRight } from "lucide-react"
-import AppointmentCard from "./DoctorComponents/AppointmentCard.jsx";
+import AppointmentCard from "./OphthalmologistComponents/AppointmentCard.jsx";
 import {useAuthentication} from "../../Utils/Provider.jsx";
-import {doctorNavLink} from "./lib/doctorNavLink.js";
-import {DoctorNavBar} from "./DoctorComponents/DoctorNavBar.jsx";
+import {ophthaNavLink} from "./lib/OphthalmologistNavLink.js";
+import {OphthalmologistNavBar} from "./OphthalmologistComponents/OphthalmologistNavBar.jsx";
 import {CustomDashboard} from "../../GlobalComponents/CustomDashboard.jsx";
 import axiosInstance from "../../Utils/axiosInstance.js";
 import Loader from "../../GlobalComponents/Loader.jsx";
 import ServerErrorPage from "../../GlobalComponents/ServerError.jsx";
 
-export  function AppointmentList() {
+export function AppointmentList(){
     const [filter, setFilter] = useState("Pending");
     const [searchTerm, setSearchTerm] = useState("");
     const [dateFilter, setDateFilter] = useState("");
@@ -20,9 +20,6 @@ export  function AppointmentList() {
     const [isLoading, setIsLoading] = useState(false);
     const [errorStatus, setErrorStatus] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
-
-
-
 
     const filteredAppointments = appointmentList.filter((appointment) => {
         const fullName = appointment?.idPatient?.firstName + " " + appointment?.idPatient?.lastName;
@@ -39,7 +36,7 @@ export  function AppointmentList() {
     const paginate = (pageNumber) => setCurrentPage(pageNumber)
     const {userData} = useAuthentication();
 
-    async function retrieveDoctorAppointments(doctorId)
+    async function retrieveOphthaAppointments(doctorId)
     {
         setIsLoading(true);
         try
@@ -66,30 +63,27 @@ export  function AppointmentList() {
     useEffect(() => {
         if(userData.id)
         {
-            retrieveDoctorAppointments(userData.id);
+            retrieveOphthaAppointments(userData.id);
         }
     }, [userData.id]);
 
     return (
-        <CustomDashboard linkList={doctorNavLink} requiredRole={"Doctor"}>
-            <DoctorNavBar />
+        <CustomDashboard linkList={ophthaNavLink} requiredRole={"Ophthalmologist"}>
+            <OphthalmologistNavBar />
             <div className="mx-auto p-6 h-fit">
                 <h1 className="text-3xl font-bold text-gray-800 mb-6">{`Appointments of Dr. ${userData?.first_name + " " + userData?.last_name}`}</h1>
-
 
                 <div className="mb-8 space-y-4">
                     <div className="flex flex-wrap gap-4">
                         <button
                             onClick={() => setFilter("Pending")}
-                            className={`px-4 py-2 rounded-md hover:bg-primary-start text-white duration-300 transition-all ${filter === "Pending" ? "bg-primary-end text-white font-bold " : "bg-gray-100 text-gray-800 hover:bg-gray-200"} transition-colors`}
+                            className={`px-4 py-2 rounded-md hover:bg-primary-start duration-300 transition-all ${filter === "Pending" ? "bg-primary-end text-white font-bold " : "bg-gray-100 text-gray-800 hover:bg-gray-200"} transition-colors`}
                         >
                             Upcoming appointments
                         </button>
                         <button
                             onClick={() => setFilter("Completed")}
-                            className={`px-4 py-2 rounded-md hover:bg-primary-start duration-300 transition-all  hover:text-white ${
-                                filter === "Completed" ? "bg-primary-end text-white font-bold " : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                            } transition-colors`}
+                            className={`px-4 py-2 rounded-md hover:bg-primary-start duration-300 transition-all  hover:text-white ${filter === "Completed" ? "bg-primary-end text-white font-bold " : "bg-gray-100 text-gray-800 hover:bg-gray-200"} transition-colors`}
                         >
                             Honored appointments
                         </button>
@@ -195,6 +189,5 @@ export  function AppointmentList() {
                 )}
             </div>
         </CustomDashboard>
-    )
+    );
 }
-

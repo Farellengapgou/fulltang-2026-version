@@ -358,22 +358,22 @@ export function Doctor() {
                 const endpoints = [
                     { 
                         key: 'appointments', 
-                        url: `http://localhost:8009/api/v1/medical/appointment/doctor/${userId}/`,
+                        url: `http://localhost:8009/api/v1/medical/appointment/planned/doctor/${userId}/count`,
                         fallback: 15
                     },
                     { 
                         key: 'consultations', 
-                        url: `http://localhost:8009/api/v1/medical/consultation/doctor/${userId}/`,
+                        url: `http://localhost:8009/api/v1/medical/consultation/doctor/${userId}/daily-count/`,
                         fallback: 8
                     },
                     { 
                         key: 'patients', 
-                        url: `http://localhost:8009/api/v1/medical/patient/doctor/${userId}/`,
+                        url: `http://localhost:8009/api/v1/medical/patient/doctor/${userId}/count/`,
                         fallback: 12
                     },
                     { 
                         key: 'exams', 
-                        url: `http://localhost:8009/api/v1/medical/exam/${userId}/`,
+                        url: `http://localhost:8009/api/v1/medical/exam-request/doctor/${userId}/count/`,
                         fallback: 6
                     }
                 ];
@@ -432,7 +432,7 @@ export function Doctor() {
             icon: ClipboardList,
             title: "Consultations",
             value: stats.consultations,
-            description: "Consultations today",
+            description: "Today's consultations",
             color: "bg-purple-500"
         },
         {

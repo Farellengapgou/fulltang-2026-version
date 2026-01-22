@@ -3,17 +3,15 @@ import {Tooltip} from "antd";
 import {useEffect, useState} from "react";
 import {ViewPatientDetailsModal} from "../Receptionist/ViewPatientDetailsModal.jsx";
 import axiosInstance from "../../Utils/axiosInstance.js";
-import {DoctorNavBar} from "./DoctorComponents/DoctorNavBar.jsx";
-import {doctorNavLink} from "./lib/doctorNavLink.js";
+import {OphthalmologistNavBar} from "./OphthalmologistComponents/OphthalmologistNavBar.jsx";
+import {ophthaNavLink} from "./lib/OphthalmologistNavLink.js";
 import {useNavigate} from "react-router-dom";
 import {useAuthentication} from "../../Utils/Provider.jsx";
 import Loader from "../../GlobalComponents/Loader.jsx";
 import ServerErrorPage from "../../GlobalComponents/ServerError.jsx";
 import {CustomDashboard} from "../../GlobalComponents/CustomDashboard.jsx";
 
-
-export function DoctorPatientList()
-{
+export function OphthaPatientList(){
     const [selectedPatientDetails, setSelectedPatientDetails] = useState({});
     const [canOpenViewPatientDetailModal, setCanOpenViewPatientDetailModal] = useState(false);
     const [patients, setPatients] = useState([]);
@@ -117,8 +115,8 @@ export function DoctorPatientList()
     const navigate = useNavigate();
 
     return (
-        <CustomDashboard linkList={doctorNavLink} requiredRole={"Doctor"}>
-            <DoctorNavBar/>
+        <CustomDashboard linkList={ophthaNavLink} requiredRole={"Ophthalmologist"}>
+            <OphthalmologistNavBar/>
             <div className="mt-5 flex flex-col relative">
 
                 {/*Header content with search bar*/}
@@ -140,13 +138,13 @@ export function DoctorPatientList()
                 </div>
 
                 {/*List of registered patients*/}
-
                 {isLoading ? (
                     <div className="h-[500px] w-full flex justify-center items-center">
                         <Loader size={"medium"} color={"primary-end"}/>
                     </div>
                 ) : errorStatus ? (
                     <ServerErrorPage errorStatus={errorStatus} message={errorMessage}/>
+
                 ) : patients.length === 0 ? (
                     <div className="h-[400px] w-full flex flex-col justify-center items-center text-center">
                         <FaUserMd className="text-9xl text-gray-300 mb-4" />
@@ -201,8 +199,8 @@ export function DoctorPatientList()
                                 ))}
                             </tbody>
                         </table>
-
-
+                
+                
                         {/*Pagination content */}
                         <div className="fixed w-full justify-center -right-16 bottom-0 flex mt-6 mb-4">
                             <div className="flex gap-4">
@@ -227,13 +225,13 @@ export function DoctorPatientList()
                                 </Tooltip>
                             </div>
                         </div>
-
-
+                
+                
                         {/* Modals content */}
                         <ViewPatientDetailsModal 
                             isOpen={canOpenViewPatientDetailModal}
                             patient={selectedPatientDetails} 
-                            onClose={() => setCanOpenViewPatientDetailModal(false)}   
+                            onClose={() => setCanOpenViewPatientDetailModal(false)}
                         />
                     </div>
                 )}
