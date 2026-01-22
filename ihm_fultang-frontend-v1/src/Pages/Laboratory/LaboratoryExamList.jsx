@@ -174,16 +174,6 @@ export function LaboratoryExamList() {
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none transition-all duration-300"
             />
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-2 py-2 pr-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none transition-all duration-300"
-          >
-            <option value="">All statuses</option>
-            <option value="En attente">Pending</option>
-            <option value="Termine">End</option>
-            <option value="Annule">Cancelled</option>
-          </select>
         </div>
 
         {/* Liste des demandes */}
