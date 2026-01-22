@@ -1,6 +1,8 @@
 import {XIcon} from "lucide-react";
 import {useEffect, useState} from "react";
 import PropTypes from "prop-types";
+import PhoneInput from "react-phone-input-2"
+import "react-phone-input-2/lib/style.css"
 import axiosInstance from "../../Utils/axiosInstance.js";
 import {useAuthentication} from "../../Utils/Provider.jsx";
 
@@ -342,22 +344,46 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone
-                                    Number</label>
-                                <input
-                                    type="number"
-                                    id="phone"
-                                    name="phoneNumber"
+                                <label 
+                                    htmlFor="email"
+                                    className="block text-sm font-medium text-gray-700 mb-1"
+                                >
+                                    Phone Number
+                                </label>
+
+                                <PhoneInput
+                                    country="cm"                 
                                     value={formData.phoneNumber}
-                                    placeholder={"enter patient's phone number"}
-                                    onChange={handleChange}
-                                    className={applyFormStyle()}
-                                    required={true}
+                                    onChange={(value) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            phoneNumber: value,
+                                        }))
+                                    }
+                                    countryCodeEditable={false} 
+                                    inputProps={{
+                                        name: "phoneNumber",
+                                        required: true,
+                                        placeholder: "Enter patient's phone number",
+                                    }}
+                                    containerClass="w-full"
+                                    inputClass={`${applyFormStyle()} !w-full`}
+                                    buttonClass="!border-gray-300 !bg-gray-100"
+                                    dropdownStyle={{
+                                        borderRadius: '8px',
+                                    }}
+                                    enableSearch
+                                    searchPlaceholder="Search country..."
+                                    preferredCountries={['cm', 'fr', 'us', 'gb', 'ca']}
                                 />
                             </div>
                             <div>
-                                <label htmlFor="email"
-                                       className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <label 
+                                    htmlFor="email"
+                                    className="block text-sm font-medium text-gray-700 mb-1"
+                                >
+                                    Email
+                                </label>
                                 <input
                                     type="email"
                                     id="email"
