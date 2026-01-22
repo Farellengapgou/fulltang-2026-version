@@ -26,11 +26,6 @@ export const laboratoryNavLink = [
         link: appRoutes.laboratoryExamenHistories
     },
     {
-        icon: FaBell,
-        name: "Notifications",
-        link: appRoutes.laboratoryNotification
-    },
-    {
         name: 'Help Center',
         icon: FaQuestionCircle,
         link: appRoutes.helpCenterPage,

@@ -35,15 +35,6 @@ export function LaboratoryNavBar()
                                 <FaEnvelope/>
                             </button>
                         </Tooltip>
-                        <Tooltip placement={"top"} title={"Notification"}>
-                            <button
-                                onClick={
-                                    () => {navigate(AppRoutesPaths.laboratoryNotification)}
-                                }
-                                className={applyNavLinkBtnStyle()}>
-                                <FaBell/>
-                            </button>
-                        </Tooltip>
                         <Tooltip placement={"top"} title={"LogOut"}>
                             <button
                                 onClick={() => {logout()}}
