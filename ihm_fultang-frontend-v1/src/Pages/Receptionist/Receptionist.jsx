@@ -240,7 +240,7 @@ export function Receptionist() {
                                                     </tr>
                                                 ))}
 
-                                            {patients.map((patient, index) => (
+                                            {/* {patients.map((patient, index) => (
                                                 <tr key={patient.id || index} className="">
                                                     <td className="p-4 text-md text-blue-900 rounded-l-lg bg-gray-100 text-center">{index + 1}</td>
                                                     <td className="p-4 text-md text-center bg-gray-100 font-bold">{patient.firstName}</td>
@@ -280,7 +280,7 @@ export function Receptionist() {
                                                         </div>
                                                     </td>
                                                 </tr>
-                                            ))}
+                                            ))} */}
 
                                             </tbody>
                                         </table>
