@@ -317,7 +317,7 @@ export function AddMedicalStaff() {
                             </div>
                             <div>
                                 <label className={applyLabelStyle()}>
-                                    Spécialisation
+                                    Specialisation
                                 </label>
                                 <select
                                     name="role"
