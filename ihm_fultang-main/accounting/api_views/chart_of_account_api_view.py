@@ -6,13 +6,13 @@ from accounting.serializers import ChartOfAccountsSerializer
 
 from accounting.permissions.accounting_staff_permissions import AccountingStaffPermission
 from accounting.serializers import AccountSerializer
-from accounting.models import Account, AccountState, BudgetExercise
+from accounting.models_financier import Account, AccountState, BudgetExercise
 from rest_framework.viewsets import ModelViewSet
 from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from accounting.models import ChartOfAccounts
+from accounting.models_financier import ChartOfAccounts
 from django.db import transaction
 
 tags = ["chart-account"]
@@ -104,10 +104,25 @@ class ChartOfAccountsViewSet(ModelViewSet):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context.update({
-            'start_date': self.request.query_params.get('start_date'),
-            'end_date': self.request.query_params.get('end_date'),
-        })
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        # Convert strings to date objects if they exist
+        if start_date:
+            try:
+                from datetime import datetime
+                context['start_date'] = datetime.strptime(start_date, '%Y-%m-%d').date()
+            except (ValueError, TypeError):
+                pass
+        
+        if end_date:
+            try:
+                from datetime import datetime
+                context['end_date'] = datetime.strptime(end_date, '%Y-%m-%d').date()
+            except (ValueError, TypeError):
+                pass
+
+        return context
 
     @transaction.atomic
     def perform_create(self, serializer):
@@ -160,3 +175,57 @@ class ChartOfAccountsViewSet(ModelViewSet):
         detailed_accounts = self.queryset.filter(is_detailed=True)
         serializer = self.get_serializer(detailed_accounts, many=True)
         return Response(serializer.data)
+
+    @swagger_auto_schema(
+        method='get',
+        operation_description="Récupère le Grand Livre (historique) d'un compte",
+        manual_parameters=[
+            openapi.Parameter('start_date', openapi.IN_QUERY, type=openapi.FORMAT_DATE, description="Date début"),
+            openapi.Parameter('end_date', openapi.IN_QUERY, type=openapi.FORMAT_DATE, description="Date fin"),
+        ],
+        responses={200: openapi.Response("Liste des mouvements")}
+    )
+    @action(detail=True, methods=['get'])
+    def ledger(self, request, pk=None):
+        """Grand Livre du compte : retourne les lignes d'écritures validées"""
+        account = self.get_object()
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+
+        # Import local pour éviter les cycles si nécessaire, ou utiliser self.queryset.model...
+        from accounting.models_financier import JournalEntryLine
+        
+        lines = JournalEntryLine.objects.filter(
+            account=account,
+            journal_entry__state='POSTED'
+        ).select_related('journal_entry', 'journal_entry__journal').order_by('journal_entry__entry_date')
+
+        if start_date:
+            lines = lines.filter(journal_entry__entry_date__gte=start_date)
+        if end_date:
+            lines = lines.filter(journal_entry__entry_date__lte=end_date)
+            
+        # On pourrait utiliser un serializer spécifique, mais faisons simple pour l'instant
+        data = []
+        balance = 0 # Solde cumulé (faudrait ajouter le solde d'ouverture si date_start > début exercice)
+        
+        for line in lines:
+            debit = line.debit_amount
+            credit = line.credit_amount
+            if account.account_class in ['2','3','5','6']: # Actif/Charge -> Debit augmente
+                balance += (debit - credit)
+            else: # Passif/Produit -> Credit augmente
+                balance += (credit - debit)
+                
+            data.append({
+                'date': line.journal_entry.entry_date,
+                'journal': line.journal_entry.journal.code,
+                'entry_number': line.journal_entry.entry_number,
+                'voucher': line.journal_entry.voucher_number,
+                'label': line.label,
+                'debit': debit,
+                'credit': credit,
+                'balance': balance
+            })
+            
+        return Response(data)

@@ -4,7 +4,7 @@ from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.utils import timezone
-from accounting.models import BudgetExercise, Account, AccountState, FinancialOperation
+from accounting.models_financier import BudgetExercise, Account, AccountState, FinancialOperation
 from accounting.permissions.accounting_staff_permissions import AccountingStaffPermission
 from rest_framework.permissions import IsAuthenticated
 from polyclinic.models import Bill
@@ -12,6 +12,7 @@ from polyclinic.models import Bill
 
 class AccountingStatsAPI(APIView):
     permission_classes = [IsAuthenticated, AccountingStaffPermission]
+    
     @swagger_auto_schema(
         operation_description="Obtenir les statistiques comptables globales",
         manual_parameters=[
