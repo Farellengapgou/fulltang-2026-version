@@ -30,7 +30,10 @@ def apply_movement_filters(qs, params):
 
     movement_type = params.get("movement_type")
     if movement_type:
-        qs = qs.filter(movement_type__iexact=movement_type)
+        if movement_type.upper() == "TRANSFER":
+            qs = qs.filter(Q(movement_type__iexact="TRANSFER") | Q(movement_reason__iexact="TRANSFER"))
+        else:
+            qs = qs.filter(movement_type__iexact=movement_type)
 
     movement_reason = params.get("movement_reason")
     if movement_reason:

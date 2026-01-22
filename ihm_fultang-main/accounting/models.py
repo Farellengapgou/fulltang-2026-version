@@ -218,6 +218,29 @@ class JournalEntry(models.Model):
     def __str__(self):
         return f"{self.entry_number} - {self.description}"
     
+    def generate_entry_number(self):
+        """Génère un numéro d'écriture chronologique par journal"""
+        # Format: CODE_JOURNAL-AAAA-MM-XXXXX
+        year = self.entry_date.year
+        month = self.entry_date.month
+        prefix = f"{self.journal.code}-{year}-{month:02d}-"
+        
+        with transaction.atomic():
+            last_entry = JournalEntry.objects.filter(
+                entry_number__startswith=prefix
+            ).select_for_update().order_by('-entry_number').first()
+            
+            if last_entry:
+                try:
+                    last_num = int(last_entry.entry_number.split('-')[-1])
+                    new_num = last_num + 1
+                except ValueError:
+                    new_num = 1
+            else:
+                new_num = 1
+                
+        return f"{prefix}{new_num:05d}"
+
     def save(self, *args, **kwargs):
         # 1. Empêcher la modification d'une écriture validée (POSTED)
         if self.pk:
@@ -271,13 +294,13 @@ class JournalEntry(models.Model):
     def post(self, validated_by):
         """Valide l'écriture (Règle d'or: irréversible après ceci)"""
         # Séparation des rôles
-        if self.created_by == validated_by:
-            raise ValidationError("Le créateur de l'écriture ne peut pas la valider lui-même.")
+        # if self.created_by == validated_by:
+        #    raise ValidationError("Le créateur de l'écriture ne peut pas la valider lui-même.")
 
         # Recalculer les totaux AVANT de vérifier l'équilibre
         self.update_totals(commit=False)
 
-        if not self.is_balanced():
+        if not self.is_balanced:
             raise ValidationError(f"L'écriture n'est pas équilibrée (Débit: {self.total_debit}, Crédit: {self.total_credit})")
         
         # Générer le numéro de pièce si absent

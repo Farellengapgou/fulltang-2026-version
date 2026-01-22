@@ -54,11 +54,17 @@ class StockLevelViewSet(ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated, AccountingStaffPermission]
 
     def get_queryset(self):
-        return (
-            Stock.objects
-            .select_related("article", "depot")
-            .all()
-        )
+        qs = Stock.objects.select_related("article", "depot").all()
+        
+        depot_id = self.request.query_params.get('depot_id') or self.request.query_params.get('warehouse')
+        if depot_id:
+            qs = qs.filter(depot_id=depot_id)
+            
+        article_id = self.request.query_params.get('article_id')
+        if article_id:
+            qs = qs.filter(article_id=article_id)
+            
+        return qs
 
     @swagger_auto_schema(
         operation_summary="Stock par article",

@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.db.models import Q
 from django.db import transaction
 from django.core.exceptions import ValidationError
+from datetime import datetime, time
 
 from accounting.stock_models import TransferNote, TransferLine, StockMovement, Stock
 from accounting.stock_serializers import TransferNoteSerializer, TransferLineSerializer
@@ -185,9 +186,9 @@ class TransferNoteViewSet(ModelViewSet):
 
     queryset = (
         TransferNote.objects.select_related(
-            "source_depot", "destination_depot", "created_by", "sent_by", "received_by"
+            "source_depot", "destination_depot", "created_by"
         )
-        .prefetch_related("lines__article", "lines__batch")
+        .prefetch_related("lines__article")
         .order_by("-planned_date", "-created_at")
     )
     serializer_class = TransferNoteSerializer
@@ -225,8 +226,8 @@ class TransferNoteViewSet(ModelViewSet):
         transfer = self.get_object()
         lines = (
             TransferLine.objects.filter(transfer_id=transfer.pk)
-            .select_related("article", "batch")
-            .order_by("id")
+            .select_related("article")
+            .order_by("sequence")
         )
         serializer = TransferLineSerializer(lines, many=True)
         return Response(serializer.data)
@@ -252,6 +253,11 @@ class TransferNoteViewSet(ModelViewSet):
 
         data = request.data.copy()
         data["transfer"] = pk
+
+        # Auto-calculate sequence if not provided
+        if not data.get("sequence"):
+            last_line = transfer.lines.order_by("-sequence").first()
+            data["sequence"] = (last_line.sequence + 1) if last_line else 1
 
         serializer = TransferLineSerializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -406,25 +412,35 @@ class TransferNoteViewSet(ModelViewSet):
 
         # Créer les mouvements de sortie
         for line in transfer.lines.select_related("article").all():
+            unit_price = line.article.weighted_average_price
             StockMovement.objects.create(
                 movement_type="OUT",
-                movement_reason="TRANSFER_OUT",
+                movement_reason="TRANSFER",
                 article=line.article,
-                batch=line.batch,
                 quantity=line.quantity,
-                unit_price=line.unit_price,
-                total_value=line.quantity * line.unit_price if line.unit_price else 0,
+                unit_price=unit_price,
+                total_value=line.quantity * unit_price,
                 source_depot=transfer.source_depot,
                 destination_depot=transfer.destination_depot,
                 reference_document=transfer.transfer_number,
-                operation_date=transfer.planned_date or timezone.now(),
-                notes=f"Transfert vers {transfer.destination_depot.code if transfer.destination_depot else 'N/A'}",
+                document_type='TRANSFER_NOTE',
+                operation_date=timezone.make_aware(datetime.combine(transfer.planned_date, time.min)) if transfer.planned_date else timezone.now(),
+                notes=f"Transfert vers {transfer.destination_depot.name if transfer.destination_depot else 'N/A'}",
                 created_by=request.user,
+                status="CONFIRMED"
             )
+            
+            # Mettre à jour le stock source
+            stock, _ = Stock.objects.get_or_create(
+                article=line.article, 
+                depot=transfer.source_depot,
+                defaults={'physical_quantity': 0, 'theoretical_quantity': 0}
+            )
+            stock.physical_quantity -= line.quantity
+            stock.theoretical_quantity -= line.quantity
+            stock.update_value()
 
         transfer.status = "SENT"
-        transfer.sent_by = request.user
-        transfer.sent_at = timezone.now()
         transfer.save()
 
         return Response(
@@ -455,25 +471,35 @@ class TransferNoteViewSet(ModelViewSet):
 
         # Créer les mouvements d'entrée
         for line in transfer.lines.select_related("article").all():
+            unit_price = line.article.weighted_average_price
             StockMovement.objects.create(
                 movement_type="IN",
-                movement_reason="TRANSFER_IN",
+                movement_reason="TRANSFER",
                 article=line.article,
-                batch=line.batch,
                 quantity=line.quantity,
-                unit_price=line.unit_price,
-                total_value=line.quantity * line.unit_price if line.unit_price else 0,
+                unit_price=unit_price,
+                total_value=line.quantity * unit_price,
                 source_depot=transfer.source_depot,
                 destination_depot=transfer.destination_depot,
                 reference_document=transfer.transfer_number,
+                document_type='TRANSFER_NOTE',
                 operation_date=timezone.now(),
-                notes=f"Réception depuis {transfer.source_depot.code if transfer.source_depot else 'N/A'}",
+                notes=f"Réception de {transfer.source_depot.name if transfer.source_depot else 'N/A'}",
                 created_by=request.user,
+                status="CONFIRMED"
             )
 
+            # Mettre à jour le stock destination
+            stock, _ = Stock.objects.get_or_create(
+                article=line.article, 
+                depot=transfer.destination_depot,
+                defaults={'physical_quantity': 0, 'theoretical_quantity': 0}
+            )
+            stock.physical_quantity += line.quantity
+            stock.theoretical_quantity += line.quantity
+            stock.update_value()
+
         transfer.status = "RECEIVED"
-        transfer.received_by = request.user
-        transfer.received_at = timezone.now()
         transfer.save()
 
         return Response(

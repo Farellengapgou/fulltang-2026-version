@@ -189,6 +189,7 @@ class GoodsIssueNoteViewSet(ModelViewSet):
     - lines: Lister/Ajouter des lignes
     - line_detail: GET/PUT/DELETE sur une ligne spécifique
     - validate: Confirmer le bon (méthode FEFO)
+    - post: Comptabiliser le bon
     - cancel: Annuler le bon
     - check-availability: Vérifier la disponibilité du stock
     - suggested-batches: Suggérer les lots selon FEFO
@@ -203,6 +204,16 @@ class GoodsIssueNoteViewSet(ModelViewSet):
     )
     serializer_class = GoodsIssueNoteSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.status != 'DRAFT':
+            return Response(
+                {"detail": "Seuls les bons en brouillon peuvent être supprimés pour préserver la traçabilité du stock (lots réservés ou déduits)."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return super().destroy(request, *args, **kwargs)
+
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -262,8 +273,8 @@ class GoodsIssueNoteViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        # Mettre à jour le total
-        issue.total_amount = sum(line.line_amount for line in issue.lines.all())
+        # Mettre à jour le total (PMP prévisionnel)
+        issue.total_amount = sum(line.quantity * line.article.weighted_average_price for line in issue.lines.all())
         issue.save(update_fields=["total_amount"])
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -319,7 +330,7 @@ class GoodsIssueNoteViewSet(ModelViewSet):
         serializer.save()
 
         # Mettre à jour le total
-        issue.total_amount = sum(l.line_amount for l in issue.lines.all())
+        issue.total_amount = sum(l.quantity * l.article.weighted_average_price for l in issue.lines.all())
         issue.save(update_fields=["total_amount"])
 
         return Response(serializer.data)
@@ -357,8 +368,8 @@ class GoodsIssueNoteViewSet(ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @swagger_auto_schema(
-        operation_summary="Valider un bon de sortie",
-        operation_description="Confirme le bon de sortie avec la méthode FEFO (First Expired, First Out).",
+        operation_summary="Valider un bon de sortie (Réservation)",
+        operation_description="Passe le bon en VALIDATED et réserve les quantités dans le stock.",
         manual_parameters=[auth_header_param],
         tags=tags,
     )
@@ -380,6 +391,41 @@ class GoodsIssueNoteViewSet(ModelViewSet):
             )
 
         try:
+            issue.validate(request.user)
+        except ValidationError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return Response(
+            {
+                "detail": "Bon de sortie réservé avec succès",
+                "issue_number": issue.issue_number,
+                "status": issue.status,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @swagger_auto_schema(
+        operation_summary="Confirmer un bon de sortie (Sortie Physique)",
+        operation_description="Passe le bon en CONFIRMED et déduit physiquement les quantités des lots.",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @action(detail=True, methods=["post"], url_path="confirm")
+    @transaction.atomic
+    def confirm_issue(self, request, pk=None):
+        issue = self.get_object()
+
+        if issue.status != "VALIDATED":
+            return Response(
+                {"detail": "Le bon doit être validé avant d'être confirmé"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
             issue.confirm(request.user)
         except ValidationError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -390,7 +436,7 @@ class GoodsIssueNoteViewSet(ModelViewSet):
 
         return Response(
             {
-                "detail": "Bon de sortie validé avec succès",
+                "detail": "Sortie physique confirmée avec succès",
                 "issue_number": issue.issue_number,
                 "status": issue.status,
             },
@@ -426,9 +472,9 @@ class GoodsIssueNoteViewSet(ModelViewSet):
             issue.delete()
             return Response({"detail": "Bon supprimé"}, status=status.HTTP_200_OK)
 
-        if issue.status != "CONFIRMED":
+        if issue.status not in ["CONFIRMED", "POSTED"]:
             return Response(
-                {"detail": "Seuls les bons confirmés peuvent être annulés"},
+                {"detail": "Seuls les bons confirmés ou comptabilisés peuvent être annulés"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -462,6 +508,41 @@ class GoodsIssueNoteViewSet(ModelViewSet):
             )
 
         return Response({"detail": "Bon annulé avec succès"}, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_summary="Comptabiliser un bon de sortie",
+        operation_description="Génère l'écriture comptable valorisée et passe le statut en POSTED.",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @action(detail=True, methods=["post"], url_path="post")
+    @transaction.atomic
+    def post_issue(self, request, pk=None):
+        issue = self.get_object()
+
+        if issue.status != "CONFIRMED":
+            return Response(
+                {"detail": "Le bon doit être confirmé physiquement avant comptabilisation"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            issue.generate_journal_entry(request.user)
+        except ValidationError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return Response(
+            {
+                "detail": "Bon de sortie comptabilisé avec succès",
+                "journal_entry": issue.journal_entry.entry_number,
+                "status": issue.status,
+            },
+            status=status.HTTP_200_OK,
+        )
 
     @swagger_auto_schema(
         operation_summary="Vérifier la disponibilité",
@@ -524,10 +605,9 @@ class GoodsIssueNoteViewSet(ModelViewSet):
         for line in issue.lines.select_related("article").all():
             needed = float(line.quantity)
 
-            # Filtrer les lots disponibles dans le dépôt source uniquement
+            # Filtrer les lots disponibles (globalement pour l'instant car Batch n'a pas de dépôt)
             batches = Batch.objects.filter(
                 article=line.article,
-                depot=issue.depot,
                 remaining_quantity__gt=0,
                 is_blocked=False,
             ).order_by("expiry_date", "reception_date")

@@ -345,6 +345,8 @@ class SupplierSerializer(serializers.ModelSerializer):
     )
     balance = serializers.SerializerMethodField()
     orders_total_current_year = serializers.SerializerMethodField()
+    total_purchases = serializers.SerializerMethodField()
+    last_purchase_date = serializers.SerializerMethodField()
 
     class Meta:
         model = Supplier
@@ -353,9 +355,27 @@ class SupplierSerializer(serializers.ModelSerializer):
             'email', 'website', 'payment_terms', 'credit_limit',
             'discount_rate', 'tax_id', 'trade_register', 'account',
             'account_label', 'is_active', 'created_at', 'created_by',
-            'created_by_name', 'balance', 'orders_total_current_year'
+            'created_by_name', 'balance', 'orders_total_current_year',
+            'total_purchases', 'last_purchase_date'
         ]
         read_only_fields = ['created_at', 'created_by']
+
+    def get_total_purchases(self, obj):
+        from .stock_models import GoodsReceiptNote
+        from django.db.models import Sum
+        total = GoodsReceiptNote.objects.filter(
+            supplier=obj,
+            status__in=["CONFIRMED", "POSTED"]
+        ).aggregate(total=Sum("total_amount"))["total"] or 0
+        return float(total)
+
+    def get_last_purchase_date(self, obj):
+        from .stock_models import GoodsReceiptNote
+        last = GoodsReceiptNote.objects.filter(
+            supplier=obj,
+            status__in=["CONFIRMED", "POSTED"]
+        ).order_by("-receipt_date").first()
+        return last.receipt_date if last else None
 
     def get_balance(self, obj):
         """Retourne le solde fournisseur"""

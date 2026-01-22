@@ -58,7 +58,30 @@ class MaterialDashboardAPIView(APIView):
                 "article_count": depot.stocks.filter(physical_quantity__gt=0).count()
             })
 
-        # 7. Lots expirant bientôt (90 jours)
+        # 7. Stock par catégorie
+        from accounting.stock_models import Category
+        stock_by_category = []
+        categories = Category.objects.all()
+        for cat in categories:
+            val = Stock.objects.filter(article__category=cat).annotate(
+                item_value=F('physical_quantity') * F('article__weighted_average_price')
+            ).aggregate(total=Sum('item_value'))['total'] or 0
+            if val > 0:
+                stock_by_category.append({
+                    "name": cat.name,
+                    "value": float(val)
+                })
+
+        # 8. Top consommations (Articles les plus sortis ce mois-ci)
+        top_consuming = StockMovement.objects.filter(
+            movement_type='OUT',
+            operation_date__gte=first_day_of_month,
+            status='CONFIRMED'
+        ).values('article__name').annotate(
+            value=Sum('total_value')
+        ).order_by('-value')[:5]
+
+        # 9. Lots expirant bientôt (90 jours)
         expiring_batches = Batch.objects.filter(
             expiry_date__lte=today.date() + timedelta(days=90),
             remaining_quantity__gt=0
@@ -86,6 +109,13 @@ class MaterialDashboardAPIView(APIView):
                 } for m in recent_movements
             ],
             "stock_by_warehouse": stock_by_warehouse,
+            "stock_by_category": stock_by_category,
+            "top_consuming_articles": [
+                {
+                    "article": item["article__name"],
+                    "value": float(item["value"] or 0)
+                } for item in top_consuming
+            ],
             "expiring_batches": [
                 {
                     "batch_number": b.batch_number,

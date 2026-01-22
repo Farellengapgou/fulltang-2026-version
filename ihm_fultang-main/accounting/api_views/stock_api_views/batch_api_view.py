@@ -33,7 +33,6 @@ auth_header_param = openapi.Parameter(
             "Retourne la liste des lots (batches).\n\n"
             "Filtres possibles :\n"
             "- `article_id`\n"
-            "- `depot_id`\n"
             "- `is_blocked`\n"
             "- `is_expired`"
         ),
@@ -44,8 +43,8 @@ auth_header_param = openapi.Parameter(
 @method_decorator(
     name="retrieve",
     decorator=swagger_auto_schema(
-        operation_summary="Détail d’un lot",
-        operation_description="Retourne les informations détaillées d’un lot.",
+        operation_summary="Détail d'un lot",
+        operation_description="Retourne les informations détaillées d'un lot.",
         manual_parameters=[auth_header_param],
         tags=tags
     )
@@ -54,7 +53,7 @@ auth_header_param = openapi.Parameter(
     name="create",
     decorator=swagger_auto_schema(
         operation_summary="Créer un lot",
-        operation_description="Création d’un lot (batch) avec date d’expiration.",
+        operation_description="Création d'un lot (batch) avec date d'expiration.",
         manual_parameters=[auth_header_param],
         tags=tags
     )
@@ -63,7 +62,7 @@ auth_header_param = openapi.Parameter(
     name="partial_update",
     decorator=swagger_auto_schema(
         operation_summary="Modifier un lot",
-        operation_description="Modification partielle d’un lot.",
+        operation_description="Modification partielle d'un lot.",
         manual_parameters=[auth_header_param],
         tags=tags
     )
@@ -73,19 +72,15 @@ class BatchViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, AccountingStaffPermission]
 
     def get_queryset(self):
-        qs = Batch.objects.select_related("article", "depot")
+        qs = Batch.objects.all()
 
         # 🔍 Filtres
         article_id = self.request.query_params.get("article_id")
-        depot_id = self.request.query_params.get("depot_id")
         is_blocked = self.request.query_params.get("is_blocked")
         is_expired = self.request.query_params.get("is_expired")
 
         if article_id:
             qs = qs.filter(article_id=article_id)
-
-        if depot_id:
-            qs = qs.filter(depot_id=depot_id)
 
         if is_blocked is not None:
             qs = qs.filter(is_blocked=is_blocked.lower() == "true")
@@ -132,7 +127,7 @@ class BatchViewSet(ModelViewSet):
         return Response(BatchSerializer(batches, many=True).data)
 
     @swagger_auto_schema(
-        operation_summary="Lots proches de l’expiration",
+        operation_summary="Lots proches de l'expiration",
         operation_description=(
             "Lots expirant très prochainement.\n"
             "Paramètre optionnel : `days` (défaut = 7)."
@@ -184,7 +179,7 @@ class BatchViewSet(ModelViewSet):
 
     @swagger_auto_schema(
         operation_summary="Débloquer un lot",
-        operation_description="Autorise à nouveau l’utilisation du lot.",
+        operation_description="Autorise à nouveau l'utilisation du lot.",
         manual_parameters=[auth_header_param],
         tags=tags
     )

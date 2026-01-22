@@ -221,25 +221,35 @@ class GoodsReceiptNoteViewSet(ModelViewSet):
     @lines.mapping.post
     @transaction.atomic
     def add_line(self, request, pk=None):
-        receipt = self.get_object()
+        import traceback
+        try:
+            receipt = self.get_object()
 
-        if receipt.status != "DRAFT":
+            if receipt.status != "DRAFT":
+                return Response(
+                    {"detail": "Impossible d'ajouter des lignes à un bon non brouillon"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            data = request.data.copy()
+            data["receipt"] = pk
+
+            serializer = GoodsReceiptLineSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            # Mettre à jour les totaux après ajout
+            receipt.update_totals()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            import traceback  # Re-import just in case
+            print(f"ERROR ADDING LINE: {str(e)}")
+            print(traceback.format_exc())
             return Response(
-                {"detail": "Impossible d'ajouter des lignes à un bon non brouillon"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"detail": f"Erreur interne: {str(e)}", "trace": traceback.format_exc()},
+                status=status.HTTP_400_BAD_REQUEST
             )
-
-        data = request.data.copy()
-        data["receipt"] = pk
-
-        serializer = GoodsReceiptLineSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        # Mettre à jour les totaux après ajout
-        receipt.update_totals()
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @swagger_auto_schema(
         operation_summary="Récupérer une ligne spécifique",
@@ -362,6 +372,37 @@ class GoodsReceiptNoteViewSet(ModelViewSet):
         return Response(
             {
                 "detail": "Bon d'entrée validé avec succès",
+                "receipt_number": receipt.receipt_number,
+                "status": receipt.status,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @swagger_auto_schema(
+        operation_summary="Comptabiliser le bon",
+        operation_description="Génère l'écriture comptable pour ce bon.",
+        manual_parameters=[auth_header_param],
+        tags=tags,
+    )
+    @action(detail=True, methods=["post"], url_path="accounting-entry")
+    @transaction.atomic
+    def post_receipt(self, request, pk=None):
+        receipt = self.get_object()
+        
+        try:
+            receipt.post_to_accounting()
+        except ValidationError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            # import traceback
+            # print(traceback.format_exc())
+            return Response(
+                {"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+            
+        return Response(
+            {
+                "detail": "Bon comptabilisé avec succès",
                 "receipt_number": receipt.receipt_number,
                 "status": receipt.status,
             },

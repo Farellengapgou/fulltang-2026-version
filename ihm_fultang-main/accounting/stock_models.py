@@ -370,7 +370,7 @@ class Stock(models.Model):
     def update_value(self):
         """Met à jour la valorisation"""
         self.stock_value = self.physical_quantity * self.article.weighted_average_price
-        self.save(update_fields=['stock_value', 'updated_at'])
+        self.save(update_fields=['stock_value', 'physical_quantity', 'theoretical_quantity', 'reserved_quantity', 'updated_at'])
     
     def can_issue(self, quantity):
         """Vérifie si on peut sortir une quantité"""
@@ -815,20 +815,30 @@ class GoodsReceiptNote(models.Model):
         
         # Pour chaque ligne, créer un lot et un mouvement
         for line in self.lines.all():
-            # Créer le lot si nécessaire
+            # Créer ou mettre à jour le lot
             if line.article.requires_batch:
-                batch = Batch.objects.create(
+                batch, created = Batch.objects.get_or_create(
                     article=line.article,
-                    supplier=self.supplier,
                     batch_number=line.batch_number,
-                    manufacturing_date=line.manufacturing_date,
-                    expiry_date=line.expiry_date,
-                    reception_date=self.receipt_date,
-                    initial_quantity=line.quantity_received,
-                    remaining_quantity=line.quantity_received,
-                    unit_cost=line.unit_price,
-                    created_by=user
+                    supplier=self.supplier,
+                    defaults={
+                        'manufacturing_date': line.manufacturing_date,
+                        'expiry_date': line.expiry_date,
+                        'reception_date': self.receipt_date,
+                        'initial_quantity': line.quantity_received,
+                        'remaining_quantity': line.quantity_received,
+                        'unit_cost': line.unit_price,
+                        'created_by': user
+                    }
                 )
+                if not created:
+                    batch.initial_quantity += line.quantity_received
+                    batch.remaining_quantity += line.quantity_received
+                    # Mettre à jour la date d'expiration si fournie et plus récente/différente? 
+                    # On garde la première par sécurité ou on met à jour.
+                    if line.expiry_date:
+                        batch.expiry_date = line.expiry_date
+                    batch.save()
             else:
                 batch = None
             
@@ -849,6 +859,9 @@ class GoodsReceiptNote(models.Model):
                 created_by=user
             )
             
+            # Recalculer le PMP (AVANT la mise à jour du stock pour avoir la "current_quantity" correcte)
+            line.article.recalculate_pmp(line.quantity_received, line.unit_price)
+        
             # Mettre à jour le stock
             stock, created = Stock.objects.get_or_create(
                 article=line.article,
@@ -859,9 +872,6 @@ class GoodsReceiptNote(models.Model):
             stock.theoretical_quantity += line.quantity_received
             stock.update_value()
             
-            # Recalculer le PMP
-            line.article.recalculate_pmp(line.quantity_received, line.unit_price)
-        
         # Mettre à jour le statut
         self.status = 'CONFIRMED'
         self.validated_by = user
@@ -903,21 +913,24 @@ class GoodsReceiptNote(models.Model):
                 label=f"Stock {line.article.name}",
                 debit_amount=line.line_amount,
                 credit_amount=0,
-                partner=self.supplier
+                partner_supplier=self.supplier
             )
             sequence += 1
         
         # Crédit fournisseur (total)
-        if self.supplier and self.supplier.account:
-            JournalEntryLine.objects.create(
-                journal_entry=entry,
-                sequence=sequence,
-                account=self.supplier.account,
-                label=f"Fournisseur {self.supplier.name}",
-                debit_amount=0,
-                credit_amount=self.total_amount,
-                partner=self.supplier
-            )
+        # Crédit fournisseur (total)
+        if not self.supplier or not self.supplier.account:
+            raise ValidationError(f"Le fournisseur {self.supplier.name} n'a pas de compte comptable associé (ex: 401). Veuillez le configurer dans la fiche fournisseur.")
+
+        JournalEntryLine.objects.create(
+            journal_entry=entry,
+            sequence=sequence,
+            account=self.supplier.account,
+            label=f"Fournisseur {self.supplier.name}",
+            debit_amount=0,
+            credit_amount=self.total_amount,
+            partner_supplier=self.supplier
+        )
         
         # Mettre à jour les totaux et valider
         entry.update_totals()
@@ -973,7 +986,8 @@ class GoodsReceiptLine(models.Model):
     
     def save(self, *args, **kwargs):
         # Calculer le montant
-        discounted_price = self.unit_price * (1 - self.discount_rate / 100)
+        discount_rate = Decimal(str(self.discount_rate)) if self.discount_rate else Decimal('0')
+        discounted_price = self.unit_price * (1 - discount_rate / 100)
         self.line_amount = self.quantity_received * discounted_price
         super().save(*args, **kwargs)
 
@@ -991,9 +1005,10 @@ class GoodsIssueNote(models.Model):
         ('RETURN', 'Retour fournisseur'),
     ]
     
-    ISSUE_STATUS = [
+    STATUS_CHOICES = [
         ('DRAFT', 'Brouillon'),
-        ('CONFIRMED', 'Confirmé'),
+        ('VALIDATED', 'Validé (Réservé)'),
+        ('CONFIRMED', 'Confirmé (Déduit)'),
         ('POSTED', 'Comptabilisé'),
         ('CANCELLED', 'Annulé'),
     ]
@@ -1042,7 +1057,7 @@ class GoodsIssueNote(models.Model):
     )
     
     # État
-    status = models.CharField(max_length=15, choices=ISSUE_STATUS, default='DRAFT')
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='DRAFT')
     notes = models.TextField(blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
@@ -1101,59 +1116,163 @@ class GoodsIssueNote(models.Model):
         
         return f"{prefix}{new_num:05d}"
     
-    def confirm(self, user):
-        """Confirme le bon de sortie avec méthode FEFO"""
+    def update_total(self):
+        """Met à jour le montant total du bon"""
+        from django.db.models import Sum
+        self.total_amount = self.lines.aggregate(total=Sum('line_amount'))['total'] or 0
+        self.save(update_fields=['total_amount'])
+
+    def validate(self, user):
+        """Valide le bon de sortie et réserve la quantité dans le stock"""
         if self.status != 'DRAFT':
-            raise ValidationError("Seul un bon en brouillon peut être confirmé")
+            raise ValidationError("Seul un bon en brouillon peut être validé")
+        
+        from django.db.models import Sum
         
         for line in self.lines.all():
-            # Sélectionner le lot selon FEFO (First Expired, First Out)
-            batch = Batch.objects.filter(
-                article=line.article,
-                remaining_quantity__gte=line.quantity,
-                is_blocked=False
-            ).order_by('expiry_date', 'reception_date').first()
-            
-            if not batch:
-                raise ValidationError(f"Stock insuffisant pour {line.article.name}")
-            
-            # Créer le mouvement
-            StockMovement.objects.create(
-                movement_type='OUT',
-                movement_reason=self.issue_type,
-                article=line.article,
-                batch=batch,
-                source_depot=self.depot,
-                quantity=line.quantity,
-                unit_price=line.article.weighted_average_price,
-                total_value=line.line_amount,
-                operation_date=timezone.now(),
-                reference_document=self.issue_number,
-                document_type='GOODS_ISSUE',
-                status='CONFIRMED',
-                created_by=user
+            # Vérifier la disponibilité (Physique - Réservé)
+            stock, created = Stock.objects.get_or_create(
+                article=line.article, 
+                depot=self.depot,
+                defaults={'physical_quantity': 0, 'theoretical_quantity': 0, 'reserved_quantity': 0}
             )
+            # Re-fetch with lock to be safe during reservation
+            if not created:
+                stock = Stock.objects.select_for_update().get(id=stock.id)
             
-            # Mettre à jour le stock
-            stock = Stock.objects.get(article=line.article, depot=self.depot)
+            if stock.available_quantity < line.quantity:
+                raise ValidationError(f"Stock insuffisant (Disponible: {stock.available_quantity}, Demandé: {line.quantity})")
+            
+            # Réserver
+            stock.reserved_quantity += line.quantity
+            stock.save(update_fields=['reserved_quantity', 'updated_at'])
+            
+            # Fixer le prix prévisionnel (PMP actuel)
+            line.unit_price = line.article.weighted_average_price
+            line.line_amount = line.quantity * line.unit_price
+            line.save()
+            
+        self.status = 'VALIDATED'
+        self.update_total()
+        self.save()
+
+    def confirm(self, user):
+        """Confirme la sortie physique : réduit physique et libère réservé"""
+        if self.status != 'VALIDATED':
+            raise ValidationError("Le bon doit être validé/réservé avant confirmation")
+        
+        for line in self.lines.all():
+            # 1. Déduire des lots par FEFO
+            remaining_to_deduct = line.quantity
+            batches = Batch.objects.filter(
+                article=line.article,
+                remaining_quantity__gt=0,
+                is_blocked=False
+            ).order_by('expiry_date', 'reception_date')
+            
+            for batch in batches:
+                if remaining_to_deduct <= 0:
+                    break
+                    
+                deduction = min(batch.remaining_quantity, remaining_to_deduct)
+                
+                StockMovement.objects.create(
+                    movement_type='OUT',
+                    movement_reason=self.issue_type,
+                    article=line.article,
+                    batch=batch,
+                    source_depot=self.depot,
+                    quantity=deduction,
+                    unit_price=line.unit_price,
+                    total_value=deduction * line.unit_price,
+                    operation_date=timezone.now(),
+                    reference_document=self.issue_number,
+                    document_type='GOODS_ISSUE',
+                    status='CONFIRMED',
+                    created_by=user
+                )
+                
+                batch.remaining_quantity -= deduction
+                batch.save()
+                remaining_to_deduct -= deduction
+            
+            if remaining_to_deduct > 0:
+                raise ValidationError(f"Stock insuffisant dans les lots pour {line.article.name} (Manquant: {remaining_to_deduct}). Vérifiez l'état des lots.")
+
+            # 2. Mettre à jour le stock global
+            stock = Stock.objects.select_for_update().get(article=line.article, depot=self.depot)
             stock.physical_quantity -= line.quantity
             stock.theoretical_quantity -= line.quantity
+            stock.reserved_quantity -= line.quantity # Libération de la réservation
             stock.update_value()
-            
-            # Mettre à jour le lot
-            batch.remaining_quantity -= line.quantity
-            batch.save()
         
         self.status = 'CONFIRMED'
         self.validated_by = user
         self.validated_at = timezone.now()
         self.save()
     
-    def post_to_accounting(self):
-        """Écriture comptable sortie OHADA"""
-        # Débit 603x - Variation de stocks
-        # Crédit 33xx - Stock
-        pass  # À implémenter selon même logique que GoodsReceiptNote
+    def generate_journal_entry(self, user):
+        """Génère l'écriture comptable pour la sortie de stock (Valorisation PMP)"""
+        if self.status != 'CONFIRMED':
+            raise ValidationError("Le bon doit être confirmé avant comptabilisation")
+            
+        from accounting.models import Journal, JournalEntry, JournalEntryLine, ChartOfAccounts
+        
+        # 1. Identifier le journal (STK ou Divers)
+        journal = Journal.objects.filter(code='STK').first() or Journal.objects.filter(journal_type='MISCELLANEOUS').first()
+        if not journal:
+            raise ValidationError("Journal de stock (STK) ou Opérations Diverses (MISCELLANEOUS) non trouvé")
+            
+        # 2. Créer l'entête de l'écriture
+        entry = JournalEntry.objects.create(
+            journal=journal,
+            entry_date=self.issue_date,
+            description=f"Sortie de stock {self.issue_number} - {self.get_issue_type_display()}",
+            reference=self.issue_number,
+            created_by=user,
+            state='DRAFT'
+        )
+        
+        # 3. Lignes d'écriture (OHADA)
+        total_value = sum(line.line_amount for line in self.lines.all())
+        
+        # Débit : Compte de charges (6031 Variation de stock)
+        acc_603 = ChartOfAccounts.objects.filter(code='6031').first() or ChartOfAccounts.objects.filter(code__startswith='603').first()
+        if not acc_603:
+            raise ValidationError("Compte de variation de stock (603) non trouvé")
+
+        JournalEntryLine.objects.create(
+            journal_entry=entry,
+            sequence=1,
+            account=acc_603,
+            label=f"Variation de stock - {self.issue_number}",
+            debit_amount=total_value,
+            credit_amount=0
+        )
+        
+        # Crédit : Compte de stock (31 ou 37)
+        # On utilise le compte de stock de l'article si défini, sinon un compte 3111 par défaut
+        for i, line in enumerate(self.lines.all()):
+             acc_stock = line.article.stock_account or ChartOfAccounts.objects.filter(code='3111').first() or ChartOfAccounts.objects.filter(code__startswith='311').first()
+             if not acc_stock:
+                 raise ValidationError(f"Compte de stock pour {line.article.name} non trouvé")
+             
+             JournalEntryLine.objects.create(
+                journal_entry=entry,
+                sequence=i+2,
+                account=acc_stock,
+                label=f"Sortie {line.article.name} - {self.issue_number}",
+                debit_amount=0,
+                credit_amount=line.line_amount
+            )
+        
+        entry.update_totals()
+        entry.post(user)
+        
+        self.journal_entry = entry
+        self.status = 'POSTED'
+        self.save()
+        return entry
 
 
 class GoodsIssueLine(models.Model):
@@ -1165,8 +1284,8 @@ class GoodsIssueLine(models.Model):
     batch = models.ForeignKey('Batch', on_delete=models.PROTECT, null=True, blank=True)
     
     quantity = models.DecimalField(max_digits=15, decimal_places=3)
-    unit_price = models.DecimalField(max_digits=15, decimal_places=2, help_text="PMP au moment de la sortie")
-    line_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    unit_price = models.DecimalField(max_digits=15, decimal_places=2, default=0, help_text="PMP au moment de la sortie")
+    line_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     
     notes = models.TextField(blank=True)
     
@@ -1186,8 +1305,8 @@ class GoodsIssueLine(models.Model):
 class TransferNote(models.Model):
     """Transferts inter-dépôts (suivi séparé)."""
     TRANSFER_STATUS = [
-        ('PENDING', 'En attente'),
-        ('IN_TRANSIT', 'En transit'),
+        ('DRAFT', 'Brouillon'),
+        ('SENT', 'Envoyé'),
         ('RECEIVED', 'Reçu'),
         ('CANCELLED', 'Annulé'),
     ]
@@ -1197,7 +1316,7 @@ class TransferNote(models.Model):
     destination_depot = models.ForeignKey('Depot', on_delete=models.PROTECT, related_name='incoming_transfers')
     planned_date = models.DateField(null=True, blank=True)
     notes = models.TextField(blank=True)
-    status = models.CharField(max_length=20, choices=TRANSFER_STATUS, default='PENDING')
+    status = models.CharField(max_length=20, choices=TRANSFER_STATUS, default='DRAFT')
 
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(
@@ -1376,6 +1495,11 @@ class Inventory(models.Model):
         self.validated_by = user
         self.validated_at = timezone.now()
         self.save()
+
+    @property
+    def variance_value(self):
+        """Valeur totale des écarts (surplus - manques) sur cet inventaire"""
+        return sum(line.variance_value for line in self.lines.all())
 
 
 class InventoryLine(models.Model):

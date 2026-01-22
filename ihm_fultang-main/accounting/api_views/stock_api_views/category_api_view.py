@@ -7,7 +7,10 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
+from rest_framework import status
+from django.db.models import ProtectedError
 
 from accounting.permissions.accounting_staff_permissions import AccountingStaffPermission
 
@@ -102,6 +105,20 @@ class CategoryViewSet(ModelViewSet):
             queryset = queryset.filter(is_active=is_active.lower() == "true")
 
         return queryset.order_by("code")
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError:
+            return Response(
+                {"detail": "Impossible de supprimer cette catégorie car elle contient des articles ou des sous-catégories actifs."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"detail": f"Erreur lors de la suppression : {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     @swagger_auto_schema(
         operation_summary="Lister les sous-catégories",
