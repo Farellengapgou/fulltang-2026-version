@@ -13,11 +13,19 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         fields = ['first_name', 'last_name', 'email', 'phoneNumber', 'address']
     
     def validate_email(self, value):
-        """Valider que l'email n'est pas déjà utilisé par un autre utilisateur"""
-        user = self.context['request'].user
-        if MedicalStaff.objects.exclude(pk=user.pk).filter(email=value).exists():
-            raise serializers.ValidationError("Cet email est déjà utilisé par un autre utilisateur")
+    user = self.context['request'].user
+
+    # 🔥 Si l'email n'a pas changé, on ne valide pas
+    if value == user.email:
         return value
+
+    if MedicalStaff.objects.exclude(pk=user.pk).filter(email=value).exists():
+        raise serializers.ValidationError(
+            "Cet email est déjà utilisé par un autre utilisateur"
+        )
+
+    return value
+
     
     def update(self, instance, validated_data):
         """Mettre à jour les champs autorisés"""
