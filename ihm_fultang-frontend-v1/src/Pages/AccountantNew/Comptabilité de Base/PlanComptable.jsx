@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Search } from "lucide-react";
+import { X, Search, Trash2, Edit } from "lucide-react";
 import { chartOfAccountsService } from "../../../Services/Accounting";
 import Loader from "../../../GlobalComponents/Loader";
 import Pagination from "../../../GlobalComponents/Pagination";
@@ -23,7 +23,11 @@ export function ChartOfAccounts() {
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const [confirmConfig, setConfirmConfig] = useState({ title: "", message: "", onConfirm: () => {} });
+  const [confirmConfig, setConfirmConfig] = useState({
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
 
   const [formData, setFormData] = useState({
     code: "",
@@ -69,7 +73,11 @@ export function ChartOfAccounts() {
       fetchAccounts();
     } catch (error) {
       console.error("Erreur:", error);
-      setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
+      setModalMessage(
+        error.response?.data
+          ? JSON.stringify(error.response.data)
+          : error.message,
+      );
       setIsErrorModalOpen(true);
     }
   };
@@ -83,7 +91,8 @@ export function ChartOfAccounts() {
   const handleDelete = (id) => {
     setConfirmConfig({
       title: "Supprimer Compte",
-      message: "Êtes-vous sûr de vouloir supprimer ce compte ? Cette action peut impacter vos écritures.",
+      message:
+        "Êtes-vous sûr de vouloir supprimer ce compte ? Cette action peut impacter vos écritures.",
       onConfirm: async () => {
         try {
           await chartOfAccountsService.deleteAccount(id);
@@ -92,10 +101,14 @@ export function ChartOfAccounts() {
           fetchAccounts();
         } catch (error) {
           console.error("Erreur:", error);
-          setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
+          setModalMessage(
+            error.response?.data
+              ? JSON.stringify(error.response.data)
+              : error.message,
+          );
           setIsErrorModalOpen(true);
         }
-      }
+      },
     });
     setIsConfirmModalOpen(true);
   };
@@ -166,7 +179,9 @@ export function ChartOfAccounts() {
               <form onSubmit={handleSubmit}>
                 <div className="ft-modal-body grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Code</label>
+                    <label className="text-sm font-semibold text-gray-700">
+                      Code
+                    </label>
                     <input
                       type="text"
                       placeholder="Ex: 101000"
@@ -179,7 +194,9 @@ export function ChartOfAccounts() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Libellé</label>
+                    <label className="text-sm font-semibold text-gray-700">
+                      Libellé
+                    </label>
                     <input
                       type="text"
                       placeholder="Ex: Capital social"
@@ -192,11 +209,16 @@ export function ChartOfAccounts() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Classe de compte</label>
+                    <label className="text-sm font-semibold text-gray-700">
+                      Classe de compte
+                    </label>
                     <select
                       value={formData.account_class}
                       onChange={(e) =>
-                        setFormData({ ...formData, account_class: e.target.value })
+                        setFormData({
+                          ...formData,
+                          account_class: e.target.value,
+                        })
                       }
                       className="ft-select"
                     >
@@ -211,11 +233,16 @@ export function ChartOfAccounts() {
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Type de compte</label>
+                    <label className="text-sm font-semibold text-gray-700">
+                      Type de compte
+                    </label>
                     <select
                       value={formData.account_type}
                       onChange={(e) =>
-                        setFormData({ ...formData, account_type: e.target.value })
+                        setFormData({
+                          ...formData,
+                          account_type: e.target.value,
+                        })
                       }
                       className="ft-select"
                     >
@@ -262,7 +289,9 @@ export function ChartOfAccounts() {
             <tbody className="divide-y divide-gray-100">
               {accounts.map((account) => (
                 <tr key={account.id} className="ft-tr">
-                  <td className="ft-td font-bold text-secondary uppercase tracking-tight">{account.code}</td>
+                  <td className="ft-td font-bold text-secondary uppercase tracking-tight">
+                    {account.code}
+                  </td>
                   <td className="ft-td font-medium">{account.label}</td>
                   <td className="ft-td text-center">
                     <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-600 font-mono">
@@ -289,13 +318,13 @@ export function ChartOfAccounts() {
                         onClick={() => handleEdit(account)}
                         className="text-secondary hover:text-primary-end font-semibold text-xs"
                       >
-                        Modifier
+                        <Edit size={14} />
                       </button>
                       <button
                         onClick={() => handleDelete(account.id)}
                         className="text-red-600 hover:text-red-800 font-semibold text-xs"
                       >
-                        Supprimer
+                        <Trash2 size={18} />
                       </button>
                     </div>
                   </td>
@@ -303,7 +332,10 @@ export function ChartOfAccounts() {
               ))}
               {accounts.length === 0 && (
                 <tr>
-                  <td colSpan="6" className="ft-td text-center text-gray-500 py-12">
+                  <td
+                    colSpan="6"
+                    className="ft-td text-center text-gray-500 py-12"
+                  >
                     Aucun compte trouvé.
                   </td>
                 </tr>
@@ -321,16 +353,16 @@ export function ChartOfAccounts() {
         </div>
       </div>
 
-      <SuccessModal 
-        isOpen={isSuccessModalOpen} 
-        canOpenSuccessModal={setIsSuccessModalOpen} 
-        message={modalMessage} 
-        makeAction={() => {}} 
+      <SuccessModal
+        isOpen={isSuccessModalOpen}
+        canOpenSuccessModal={setIsSuccessModalOpen}
+        message={modalMessage}
+        makeAction={() => {}}
       />
-      <ErrorModal 
-        isOpen={isErrorModalOpen} 
-        onCloseErrorModal={setIsErrorModalOpen} 
-        message={modalMessage} 
+      <ErrorModal
+        isOpen={isErrorModalOpen}
+        onCloseErrorModal={setIsErrorModalOpen}
+        message={modalMessage}
       />
       <ConfirmationModal
         isOpen={isConfirmModalOpen}

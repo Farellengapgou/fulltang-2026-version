@@ -1,5 +1,16 @@
 import { useState, useEffect } from "react";
-import { X, Plus, CheckCircle, AlertCircle, Calendar, Landmark, CreditCard, Banknote, History, ArrowRight } from "lucide-react";
+import {
+  X,
+  Plus,
+  CheckCircle,
+  AlertCircle,
+  Calendar,
+  Landmark,
+  CreditCard,
+  Banknote,
+  History,
+  ArrowRight,
+} from "lucide-react";
 import {
   bankReconciliationService,
   bankAccountService,
@@ -18,12 +29,16 @@ export function BankReconciliation() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [bankAccounts, setBankAccounts] = useState([]);
-  
+
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const [confirmConfig, setConfirmConfig] = useState({ title: "", message: "", onConfirm: () => {} });
+  const [confirmConfig, setConfirmConfig] = useState({
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
 
   const [formData, setFormData] = useState({
     bank_account: "",
@@ -70,7 +85,11 @@ export function BankReconciliation() {
       fetchData();
     } catch (error) {
       console.error("Erreur:", error);
-      setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
+      setModalMessage(
+        error.response?.data
+          ? JSON.stringify(error.response.data)
+          : error.message,
+      );
       setIsErrorModalOpen(true);
     }
   };
@@ -78,7 +97,8 @@ export function BankReconciliation() {
   const handleReconcile = (id) => {
     setConfirmConfig({
       title: "Finaliser la Réconciliation",
-      message: "Voulez-vous finaliser cette réconciliation ? Cette action est irréversible et validera le solde bancaire.",
+      message:
+        "Voulez-vous finaliser cette réconciliation ? Cette action est irréversible et validera le solde bancaire.",
       onConfirm: async () => {
         try {
           await bankReconciliationService.reconcileBank(id);
@@ -87,10 +107,14 @@ export function BankReconciliation() {
           fetchData();
         } catch (error) {
           console.error("Erreur:", error);
-          setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
+          setModalMessage(
+            error.response?.data
+              ? JSON.stringify(error.response.data)
+              : error.message,
+          );
           setIsErrorModalOpen(true);
         }
-      }
+      },
     });
     setIsConfirmModalOpen(true);
   };
@@ -106,8 +130,12 @@ export function BankReconciliation() {
       <div className="ft-page">
         <div className="flex justify-between items-center mb-10">
           <div>
-            <h1 className="text-3xl font-black text-secondary tracking-tight uppercase">Réconciliation Bancaire</h1>
-            <p className="text-gray-400 text-sm font-medium mt-1 uppercase tracking-widest">Ajustement des soldes banque et comptabilité</p>
+            <h1 className="text-3xl font-black text-secondary tracking-tight uppercase">
+              Réconciliation Bancaire
+            </h1>
+            <p className="text-gray-400 text-sm font-medium mt-1 uppercase tracking-widest">
+              Ajustement des soldes banque et comptabilité
+            </p>
           </div>
           <button
             onClick={() => setShowForm(true)}
@@ -123,80 +151,130 @@ export function BankReconciliation() {
             <div className="ft-modal max-w-2xl">
               <div className="ft-modal-header">
                 <h2 className="ft-modal-title">Nouvelle Réconciliation</h2>
-                <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <button
+                  onClick={() => setShowForm(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
                   <X size={28} />
                 </button>
               </div>
               <form onSubmit={handleSubmit}>
                 <div className="ft-modal-body grid grid-cols-2 gap-6">
                   <div className="col-span-2 space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Compte Bancaire</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">
+                      Compte Bancaire
+                    </label>
                     <div className="relative">
-                        <Landmark className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                        <select
-                            value={formData.bank_account}
-                            onChange={(e) => setFormData({ ...formData, bank_account: e.target.value })}
-                            required
-                            className="ft-select pl-12"
-                        >
-                            <option value="">Sélectionner un compte</option>
-                            {bankAccounts.map((b) => (
-                            <option key={b.id} value={b.id}>
-                                {b.bank_name} - {b.account_number}
-                            </option>
-                            ))}
-                        </select>
+                      <Landmark
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                        size={18}
+                      />
+                      <select
+                        value={formData.bank_account}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            bank_account: e.target.value,
+                          })
+                        }
+                        required
+                        className="ft-select pl-12"
+                      >
+                        <option value="">Sélectionner un compte</option>
+                        {bankAccounts.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            {b.bank_name} - {b.account_number}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                   <div className="col-span-2 space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Date d'arrêté</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">
+                      Date d'arrêté
+                    </label>
                     <div className="relative">
-                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                        <input
-                            type="date"
-                            value={formData.reconciliation_date}
-                            onChange={(e) => setFormData({ ...formData, reconciliation_date: e.target.value })}
-                            required
-                            className="ft-input pl-12"
-                        />
+                      <Calendar
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                        size={18}
+                      />
+                      <input
+                        type="date"
+                        value={formData.reconciliation_date}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            reconciliation_date: e.target.value,
+                          })
+                        }
+                        required
+                        className="ft-input pl-12"
+                      />
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Solde Relevé Bancaire (FCFA)</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">
+                      Solde Relevé Bancaire (FCFA)
+                    </label>
                     <div className="relative">
-                        <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                        <input
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            value={formData.statement_balance}
-                            onChange={(e) => setFormData({ ...formData, statement_balance: parseFloat(e.target.value) })}
-                            required
-                            className="ft-input pl-12 font-mono font-bold"
-                        />
+                      <CreditCard
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                        size={18}
+                      />
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={formData.statement_balance}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            statement_balance: parseFloat(e.target.value),
+                          })
+                        }
+                        required
+                        className="ft-input pl-12 font-mono font-bold"
+                      />
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Solde Comptable (FCFA)</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">
+                      Solde Comptable (FCFA)
+                    </label>
                     <div className="relative">
-                        <Banknote className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                        <input
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            value={formData.book_balance}
-                            onChange={(e) => setFormData({ ...formData, book_balance: parseFloat(e.target.value) })}
-                            required
-                            className="ft-input pl-12 font-mono font-bold"
-                        />
+                      <Banknote
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                        size={18}
+                      />
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={formData.book_balance}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            book_balance: parseFloat(e.target.value),
+                          })
+                        }
+                        required
+                        className="ft-input pl-12 font-mono font-bold"
+                      />
                     </div>
                   </div>
                 </div>
                 <div className="ft-modal-footer">
-                  <button type="button" onClick={() => setShowForm(false)} className="ft-btn ft-btn-md ft-btn-outline">
+                  <button
+                    type="button"
+                    onClick={() => setShowForm(false)}
+                    className="ft-btn ft-btn-md ft-btn-outline"
+                  >
                     Annuler
                   </button>
-                  <button type="submit" className="ft-btn ft-btn-md ft-btn-primary">
+                  <button
+                    type="submit"
+                    className="ft-btn ft-btn-md ft-btn-primary"
+                  >
                     Lancer la Réconciliation
                   </button>
                 </div>
@@ -223,38 +301,49 @@ export function BankReconciliation() {
                 <tr key={r.id} className="ft-tr">
                   <td className="ft-td">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-secondary/10 text-secondary rounded-2xl">
-                            <Landmark size={20} />
-                        </div>
-                        <div className="font-black text-secondary leading-tight uppercase tracking-tight">
-                            {r.bank_account_name}
-                        </div>
+                      <div className="p-3 bg-secondary/10 text-secondary rounded-2xl">
+                        <Landmark size={20} />
+                      </div>
+                      <div className="font-black text-secondary leading-tight uppercase tracking-tight">
+                        {r.bank_account_name}
+                      </div>
                     </div>
                   </td>
                   <td className="ft-td">
                     <div className="flex items-center gap-2 text-gray-500 font-medium">
-                        <Calendar size={14} />
-                        {new Date(r.reconciliation_date).toLocaleDateString()}
+                      <Calendar size={14} />
+                      {new Date(r.reconciliation_date).toLocaleDateString()}
                     </div>
                   </td>
                   <td className="ft-td text-right font-mono font-black text-gray-600">
-                    {r.bank_balance.toLocaleString()}
+                    {(r.variance || 0).toLocaleString()}
                   </td>
                   <td className="ft-td text-right font-mono font-black text-gray-600">
                     {r.book_balance.toLocaleString()}
                   </td>
-                  <td className={`ft-td text-right font-mono font-black ${
-                      Math.abs(r.variance) < 0.01 ? "text-green-600" : "text-red-600"
+                  <td
+                    className={`ft-td text-right font-mono font-black ${
+                      Math.abs(r.variance) < 0.01
+                        ? "text-green-600"
+                        : "text-red-600"
                     }`}
                   >
                     {r.variance.toLocaleString()}
                   </td>
                   <td className="ft-td text-center">
-                    <span className={`text-[10px] font-black px-3 py-1 rounded-full flex items-center justify-center gap-1 mx-auto w-fit ${
-                        r.is_reconciled ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-                    }`}>
-                        {r.is_reconciled ? <CheckCircle size={10} /> : <History size={10} />}
-                        {r.is_reconciled ? "RÉCONCILIÉ" : "EN ATTENTE"}
+                    <span
+                      className={`text-[10px] font-black px-3 py-1 rounded-full flex items-center justify-center gap-1 mx-auto w-fit ${
+                        r.is_reconciled
+                          ? "bg-green-100 text-green-700"
+                          : "bg-amber-100 text-amber-700"
+                      }`}
+                    >
+                      {r.is_reconciled ? (
+                        <CheckCircle size={10} />
+                      ) : (
+                        <History size={10} />
+                      )}
+                      {r.is_reconciled ? "RÉCONCILIÉ" : "EN ATTENTE"}
                     </span>
                   </td>
                   <td className="ft-td text-right">
@@ -271,35 +360,37 @@ export function BankReconciliation() {
               ))}
               {reconciliations.length === 0 && (
                 <tr>
-                    <td colSpan="7" className="ft-td text-center text-gray-400 py-20 font-medium italic uppercase tracking-widest">
-                        Aucune réconciliation enregistrée.
-                    </td>
+                  <td
+                    colSpan="7"
+                    className="ft-td text-center text-gray-400 py-20 font-medium italic uppercase tracking-widest"
+                  >
+                    Aucune réconciliation enregistrée.
+                  </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
 
-        <SuccessModal 
-            isOpen={isSuccessModalOpen} 
-            canOpenSuccessModal={setIsSuccessModalOpen} 
-            message={modalMessage} 
-            makeAction={() => {}} 
+        <SuccessModal
+          isOpen={isSuccessModalOpen}
+          canOpenSuccessModal={setIsSuccessModalOpen}
+          message={modalMessage}
+          makeAction={() => {}}
         />
-        <ErrorModal 
-            isOpen={isErrorModalOpen} 
-            onCloseErrorModal={setIsErrorModalOpen} 
-            message={modalMessage} 
+        <ErrorModal
+          isOpen={isErrorModalOpen}
+          onCloseErrorModal={setIsErrorModalOpen}
+          message={modalMessage}
         />
         <ConfirmationModal
-            isOpen={isConfirmModalOpen}
-            onClose={() => setIsConfirmModalOpen(false)}
-            onConfirm={confirmConfig.onConfirm}
-            title={confirmConfig.title}
-            message={confirmConfig.message}
+          isOpen={isConfirmModalOpen}
+          onClose={() => setIsConfirmModalOpen(false)}
+          onConfirm={confirmConfig.onConfirm}
+          title={confirmConfig.title}
+          message={confirmConfig.message}
         />
       </div>
     </CustomDashboard>
   );
 }
-

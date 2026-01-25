@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
-import { fixedAssetService, chartOfAccountsService } from "../../../Services/Accounting";
+import { X, Edit } from "lucide-react";
+import {
+  fixedAssetService,
+  chartOfAccountsService,
+} from "../../../Services/Accounting";
 import Loader from "../../../GlobalComponents/Loader";
 import { CustomDashboard } from "../../../GlobalComponents/CustomDashboard.jsx";
 import { FinancialAccountantNavBar } from "../NavBar.jsx";
@@ -68,7 +71,11 @@ export function Assets() {
       fetchData();
     } catch (error) {
       console.error("Erreur:", error);
-      setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
+      setModalMessage(
+        error.response?.data
+          ? JSON.stringify(error.response.data)
+          : error.message,
+      );
       setIsErrorModalOpen(true);
     }
   };
@@ -116,7 +123,9 @@ export function Assets() {
             <div className="ft-modal max-w-2xl">
               <div className="ft-modal-header">
                 <h2 className="ft-modal-title">
-                  {editingId ? "Modifier l'Immobilisation" : "Nouvelle Immobilisation"}
+                  {editingId
+                    ? "Modifier l'Immobilisation"
+                    : "Nouvelle Immobilisation"}
                 </h2>
                 <button
                   onClick={() => setShowForm(false)}
@@ -128,20 +137,27 @@ export function Assets() {
               <form onSubmit={handleSubmit}>
                 <div className="ft-modal-body grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">N° Immobilisation</label>
+                    <label className="text-sm font-semibold text-gray-700">
+                      N° Immobilisation
+                    </label>
                     <input
                       type="text"
                       placeholder="Ex: IMM-2026-001"
                       value={formData.asset_number}
                       onChange={(e) =>
-                        setFormData({ ...formData, asset_number: e.target.value })
+                        setFormData({
+                          ...formData,
+                          asset_number: e.target.value,
+                        })
                       }
                       required
                       className="ft-input"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Nom / Désignation</label>
+                    <label className="text-sm font-semibold text-gray-700">
+                      Nom / Désignation
+                    </label>
                     <input
                       type="text"
                       placeholder="Ex: Scanner IRM"
@@ -154,7 +170,9 @@ export function Assets() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Catégorie</label>
+                    <label className="text-sm font-semibold text-gray-700">
+                      Catégorie
+                    </label>
                     <select
                       value={formData.category}
                       onChange={(e) =>
@@ -163,26 +181,37 @@ export function Assets() {
                       className="ft-select"
                     >
                       <option value="BUILDING">Bâtiment</option>
-                      <option value="MEDICAL_EQUIPMENT">Équipement médical</option>
-                      <option value="IT_EQUIPMENT">Matériel informatique</option>
+                      <option value="MEDICAL_EQUIPMENT">
+                        Équipement médical
+                      </option>
+                      <option value="IT_EQUIPMENT">
+                        Matériel informatique
+                      </option>
                       <option value="FURNITURE">Mobilier</option>
                       <option value="VEHICLE">Véhicule</option>
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Date d'acquisition</label>
+                    <label className="text-sm font-semibold text-gray-700">
+                      Date d'acquisition
+                    </label>
                     <input
                       type="date"
                       value={formData.acquisition_date}
                       onChange={(e) =>
-                        setFormData({ ...formData, acquisition_date: e.target.value })
+                        setFormData({
+                          ...formData,
+                          acquisition_date: e.target.value,
+                        })
                       }
                       required
                       className="ft-input"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Coût d'acquisition (FCFA)</label>
+                    <label className="text-sm font-semibold text-gray-700">
+                      Coût d'acquisition (FCFA)
+                    </label>
                     <input
                       type="number"
                       step="0.01"
@@ -199,30 +228,42 @@ export function Assets() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Vie utile (années)</label>
+                    <label className="text-sm font-semibold text-gray-700">
+                      Vie utile (années)
+                    </label>
                     <input
                       type="number"
                       value={formData.useful_life_years}
                       onChange={(e) =>
-                        setFormData({ ...formData, useful_life_years: parseInt(e.target.value) })
+                        setFormData({
+                          ...formData,
+                          useful_life_years: parseInt(e.target.value),
+                        })
                       }
                       required
                       className="ft-input"
                     />
                   </div>
                   <div className="col-span-2 space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Compte d'Immobilisation</label>
+                    <label className="text-sm font-semibold text-gray-700">
+                      Compte d'Immobilisation
+                    </label>
                     <select
                       value={formData.asset_account}
                       onChange={(e) =>
-                        setFormData({ ...formData, asset_account: e.target.value })
+                        setFormData({
+                          ...formData,
+                          asset_account: e.target.value,
+                        })
                       }
                       required
                       className="ft-select"
                     >
                       <option value="">Sélectionner un compte...</option>
-                      {coa.map(c => (
-                        <option key={c.id} value={c.id}>{c.code} - {c.label}</option>
+                      {coa.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.code} - {c.label}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -262,9 +303,13 @@ export function Assets() {
             <tbody className="divide-y divide-gray-100">
               {assets.map((asset) => (
                 <tr key={asset.id} className="ft-tr">
-                  <td className="ft-td font-bold text-secondary uppercase tracking-tight text-xs">{asset.asset_number}</td>
+                  <td className="ft-td font-bold text-secondary uppercase tracking-tight text-xs">
+                    {asset.asset_number}
+                  </td>
                   <td className="ft-td font-medium">{asset.name}</td>
-                  <td className="ft-td text-xs text-gray-500 uppercase">{asset.category.replace('_', ' ')}</td>
+                  <td className="ft-td text-xs text-gray-500 uppercase">
+                    {asset.category.replace("_", " ")}
+                  </td>
                   <td className="ft-td text-right font-mono text-gray-600">
                     {(asset.acquisition_cost || 0).toLocaleString()}
                   </td>
@@ -280,14 +325,17 @@ export function Assets() {
                       }}
                       className="text-secondary hover:text-primary-end font-semibold text-xs"
                     >
-                      Modifier
+                      <Edit size={14} />
                     </button>
                   </td>
                 </tr>
               ))}
               {assets.length === 0 && (
                 <tr>
-                  <td colSpan="6" className="ft-td text-center text-gray-500 py-12">
+                  <td
+                    colSpan="6"
+                    className="ft-td text-center text-gray-500 py-12"
+                  >
                     Aucune immobilisation enregistrée.
                   </td>
                 </tr>
@@ -297,16 +345,16 @@ export function Assets() {
         </div>
       </div>
 
-      <SuccessModal 
-        isOpen={isSuccessModalOpen} 
-        canOpenSuccessModal={setIsSuccessModalOpen} 
-        message={modalMessage} 
-        makeAction={() => {}} 
+      <SuccessModal
+        isOpen={isSuccessModalOpen}
+        canOpenSuccessModal={setIsSuccessModalOpen}
+        message={modalMessage}
+        makeAction={() => {}}
       />
-      <ErrorModal 
-        isOpen={isErrorModalOpen} 
-        onCloseErrorModal={setIsErrorModalOpen} 
-        message={modalMessage} 
+      <ErrorModal
+        isOpen={isErrorModalOpen}
+        onCloseErrorModal={setIsErrorModalOpen}
+        message={modalMessage}
       />
     </CustomDashboard>
   );
