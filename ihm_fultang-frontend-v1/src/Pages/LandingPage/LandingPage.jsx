@@ -73,20 +73,11 @@ export function LandingPage() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-8">
-            {["About", "Modules", "Actors", "Contact"].map((item) => (
-              <button
-                key={item}
-                onClick={() => scrollToSection(item.toLowerCase())}
-                className={`text-sm font-semibold transition-colors duration-500 ease-in-out hover:text-primary-end ${scrolled ? "text-gray-600" : "text-white/90"}`}
-              >
-                {item}
-              </button>
-            ))}
             <button
               onClick={() => navigate("/login")}
               className="bg-secondary text-white px-6 py-2 rounded-lg font-bold shadow-md hover:shadow-lg hover:bg-[#3d9d94] transition-all duration-500 ease-in-out"
             >
-              Accès Portail
+              Connexion
             </button>
           </div>
 
@@ -153,14 +144,6 @@ export function LandingPage() {
               transition={{ duration: 0.8 }}
               className="lg:w-1/2 text-white text-center lg:text-left"
             >
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="inline-block px-4 py-1 rounded-full bg-white/20 backdrop-blur-sm text-sm font-semibold mb-6 tracking-wide"
-              >
-                NEXT GEN ERP SOLUTION
-              </motion.span>
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-6">
                 Gérez votre <span className="text-white">Polyclinique</span>{" "}
                 avec Excellence
@@ -172,22 +155,15 @@ export function LandingPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <button
-                  onClick={() => scrollToSection("modules")}
+                  onClick={() => navigate("/login")}
                   className="px-8 py-4 bg-white text-secondary hover:bg-gray-100 rounded-lg font-bold shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex items-center justify-center gap-2"
                 >
-                  Découvrir nos modules <ChevronRight className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => navigate("/login")}
-                  className="px-8 py-4 bg-transparent border-2 border-white/30 hover:border-white text-white rounded-lg font-bold transition-all duration-500 ease-in-out"
-                >
-                  Portail Employé
+                  Connexion <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1 }}
               className="lg:w-1/2 relative"
@@ -199,39 +175,6 @@ export function LandingPage() {
                   className="rounded-2xl shadow-inner transition-transform duration-500 ease-in-out group-hover:scale-105"
                 />
               </div>
-
-              {/* Floating Stats */}
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity }}
-                className="absolute -top-20 -right-6 md:right-0 bg-white p-4 rounded-2xl shadow-xl flex items-center gap-3"
-              >
-                <div className="w-12 h-12 bg-primary-end/10 rounded-xl flex items-center justify-center">
-                  <TrendingUp className="text-primary-end w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-xs text-secondary/50 font-bold">
-                    Optimisation
-                  </p>
-                  <p className="text-xl font-black text-secondary">+40%</p>
-                </div>
-              </motion.div>
-
-              <motion.div
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 5, repeat: Infinity }}
-                className="absolute -bottom-15 -left-6 md:left-0 bg-white p-4 rounded-2xl shadow-xl flex items-center gap-3"
-              >
-                <div className="w-12 h-12 bg-primary-start/10 rounded-xl flex items-center justify-center">
-                  <Clock className="text-primary-start w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-xs text-secondary/50 font-bold">
-                    Temps Réel
-                  </p>
-                  <p className="text-xl font-black text-secondary">24/7</p>
-                </div>
-              </motion.div>
             </motion.div>
           </div>
         </div>
@@ -454,12 +397,6 @@ export function LandingPage() {
                 Rejoignez des centaines de professionnels qui utilisent Fultang
                 pour automatiser les tâches répétitives.
               </p>
-              <button
-                onClick={() => navigate("/login")}
-                className="px-8 py-3 bg-white text-secondary font-bold rounded-lg hover:bg-gray-100 transition-all duration-500 ease-in-out flex items-center gap-2"
-              >
-                Se connecter au système <ChevronRight className="w-5 h-5" />
-              </button>
             </div>
             <div className="md:w-1/2 grid grid-cols-2 gap-4">
               <div className="p-6 bg-white/10 rounded-2xl border border-white/20 text-center">
@@ -478,157 +415,6 @@ export function LandingPage() {
           </motion.div>
         </div>
       </section>
-
-      {/* Contact Section */}
-      <section id="contact" className="py-24 bg-white">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
-            <div>
-              <h2 className="text-primary-end font-bold tracking-widest uppercase mb-4">
-                Contactez-nous
-              </h2>
-              <h3 className="text-3xl md:text-4xl font-bold text-secondary mb-6">
-                Une Question ? Un Problème ?
-              </h3>
-              <p className="text-lg text-gray-600 mb-12">
-                Notre équipe technique et notre support client sont à votre
-                disposition.
-              </p>
-
-              <div className="space-y-8">
-                <div className="flex items-center gap-6 group">
-                  <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center transition-all duration-500 ease-in-out group-hover:bg-secondary group-hover:text-white text-secondary">
-                    <MapPin className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase mb-1">
-                      Localisation
-                    </p>
-                    <p className="font-bold text-secondary">
-                      Nkongsamba, Cameroun
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-6 group">
-                  <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center transition-all duration-500 ease-in-out group-hover:bg-secondary group-hover:text-white text-secondary">
-                    <Phone className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase mb-1">
-                      Facebook
-                    </p>
-                    <p className="font-bold text-secondary text-sm">
-                      Fultang Polyclinic
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-6 group">
-                  <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center transition-all duration-500 ease-in-out group-hover:bg-secondary group-hover:text-white text-secondary">
-                    <Mail className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase mb-1">
-                      Email
-                    </p>
-                    <p className="font-bold text-secondary">
-                      fultangpolyclinic.com
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 p-8 md:p-12 rounded-2xl border border-gray-100 shadow-sm">
-              <form className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-600">
-                      Nom Complet
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-md focus:outline-none focus:border-2 focus:border-primary-end transition-all duration-300 bg-white"
-                      placeholder="Jean Dupont"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-600">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-md focus:outline-none focus:border-2 focus:border-primary-end transition-all duration-300 bg-white"
-                      placeholder="jean@email.com"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-600">
-                    Sujet
-                  </label>
-                  <select className="w-full px-4 py-3 border-2 border-gray-200 rounded-md focus:outline-none focus:border-2 focus:border-primary-end transition-all duration-300 bg-white">
-                    <option>Support Technique</option>
-                    <option>Demande de formation</option>
-                    <option>Autre</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-600">
-                    Message
-                  </label>
-                  <textarea
-                    rows="4"
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-md focus:outline-none focus:border-2 focus:border-primary-end transition-all duration-300 bg-white"
-                    placeholder="Comment pouvons-nous vous aider ?"
-                  ></textarea>
-                </div>
-                <button className="w-full py-4 bg-secondary text-white font-bold rounded-lg hover:bg-[#3d9d94] transition-all duration-500 ease-in-out shadow-md hover:shadow-lg">
-                  Envoyer le message
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-50 border-t border-gray-100 py-12">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-primary-start to-primary-end rounded-lg flex items-center justify-center shadow-md">
-                <Activity className="text-white w-4 h-4" />
-              </div>
-              <span className="text-xl font-bold text-secondary">FULTANG</span>
-            </div>
-
-            <div className="flex gap-8">
-              <a
-                href="#"
-                className="font-semibold text-gray-400 hover:text-primary-end transition-colors duration-500 ease-in-out"
-              >
-                Confidentialité
-              </a>
-              <a
-                href="#"
-                className="font-semibold text-gray-400 hover:text-primary-end transition-colors duration-500 ease-in-out"
-              >
-                Conditions
-              </a>
-              <a
-                href="#"
-                className="font-semibold text-gray-400 hover:text-primary-end transition-colors duration-500 ease-in-out"
-              >
-                Support
-              </a>
-            </div>
-
-            <p className="text-gray-400 font-medium text-sm">
-              © {new Date().getFullYear()} Fultang ERP. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

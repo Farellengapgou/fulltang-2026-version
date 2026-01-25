@@ -22,12 +22,16 @@ export function JournalEntries() {
   const [showForm, setShowForm] = useState(false);
   const [journals, setJournals] = useState([]);
   const [accounts, setAccounts] = useState([]);
-  
+
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const [confirmConfig, setConfirmConfig] = useState({ title: "", message: "", onConfirm: () => {} });
+  const [confirmConfig, setConfirmConfig] = useState({
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
 
   const [formData, setFormData] = useState({
     entry_number: "",
@@ -113,7 +117,11 @@ export function JournalEntries() {
       fetchData();
     } catch (error) {
       console.error("Erreur:", error);
-      setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
+      setModalMessage(
+        error.response?.data
+          ? JSON.stringify(error.response.data)
+          : error.message,
+      );
       setIsErrorModalOpen(true);
     }
   };
@@ -121,7 +129,8 @@ export function JournalEntries() {
   const handlePost = (id) => {
     setConfirmConfig({
       title: "Valider l'Écriture",
-      message: "Voulez-vous vraiment valider cette écriture ? Une fois validée, elle ne pourra plus être modifiée.",
+      message:
+        "Voulez-vous vraiment valider cette écriture ? Une fois validée, elle ne pourra plus être modifiée.",
       onConfirm: async () => {
         try {
           await journalEntryService.postEntry(id, {});
@@ -130,10 +139,14 @@ export function JournalEntries() {
           fetchData();
         } catch (error) {
           console.error("Erreur:", error);
-          setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
+          setModalMessage(
+            error.response?.data
+              ? JSON.stringify(error.response.data)
+              : error.message,
+          );
           setIsErrorModalOpen(true);
         }
-      }
+      },
     });
     setIsConfirmModalOpen(true);
   };
@@ -141,7 +154,8 @@ export function JournalEntries() {
   const handleReverse = (id) => {
     setConfirmConfig({
       title: "Contre-passer",
-      message: "Voulez-vous vraiment contre-passer cette écriture ? Cela créera une écriture inverse pour annuler l'impact.",
+      message:
+        "Voulez-vous vraiment contre-passer cette écriture ? Cela créera une écriture inverse pour annuler l'impact.",
       onConfirm: async () => {
         try {
           await journalEntryService.reverseEntry(id, {});
@@ -150,10 +164,14 @@ export function JournalEntries() {
           fetchData();
         } catch (error) {
           console.error("Erreur:", error);
-          setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
+          setModalMessage(
+            error.response?.data
+              ? JSON.stringify(error.response.data)
+              : error.message,
+          );
           setIsErrorModalOpen(true);
         }
-      }
+      },
     });
     setIsConfirmModalOpen(true);
   };
@@ -180,7 +198,9 @@ export function JournalEntries() {
       <FinancialAccountantNavBar />
       <div className="ft-page">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-secondary">Écritures Comptables</h1>
+          <h1 className="text-2xl font-bold text-secondary">
+            Écritures Comptables
+          </h1>
           <button
             onClick={() => {
               resetForm();
@@ -200,7 +220,10 @@ export function JournalEntries() {
                 <h2 className="ft-modal-title">
                   {editingId ? "Modifier l'Écriture" : "Nouvelle Écriture"}
                 </h2>
-                <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
+                <button
+                  onClick={() => setShowForm(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
                   <X size={24} />
                 </button>
               </div>
@@ -209,19 +232,26 @@ export function JournalEntries() {
                   {/* Header Fields */}
                   <div className="grid grid-cols-4 gap-4">
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-gray-500 uppercase">Date</label>
+                      <label className="text-xs font-semibold text-gray-500 uppercase">
+                        Date
+                      </label>
                       <input
                         type="date"
                         value={formData.entry_date}
                         onChange={(e) =>
-                          setFormData({ ...formData, entry_date: e.target.value })
+                          setFormData({
+                            ...formData,
+                            entry_date: e.target.value,
+                          })
                         }
                         required
                         className="ft-input"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-gray-500 uppercase">Journal</label>
+                      <label className="text-xs font-semibold text-gray-500 uppercase">
+                        Journal
+                      </label>
                       <select
                         value={formData.journal}
                         onChange={(e) =>
@@ -239,25 +269,35 @@ export function JournalEntries() {
                       </select>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-gray-500 uppercase">Référence</label>
+                      <label className="text-xs font-semibold text-gray-500 uppercase">
+                        Référence
+                      </label>
                       <input
                         type="text"
                         placeholder="Ex: Fact-2026-001"
                         value={formData.reference}
                         onChange={(e) =>
-                          setFormData({ ...formData, reference: e.target.value })
+                          setFormData({
+                            ...formData,
+                            reference: e.target.value,
+                          })
                         }
                         className="ft-input"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-gray-500 uppercase">Description</label>
+                      <label className="text-xs font-semibold text-gray-500 uppercase">
+                        Description
+                      </label>
                       <input
                         type="text"
                         placeholder="Description de l'écriture"
                         value={formData.description}
                         onChange={(e) =>
-                          setFormData({ ...formData, description: e.target.value })
+                          setFormData({
+                            ...formData,
+                            description: e.target.value,
+                          })
                         }
                         required
                         className="ft-input"
@@ -268,11 +308,13 @@ export function JournalEntries() {
                   {/* Lines Section */}
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider">Lignes d'Écriture</h3>
+                      <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider">
+                        Lignes d'Écriture
+                      </h3>
                       <button
                         type="button"
                         onClick={handleAddLine}
-                        className="ft-btn ft-btn-sm ft-btn-outline"
+                        className="ft-btn ft-btn-sm ft-btn-out"
                       >
                         <Plus size={16} /> Ajouter une ligne
                       </button>
@@ -295,7 +337,11 @@ export function JournalEntries() {
                                 <select
                                   value={line.account}
                                   onChange={(e) =>
-                                    handleLineChange(idx, "account", e.target.value)
+                                    handleLineChange(
+                                      idx,
+                                      "account",
+                                      e.target.value,
+                                    )
                                   }
                                   required
                                   className="ft-select !py-1.5 text-xs font-mono"
@@ -313,7 +359,11 @@ export function JournalEntries() {
                                   type="text"
                                   value={line.label}
                                   onChange={(e) =>
-                                    handleLineChange(idx, "label", e.target.value)
+                                    handleLineChange(
+                                      idx,
+                                      "label",
+                                      e.target.value,
+                                    )
                                   }
                                   required
                                   className="ft-input !py-1.5 text-xs"
@@ -329,7 +379,7 @@ export function JournalEntries() {
                                     handleLineChange(
                                       idx,
                                       "debit_amount",
-                                      parseFloat(e.target.value) || 0
+                                      parseFloat(e.target.value) || 0,
                                     )
                                   }
                                   className="ft-input !py-1.5 text-xs text-right font-mono"
@@ -344,7 +394,7 @@ export function JournalEntries() {
                                     handleLineChange(
                                       idx,
                                       "credit_amount",
-                                      parseFloat(e.target.value) || 0
+                                      parseFloat(e.target.value) || 0,
                                     )
                                   }
                                   className="ft-input !py-1.5 text-xs text-right font-mono"
@@ -363,7 +413,10 @@ export function JournalEntries() {
                           ))}
                           {formData.lines.length === 0 && (
                             <tr>
-                              <td colSpan="5" className="px-3 py-6 text-center text-gray-400 text-sm">
+                              <td
+                                colSpan="5"
+                                className="px-3 py-6 text-center text-gray-400 text-sm"
+                              >
                                 Cliquez sur "+ Ajouter une ligne" pour commencer
                               </td>
                             </tr>
@@ -372,12 +425,29 @@ export function JournalEntries() {
                         {formData.lines.length > 0 && (
                           <tfoot className="bg-gray-50/50">
                             <tr className="font-bold">
-                              <td colSpan="2" className="px-3 py-2 text-right text-xs uppercase text-gray-500">Totaux</td>
-                              <td className="px-3 py-2 text-right font-mono text-secondary">
-                                {formData.lines.reduce((sum, l) => sum + (parseFloat(l.debit_amount) || 0), 0).toFixed(2)}
+                              <td
+                                colSpan="2"
+                                className="px-3 py-2 text-right text-xs uppercase text-gray-500"
+                              >
+                                Totaux
                               </td>
                               <td className="px-3 py-2 text-right font-mono text-secondary">
-                                {formData.lines.reduce((sum, l) => sum + (parseFloat(l.credit_amount) || 0), 0).toFixed(2)}
+                                {formData.lines
+                                  .reduce(
+                                    (sum, l) =>
+                                      sum + (parseFloat(l.debit_amount) || 0),
+                                    0,
+                                  )
+                                  .toFixed(2)}
+                              </td>
+                              <td className="px-3 py-2 text-right font-mono text-secondary">
+                                {formData.lines
+                                  .reduce(
+                                    (sum, l) =>
+                                      sum + (parseFloat(l.credit_amount) || 0),
+                                    0,
+                                  )
+                                  .toFixed(2)}
                               </td>
                               <td></td>
                             </tr>
@@ -438,10 +508,14 @@ export function JournalEntries() {
                     {entry.description}
                   </td>
                   <td className="ft-td text-right font-mono text-gray-700">
-                    {entry.total_debit.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}
+                    {entry.total_debit.toLocaleString("fr-FR", {
+                      minimumFractionDigits: 2,
+                    })}
                   </td>
                   <td className="ft-td text-right font-mono text-gray-700">
-                    {entry.total_credit.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}
+                    {entry.total_credit.toLocaleString("fr-FR", {
+                      minimumFractionDigits: 2,
+                    })}
                   </td>
                   <td className="ft-td text-center">
                     <span
@@ -449,8 +523,8 @@ export function JournalEntries() {
                         entry.state === "POSTED"
                           ? "bg-green-100 text-green-700"
                           : entry.state === "DRAFT"
-                          ? "bg-amber-100 text-amber-700"
-                          : "bg-red-100 text-red-700"
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-red-100 text-red-700"
                       }`}
                     >
                       {entry.state}
@@ -492,7 +566,10 @@ export function JournalEntries() {
               ))}
               {entries.length === 0 && (
                 <tr>
-                  <td colSpan="8" className="ft-td text-center text-gray-500 py-16">
+                  <td
+                    colSpan="8"
+                    className="ft-td text-center text-gray-500 py-16"
+                  >
                     Aucune écriture enregistrée pour le moment.
                   </td>
                 </tr>
@@ -514,7 +591,9 @@ export function JournalEntries() {
           <div className="ft-modal-overlay">
             <div className="ft-modal max-w-4xl">
               <div className="ft-modal-header">
-                <h2 className="ft-modal-title">Écriture {selectedEntry.entry_number}</h2>
+                <h2 className="ft-modal-title">
+                  Écriture {selectedEntry.entry_number}
+                </h2>
                 <button
                   onClick={() => setShowDetails(false)}
                   className="text-gray-400 hover:text-gray-600"
@@ -525,24 +604,42 @@ export function JournalEntries() {
               <div className="ft-modal-body space-y-6">
                 <div className="grid grid-cols-3 gap-6 bg-gray-50 p-4 rounded-xl">
                   <div>
-                    <span className="block text-[10px] uppercase font-bold text-gray-400 mb-1">Date</span>
-                    <span className="font-semibold text-gray-800">{selectedEntry.entry_date}</span>
+                    <span className="block text-[10px] uppercase font-bold text-gray-400 mb-1">
+                      Date
+                    </span>
+                    <span className="font-semibold text-gray-800">
+                      {selectedEntry.entry_date}
+                    </span>
                   </div>
                   <div>
-                    <span className="block text-[10px] uppercase font-bold text-gray-400 mb-1">Journal</span>
-                    <span className="font-semibold text-gray-800">{selectedEntry.journal_name}</span>
+                    <span className="block text-[10px] uppercase font-bold text-gray-400 mb-1">
+                      Journal
+                    </span>
+                    <span className="font-semibold text-gray-800">
+                      {selectedEntry.journal_name}
+                    </span>
                   </div>
                   <div>
-                    <span className="block text-[10px] uppercase font-bold text-gray-400 mb-1">Statut</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-bold uppercase ${
-                      selectedEntry.state === "POSTED" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-                    }`}>
+                    <span className="block text-[10px] uppercase font-bold text-gray-400 mb-1">
+                      Statut
+                    </span>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full font-bold uppercase ${
+                        selectedEntry.state === "POSTED"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-amber-100 text-amber-700"
+                      }`}
+                    >
                       {selectedEntry.state}
                     </span>
                   </div>
                   <div className="col-span-3">
-                    <span className="block text-[10px] uppercase font-bold text-gray-400 mb-1">Description</span>
-                    <span className="font-medium text-gray-700">{selectedEntry.description}</span>
+                    <span className="block text-[10px] uppercase font-bold text-gray-400 mb-1">
+                      Description
+                    </span>
+                    <span className="font-medium text-gray-700">
+                      {selectedEntry.description}
+                    </span>
                   </div>
                 </div>
 
@@ -559,23 +656,38 @@ export function JournalEntries() {
                     <tbody className="divide-y divide-gray-100">
                       {selectedEntry.lines?.map((line, idx) => (
                         <tr key={idx} className="ft-tr">
-                          <td className="ft-td font-mono text-xs">{line.account_code}</td>
+                          <td className="ft-td font-mono text-xs">
+                            {line.account_code}
+                          </td>
                           <td className="ft-td text-xs">{line.label}</td>
                           <td className="ft-td text-right font-mono text-xs">
-                            {line.debit_amount.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}
+                            {line.debit_amount.toLocaleString("fr-FR", {
+                              minimumFractionDigits: 2,
+                            })}
                           </td>
                           <td className="ft-td text-right font-mono text-xs">
-                            {line.credit_amount.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}
+                            {line.credit_amount.toLocaleString("fr-FR", {
+                              minimumFractionDigits: 2,
+                            })}
                           </td>
                         </tr>
                       ))}
                       <tr className="bg-gray-50 font-bold border-t-2">
-                        <td colSpan="2" className="px-6 py-4 text-right text-xs uppercase text-gray-500">Total</td>
-                        <td className="px-6 py-4 text-right font-mono text-secondary">
-                          {selectedEntry.total_debit.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}
+                        <td
+                          colSpan="2"
+                          className="px-6 py-4 text-right text-xs uppercase text-gray-500"
+                        >
+                          Total
                         </td>
                         <td className="px-6 py-4 text-right font-mono text-secondary">
-                          {selectedEntry.total_credit.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}
+                          {selectedEntry.total_debit.toLocaleString("fr-FR", {
+                            minimumFractionDigits: 2,
+                          })}
+                        </td>
+                        <td className="px-6 py-4 text-right font-mono text-secondary">
+                          {selectedEntry.total_credit.toLocaleString("fr-FR", {
+                            minimumFractionDigits: 2,
+                          })}
                         </td>
                       </tr>
                     </tbody>
@@ -596,16 +708,16 @@ export function JournalEntries() {
         )}
       </div>
 
-      <SuccessModal 
-        isOpen={isSuccessModalOpen} 
-        canOpenSuccessModal={setIsSuccessModalOpen} 
-        message={modalMessage} 
-        makeAction={() => {}} 
+      <SuccessModal
+        isOpen={isSuccessModalOpen}
+        canOpenSuccessModal={setIsSuccessModalOpen}
+        message={modalMessage}
+        makeAction={() => {}}
       />
-      <ErrorModal 
-        isOpen={isErrorModalOpen} 
-        onCloseErrorModal={setIsErrorModalOpen} 
-        message={modalMessage} 
+      <ErrorModal
+        isOpen={isErrorModalOpen}
+        onCloseErrorModal={setIsErrorModalOpen}
+        message={modalMessage}
       />
       <ConfirmationModal
         isOpen={isConfirmModalOpen}

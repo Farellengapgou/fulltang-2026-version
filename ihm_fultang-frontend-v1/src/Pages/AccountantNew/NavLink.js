@@ -20,13 +20,8 @@ import { AppRoutesPaths as appRoutes } from "../../Router/appRouterPaths.js";
 export const FinancialAccountantNavLink = [
   {
     name: "Tableau De Bord",
-    subLinks: [
-      {
-        name: "Accueil",
-        link: appRoutes.financialAccountantHome,
-        icon: FaHome,
-      },
-    ],
+    link: appRoutes.financialAccountantHome,
+    icon: FaHome,
   },
   {
     name: "Comptabilité De Base",
@@ -37,14 +32,14 @@ export const FinancialAccountantNavLink = [
         icon: FaChartBar,
       },
       {
-        name: "Écritures Comptable",
-        link: appRoutes.financialAccountantJournalEntries,
-        icon: FaEdit,
-      },
-      {
         name: "Journal Comptable",
         link: appRoutes.financialAccountantAccountingJournals,
         icon: FaBook,
+      },
+      {
+        name: "Écritures Comptable",
+        link: appRoutes.financialAccountantJournalEntries,
+        icon: FaEdit,
       },
       {
         name: "Périodes Comptables",
@@ -84,14 +79,9 @@ export const FinancialAccountantNavLink = [
     ],
   },
   {
-    name: "Paie",
-    subLinks: [
-      {
-        name: "Gestion de Paie",
-        link: appRoutes.financialAccountPayroll,
-        icon: FaUserTie,
-      },
-    ],
+    name: "Gestion de Paie",
+    link: appRoutes.financialAccountPayroll,
+    icon: FaUserTie,
   },
   {
     name: "Fiscalité",
@@ -129,14 +119,9 @@ export const FinancialAccountantNavLink = [
     ],
   },
   {
-    name: "Budget Et Contrôle",
-    subLinks: [
-      {
-        name: "Budget",
-        link: appRoutes.budgetEntry,
-        icon: FaCalculator,
-      },
-    ],
+    name: "Budget",
+    link: appRoutes.budgetEntry,
+    icon: FaCalculator,
   },
   {
     name: "Analyse Et Ratios",
@@ -154,23 +139,12 @@ export const FinancialAccountantNavLink = [
     ],
   },
   {
-    name: "Clôture Et Rapports",
-    subLinks: [
-      {
-        name: "Rapports Financiers",
-        link: appRoutes.financialStatements,
-        icon: FaFileAlt,
-      },
-    ],
+    name: "Rapports Financiers",
+    link: appRoutes.financialStatements,
   },
   {
-    name: "Support",
-    subLinks: [
-      {
-        name: "Centre d'Aide",
-        link: appRoutes.helpCenter,
-        icon: FaQuestionCircle,
-      },
-    ],
+    name: "Centre d'Aide",
+    link: appRoutes.helpCenter,
+    icon: FaQuestionCircle,
   },
 ];
