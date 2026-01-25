@@ -262,7 +262,7 @@ export function AddMedicalStaff() {
                             </div>
                             <div>
                                 <label className={applyLabelStyle()}>
-                                    Phone Number
+                                    Phone Numbers
                                 </label>
                                 <PhoneInput
                                     country={'cm'} // Cameroun par défaut
@@ -333,6 +333,7 @@ export function AddMedicalStaff() {
                                     <option value="Receptionist">Receptionist</option>
                                     <option value="Labtech">Laboratory Assistant</option>
                                     <option value="Ophthalmologist">Ophthalmologist</option>
+                                    <option value="Dentist">Dentist</option>
                                     <option value="Cashier">Cashier</option>
                                     <option value="Accountant">Accountant</option>
                                     <option value="Admin">Administrator</option>
