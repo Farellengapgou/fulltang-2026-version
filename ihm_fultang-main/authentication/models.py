@@ -31,6 +31,7 @@ ROLES = [
 ROLES_ACCOUNTING = [
     ('NoRole', 'NoRole'),
     ('Accountant', 'Accountant'),
+    ('MaterialAccountant', 'MaterialAccountant'),
     ('Auditor', 'Auditor'),
     ('FinanceManager', 'FinanceManager'),
 ]

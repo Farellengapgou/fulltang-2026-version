@@ -375,6 +375,102 @@ export function AppRoute() {
     ).FinancialReports,
   }));
 
+  // COMPTABILITE MATIERE
+  const MaterialAccountingDashboard = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Dashboard/MaterialDashboard.jsx")
+    ).MaterialDashboard,
+  }));
+  const MaterialCategories = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Configuration/Categories.jsx")
+    ).Categories,
+  }));
+  const MaterialArticles = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Configuration/Articles.jsx")
+    ).Articles,
+  }));
+  const MaterialWarehouses = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Configuration/Warehouses.jsx")
+    ).Warehouses,
+  }));
+  const MaterialSuppliers = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Configuration/Suppliers.jsx")
+    ).Suppliers,
+  }));
+  const MaterialFamilies = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Configuration/Families.jsx")
+    ).Families,
+  }));
+
+  const MaterialStockLevels = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Stock/StockLevels.jsx")
+    ).StockLevels,
+  }));
+  const MaterialBatches = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Stock/Batches.jsx")
+    ).Batches,
+  }));
+  const MaterialMovements = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Stock/Movements.jsx")
+    ).Movements,
+  }));
+
+  const MaterialReceipts = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Operations/GoodsReceipts.jsx")
+    ).GoodsReceipts,
+  }));
+  const MaterialIssues = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Operations/GoodsIssues.jsx")
+    ).GoodsIssues,
+  }));
+  const MaterialTransfers = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Operations/Transfers.jsx")
+    ).Transfers,
+  }));
+
+  const PhysicalInventory = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Inventory/PhysicalInventory.jsx")
+    ).PhysicalInventory,
+  }));
+
+  const MaterialStockCard = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Reports/StockCard.jsx")
+    ).StockCard,
+  }));
+  const MaterialPerpetualInventory = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Reports/PerpetualInventory.jsx")
+    ).PerpetualInventory,
+  }));
+  const MaterialABCAnalysis = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Reports/ABCAnalysis.jsx")
+    ).ABCAnalysis,
+  }));
+  const MaterialTurnoverRate = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Reports/StockTurnoverRate.jsx")
+    ).StockTurnoverRate,
+  }));
+  const MaterialReconciliation = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Reports/StockAccountingReconciliation.jsx")
+    ).StockAccountingReconciliation,
+  }));
+
   return (
     <React.Suspense fallback={<Loading />}>
       <Routes>
@@ -724,6 +820,85 @@ export function AppRoute() {
         <Route
           path="/accountant-financial/financial-statements"
           element={<FinancialStatements />}
+        />
+
+        {/** MATERIAL ACCOUNTING ROUTES */}
+        <Route
+          path = {AppRoutesPaths.materialAccountingDashboard}
+          element = {<MaterialAccountingDashboard />}
+        />
+
+        <Route
+          path = {AppRoutesPaths.materialCategories}
+          element={<MaterialCategories />}
+        />
+        <Route
+          path = {AppRoutesPaths.materialArticles}
+          element={<MaterialArticles />}
+        />
+        <Route
+          path = {AppRoutesPaths.materialWarehouses}
+          element={<MaterialWarehouses />}
+        />
+        <Route
+          path={AppRoutesPaths.materialSuppliers}
+          element={<MaterialSuppliers />}
+        />
+        <Route
+          path={AppRoutesPaths.materialFamilies}
+          element={<MaterialFamilies />}
+        />
+        
+        <Route
+          path = {AppRoutesPaths.materialStockLevels}
+          element={<MaterialStockLevels />}
+        />
+        <Route
+          path = {AppRoutesPaths.materialBatches}
+          element={<MaterialBatches />}
+        />
+        <Route
+          path = {AppRoutesPaths.materialMovements}
+          element={<MaterialMovements />}
+        />
+        
+        <Route
+          path = {AppRoutesPaths.materialReceipts}
+          element={<MaterialReceipts />}
+        />
+        <Route
+          path = {AppRoutesPaths.materialIssues}
+          element={<MaterialIssues />}
+        />
+        <Route
+          path = {AppRoutesPaths.materialTransfers}
+          element={<MaterialTransfers />}
+        />
+
+        <Route
+          path = {AppRoutesPaths.materialInventories}
+          element={<PhysicalInventory />}
+        />
+
+        <Route
+          path = {AppRoutesPaths.materialStockCard}
+          element={<MaterialStockCard />}
+        />
+        <Route
+          path = {AppRoutesPaths.materialPerpetualInventory}
+          element={<MaterialPerpetualInventory />}
+        />
+        <Route
+          path = {AppRoutesPaths.materialABCAnalysis}
+          element={<MaterialABCAnalysis />}
+        />
+        <Route
+          path = {AppRoutesPaths.materialTurnoverRate}
+          element={<MaterialTurnoverRate />}
+        />
+        <Route
+          path = {AppRoutesPaths.materialReconciliation}
+          element={<MaterialReconciliation />}
         />
       </Routes>
     </React.Suspense>

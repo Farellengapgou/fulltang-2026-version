@@ -1,0 +1,272 @@
+import { useState, useEffect } from "react";
+import { X, Plus, Trash2, Save } from "lucide-react";
+import { getSuppliers, getWarehouses, getArticles, createGoodsReceipt } from "../../../Utils/api/materialAccounting.js";
+
+export function GoodsReceiptModal({ isOpen, onClose, onRefresh, initialData = null }) {
+    const [suppliers, setSuppliers] = useState([]);
+    const [warehouses, setWarehouses] = useState([]);
+    const [articles, setArticles] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const isReadOnly = initialData && initialData.status !== 'DRAFT';
+
+    const [formData, setFormData] = useState({
+        supplier: "", // Should be ID
+        warehouse: "", // Should be ID
+        date: new Date().toISOString().split('T')[0],
+        reference: "",
+        lines: [{ article: "", quantity: 1, unit_price: 0, batch_number: "", expiry_date: "" }] // No manufacturing_date
+    });
+
+    useEffect(() => {
+        if (isOpen) {
+            loadMetaData();
+            if (initialData) {
+                // Populate form with existing data
+                setFormData({
+                    supplier: initialData.supplier_id || "",
+                    warehouse: initialData.depot_id || "",
+                    date: initialData.date || new Date().toISOString().split('T')[0],
+                    reference: initialData.external_reference || "",
+                    lines: initialData.lines && initialData.lines.length > 0
+                        ? initialData.lines.map(l => ({
+                            article: l.article,
+                            quantity: l.quantity_received,
+                            unit_price: l.unit_price,
+                            batch_number: l.batch_number || "",
+                            expiry_date: l.expiry_date || ""
+                        }))
+                        : [{ article: "", quantity: 1, unit_price: 0, batch_number: "", expiry_date: "" }]
+                });
+            } else {
+                // Reset form for new entry
+                setFormData({
+                    supplier: "",
+                    warehouse: "",
+                    date: new Date().toISOString().split('T')[0],
+                    reference: "",
+                    lines: [{ article: "", quantity: 1, unit_price: 0, batch_number: "", expiry_date: "" }]
+                });
+            }
+        }
+    }, [isOpen, initialData]);
+
+    const loadMetaData = async () => {
+        try {
+            const [sData, wData, aData] = await Promise.all([
+                getSuppliers(),
+                getWarehouses(),
+                getArticles()
+            ]);
+            setSuppliers(sData.results || []);
+            setWarehouses(wData.results || []);
+            setArticles(aData.results || []);
+        } catch (error) {
+            console.error("Error loading metadata:", error);
+        }
+    };
+
+    const handleAddLine = () => {
+        setFormData({
+            ...formData,
+            lines: [...formData.lines, { article: "", quantity: 1, unit_price: 0, batch_number: "", expiry_date: "" }]
+        });
+    };
+
+    const handleRemoveLine = (index) => {
+        const newLines = formData.lines.filter((_, i) => i !== index);
+        setFormData({ ...formData, lines: newLines });
+    };
+
+    const handleLineChange = (index, field, value) => {
+        const newLines = [...formData.lines];
+        newLines[index][field] = value;
+        setFormData({ ...formData, lines: newLines });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            setIsLoading(true);
+            await createGoodsReceipt(formData);
+            onRefresh();
+            onClose();
+        } catch (error) {
+            alert("Erreur lors de la création du bon d'entrée");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-primary-end text-white">
+                    <h2 className="text-xl font-bold italic">
+                        {isReadOnly ? `Détails du Bon d'Entrée ${initialData.receipt_number || ''}` : initialData ? "Modifier le Bon d'Entrée" : "Nouveau Bon d'Entrée"}
+                    </h2>
+                    <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full transition-colors">
+                        <X className="h-6 w-6" />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Fournisseur</label>
+                            <select
+                                required
+                                disabled={isReadOnly}
+                                value={formData.supplier}
+                                onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
+                                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-end outline-none disabled:bg-gray-100 disabled:text-gray-600"
+                            >
+                                <option value="">Sélectionner un fournisseur</option>
+                                {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                            </select>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Dépôt de réception</label>
+                            <select
+                                required
+                                disabled={isReadOnly}
+                                value={formData.warehouse}
+                                onChange={(e) => setFormData({ ...formData, warehouse: e.target.value })}
+                                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-end outline-none disabled:bg-gray-100 disabled:text-gray-600"
+                            >
+                                <option value="">Sélectionner un dépôt</option>
+                                {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                            </select>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Date</label>
+                            <input
+                                type="date"
+                                required
+                                disabled={isReadOnly}
+                                value={formData.date}
+                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-end outline-none disabled:bg-gray-100 disabled:text-gray-600"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Référence (Optionnel)</label>
+                            <input
+                                type="text"
+                                disabled={isReadOnly}
+                                placeholder="Ex: BL-2024-001"
+                                value={formData.reference}
+                                onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
+                                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-end outline-none disabled:bg-gray-100 disabled:text-gray-600"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center border-b pb-2">
+                            <h3 className="font-bold text-gray-800">Articles réceptionnés</h3>
+                            {!isReadOnly && (
+                                <button
+                                    type="button"
+                                    onClick={handleAddLine}
+                                    className="flex items-center text-sm font-bold text-primary-end hover:bg-teal-50 px-3 py-1 rounded-lg"
+                                >
+                                    <Plus className="h-4 w-4 mr-1" /> Ajouter une ligne
+                                </button>
+                            )}
+                        </div>
+
+                        {formData.lines.map((line, index) => (
+                            <div key={index} className="grid grid-cols-12 gap-3 items-end bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                <div className="col-span-12 md:col-span-4 space-y-1">
+                                    <label className="text-[10px] uppercase font-bold text-gray-500">Article</label>
+                                    <select
+                                        required
+                                        disabled={isReadOnly}
+                                        value={line.article}
+                                        onChange={(e) => handleLineChange(index, 'article', e.target.value)}
+                                        className="w-full p-2 bg-white border border-gray-200 rounded-lg outline-none disabled:bg-gray-100"
+                                    >
+                                        <option value="">Choisir un article</option>
+                                        {articles.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                                    </select>
+                                </div>
+                                <div className="col-span-6 md:col-span-2 space-y-1">
+                                    <label className="text-[10px] uppercase font-bold text-gray-500">Quantité</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        required
+                                        disabled={isReadOnly}
+                                        value={line.quantity}
+                                        onChange={(e) => handleLineChange(index, 'quantity', e.target.value)}
+                                        className="w-full p-2 bg-white border border-gray-200 rounded-lg outline-none disabled:bg-gray-100"
+                                    />
+                                </div>
+                                <div className="col-span-12 md:col-span-3 space-y-1">
+                                    <label className="text-[10px] uppercase font-bold text-gray-500">N° de Lot</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Optionnel"
+                                        disabled={isReadOnly}
+                                        value={line.batch_number}
+                                        onChange={(e) => handleLineChange(index, 'batch_number', e.target.value)}
+                                        className="w-full p-2 bg-white border border-gray-200 rounded-lg outline-none disabled:bg-gray-100"
+                                    />
+                                </div>
+                                <div className="col-span-12 md:col-span-2 space-y-1">
+                                    <label className="text-[10px] uppercase font-bold text-gray-500">Péremption</label>
+                                    <input
+                                        type="date"
+                                        disabled={isReadOnly}
+                                        value={line.expiry_date}
+                                        onChange={(e) => handleLineChange(index, 'expiry_date', e.target.value)}
+                                        className="w-full p-2 bg-white border border-gray-200 rounded-lg outline-none disabled:bg-gray-100"
+                                    />
+                                </div>
+                                {!isReadOnly && (
+                                    <div className="col-span-12 md:col-span-1 flex justify-end">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveLine(index)}
+                                            disabled={formData.lines.length === 1}
+                                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg disabled:opacity-30"
+                                        >
+                                            <Trash2 className="h-5 w-5" />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </form>
+
+                <div className="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="px-6 py-2 border border-gray-300 rounded-xl font-bold text-gray-600 hover:bg-white transition-all shadow-sm"
+                    >
+                        {isReadOnly ? "Fermer" : "Annuler"}
+                    </button>
+                    {!isReadOnly && (
+                        <button
+                            onClick={handleSubmit}
+                            disabled={isLoading}
+                            className="px-8 py-2 bg-primary-end text-white rounded-xl font-bold hover:bg-teal-700 transition-all shadow-lg shadow-teal-100 flex items-center disabled:opacity-50"
+                        >
+                            {isLoading ? (
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                            ) : (
+                                <Save className="h-5 w-5 mr-2" />
+                            )}
+                            Enregistrer le bon
+                        </button>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}

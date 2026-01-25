@@ -49,7 +49,8 @@ export function LoginPage() {
                 "Receptionist": appRouterPaths.receptionistPage,
                 "Cashier": appRouterPaths.cashierPage,
                 "Specialist": appRouterPaths.specialistPage,
-                "Accountant": appRouterPaths.financialAccountantHome
+                "Accountant": appRouterPaths.financialAccountantHome,
+                "MaterialAccountant": appRouterPaths.materialAccountingDashboard
             };
 
             if (roleRoutes[response]) {
