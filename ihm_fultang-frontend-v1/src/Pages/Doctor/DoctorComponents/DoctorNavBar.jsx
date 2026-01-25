@@ -2,7 +2,7 @@ import {FaCog, FaEnvelope, FaSignOutAlt} from "react-icons/fa";
 import {Tooltip} from "antd";
 import {useAuthentication} from "../../../Utils/Provider.jsx";
 import userIcon from "../../../assets/userIcon.png";
-
+import { useState } from 'react';
 import { useNavigate } from "react-router-dom"
 import PropTypes from 'prop-types';
 
@@ -11,6 +11,7 @@ export function DoctorNavBar({ messageCount = 2 }) {
     const navigate = useNavigate()
 
     const {logout , userData} = useAuthentication();
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
     const applyNavLinkBtnStyle = () => {
         return " w-12 h-10 mt-1 border-2 bg-gray-100 flex justify-center items-center rounded-xl shadow-xl hover:bg-secondary text-secondary text-xl hover:text-white transition-all duration-300";
@@ -55,16 +56,33 @@ export function DoctorNavBar({ messageCount = 2 }) {
                                 <FaSignOutAlt/>
                             </button>
                         </Tooltip>
-                        <Tooltip placement={"top"} title={"Profile"}>
+                        {/* <Tooltip placement={"top"} title={"Profile"}>
                             <button className="ml-3 flex">
                                 <p className="font-bold text-secondary text-xl mt-2">{"Hello " +userData?.username + "!"}</p>
                                 <img src={userIcon} alt={"user-icon"} className="w-12 h-12 ml-2 mr-3"/>
 
                             </button>
+                        </Tooltip> */}
+                        <Tooltip placement={"top"} title={"Mon Profil"}>
+                            <div 
+                                className="ml-3 flex cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => setIsProfileModalOpen(true)}
+                            >
+                                <p className="font-bold text-secondary text-xl mt-2">{"Hello " + userData?.username + "!"}</p>
+                                <img 
+                                    src={userData?.profilePicture || userIcon} 
+                                    alt={"user-icon"} 
+                                    className="w-12 h-12 ml-2 mr-3 rounded-full object-cover border-2 border-gray-200"
+                                />
+                            </div>
                         </Tooltip>
                     </div>
                 </div>
             </div>
+            {/* <UserProfileModal 
+                isOpen={isProfileModalOpen}
+                onClose={() => setIsProfileModalOpen(false)}
+            /> */}
         </>
     )
 }

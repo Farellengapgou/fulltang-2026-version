@@ -2,19 +2,8 @@ import { useEffect } from "react";
 import axiosInstanceAccountant from "../../../Utils/axiosInstanceAccountant";
 
 export default function IncomeStatement({ year }) {
-  const expenses = [
-    { code: "60", label: "Achats de biens et services", amount: 2500000 },
-    { code: "63", label: "Impôts et taxes", amount: 350000 },
-    { code: "64", label: "Charges de personnel", amount: 4200000 },
-    { code: "66", label: "Charges financières", amount: 180000 },
-    { code: "68", label: "Amortissements", amount: 420000 },
-  ];
-
-  const income = [
-    { code: "70", label: "Ventes (chiffre d'affaires)", amount: 8250000 },
-    { code: "74", label: "Subventions d'exploitation", amount: 150000 },
-    { code: "76", label: "Produits financiers", amount: 75000 },
-  ];
+  const expenses = [];
+  const income = [];
 
   useEffect(() => {
     async function fetchData() {

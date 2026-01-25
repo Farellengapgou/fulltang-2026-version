@@ -70,6 +70,10 @@ function useLogin() {
     }
   }
 
+  async function refreshUserData() {
+    await getCurrentUserInfos();
+  }
+
   useEffect(() => {
     const token = localStorage.getItem("token_key_fultang");
     if (token) {
@@ -106,6 +110,20 @@ function useLogin() {
     //window.location.href = "/login";
   }
 
+  // const authMethods = useMemo(
+  //   () => ({
+  //     login,
+  //     setIsLoading,
+  //     isLoading,
+  //     userData,
+  //     isLogged,
+  //     isAuthenticated,
+  //     hasRole,
+  //     userRole,
+  //     logout,
+  //   }),
+  //   [isLoading, userData, isLogged, userRole, logout]
+  // );
   const authMethods = useMemo(
     () => ({
       login,
@@ -117,8 +135,9 @@ function useLogin() {
       hasRole,
       userRole,
       logout,
+      refreshUserData,
     }),
-    [isLoading, userData, isLogged, userRole, logout]
+    [isLoading, userData, isLogged, userRole]
   );
   return { authMethods };
 }

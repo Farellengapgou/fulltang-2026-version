@@ -4,9 +4,6 @@ import {formatDateToTime} from "../../../Utils/formatDateMethods.js";
 import {useCalculateAge} from "../../../Utils/compute.js";
 import {useNavigate} from "react-router-dom";
 
-
-
-
 export default function ConsultationCard ({ consultation }) {
 
     ConsultationCard.propTypes = {
@@ -83,7 +80,6 @@ export default function ConsultationCard ({ consultation }) {
                     <p className=" ">Consultation Reason:</p>
                     <p className="text-black font-semibold">{consultation.consultationNotes}</p>
                 </div>
-
 
                 <div className="flex flex-col gap-4 ml-7">
                     <div className="flex items-center text-gray-500">

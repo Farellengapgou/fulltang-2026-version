@@ -1,12 +1,15 @@
-import {FaCog, FaEnvelope, FaSignOutAlt} from "react-icons/fa";
+import {FaCog, FaEnvelope, FaSignOutAlt, FaBell} from "react-icons/fa";
 import {Tooltip} from "antd";
 import {useAuthentication} from "../../Utils/Provider.jsx";
 import userIcon from "../../assets/userIcon.png";
+import { AppRoutesPaths } from "../../Router/appRouterPaths.js";
+import { useNavigate } from "react-router-dom";
 
 export function FinancialAccountantNavBar()
 {
 
     const {logout , userData} = useAuthentication();
+    const navigate = useNavigate();
     const applyNavLinkBtnStyle = () => {
         return " w-12 h-10 mt-1 border-2 bg-gray-100 flex justify-center items-center rounded-xl shadow-xl hover:bg-secondary text-secondary text-xl hover:text-white transition-all duration-300";
     }
@@ -30,6 +33,15 @@ export function FinancialAccountantNavBar()
                         <Tooltip placement={"top"} title={"Messages"}>
                             <button className={applyNavLinkBtnStyle()}>
                                 <FaEnvelope/>
+                            </button>
+                        </Tooltip>
+                        <Tooltip placement={"top"} title={"Notification"}>
+                            <button
+                                onClick={
+                                    () => {navigate(AppRoutesPaths.laboratoryNotification)}
+                                }
+                                className={applyNavLinkBtnStyle()}>
+                                <FaBell/>
                             </button>
                         </Tooltip>
                         <Tooltip placement={"top"} title={"LogOut"}>

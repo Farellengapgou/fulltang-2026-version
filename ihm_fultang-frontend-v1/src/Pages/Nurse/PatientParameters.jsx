@@ -344,7 +344,7 @@ export  function PatientParameters() {
                                                 Diseases</label>
                                             <div className="relative">
                                                 <textarea
-                                                    name="chronicDiseases"
+                                                    name="chronicalDiseases"
                                                     value={parameters.chronicalDiseases}
                                                     onChange={handleChange}
                                                     rows={2}

@@ -1,4 +1,4 @@
-import {FaArrowLeft, FaArrowRight, FaEdit, FaEye, FaSearch} from "react-icons/fa";
+import {FaArrowLeft, FaUserMd, FaArrowRight, FaEdit, FaEye, FaSearch} from "react-icons/fa";
 import {Tooltip} from "antd";
 import {useEffect, useState} from "react";
 import {ViewPatientDetailsModal} from "../Receptionist/ViewPatientDetailsModal.jsx";
@@ -14,11 +14,6 @@ import {CustomDashboard} from "../../GlobalComponents/CustomDashboard.jsx";
 
 export function DoctorPatientList()
 {
-
-
-
-
-
     const [selectedPatientDetails, setSelectedPatientDetails] = useState({});
     const [canOpenViewPatientDetailModal, setCanOpenViewPatientDetailModal] = useState(false);
     const [patients, setPatients] = useState([]);
@@ -31,12 +26,10 @@ export function DoctorPatientList()
     const [errorStatus, setErrorStatus] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
 
-
-
     function calculateNumberOfSlide() {
+        if (numberOfPatients===0) return 1;
         return numberOfPatients % 5 === 0 ? numberOfPatients / 5 : Math.floor(numberOfPatients / 5) + 1;
     }
-
 
     function updateActualPageNumber(action) {
         if (action === "next")
@@ -54,7 +47,6 @@ export function DoctorPatientList()
             }
         }
     }
-
 
     async function fetchPatients () {
         setIsLoading(true);
@@ -91,10 +83,6 @@ export function DoctorPatientList()
         fetchPatients();
     }, []);
 
-
-
-
-
     async function fetchNextOrPreviousPatientList(url)
     {
         if(url)
@@ -126,13 +114,7 @@ export function DoctorPatientList()
         }
     }
 
-
-
-
-
-
     const navigate = useNavigate();
-
 
     return (
         <CustomDashboard linkList={doctorNavLink} requiredRole={"Doctor"}>
@@ -163,99 +145,99 @@ export function DoctorPatientList()
                     <div className="h-[500px] w-full flex justify-center items-center">
                         <Loader size={"medium"} color={"primary-end"}/>
                     </div>
-                ) :( errorStatus ? (<ServerErrorPage errorStatus={errorStatus} message={errorMessage}/>) :
-                        (
-                            <div className="ml-5 mr-5 ">
-                                <table className="w-full border-separate border-spacing-y-2">
-                                    <thead>
-                                    <tr className="">
-                                        <th className="text-center text-white p-4 text-xl font-bold  bg-primary-end border-gray-200 rounded-l-2xl ">No</th>
-                                        <th className="text-center text-white p-4 text-xl font-bold bg-primary-end border-gray-200">First
-                                            Name
-                                        </th>
-                                        <th className="text-center text-white p-4 text-xl font-bold  bg-primary-end  border-gray-200 ">Last
-                                            Name
-                                        </th>
-                                        <th className="text-center text-white p-4 text-xl font-bold bg-primary-end  border-gray-200 ">Gender</th>
-                                        <th className="text-center text-white p-4 text-xl font-bold  bg-primary-end border-gray-200 ">Address</th>
-                                        <th className="text-center text-white p-4 text-xl font-bold bg-primary-end flex-col rounded-r-2xl">
-                                            <p>Operations</p>
-                                        </th>
+                ) : errorStatus ? (
+                    <ServerErrorPage errorStatus={errorStatus} message={errorMessage}/>
+                ) : patients.length === 0 ? (
+                    <div className="h-[400px] w-full flex flex-col justify-center items-center text-center">
+                        <FaUserMd className="text-9xl text-gray-300 mb-4" />
+                        <p className="text-xl text-gray-500 font-semibold">
+                            No patients registered yet for you.
+                        </p>
+                    </div>
+                ) : (
+                    <div className="ml-5 mr-5 ">
+                        <table className="w-full border-separate border-spacing-y-2">
+                            <thead>
+                                <tr className="">
+                                    <th className="text-center text-white p-4 text-xl font-bold  bg-primary-end border-gray-200 rounded-l-2xl ">No</th>
+                                    <th className="text-center text-white p-4 text-xl font-bold bg-primary-end border-gray-200">First Name</th>
+                                    <th className="text-center text-white p-4 text-xl font-bold  bg-primary-end  border-gray-200 ">Last Name</th>
+                                    <th className="text-center text-white p-4 text-xl font-bold bg-primary-end  border-gray-200 ">Gender</th>
+                                    <th className="text-center text-white p-4 text-xl font-bold  bg-primary-end border-gray-200 ">Address</th>
+                                    <th className="text-center text-white p-4 text-xl font-bold bg-primary-end flex-col rounded-r-2xl"><p>Operations</p></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {patients.map((patient, index) => (
+                                    <tr key={patient.id || index} className="bg-gray-100">
+                                        <td className="p-4 text-md text-blue-900 rounded-l-lg text-center">{index + 1}</td>
+                                        <td className="p-4 text-md text-center font-bold">{patient.firstName}</td>
+                                        <td className="p-4 text-md text-center">{patient.lastName}</td>
+                                        <td className="p-4 text-md text-center">{patient.gender}</td>
+                                        <td className="p-4 text-center text-md">{patient.address}</td>
+                                        <td className="p-4 relative rounded-r-lg">
+                                            <div className="w-full items-center justify-center flex gap-6">
+                                                <Tooltip placement={"left"} title={"view patient information"}>
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedPatientDetails(patient), setCanOpenViewPatientDetailModal(true)
+                                                        }}
+                                                        className="flex items-center justify-center w-9 h-9 text-primary-end text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300">
+                                                        <FaEye/>
+                                                    </button>
+                                                </Tooltip>
+                                                <Tooltip placement={"right"} title={"View Medical Folder"}>
+                                                    <button
+                                                        onClick={() => {
+                                                            navigate(`/doctor/patients/medical-folder/${patient?.id}`, {state: {patient}})
+                                                        }}
+                                                        className="flex items-center justify-center w-9 h-9 text-green-500 text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300">
+                                                        <FaEdit/>
+                                                    </button>
+                                                </Tooltip>
+                                            </div>
+                                        </td>
                                     </tr>
-                                    </thead>
-                                    <tbody>
-                                    {patients.map((patient, index) => (
-                                        <tr key={patient.id || index} className="bg-gray-100">
-                                            <td className="p-4 text-md text-blue-900 rounded-l-lg text-center">{index + 1}</td>
-                                            <td className="p-4 text-md text-center font-bold">{patient.firstName}</td>
-                                            <td className="p-4 text-md text-center">{patient.lastName}</td>
-                                            <td className="p-4 text-md text-center">{patient.gender}</td>
-                                            <td className="p-4 text-center text-md">{patient.address}</td>
-                                            <td className="p-4 relative rounded-r-lg">
-                                                <div className="w-full items-center justify-center flex gap-6">
-                                                    <Tooltip placement={"left"} title={"view patient information"}>
-                                                        <button
-                                                            onClick={() => {
-                                                                setSelectedPatientDetails(patient), setCanOpenViewPatientDetailModal(true)
-                                                            }}
-                                                            className="flex items-center justify-center w-9 h-9 text-primary-end text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300">
-                                                            <FaEye/>
-                                                        </button>
-                                                    </Tooltip>
-                                                    <Tooltip placement={"right"} title={"View Medical Folder"}>
-                                                        <button
-                                                            onClick={() => {
-                                                                navigate(`/doctor/patients/medical-folder/${patient?.id}`, {state: {patient}})
-                                                            }}
-                                                            className="flex items-center justify-center w-9 h-9 text-green-500 text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300">
-                                                            <FaEdit/>
-                                                        </button>
-                                                    </Tooltip>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    </tbody>
-                                </table>
+                                ))}
+                            </tbody>
+                        </table>
 
 
-                                {/*Pagination content */}
-                                <div className="fixed w-full justify-center -right-16 bottom-0 flex mt-6 mb-4">
-                                    <div className="flex gap-4">
-                                        <Tooltip placement={"left"} title={"previous slide"}>
-                                            <button
-                                                onClick={async () => {
-                                                    await fetchNextOrPreviousPatientList(previousUrlForRenderPatientList), updateActualPageNumber("prev")
-                                                }}
-                                                className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl  text-secondary hover:text-2xl duration-300 transition-all  hover:text-white shadow-xl flex justify-center items-center mt-2">
-                                                <FaArrowLeft/>
-                                            </button>
-                                        </Tooltip>
-                                        <p className="text-secondary text-2xl font-bold mt-4">{actualPageNumber}/{calculateNumberOfSlide()}</p>
-                                        <Tooltip placement={"right"} title={"next slide"}>
-                                            <button
-                                                onClick={async () => {
-                                                    await fetchNextOrPreviousPatientList(nexUrlForRenderPatientList), updateActualPageNumber("next")
-                                                }}
-                                                className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl  text-secondary hover:text-2xl duration-300 transition-all  hover:text-white shadow-xl flex justify-center items-center mt-2">
-                                                <FaArrowRight/>
-                                            </button>
-                                        </Tooltip>
-                                    </div>
-                                </div>
-
-
-                                {/* Modals content */}
-                                <ViewPatientDetailsModal isOpen={canOpenViewPatientDetailModal}
-                                                         patient={selectedPatientDetails} onClose={() => {
-                                    setCanOpenViewPatientDetailModal(false)
-                                }}/>
+                        {/*Pagination content */}
+                        <div className="fixed w-full justify-center -right-16 bottom-0 flex mt-6 mb-4">
+                            <div className="flex gap-4">
+                                <Tooltip placement={"left"} title={"previous slide"}>
+                                    <button
+                                        onClick={async () => {
+                                            await fetchNextOrPreviousPatientList(previousUrlForRenderPatientList), updateActualPageNumber("prev")
+                                        }}
+                                        className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl  text-secondary hover:text-2xl duration-300 transition-all  hover:text-white shadow-xl flex justify-center items-center mt-2">
+                                        <FaArrowLeft/>
+                                    </button>
+                                </Tooltip>
+                                <p className="text-secondary text-2xl font-bold mt-4">{actualPageNumber}/{calculateNumberOfSlide()}</p>
+                                <Tooltip placement={"right"} title={"next slide"}>
+                                    <button
+                                        onClick={async () => {
+                                            await fetchNextOrPreviousPatientList(nexUrlForRenderPatientList), updateActualPageNumber("next")
+                                        }}
+                                        className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl  text-secondary hover:text-2xl duration-300 transition-all  hover:text-white shadow-xl flex justify-center items-center mt-2">
+                                        <FaArrowRight/>
+                                    </button>
+                                </Tooltip>
                             </div>
-                        )
+                        </div>
+
+
+                        {/* Modals content */}
+                        <ViewPatientDetailsModal 
+                            isOpen={canOpenViewPatientDetailModal}
+                            patient={selectedPatientDetails} 
+                            onClose={() => setCanOpenViewPatientDetailModal(false)}   
+                        />
+                    </div>
                 )}
-
-
             </div>
         </CustomDashboard>
-    )
+    );
 }
