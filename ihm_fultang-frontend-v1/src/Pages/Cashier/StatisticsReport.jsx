@@ -1,6 +1,10 @@
 import { FaCalendarAlt, FaChartPie, FaUserMd, FaPrescriptionBottle, FaFileMedical } from "react-icons/fa";
 import { useState } from "react";
 import PropTypes from "prop-types";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
+
+const { RangePicker } = DatePicker;
 
 
 export function StatisticsReport({ annualStats, monthlyStats, dailyStats }) {
@@ -37,34 +41,34 @@ export function StatisticsReport({ annualStats, monthlyStats, dailyStats }) {
     const [customFilter, setCustomFilter] = useState({});
     const [customFilteredStats, setCustomFilteredStats] = useState([]);
 
-const handleCustomFilter = (filter) => {
-    const { startDate, endDate, category } = filter;
-    const filteredByDate = dailyStats.filter((stat) => {
-        const statDate = new Date(stat.date);
-        const start = startDate ? new Date(startDate) : null;
-        const end = endDate ? new Date(endDate) : null;
+    const handleCustomFilter = (filter) => {
+        const { startDate, endDate, category } = filter;
+        const filteredByDate = dailyStats.filter((stat) => {
+            const statDate = new Date(stat.date);
+            const start = startDate ? new Date(startDate) : null;
+            const end = endDate ? new Date(endDate) : null;
 
-        return (
-            (!start || statDate >= start) &&
-            (!end || statDate <= end)
-        );
-    });
+            return (
+                (!start || statDate >= start) &&
+                (!end || statDate <= end)
+            );
+        });
 
-    const filteredByCategory = filteredByDate.map((stat) => {
-        if (category === "consultations") {
-            return { ...stat, exams: null, medications: null, revenue: null };
-        } else if (category === "exams") {
-            return { ...stat, consultations: null, medications: null, revenue: null };
-        } else if (category === "medications") {
-            return { ...stat, consultations: null, exams: null, revenue: null };
-        } else if (category === "revenue") {
-            return { ...stat, consultations: null, exams: null, medications: null };
-        }
-        return stat;
-    });
+        const filteredByCategory = filteredByDate.map((stat) => {
+            if (category === "consultations") {
+                return { ...stat, exams: null, medications: null, revenue: null };
+            } else if (category === "exams") {
+                return { ...stat, consultations: null, medications: null, revenue: null };
+            } else if (category === "medications") {
+                return { ...stat, consultations: null, exams: null, revenue: null };
+            } else if (category === "revenue") {
+                return { ...stat, consultations: null, exams: null, medications: null };
+            }
+            return stat;
+        });
 
-    setCustomFilteredStats(filteredByCategory);
-};
+        setCustomFilteredStats(filteredByCategory);
+    };
 
     const renderStats = () => {
         if (selectedTab === "annual") {
@@ -114,7 +118,7 @@ const handleCustomFilter = (filter) => {
             );
         }
 
-        
+
     };
 
     return (
@@ -130,11 +134,10 @@ const handleCustomFilter = (filter) => {
                     <button
                         key={tab}
                         onClick={() => setSelectedTab(tab)}
-                        className={`px-4 py-2 rounded ${
-                            selectedTab === tab
-                                ? "bg-blue-600 text-white"
-                                : "bg-gray-200 hover:bg-gray-300"
-                        }`}
+                        className={`px-4 py-2 rounded ${selectedTab === tab
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-200 hover:bg-gray-300"
+                            }`}
                     >
                         {label}
                     </button>
@@ -210,13 +213,17 @@ TableStats.propTypes = {
 };
 
 function CustomReportFilter({ onFilter }) {
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
+    const [dateRange, setDateRange] = useState([]);
     const [category, setCategory] = useState("all");
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onFilter({ startDate, endDate, category });
+        const [startDate, endDate] = dateRange || [];
+        onFilter({
+            startDate: startDate ? startDate.format('YYYY-MM-DD') : "",
+            endDate: endDate ? endDate.format('YYYY-MM-DD') : "",
+            category
+        });
     };
 
     return (
@@ -246,28 +253,28 @@ function CustomReportFilter({ onFilter }) {
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
                         className="border p-2 rounded w-full"
-                        >
-                            <option value="all">All categories</option>
-                            <option value="consultations">Consultations</option>
-                            <option value="exams">Exams</option>
-                            <option value="medications">Medicines</option>
-                            <option value="revenue">Income</option>
-                        </select>
-                    </div>
-                </div>
-                <div className="flex justify-end">
-                    <button
-                        type="submit"
-                        className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
                     >
-                        Filter
-                    </button>
+                        <option value="all">All categories</option>
+                        <option value="consultations">Consultations</option>
+                        <option value="exams">Exams</option>
+                        <option value="medications">Medicines</option>
+                        <option value="revenue">Income</option>
+                    </select>
                 </div>
-            </form>
-        );
-    }
-    
-    CustomReportFilter.propTypes = {
-        onFilter: PropTypes.func.isRequired,
-    };
-    
+            </div>
+            <div className="flex justify-end">
+                <button
+                    type="submit"
+                    className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
+                >
+                    Filter
+                </button>
+            </div>
+        </form>
+    );
+}
+
+CustomReportFilter.propTypes = {
+    onFilter: PropTypes.func.isRequired,
+};
+

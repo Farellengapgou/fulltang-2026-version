@@ -1,15 +1,17 @@
 "use client"
 
-import  { useState } from "react"
+import { useState } from "react"
 import { ArrowLeft, User, Calendar, CreditCard, Printer, FileText } from "lucide-react"
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 
 import { FaSearch, FaUser, FaChevronRight, FaHistory, FaPills } from "react-icons/fa"
 import { BsExclamationTriangle } from "react-icons/bs"
 import { IoMedkit } from "react-icons/io5"
 import { GiStethoscope } from "react-icons/gi"
 import { doctorNavLink } from "../lib/doctorNavLink.js"
-import {DoctorNavBar} from "../DoctorComponents/DoctorNavBar.jsx"
-import {CustomDashboard} from "../../../GlobalComponents/CustomDashboard.jsx";
+import { DoctorNavBar } from "../DoctorComponents/DoctorNavBar.jsx"
+import { CustomDashboard } from "../../../GlobalComponents/CustomDashboard.jsx";
 
 
 const patients = [
@@ -111,63 +113,63 @@ export const MedicalRecord2 = () => {
 
   if (!selectedPatient) {
 
-        return (
-            <div className="min-h-screen bg-gray-100">
-              <div className="bg-gradient-to-r from-primary-end to-primary-start p-6 text-white">
-                <h1 className="text-3xl font-bold mb-2">Carnet Médical</h1>
-                <p className="opacity-90 font-semibold text-md">Sélectionnez un patient pour commencer la consultation</p>
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <div className="bg-gradient-to-r from-primary-end to-primary-start p-6 text-white">
+          <h1 className="text-3xl font-bold mb-2">Carnet Médical</h1>
+          <p className="opacity-90 font-semibold text-md">Sélectionnez un patient pour commencer la consultation</p>
+        </div>
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div className="p-6">
+              <div className="relative mb-6">
+                <input
+                  type="text"
+                  placeholder="Rechercher un patient..."
+                  value={searchPatient}
+                  onChange={(e) => setSearchPatient(e.target.value)}
+                  className="w-full px-4 py-3 pl-12 rounded-lg border border-gray-300 focus:border-primary-end focus:ring-2 focus:ring-primary-start outline-none transition-all"
+                />
+                <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               </div>
-              <div className="container mx-auto px-4 py-8">
-                <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                  <div className="p-6">
-                    <div className="relative mb-6">
-                      <input
-                        type="text"
-                        placeholder="Rechercher un patient..."
-                        value={searchPatient}
-                        onChange={(e) => setSearchPatient(e.target.value)}
-                        className="w-full px-4 py-3 pl-12 rounded-lg border border-gray-300 focus:border-primary-end focus:ring-2 focus:ring-primary-start outline-none transition-all"
-                      />
-                      <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+
+              <div className="space-y-4">
+                {filteredPatients.map((patient) => (
+                  <button
+                    key={patient.id}
+                    onClick={() => setSelectedPatient(patient)}
+                    className="w-full p-4 flex items-center space-x-4 hover:bg-gray-50 rounded-lg transition-all border border-gray-200"
+                  >
+                    <div className="w-12 h-12 bg-primary-start rounded-full flex items-center justify-center">
+                      <FaUser className="w-6 h-6 text-white" />
                     </div>
-      
-                    <div className="space-y-4">
-                      {filteredPatients.map((patient) => (
-                        <button
-                          key={patient.id}
-                          onClick={() => setSelectedPatient(patient)}
-                          className="w-full p-4 flex items-center space-x-4 hover:bg-gray-50 rounded-lg transition-all border border-gray-200"
-                        >
-                          <div className="w-12 h-12 bg-primary-start rounded-full flex items-center justify-center">
-                            <FaUser className="w-6 h-6 text-white" />
-                          </div>
-                          <div className="flex-1 text-left">
-                            <h3 className="font-medium text-gray-800">{patient.name}</h3>
-                            <div className="text-sm text-gray-500 space-x-4">
-                              <span>{patient.age} ans</span>
-                              <span>•</span>
-                              <span>{patient.phone}</span>
-                            </div>
-                          </div>
-                          <FaChevronRight className="text-gray-400" />
-                        </button>
-                      ))}
+                    <div className="flex-1 text-left">
+                      <h3 className="font-medium text-gray-800">{patient.name}</h3>
+                      <div className="text-sm text-gray-500 space-x-4">
+                        <span>{patient.age} ans</span>
+                        <span>•</span>
+                        <span>{patient.phone}</span>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                    <FaChevronRight className="text-gray-400" />
+                  </button>
+                ))}
               </div>
             </div>
-          )
-        }
+          </div>
+        </div>
+      </div>
+    )
+  }
 
- 
-      
+
+
 
   return (
     <div className="flex flex-col min-h-screen p-4">
       <div className="bg-gradient-to-r from-primary-end to-primary-start rounded-lg p-6 text-white mb-5">
         <h1 className="text-3xl font-bold mb-2">
-          Consultation de {selectedPatient.name} 
+          Consultation de {selectedPatient.name}
         </h1>
         <p className="opacity-90 font-semibold text-md">
           Enregistrez les détails de la consultation de {selectedPatient.name}, incluant le diagnostic établi, les examens
@@ -214,13 +216,20 @@ export const MedicalRecord2 = () => {
                   <p className="text-md font-bold">Date et Heure</p>
                   <div className="mt-1 text-md text-gray-900 flex items-center">
                     <Calendar className="mr-2 h-8 w-8 text-gray-600" />
-                    <input
-                      type="datetime-local"
+                    <DatePicker
+                      showTime
                       id="date"
-                      name="date"
-                      value={formData.date}
-                      onChange={handleInputChange}
-                      className="border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      value={formData.date ? dayjs(formData.date) : null}
+                      onChange={(date, dateString) => {
+                        setFormData((prevState) => ({
+                          ...prevState,
+                          date: dateString,
+                        }))
+                      }}
+                      disabledDate={(current) => {
+                        return current && current.isBefore(dayjs().startOf('day'));
+                      }}
+                      className="w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -515,12 +524,12 @@ export const MedicalRecord2 = () => {
 }
 
 
-export  function DoctorAddConsultation() {
+export function DoctorAddConsultation() {
   return (
     <CustomDashboard linkList={doctorNavLink} requiredRole="Doctor">
-        <DoctorNavBar/>
+      <DoctorNavBar />
       <MedicalRecord2></MedicalRecord2>
-    </>
+    </CustomDashboard>
   )
 }
 

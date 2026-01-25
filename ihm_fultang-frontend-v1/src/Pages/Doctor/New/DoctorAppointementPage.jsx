@@ -1,4 +1,4 @@
-import  { useState } from "react"
+import { useState } from "react"
 import {
   Calendar,
   Clock,
@@ -15,10 +15,12 @@ import {
   CheckCircle2,
   ArrowLeft,
 } from "lucide-react"
+import { DatePicker, TimePicker } from 'antd';
+import dayjs from 'dayjs';
 import { FaSearch, FaUser, FaChevronRight } from "react-icons/fa"
 import { DoctorNavBar } from "../DoctorComponents/DoctorNavBar.jsx"
 import { doctorNavLink } from "../lib/doctorNavLink.js"
-import {CustomDashboard} from "../../../GlobalComponents/CustomDashboard.jsx";
+import { CustomDashboard } from "../../../GlobalComponents/CustomDashboard.jsx";
 
 const patients = [
   { id: 1, name: "Jean Dupont", age: 45, email: "jean@email.com", phone: "0123456789" },
@@ -186,11 +188,10 @@ export const AppointmentForm2 = () => {
                         key={doctor.id}
                         type="button"
                         onClick={() => setSelectedDoctor(doctor)}
-                        className={`w-full p-2 rounded-lg border transition-all ${
-                          selectedDoctor?.id === doctor.id
-                            ? "border-primary-end bg-primary-start text-white"
-                            : "border-gray-200 hover:border-primary-start hover:bg-gray-50"
-                        }`}
+                        className={`w-full p-2 rounded-lg border transition-all ${selectedDoctor?.id === doctor.id
+                          ? "border-primary-end bg-primary-start text-white"
+                          : "border-gray-200 hover:border-primary-start hover:bg-gray-50"
+                          }`}
                       >
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
@@ -211,17 +212,19 @@ export const AppointmentForm2 = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
                   <div className="relative">
-                    <input
-                      type="date"
-                      value={appointmentData.date}
-                      onChange={(e) =>
+                    <DatePicker
+                      id="date"
+                      value={appointmentData.date ? dayjs(appointmentData.date) : null}
+                      onChange={(date, dateString) =>
                         setAppointmentData({
                           ...appointmentData,
-                          date: e.target.value,
+                          date: dateString,
                         })
                       }
-                      className="w-full px-4 py-3 pl-12 rounded-lg border border-gray-300 focus:border-primary-end focus:ring-2 focus:ring-primary-start outline-none"
-                      required
+                      disabledDate={(current) => {
+                        return current && current.isBefore(dayjs().startOf('day'));
+                      }}
+                      className="w-full h-12 pl-12 rounded-lg border border-gray-300 focus:border-primary-end focus:ring-2 focus:ring-primary-start outline-none"
                     />
                     <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   </div>
@@ -229,17 +232,16 @@ export const AppointmentForm2 = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Heure</label>
                   <div className="relative">
-                    <input
-                      type="time"
-                      value={appointmentData.time}
-                      onChange={(e) =>
+                    <TimePicker
+                      format="HH:mm"
+                      value={appointmentData.time ? dayjs(appointmentData.time, 'HH:mm') : null}
+                      onChange={(time, timeString) =>
                         setAppointmentData({
                           ...appointmentData,
-                          time: e.target.value,
+                          time: timeString,
                         })
                       }
-                      className="w-full px-4 py-3 pl-12 rounded-lg border border-gray-300 focus:border-primary-end focus:ring-2 focus:ring-primary-start outline-none"
-                      required
+                      className="w-full h-12 pl-12 rounded-lg border border-gray-300 focus:border-primary-end focus:ring-2 focus:ring-primary-start outline-none"
                     />
                     <Clock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   </div>
@@ -290,11 +292,10 @@ export const AppointmentForm2 = () => {
 
             {notification && (
               <div
-                className={`mt-6 p-4 rounded-lg flex items-center space-x-3 ${
-                  notification.type === "success"
-                    ? "bg-green-50 border border-green-200"
-                    : "bg-red-50 border border-red-200"
-                }`}
+                className={`mt-6 p-4 rounded-lg flex items-center space-x-3 ${notification.type === "success"
+                  ? "bg-green-50 border border-green-200"
+                  : "bg-red-50 border border-red-200"
+                  }`}
               >
                 {notification.type === "success" ? (
                   <CheckCircle2 className="w-5 h-5 text-green-700" />

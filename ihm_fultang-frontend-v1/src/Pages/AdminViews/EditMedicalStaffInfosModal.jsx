@@ -1,5 +1,7 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import axiosInstance from "../../Utils/axiosInstance.js";
 
 export function EditMedicalStaffInfosModal({ isOpen, onClose, setCanOpenSuccessModal, setSuccessMessage, setIsLoading, medicalStaffData }) {
@@ -21,8 +23,8 @@ export function EditMedicalStaffInfosModal({ isOpen, onClose, setCanOpenSuccessM
         gender: '',
         email: '',
         cniNumber: '',
-        username:'',
-        isActive:'',
+        username: '',
+        isActive: '',
         role: '',
         password: '',
     });
@@ -52,12 +54,7 @@ export function EditMedicalStaffInfosModal({ isOpen, onClose, setCanOpenSuccessM
 
     function handleChange(e) {
         const { name, value } = e.target;
-        if (name === 'date_joined') {
-            const date = new Date(value).toISOString();
-            setFormData(prevData => ({ ...prevData, [name]: date }));
-        } else {
-            setFormData(prevData => ({ ...prevData, [name]: value }));
-        }
+        setFormData(prevData => ({ ...prevData, [name]: value }));
     }
 
 
@@ -70,28 +67,28 @@ export function EditMedicalStaffInfosModal({ isOpen, onClose, setCanOpenSuccessM
     async function handleSubmit(e) {
         e.preventDefault();
         setIsLoading(true);
-            const updatedData = Object.keys(checkedFields).reduce((acc, key) => {
-                if (checkedFields[key]) {
-                    acc[key] = formData[key];
-                }
-                return acc;
-            }, {});
-
-            try {
-                const response = await axiosInstance.patch(`/medical-staff/${medicalStaffData.id}/`, updatedData);
-                if (response.status === 200) {
-                    setIsLoading(false);
-                    setSuccessMessage(`${medicalStaffData.role + " " + medicalStaffData.username} 's information has been updated successfully!`);
-                    setCanOpenSuccessModal(true);
-                    onClose();
-                }
-            } catch (error) {
-                setIsLoading(false);
-                setSuccessMessage("");
-                setCanOpenSuccessModal(false);
-                setError("Something went wrong, please try again later!");
-                console.log(error);
+        const updatedData = Object.keys(checkedFields).reduce((acc, key) => {
+            if (checkedFields[key]) {
+                acc[key] = formData[key];
             }
+            return acc;
+        }, {});
+
+        try {
+            const response = await axiosInstance.patch(`/medical-staff/${medicalStaffData.id}/`, updatedData);
+            if (response.status === 200) {
+                setIsLoading(false);
+                setSuccessMessage(`${medicalStaffData.role + " " + medicalStaffData.username} 's information has been updated successfully!`);
+                setCanOpenSuccessModal(true);
+                onClose();
+            }
+        } catch (error) {
+            setIsLoading(false);
+            setSuccessMessage("");
+            setCanOpenSuccessModal(false);
+            setError("Something went wrong, please try again later!");
+            console.log(error);
+        }
         setIsLoading(false);
     }
 
@@ -105,12 +102,12 @@ export function EditMedicalStaffInfosModal({ isOpen, onClose, setCanOpenSuccessM
     }
 
 
-    function formatDateForInput(isoDate){
+    function formatDateForInput(isoDate) {
         try {
             const date = new Date(isoDate);
             return date.toISOString().slice(0, 16);
         } catch (error) {
-            console.error( error);
+            console.error(error);
             return '';
         }
     }
@@ -142,7 +139,7 @@ export function EditMedicalStaffInfosModal({ isOpen, onClose, setCanOpenSuccessM
                                 />
                                 <div className="flex-1">
                                     <label htmlFor="firstName"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Firstname</label>
+                                        className="block text-sm font-medium text-gray-700 mb-1">Firstname</label>
                                     <input
                                         type="text"
                                         id="first_name"
@@ -169,7 +166,7 @@ export function EditMedicalStaffInfosModal({ isOpen, onClose, setCanOpenSuccessM
                                 />
                                 <div className="flex-1">
                                     <label htmlFor="lastName"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Lastname</label>
+                                        className="block text-sm font-medium text-gray-700 mb-1">Lastname</label>
                                     <input
                                         type="text"
                                         id="last_name"
@@ -198,7 +195,7 @@ export function EditMedicalStaffInfosModal({ isOpen, onClose, setCanOpenSuccessM
                                 />
                                 <div className="flex-1">
                                     <label htmlFor="lastName"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                                        className="block text-sm font-medium text-gray-700 mb-1">Username</label>
                                     <input
                                         type="text"
                                         id="username"
@@ -224,7 +221,7 @@ export function EditMedicalStaffInfosModal({ isOpen, onClose, setCanOpenSuccessM
                                 />
                                 <div className="flex-1">
                                     <label htmlFor="lastName"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                        className="block text-sm font-medium text-gray-700 mb-1">Password</label>
                                     <input
                                         type="password"
                                         id="password"
@@ -251,7 +248,7 @@ export function EditMedicalStaffInfosModal({ isOpen, onClose, setCanOpenSuccessM
                                 />
                                 <div className="flex-1">
                                     <label htmlFor="gender"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                                        className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
                                     <select
                                         id="gender"
                                         name="gender"
@@ -279,18 +276,22 @@ export function EditMedicalStaffInfosModal({ isOpen, onClose, setCanOpenSuccessM
                                 />
                                 <div className="flex-1">
                                     <label htmlFor="address"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Registered
+                                        className="block text-sm font-medium text-gray-700 mb-1">Registered
                                         at</label>
-                                    <input
-                                        type="datetime-local"
+                                    <DatePicker
+                                        showTime
                                         id="date_joined"
-                                        name="date_joined"
-                                        value={formatDateForInput(formData.date_joined)}
-                                        max={new Date().toISOString().slice(0, 16)}
-                                        onChange={handleChange}
-                                        className={applyFormStyle()}
-                                        required={checkedFields.date_joined}
+                                        placeholder="Select registration date"
+                                        value={formData.date_joined ? dayjs(formData.date_joined) : null}
+                                        onChange={(date, dateString) => {
+                                            setFormData(prevData => ({ ...prevData, date_joined: dateString }));
+                                        }}
+                                        disabledDate={(current) => {
+                                            return current && current.isAfter(dayjs(), 'day');
+                                        }}
+                                        className="w-full h-10 border border-gray-300 rounded-md focus:outline-none focus:border-2 focus:border-primary-end"
                                         disabled={!checkedFields.date_joined}
+                                        style={{ width: '100%' }}
                                     />
                                 </div>
                             </div>
@@ -306,7 +307,7 @@ export function EditMedicalStaffInfosModal({ isOpen, onClose, setCanOpenSuccessM
                                 />
                                 <div className="flex-1">
                                     <label htmlFor="email"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                        className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
                                     <input
                                         type="email"
                                         id="email"
@@ -363,7 +364,7 @@ export function EditMedicalStaffInfosModal({ isOpen, onClose, setCanOpenSuccessM
                                 />
                                 <div className="flex-1">
                                     <label htmlFor="gender"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Profession</label>
+                                        className="block text-sm font-medium text-gray-700 mb-1">Profession</label>
                                     <select
                                         id="role"
                                         name="role"
@@ -397,7 +398,7 @@ export function EditMedicalStaffInfosModal({ isOpen, onClose, setCanOpenSuccessM
                                 type="button"
                                 onClick={() => {
                                     setError(""),
-                                    onClose()
+                                        onClose()
                                 }}
                                 className="px-4 py-2 border bg-red-400 text-md hover:text-xl hover:bg-red-500 text-white font-bold rounded-lg transition-all duration-300"
                             >
