@@ -42,6 +42,8 @@ export function LoginPage() {
             const roleRoutes = {
                 "Pharmacist": appRouterPaths.pharmacyPage,
                 "Doctor": appRouterPaths.doctorPage,
+                "Ophthalmologist": appRouterPaths.ophthalmologistPage,
+                "Dentist": appRouterPaths.dentistPage,
                 "Nurse": appRouterPaths.nursePage,
                 "Labtech": appRouterPaths.laboratoryAssistantPage,
                 "Admin": appRouterPaths.adminHomePage,

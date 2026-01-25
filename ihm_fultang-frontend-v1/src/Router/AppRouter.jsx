@@ -219,6 +219,34 @@ export function AppRoute() {
     ).OphthaMessage,
   }));
 
+  const DentistPage = React.lazy(async () => ({
+    default: (await import("../Pages/Dentist/Dentist.jsx"))
+      .Dentist,
+  }));
+  const DentistConsultationList = React.lazy(async () => ({
+    default: (
+      await import("../Pages/Dentist/DentistConsultationList.jsx")
+    ).DentistConsultationList,
+  }));
+  const DentistConsultationHistory = React.lazy(async () => ({
+    default: (await import("../Pages/Dentist/ConsultationHistory.jsx"))
+      .DentistConsultationHistory,
+  }));
+  const DentistPatientList = React.lazy(async () => ({
+    default: (
+      await import("../Pages/Dentist/DentistPatientList.jsx")
+    ).DentistPatientList,
+  }));
+  const DentistAppointment = React.lazy(async () => ({
+    default: (await import("../Pages/Dentist/AppointmentList.jsx"))
+      .AppointmentList,
+  }));
+  const DentistMessage = React.lazy(async () => ({
+    default: (
+      await import("../Pages/Dentist/DentistMessagePage.jsx")
+    ).DentistMessagePage,
+  }));
+
   const FinancialContributions = React.lazy(async () => ({
     default: (await import("../Pages/Accountant/FinancialContribution.jsx"))
       .FinancialContributions,
@@ -497,6 +525,31 @@ export function AppRoute() {
         <Route
           path={AppRoutesPaths.ophthaMessage}
           element={<OphthaMessage />}
+        />
+
+        <Route
+          path={AppRoutesPaths.dentistPage}
+          element={<DentistPage />}
+        />
+        <Route
+          path={AppRoutesPaths.dentistConsultationList}
+          element={<DentistConsultationList />}
+        />
+        <Route
+          path={AppRoutesPaths.dentistConsultationHistory}
+          element={<DentistConsultationHistory />}
+        />
+        <Route
+          path={AppRoutesPaths.dentistPatientList}
+          element={<DentistPatientList />}
+        />
+        <Route
+          path={AppRoutesPaths.dentistAppointment}
+          element={<DentistAppointment />}
+        />
+        <Route
+          path={AppRoutesPaths.dentistMessage}
+          element={<DentistMessage />}
         />
 
         <Route path={AppRoutesPaths.welcomePage} element={<LandingPage />} />

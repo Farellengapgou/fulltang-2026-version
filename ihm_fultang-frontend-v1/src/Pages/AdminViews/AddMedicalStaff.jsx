@@ -333,6 +333,7 @@ export function AddMedicalStaff() {
                                     <option value="Receptionist">Receptionist</option>
                                     <option value="Labtech">Laboratory Assistant</option>
                                     <option value="Ophthalmologist">Ophthalmologist</option>
+                                    <option value="Dentist">Dentist</option>
                                     <option value="Cashier">Cashier</option>
                                     <option value="Accountant">Financial Accountant</option>
                                     <option value="MaterialAccountant">Material Accountant</option>
