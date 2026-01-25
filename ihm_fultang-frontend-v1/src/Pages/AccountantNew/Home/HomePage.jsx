@@ -26,15 +26,15 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { 
-  Wallet, 
-  Landmark, 
-  TrendingUp, 
-  Calendar, 
+import {
+  Wallet,
+  Landmark,
+  TrendingUp,
+  Calendar,
   DollarSign,
   TrendingDown,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
 } from "lucide-react";
 
 export function DashBoard() {
@@ -69,15 +69,20 @@ export function DashBoard() {
   }, []);
 
   if (loading) return <Loader size="medium" color="primary-end" />;
-  
+
   if (error) {
     return (
-      <CustomDashboard linkList={FinancialAccountantNavLink} requiredRole={"Accountant"}>
+      <CustomDashboard
+        linkList={FinancialAccountantNavLink}
+        requiredRole={"Accountant"}
+      >
         <FinancialAccountantNavBar />
         <div className="flex items-center justify-center h-[600px]">
           <div className="text-center">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
-            <h3 className="text-2xl font-bold text-red-600 mb-2">Error Loading Data</h3>
+            <h3 className="text-2xl font-bold text-red-600 mb-2">
+              Error Loading Data
+            </h3>
             <p className="text-gray-600">{error}</p>
           </div>
         </div>
@@ -85,9 +90,12 @@ export function DashBoard() {
     );
   }
 
-  const totalAssets = balanceSheet?.assets?.reduce((sum, a) => sum + a.balance, 0) || 0;
-  const totalLiabilities = balanceSheet?.liabilities?.reduce((sum, l) => sum + l.balance, 0) || 0;
-  const totalEquity = balanceSheet?.equity?.reduce((sum, e) => sum + e.balance, 0) || 0;
+  const totalAssets =
+    balanceSheet?.assets?.reduce((sum, a) => sum + a.balance, 0) || 0;
+  const totalLiabilities =
+    balanceSheet?.liabilities?.reduce((sum, l) => sum + l.balance, 0) || 0;
+  const totalEquity =
+    balanceSheet?.equity?.reduce((sum, e) => sum + e.balance, 0) || 0;
   const totalRevenue = incomeStatement?.total_revenue || 0;
   const totalExpense = incomeStatement?.total_expense || 0;
   const netIncome = incomeStatement?.net_income || 0;
@@ -106,15 +114,19 @@ export function DashBoard() {
   const COLORS = ["#4DB6AC", "#FF6B6B", "#4ECDC4"];
 
   return (
-    <CustomDashboard linkList={FinancialAccountantNavLink} requiredRole={"Accountant"}>
+    <CustomDashboard
+      linkList={FinancialAccountantNavLink}
+      requiredRole={"Accountant"}
+    >
       <FinancialAccountantNavBar />
-      
+
       <div className="p-6 space-y-6">
         {/* Page Header */}
         <div className="bg-gradient-to-r from-primary-end to-primary-start rounded-lg p-6 text-white">
           <h1 className="text-3xl font-bold mb-2">Accounting Dashboard</h1>
           <p className="opacity-90 font-semibold text-md">
-            Financial overview for period {currentPeriod?.month}/{currentPeriod?.year}
+            Financial overview for period {currentPeriod?.month}/
+            {currentPeriod?.year}
           </p>
         </div>
 
@@ -154,7 +166,9 @@ export function DashBoard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Balance Sheet Chart */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Balance Sheet Distribution</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              Balance Sheet Distribution
+            </h2>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -162,13 +176,18 @@ export function DashBoard() {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) =>
+                    `${name}: ${(percent * 100).toFixed(0)}%`
+                  }
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
                 >
                   {balanceChartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -178,7 +197,9 @@ export function DashBoard() {
 
           {/* Income Statement Chart */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Revenue vs Expenses</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              Revenue vs Expenses
+            </h2>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={incomeChartData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -202,16 +223,25 @@ export function DashBoard() {
             </div>
             <div className="space-y-3">
               {balanceSheet?.assets?.map((asset) => (
-                <div key={asset.id} className="flex justify-between items-center border-b border-gray-100 pb-2">
+                <div
+                  key={asset.id}
+                  className="flex justify-between items-center border-b border-gray-100 pb-2"
+                >
                   <div>
                     <p className="text-xs text-gray-500">{asset.code}</p>
-                    <p className="text-sm font-semibold text-gray-700">{asset.label}</p>
+                    <p className="text-sm font-semibold text-gray-700">
+                      {asset.label}
+                    </p>
                   </div>
-                  <p className="text-sm font-bold text-secondary">{asset.balance.toLocaleString()}</p>
+                  <p className="text-sm font-bold text-secondary">
+                    {asset.balance.toLocaleString()}
+                  </p>
                 </div>
               ))}
               {balanceSheet?.assets?.length === 0 && (
-                <p className="text-center text-gray-400 py-4">No assets recorded</p>
+                <p className="text-center text-gray-400 py-4">
+                  No assets recorded
+                </p>
               )}
             </div>
           </div>
@@ -224,16 +254,25 @@ export function DashBoard() {
             </div>
             <div className="space-y-3">
               {balanceSheet?.liabilities?.map((liability) => (
-                <div key={liability.id} className="flex justify-between items-center border-b border-gray-100 pb-2">
+                <div
+                  key={liability.id}
+                  className="flex justify-between items-center border-b border-gray-100 pb-2"
+                >
                   <div>
                     <p className="text-xs text-gray-500">{liability.code}</p>
-                    <p className="text-sm font-semibold text-gray-700">{liability.label}</p>
+                    <p className="text-sm font-semibold text-gray-700">
+                      {liability.label}
+                    </p>
                   </div>
-                  <p className="text-sm font-bold text-secondary">{liability.balance.toLocaleString()}</p>
+                  <p className="text-sm font-bold text-secondary">
+                    {liability.balance.toLocaleString()}
+                  </p>
                 </div>
               ))}
               {balanceSheet?.liabilities?.length === 0 && (
-                <p className="text-center text-gray-400 py-4">No liabilities recorded</p>
+                <p className="text-center text-gray-400 py-4">
+                  No liabilities recorded
+                </p>
               )}
             </div>
           </div>
@@ -246,16 +285,25 @@ export function DashBoard() {
             </div>
             <div className="space-y-3">
               {balanceSheet?.equity?.map((eq) => (
-                <div key={eq.id} className="flex justify-between items-center border-b border-gray-100 pb-2">
+                <div
+                  key={eq.id}
+                  className="flex justify-between items-center border-b border-gray-100 pb-2"
+                >
                   <div>
                     <p className="text-xs text-gray-500">{eq.code}</p>
-                    <p className="text-sm font-semibold text-gray-700">{eq.label}</p>
+                    <p className="text-sm font-semibold text-gray-700">
+                      {eq.label}
+                    </p>
                   </div>
-                  <p className="text-sm font-bold text-secondary">{eq.balance.toLocaleString()}</p>
+                  <p className="text-sm font-bold text-secondary">
+                    {eq.balance.toLocaleString()}
+                  </p>
                 </div>
               ))}
               {balanceSheet?.equity?.length === 0 && (
-                <p className="text-center text-gray-400 py-4">No equity recorded</p>
+                <p className="text-center text-gray-400 py-4">
+                  No equity recorded
+                </p>
               )}
             </div>
           </div>
@@ -263,27 +311,31 @@ export function DashBoard() {
 
         {/* Quick Actions */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
+          <h2 className="text-xl font-bold text-gray-800 mb-4">
+            Quick Actions
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <QuickActionButton
               icon={Calendar}
-              label="Close Period"
-              onClick={() => alert("Close period functionality")}
+              label="Périodes Comptables"
+              onClick={() => navigate(AppRouterPaths.periodClose)}
             />
             <QuickActionButton
               icon={Wallet}
               label="View Accounts"
-              onClick={() => navigate(AppRouterPaths.accountantChartOfAccountsPage)}
+              onClick={() => navigate(AppRouterPaths.cashPositions)}
             />
             <QuickActionButton
               icon={DollarSign}
-              label="Journal Entries"
-              onClick={() => navigate(AppRouterPaths.accountantJournalEntriesPage)}
+              label="Ecriture Comptable"
+              onClick={() =>
+                navigate(AppRouterPaths.financialAccountantJournalEntries)
+              }
             />
             <QuickActionButton
               icon={TrendingUp}
               label="Reports"
-              onClick={() => navigate(AppRouterPaths.accountantFinancialReportsPage)}
+              onClick={() => navigate(AppRouterPaths.financialStatements)}
             />
           </div>
         </div>
