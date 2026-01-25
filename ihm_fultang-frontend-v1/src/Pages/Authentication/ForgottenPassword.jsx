@@ -73,36 +73,28 @@ export function ForgottenPassword() {
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gray-50 font-sans text-gray-800">
       {/* Background elements */}
-      <div className="absolute inset-0 z-0 opacity-5">
+      <div className="absolute inset-0 z-0">
         <img
           src={loginBackground}
           alt="Reset Background"
-          className="w-full h-full object-cover grayscale"
+          className="w-full h-full object-cover"
         />
       </div>
 
-      <div className="container mx-auto px-6 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-4xl mx-auto flex flex-col md:flex-row bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
-        >
           {/* Info Side - Matching Login gradient */}
-          <div className="md:w-5/12 p-10 bg-gradient-to-r from-primary-end to-primary-start flex flex-col justify-between text-white relative overflow-hidden">
-            <div className="relative z-10">
-              <Link to="/" className="flex items-center gap-3 mb-10 group">
-                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-lg transition-transform duration-500 ease-in-out group-hover:scale-105">
-                  <Activity className="text-secondary w-6 h-6" />
-                </div>
-                <span className="text-2xl font-bold">FULTANG</span>
+            <div className="relative mb-[50rem] ml-[2rem]">
+              <Link to="/">
+                <span className="text-3xl  text-white font-bold">FULTANG</span>
               </Link>
+            </div>
 
-              <h2 className="text-3xl font-bold mb-4 leading-tight">
+            <div className="relative z-10 ml-[1rem] text-white">
+
+              <h2 className="text-6xl text-secondary text-black font-semibold mb-10 leading-tight">
                 Sécurité du Compte
               </h2>
 
-              <p className="text-white/80 text-base mb-8 leading-relaxed">
+              <p className="text-black text-secondary text-3xl mb-8 leading-relaxed">
                 Réinitialisez votre mot de passe en toute sécurité. Utilisez un
                 mot de passe fort pour protéger vos accès.
               </p>
@@ -114,27 +106,18 @@ export function ForgottenPassword() {
                 ].map((tip, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center gap-2 text-white/70"
+                    className="flex items-center gap-2 text-black"
                   >
                     <tip.icon className="w-5 h-5 text-emerald-400" />
-                    <span className="font-semibold text-sm">{tip.text}</span>
+                    <span className="font-semibold text-secondary text-3xl">{tip.text}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="relative z-10 pt-10">
-              <div className="p-4 bg-white/10 rounded-lg border border-white/20">
-                <Lock className="w-8 h-8 text-white mb-2 animate-pulse" />
-                <p className="text-xs font-semibold opacity-80">
-                  Vos données sont protégées par un chiffrement standard.
-                </p>
-              </div>
-            </div>
-          </div>
-
+      <div className="container mx-auto px-6 relative z-10">
           {/* Form Side */}
-          <div className="md:w-7/12 p-10 bg-white flex flex-col justify-center">
+          <div className="ml-[13rem] mr-[10rem] p-10 bg-white flex flex-col justify-center rounded-2xl">
             <AnimatePresence mode="wait">
               {!isSubmitted ? (
                 <motion.div
@@ -144,10 +127,10 @@ export function ForgottenPassword() {
                   exit={{ opacity: 0, x: -20 }}
                 >
                   <div className="mb-8">
-                    <h3 className="text-2xl font-bold text-secondary mb-2">
+                    <h3 className="text-3xl font-bold text-secondary mb-2">
                       Réinitialisation
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-gray-600 text-xl">
                       Créez un nouveau mot de passe
                     </p>
                   </div>
@@ -163,7 +146,7 @@ export function ForgottenPassword() {
 
                   <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="space-y-1.5">
-                      <label className="text-md font-semibold text-gray-600 mb-1 block">
+                      <label className="text-xl font-semibold text-gray-600 mb-1 block">
                         Adresse Email
                       </label>
                       <input
@@ -177,7 +160,7 @@ export function ForgottenPassword() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-md font-semibold text-gray-600 mb-1 block">
+                      <label className="text-xl font-semibold text-gray-600 mb-1 block">
                         Nouveau Mot de passe
                       </label>
                       <input
@@ -191,7 +174,7 @@ export function ForgottenPassword() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-md font-semibold text-gray-600 mb-1 block">
+                      <label className="text-xl font-semibold text-gray-600 mb-1 block">
                         Confirmer
                       </label>
                       <input
@@ -207,7 +190,7 @@ export function ForgottenPassword() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-4 bg-secondary text-white font-bold rounded-lg shadow-md hover:shadow-lg hover:bg-[#3d9d94] transition-all duration-500 ease-in-out flex items-center justify-center gap-2 mt-4"
+                      className="w-full py-4 bg-secondary text-md text-white font-bold rounded-lg shadow-md hover:shadow-lg hover:bg-[#3d9d94] transition-all duration-500 ease-in-out flex items-center justify-center gap-2 mt-4"
                     >
                       {loading ? (
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -248,14 +231,13 @@ export function ForgottenPassword() {
             <div className="mt-8 text-center">
               <Link
                 to="/login"
-                className="inline-flex items-center gap-2 text-gray-400 hover:text-secondary transition-colors duration-500 ease-in-out text-sm font-semibold"
+                className="inline-flex text-md items-center gap-2 text-gray-400 hover:text-secondary transition-colors duration-500 ease-in-out font-semibold"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-4 h-4"/>
                 Retour à la connexion
               </Link>
             </div>
           </div>
-        </motion.div>
       </div>
     </div>
   );

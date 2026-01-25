@@ -8,7 +8,8 @@ import {
     Lock, 
     ArrowLeft, 
     AlertCircle,
-    Activity
+    Activity,
+    ShieldCheck
 } from 'lucide-react';
 import loginBackground from "../../assets/logIn.png";
 import Wait from "../Modals/wait.jsx";
@@ -80,52 +81,41 @@ export function LoginPage() {
     return (
         <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gray-50 font-sans text-gray-800">
             {/* Background Elements */}
-            <div className="absolute inset-0 z-0 opacity-5">
+            <div className="absolute inset-0 z-0 ">
                  <img 
                     src={loginBackground} 
                     alt="Background Pattern" 
-                    className="w-full h-full object-cover grayscale"
+                    className="w-full h-full object-cover"
                 />
             </div>
-            
-            <div className="container mx-auto px-6 relative z-10">
-                <motion.div 
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    className="max-w-4xl mx-auto flex flex-col md:flex-row bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
-                >
-                    {/* Brand Side - Matching AdminHomePage gradient */}
-                    <div className="md:w-5/12 p-10 bg-gradient-to-r from-primary-end to-primary-start flex flex-col justify-between text-white relative overflow-hidden">
-                        <div className="relative z-10">
-                            <Link to="/" className="flex items-center gap-3 mb-10 group">
-                                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-lg transition-transform duration-500 ease-in-out group-hover:scale-105">
-                                    <Activity className="text-secondary w-6 h-6" />
-                                </div>
-                                <span className="text-2xl font-bold">FULTANG</span>
-                            </Link>
-                            
-                            <h2 className="text-3xl font-bold mb-4 leading-tight">
-                                Bienvenue sur votre Espace Pro
-                            </h2>
-                            <p className="text-white/80 text-base leading-relaxed">
-                                Accédez à vos outils de gestion et de suivi clinique en toute sécurité.
-                            </p>
-                        </div>
 
-                        <div className="relative z-10 mt-8">
-                            <div className="flex items-center gap-2 text-xs font-semibold text-white/70 bg-white/10 px-4 py-2 rounded-lg w-fit">
-                                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-                                Système Opérationnel
+            {/* Info Side - Matching Login gradient */}
+                            <div className="relative mb-[50rem] ml-[2rem]">
+                              <Link to="/">
+                                <span className="text-3xl  text-white font-bold">FULTANG</span>
+                              </Link>
                             </div>
-                        </div>
-                    </div>
+                
+                            <div className="relative w-[80rem] z-10 ml-[1rem] text-white">
+                
+                              <h2 className="text-5xl text-secondary text-black font-semibold mb-10 leading-tight">
+                                Bienvenue sur FULTANG
+                              </h2>
+                
+                              <p className="text-black text-secondary text-3xl mb-8 leading-relaxed">
+                                Polyclinic Fultang est une application de gestion hospitalière assurant 
+                                la prise en charge et le suivi des patients de leur arrivée à leur sortie, 
+                                via la plateforme. 
+                             </p>
+                            </div>
 
+            
+            <div className="container mx-auto px-6 relative z-10 ">
                     {/* Login Form Side */}
-                    <div className="md:w-7/12 p-10 bg-white flex flex-col justify-center">
+                    <div className="ml-[13rem] mr-[10rem]  p-10 bg-white flex flex-col justify-center rounded-2xl">
                         <div className="mb-8">
-                            <h2 className="text-2xl font-bold text-secondary mb-2">Connexion</h2>
-                            <p className="text-gray-600 text-sm">Entrez vos identifiants pour continuer</p>
+                            <h2 className="text-3xl font-bold text-secondary mb-2">Connexion</h2>
+                            <p className="text-gray-600 text-xl">Entrez vos identifiants pour continuer</p>
                         </div>
 
                         {isLoginErrorPresent && (
@@ -141,7 +131,7 @@ export function LoginPage() {
 
                         <form className="space-y-5" onSubmit={handleLogin}>
                             <div className="space-y-1.5">
-                                <label className="text-md font-semibold text-gray-600 mb-1 block">Nom d'utilisateur</label>
+                                <label className="text-xl font-semibold text-gray-600 mb-1 block">Nom d'utilisateur</label>
                                 <div className="relative group">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <User className="text-gray-400 w-5 h-5 transition-colors duration-500 ease-in-out group-focus-within:text-secondary" />
@@ -160,9 +150,9 @@ export function LoginPage() {
 
                             <div className="space-y-1.5">
                                 <div className="flex justify-between items-center">
-                                    <label className="text-md font-semibold text-gray-600 mb-1 block">Mot de passe</label>
-                                    <Link to={appRouterPaths.forgottenPasswordPage} className="text-xs font-bold text-secondary hover:underline transition-colors duration-300">
-                                        Oublié ?
+                                    <label className="text-xl font-semibold text-gray-600 mb-1 block">Mot de passe</label>
+                                    <Link to={appRouterPaths.forgottenPasswordPage} className="text-sm font-bold text-secondary hover:underline transition-colors duration-300">
+                                        Mot de Passe Oublié ?
                                     </Link>
                                 </div>
                                 <div className="relative group">
@@ -191,24 +181,20 @@ export function LoginPage() {
                             <button 
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full py-4 bg-secondary text-white font-bold rounded-lg shadow-md hover:shadow-lg hover:bg-[#3d9d94] transition-all duration-500 ease-in-out flex items-center justify-center gap-2 mt-4"
+                                className="w-full text-xl py-4 bg-secondary text-white font-bold rounded-lg shadow-md hover:shadow-lg hover:bg-[#3d9d94] transition-all duration-500 ease-in-out flex items-center justify-center gap-2 mt-4"
                             >
                                 {isLoading ? "Connexion en cours..." : "S'identifier"}
                             </button>
                         </form>
 
                         <div className="mt-8 text-center">
-                            <Link to="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-secondary transition-colors duration-500 ease-in-out text-sm font-semibold">
+                            <Link to="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-secondary transition-colors duration-500 ease-in-out text-md font-semibold">
                                 <ArrowLeft className="w-4 h-4" />
                                 Retour à l'accueil
                             </Link>
                         </div>
                     </div>
-                </motion.div>
-                
-                <p className="text-center text-gray-400 text-xs mt-8 font-medium">
-                    © {new Date().getFullYear()} Fultang Polyclinic. Tous droits réservés.
-                </p>
+            
             </div>
 
             {isLoading && <Wait />}
