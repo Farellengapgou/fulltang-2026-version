@@ -23,7 +23,6 @@ export const AppRoutesPaths = {
   examsList: "/cashier/exams-list",
   hospitalisations: "/cashier/hospitalisations-list",
   financialReport: "/cashier/financial-report",
-  helpCenter: "/cashier/help-center",
   specialistPage: "/specialist",
   nursePage: "/nurse/patients",
   nurseMedicalStaffsPage: "/nurse/medical-staff",
@@ -118,4 +117,33 @@ export const AppRoutesPaths = {
   financialRatios: "/accountant-financial/financial-ratios",
   profitabilityAnalysis: "/accountant-financial/profitability-analysis",
   financialStatements: "/accountant-financial/financial-statements",
+
+  // Material Accounting Routes
+  materialAccountingDashboard: "/material-accounting/dashboard",
+
+  materialCategories: "/material-accounting/categories",
+  materialArticles: "/material-accounting/articles",
+  materialWarehouses: "/material-accounting/warehouses",
+  materialSuppliers: "/material-accounting/suppliers",
+  materialFamilies: "/material-accounting/families",
+
+  materialStockLevels: "/material-accounting/stock-levels",
+  materialBatches: "/material-accounting/batches",
+  materialMovements: "/material-accounting/movements",
+
+  materialReceipts: "/material-accounting/receipts",
+  materialReceiptDetails: "/material-accounting/receipts/:id",
+  materialIssues: "/material-accounting/issues",
+  materialIssueDetails: "/material-accounting/issues/:id",
+  materialTransfers: "/material-accounting/transfers",
+  materialTransferDetails: "/material-accounting/transfers/:id",
+
+  materialInventories: "/material-accounting/inventories",
+  materialInventoryDetails: "/material-accounting/inventories/:id",
+
+  materialStockCard: "/material-accounting/reports/stock-card",
+  materialPerpetualInventory: "/material-accounting/reports/perpetual-inventory",
+  materialABCAnalysis: "/material-accounting/reports/abc-analysis",
+  materialTurnoverRate: "/material-accounting/reports/turnover-rate",
+  materialReconciliation: "/material-accounting/reports/reconciliation"
 };
