@@ -1,16 +1,17 @@
-import {FaCog, FaEnvelope, FaSignOutAlt} from "react-icons/fa";
-import {Tooltip} from "antd";
-import {useAuthentication} from "../../../Utils/Provider.jsx";
+import { FaCog, FaEnvelope, FaSignOutAlt } from "react-icons/fa";
+import { Tooltip } from "antd";
+import { useAuthentication } from "../../../Utils/Provider.jsx";
 import userIcon from "../../../assets/userIcon.png";
 import { useState } from 'react';
 import { useNavigate } from "react-router-dom"
 import PropTypes from 'prop-types';
+import { UserProfileModal } from '../../../GlobalComponents/UserProfileModal';
 
 
 export function DoctorNavBar({ messageCount = 2 }) {
     const navigate = useNavigate()
 
-    const {logout , userData} = useAuthentication();
+    const { logout, userData } = useAuthentication();
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
     const applyNavLinkBtnStyle = () => {
@@ -23,12 +24,12 @@ export function DoctorNavBar({ messageCount = 2 }) {
             <div className="border-b-2 m-3  border-b-gray-300">
                 <div className="w-full h-[70px] flex justify-between">
                     <h1 className="ml-3 text-4xl text-secondary mt-3.5 font-bold">
-                       Doctor
+                        Doctor
                     </h1>
                     <div className="flex gap-3 mt-3.5 mb-4 mr-5">
                         <Tooltip placement={"top"} title={"settings"}>
                             <button className={applyNavLinkBtnStyle()}>
-                                <FaCog/>
+                                <FaCog />
                             </button>
 
                         </Tooltip>
@@ -51,9 +52,9 @@ export function DoctorNavBar({ messageCount = 2 }) {
 
                         <Tooltip placement={"top"} title={"LogOut"}>
                             <button
-                                onClick={() => {logout()}}
+                                onClick={() => { logout() }}
                                 className={" w-12 h-10 mt-1 border-2 bg-red-400 flex justify-center items-center rounded-xl shadow-xl hover:bg-white text-white text-xl hover:text-red-500 transition-all duration-300"}>
-                                <FaSignOutAlt/>
+                                <FaSignOutAlt />
                             </button>
                         </Tooltip>
                         {/* <Tooltip placement={"top"} title={"Profile"}>
@@ -64,14 +65,14 @@ export function DoctorNavBar({ messageCount = 2 }) {
                             </button>
                         </Tooltip> */}
                         <Tooltip placement={"top"} title={"Mon Profil"}>
-                            <div 
+                            <div
                                 className="ml-3 flex cursor-pointer hover:opacity-80 transition-opacity"
                                 onClick={() => setIsProfileModalOpen(true)}
                             >
                                 <p className="font-bold text-secondary text-xl mt-2">{"Hello " + userData?.username + "!"}</p>
-                                <img 
-                                    src={userData?.profilePicture || userIcon} 
-                                    alt={"user-icon"} 
+                                <img
+                                    src={userData?.profilePicture || userIcon}
+                                    alt={"user-icon"}
                                     className="w-12 h-12 ml-2 mr-3 rounded-full object-cover border-2 border-gray-200"
                                 />
                             </div>
@@ -79,10 +80,10 @@ export function DoctorNavBar({ messageCount = 2 }) {
                     </div>
                 </div>
             </div>
-            {/* <UserProfileModal 
+            <UserProfileModal
                 isOpen={isProfileModalOpen}
                 onClose={() => setIsProfileModalOpen(false)}
-            /> */}
+            />
         </>
     )
 }

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Tabs, Form, Input, Button, Upload, message, Spin } from 'antd';
-import { 
-    UserOutlined, 
-    MailOutlined, 
-    PhoneOutlined, 
+import {
+    UserOutlined,
+    MailOutlined,
+    PhoneOutlined,
     HomeOutlined,
     UploadOutlined,
     DeleteOutlined,
@@ -22,7 +22,7 @@ export function UserProfileModal({ isOpen, onClose }) {
         onClose: PropTypes.func.isRequired,
     };
     const { userData, refreshUserData } = useAuthentication();
-    
+
     const [activeTab, setActiveTab] = useState('info');
     const [isLoading, setIsLoading] = useState(false);
     const [profileData, setProfileData] = useState(null);
@@ -30,7 +30,7 @@ export function UserProfileModal({ isOpen, onClose }) {
     const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [isDeletingPhoto, setIsDeletingPhoto] = useState(false);
     const [previewUrl, setPreviewUrl] = useState(null);
-    
+
     const [editForm] = Form.useForm();
     const [passwordForm] = Form.useForm();
     // Récupérer les données du profil au chargement
@@ -47,16 +47,16 @@ export function UserProfileModal({ isOpen, onClose }) {
         try {
             setIsLoading(true);
             const token = localStorage.getItem('token_key_fultang');
-            
+
             const response = await axios.get(
                 'http://127.0.0.1:8009/api/v1/auth/me/',
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            
+
             if (response.status === 200) {
                 setProfileData(response.data);
                 setPreviewUrl(response.data.profilePicture);
-                
+
                 // Pré-remplir le formulaire d'édition
                 editForm.setFieldsValue({
                     first_name: response.data.first_name || '',
@@ -80,13 +80,13 @@ export function UserProfileModal({ isOpen, onClose }) {
         try {
             setIsUpdating(true);
             const token = localStorage.getItem('token_key_fultang');
-            
+
             const response = await axios.patch(
                 'http://127.0.0.1:8009/api/v1/auth/profile/update/',
                 values,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            
+
             if (response.status === 200) {
                 message.success('Profil mis à jour avec succès');
                 await fetchProfileData();
@@ -116,16 +116,23 @@ export function UserProfileModal({ isOpen, onClose }) {
         try {
             setIsChangingPassword(true);
             const token = localStorage.getItem('token_key_fultang');
-            
+
             const response = await axios.post(
                 'http://127.0.0.1:8009/api/v1/auth/profile/change-password/',
                 values,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            
+
             if (response.status === 200) {
-                message.success('Mot de passe changé avec succès');
+                message.success('Mot de passe changé avec succès. Reconnexion requise...');
                 passwordForm.resetFields();
+
+                // Déconnecter l'utilisateur et rediriger vers la page de login
+                setTimeout(() => {
+                    localStorage.removeItem('token_key_fultang');
+                    localStorage.removeItem('refresh_token_key_fultang');
+                    window.location.href = '/login';
+                }, 1500);
             }
         } catch (error) {
             console.error('Erreur lors du changement de mot de passe:', error);
@@ -151,17 +158,17 @@ export function UserProfileModal({ isOpen, onClose }) {
                 message.error('Format non supporté. Utilisez JPG ou PNG');
                 return false;
             }
-            
+
             const maxSize = 5 * 1024 * 1024; // 5MB
             if (file.size > maxSize) {
                 message.error('Le fichier est trop volumineux (max 5MB)');
                 return false;
             }
-            
+
             const token = localStorage.getItem('token_key_fultang');
             const formData = new FormData();
             formData.append('profilePicture', file);
-            
+
             const response = await axios.post(
                 'http://127.0.0.1:8009/api/v1/auth/profile/upload-picture/',
                 formData,
@@ -172,7 +179,7 @@ export function UserProfileModal({ isOpen, onClose }) {
                     },
                 }
             );
-            
+
             if (response.status === 200) {
                 message.success('Photo mise à jour avec succès');
                 setPreviewUrl(response.data.profilePicture);
@@ -185,7 +192,7 @@ export function UserProfileModal({ isOpen, onClose }) {
             console.error('Erreur lors de l\'upload:', error);
             message.error('Erreur lors de l\'upload de la photo');
         }
-        
+
         return false; // Empêcher l'upload automatique
     };
     /**
@@ -195,12 +202,12 @@ export function UserProfileModal({ isOpen, onClose }) {
         try {
             setIsDeletingPhoto(true);
             const token = localStorage.getItem('token_key_fultang');
-            
+
             const response = await axios.delete(
                 'http://127.0.0.1:8009/api/v1/auth/profile/delete-picture/',
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            
+
             if (response.status === 200) {
                 message.success('Photo supprimée avec succès');
                 setPreviewUrl(null);
@@ -237,7 +244,7 @@ export function UserProfileModal({ isOpen, onClose }) {
             ) : (
                 <div>
                     {/* Header avec photo et nom */}
-                    <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 -mt-6 -mx-6 mb-6 rounded-t-lg">
+                    <div className="bg-secondary p-6 -mt-6 -mx-6 mb-6 rounded-t-lg">
                         <div className="flex items-center gap-4">
                             <img
                                 src={previewUrl || userIcon}
@@ -295,7 +302,7 @@ export function UserProfileModal({ isOpen, onClose }) {
                                                     Changer la photo
                                                 </Button>
                                             </Upload>
-                                            
+
                                             {(profileData?.profilePicture || previewUrl) && (
                                                 <Button
                                                     danger

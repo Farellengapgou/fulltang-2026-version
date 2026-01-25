@@ -126,9 +126,27 @@ class PasswordChangeView(APIView):
         )
         
         if serializer.is_valid():
-            serializer.save()
+            user = serializer.save()
+            
+            # Invalider tous les tokens JWT existants pour forcer la reconnexion
+            try:
+                from rest_framework_simplejwt.tokens import RefreshToken
+                from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
+                
+                # Blacklister tous les tokens existants de l'utilisateur
+                tokens = OutstandingToken.objects.filter(user=user)
+                for token in tokens:
+                    try:
+                        RefreshToken(token.token).blacklist()
+                    except Exception:
+                        pass  # Token déjà blacklisté ou invalide
+                        
+            except Exception as e:
+                # Si le blacklisting échoue, on continue quand même
+                print(f"Erreur lors du blacklisting des tokens: {e}")
+            
             return Response({
-                "message": "Mot de passe changé avec succès"
+                "message": "Mot de passe changé avec succès. Veuillez vous reconnecter."
             }, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
