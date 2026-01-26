@@ -410,36 +410,7 @@ class TransferNoteViewSet(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Créer les mouvements de sortie
-        for line in transfer.lines.select_related("article").all():
-            unit_price = line.article.weighted_average_price
-            StockMovement.objects.create(
-                movement_type="OUT",
-                movement_reason="TRANSFER",
-                article=line.article,
-                quantity=line.quantity,
-                unit_price=unit_price,
-                total_value=line.quantity * unit_price,
-                source_depot=transfer.source_depot,
-                destination_depot=transfer.destination_depot,
-                reference_document=transfer.transfer_number,
-                document_type='TRANSFER_NOTE',
-                operation_date=timezone.make_aware(datetime.combine(transfer.planned_date, time.min)) if transfer.planned_date else timezone.now(),
-                notes=f"Transfert vers {transfer.destination_depot.name if transfer.destination_depot else 'N/A'}",
-                created_by=request.user,
-                status="CONFIRMED"
-            )
-            
-            # Mettre à jour le stock source
-            stock, _ = Stock.objects.get_or_create(
-                article=line.article, 
-                depot=transfer.source_depot,
-                defaults={'physical_quantity': 0, 'theoretical_quantity': 0}
-            )
-            stock.physical_quantity -= line.quantity
-            stock.theoretical_quantity -= line.quantity
-            stock.update_value()
-
+        # Passer simplement le statut à SENT sans créer de mouvement de stock
         transfer.status = "SENT"
         transfer.save()
 
@@ -469,9 +440,39 @@ class TransferNoteViewSet(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Créer les mouvements d'entrée
+        # Créer les mouvements d'entrée et de sortie simultanément
         for line in transfer.lines.select_related("article").all():
             unit_price = line.article.weighted_average_price
+            
+            # 1. Mouvement de SORTIE (Source)
+            StockMovement.objects.create(
+                movement_type="OUT",
+                movement_reason="TRANSFER",
+                article=line.article,
+                quantity=line.quantity,
+                unit_price=unit_price,
+                total_value=line.quantity * unit_price,
+                source_depot=transfer.source_depot,
+                destination_depot=transfer.destination_depot,
+                reference_document=transfer.transfer_number,
+                document_type='TRANSFER_NOTE',
+                operation_date=timezone.now(),
+                notes=f"Transfert vers {transfer.destination_depot.name if transfer.destination_depot else 'N/A'}",
+                created_by=request.user,
+                status="CONFIRMED"
+            )
+            
+            # Mettre à jour le stock source
+            source_stock, _ = Stock.objects.get_or_create(
+                article=line.article, 
+                depot=transfer.source_depot,
+                defaults={'physical_quantity': 0, 'theoretical_quantity': 0}
+            )
+            source_stock.physical_quantity -= line.quantity
+            source_stock.theoretical_quantity -= line.quantity
+            source_stock.update_value()
+
+            # 2. Mouvement d'ENTRÉE (Destination)
             StockMovement.objects.create(
                 movement_type="IN",
                 movement_reason="TRANSFER",
@@ -490,14 +491,14 @@ class TransferNoteViewSet(ModelViewSet):
             )
 
             # Mettre à jour le stock destination
-            stock, _ = Stock.objects.get_or_create(
+            dest_stock, _ = Stock.objects.get_or_create(
                 article=line.article, 
                 depot=transfer.destination_depot,
                 defaults={'physical_quantity': 0, 'theoretical_quantity': 0}
             )
-            stock.physical_quantity += line.quantity
-            stock.theoretical_quantity += line.quantity
-            stock.update_value()
+            dest_stock.physical_quantity += line.quantity
+            dest_stock.theoretical_quantity += line.quantity
+            dest_stock.update_value()
 
         transfer.status = "RECEIVED"
         transfer.save()
