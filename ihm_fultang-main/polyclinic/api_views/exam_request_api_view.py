@@ -152,7 +152,7 @@ class ExamRequestViewSet(ModelViewSet):
     def my_exam_requests(self, request, id=None):
         try:
             medical_staff = MedicalStaff.objects.get(id=id)
-            if medical_staff.role not in ["Doctor", "Specialist", "Ophtalmologist", "Dentist"]:
+            if medical_staff.role not in ["Doctor", "Specialist", "Ophthalmologist", "Dentist"]:
                 return Response({"details": "le medical staff specifie n'est pas un docteur"},
                                 status.HTTP_404_NOT_FOUND)
             # Récupérer les demandes d'examens effectuées par ce docteur

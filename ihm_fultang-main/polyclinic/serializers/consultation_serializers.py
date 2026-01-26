@@ -35,7 +35,7 @@ class ConsultationCreateSerializer(serializers.ModelSerializer):
             medical_folder_page.save()
             # on donne les acces au medecin
             medical_staff = validated_data['idMedicalStaffGiver']
-            if medical_staff.role not in ["Doctor"] + TYPEDOCTOR:
+            if medical_staff.role not in ["Doctor", "Dentist", "Ophthalmologist"] + TYPEDOCTOR:
                 raise ValidationError({"details": "le medical staff giver doit être un docteur"})
             patient_access = PatientAccess.objects.filter(idPatient=validated_data['idPatient'])
             patient_access = patient_access.filter(idMedicalStaff=medical_staff).first()

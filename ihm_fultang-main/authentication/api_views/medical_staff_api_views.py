@@ -158,7 +158,7 @@ class MedicalStaffViewSet(ModelViewSet):
     @action(methods=['get'], detail=False, url_path='all-doctors', permission_classes=[MedicalStaffPermission])
     def all_doctors(self, request):
         self.pagination_class = None
-        doctors = MedicalStaff.objects.filter(role__in=['Doctor', 'Specialist', 'Ophtalmologist', 'Dentist'])
+        doctors = MedicalStaff.objects.filter(role__in=['Doctor', 'Specialist', 'Ophthalmologist', 'Dentist'])
         doctors_list = list(doctors.values('id', 'first_name', 'last_name', 'role'))
         return JsonResponse(doctors_list, safe=False)
 
