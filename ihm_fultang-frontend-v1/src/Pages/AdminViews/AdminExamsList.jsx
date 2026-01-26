@@ -273,7 +273,7 @@ export function AdminExamsList() {
                                 <ConfirmationModal isOpen={canOpenConfirmActionModal} onClose={() => setCanOpenConfirmActionModal(false)} onConfirm={async () => await deleteExam(examToDelete.id)} title={"Delete Exam"} message={`Are you sure you want to delete the exam "${examToDelete.examName}"?`} />
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center h-[600px]  bg-gradient-to-b from-white to-teal-50   p-8">
+                            <div className="flex flex-col items-center justify-center h-[600px]  bg-gradient-to-b from-white to-teal-50 p-8 max-w-2xl mx-auto">
                                 <div className="mb-6 relative">
                                     <svg
                                         className="w-24 h-24 text-primary-end"
