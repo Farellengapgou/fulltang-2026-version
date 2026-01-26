@@ -22,6 +22,18 @@ MessageType = [
 
 ]
 
+NOTIFICATION_EVENT_TYPES = [
+    ('PATIENT_CREATED', 'Patient Created'),
+    ('SURGERY_SCHEDULED', 'Surgery Scheduled'),
+    ('SURGERY_REMINDER', 'Surgery Reminder'),
+]
+
+NOTIFICATION_PRIORITIES = [
+    ('GREEN', 'Green'),
+    ('YELLOW', 'Yellow'),
+    ('RED', 'Red'),
+]
+
 CONDITION = [
     ('NoCritical', 'NoCritical'),
     ('Critical', 'Critical'),
@@ -61,13 +73,16 @@ STATEPATIENT = [
 
 ROOM_TYPES = [
     ("Simple", "Simple"),
+    ("Double", "Double"),
+    ("VIP", "VIP"),
+    ("Multiple", "Multiple"),
     ("Emergency", "Emergency"),
     ("Staff", "Staff"),
 ]
 
 ROOM_FACILITIES = [
     ("Television", "Television"),
-    ("Air Conditioning", "Air Conditioning"),
+    ("Air conditioning", "Air conditioning"),
     ("Private bathroom", "Private bathroom"),
     ("Mini fridge", "Mini fridge"),
 ]
@@ -82,9 +97,9 @@ APPOINTMENT_STATE = [
     ("Completed", "Completed"),
 ]
 
-STATUS_PRODUCT_CHOICES = [
+STATUS_PRODUCT_CHOICES = [ 
         ('Available', 'Available'),
-        ('Out of Stock', 'Out of Stock'),
+        ('Running low', 'Running Low'),
         ('Discontinued', 'Discontinued'),
         ('Expiring Soon', 'Expiring Soon'),
     ]
@@ -112,6 +127,22 @@ class PatientAccess(models.Model):
 
     idPatient = models.ForeignKey("Patient", on_delete=models.CASCADE, null=False)
     idMedicalStaff = models.ForeignKey("authentication.MedicalStaff", on_delete=models.CASCADE, null=False)
+
+
+class Notification(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    event_type = models.CharField(max_length=30, choices=NOTIFICATION_EVENT_TYPES)
+    priority = models.CharField(max_length=10, choices=NOTIFICATION_PRIORITIES, default='GREEN')
+    message = models.TextField()
+    scheduled_for = models.DateTimeField(null=True, blank=True)
+    data = models.JSONField(default=dict, blank=True)
+    recipient = models.ForeignKey("authentication.MedicalStaff", on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.event_type} -> {self.recipient}"
 
 
 # classe qui definie le patient
@@ -227,14 +258,14 @@ class MedicalFolderPage(models.Model):
 
 
 # ======================================
-# ====================================== EXAM
+# ======================================== EXAM
 # ======================================
 
 
 class Exam(models.Model):
     examName = models.CharField(max_length=100)
     examCost = models.FloatField()
-    examDescription = models.TextField(max_length=23, blank=True, null=True)
+    examDescription = models.TextField(max_length=500, blank=True, null=True)
     def __str__(self) -> str:
         return self.examName.__str__()
 
@@ -313,9 +344,15 @@ class PolyclinicProduct(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.category.name})"
-
-    def is_low_stock(self):
-        return self.current_stock <= self.min_stock_level
+    
+    def save(self, *args, **kwargs):
+        if self.current_stock == 0:
+            self.status = "Out of Stock"
+        elif self.current_stock <= self.min_stock_level:
+            self.status = "Running Low"
+        else:
+            self.status = "Available"
+        super().save(*args, **kwargs)
 
 
 class PolyclinicInventoryMovement(models.Model):
@@ -377,12 +414,16 @@ class PrescriptionDrug(models.Model):
 
 
 class Room(models.Model):
-    roomLabel = models.CharField(max_length=100)
-    beds = models.PositiveIntegerField(default = 1)
-    busyBeds = models.IntegerField(default = 0)
+    roomNumber = models.CharField(max_length=100, unique=True)
+    beds = models.PositiveIntegerField(default=1)
+    occupiedBeds = models.IntegerField(default=0)
     price = models.FloatField(default=2000)
     type = models.CharField(max_length=255, choices=ROOM_TYPES, default="Simple")
-    facilities = models.CharField(max_length=255, choices=ROOM_FACILITIES, default="Private Bathroom")
+    facilities = models.JSONField(default=list, blank=True, null=True)
+    addDate = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return f"Room {self.roomNumber}"
 
 class Hospitalisation(models.Model):
     atDate = models.DateTimeField(auto_now_add=True)
@@ -393,6 +434,16 @@ class Hospitalisation(models.Model):
     removeAt = models.DateTimeField(auto_now_add=True)
 
     idRoom = models.ForeignKey("Room", on_delete=models.CASCADE, null=False)
+    idPatient = models.ForeignKey("Patient", on_delete=models.CASCADE, null=False)
+    idMedicalStaff = models.ForeignKey("authentication.MedicalStaff", on_delete=models.CASCADE, null=False)
+
+class Surgery(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    scheduled_at = models.DateTimeField()
+    note = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    reminder_sent = models.BooleanField(default=False)
+
     idPatient = models.ForeignKey("Patient", on_delete=models.CASCADE, null=False)
     idMedicalStaff = models.ForeignKey("authentication.MedicalStaff", on_delete=models.CASCADE, null=False)
 

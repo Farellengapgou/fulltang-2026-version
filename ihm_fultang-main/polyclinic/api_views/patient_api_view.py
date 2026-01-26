@@ -1,5 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.exceptions import ValidationError
+from rest_framework.filters import SearchFilter
 
 from polyclinic.models import Patient, PatientAccess, MedicalFolder, Consultation
 from authentication.models import MedicalStaff
@@ -106,6 +107,9 @@ class PatientViewSet(ModelViewSet):
 
     permission_classes = [IsAuthenticated, PatientPermission]
     pagination_class = CustomPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['firstName', 'lastName', 'cniNumber', 'phoneNumber']
+
 
     def get_queryset(self):
         """
@@ -250,13 +254,16 @@ class PatientViewSet(ModelViewSet):
     def patient_doctor(self, request, id=None):
         try:
             medical_staff = MedicalStaff.objects.get(id=id)
-            if medical_staff.role != "Doctor":
+            if medical_staff.role not in ["Doctor", "Specialist", "Ophthalmologist", "Dentist"]:
                 return Response({"details": "le medical staff specifie n'est pas un docteur"},
                                 status.HTTP_404_NOT_FOUND)
-            # Récupérer les consultations effectuées par ce docteur
-            consultations = Consultation.objects.filter(idMedicalStaffGiver=medical_staff)
+            # Récupérer les consultations payées effectuées par ce docteur
+            consultations = Consultation.objects.filter(
+                idMedicalStaffGiver=medical_staff,
+                paymentStatus="Valid"
+            )
             # Extraire les patients uniques ayant une consultation avec ce docteur
-            patient_ids = consultations.values_list('idPatient', flat=True).distinct()
+            patient_ids = set(consultations.values_list('idPatient', flat=True).distinct())
             patients = Patient.objects.filter(id__in=patient_ids)
 
             # Sérialiser les patients
@@ -264,3 +271,86 @@ class PatientViewSet(ModelViewSet):
             return Response(serializer.data, status.HTTP_200_OK)
         except MedicalStaff.DoesNotExist:
             return Response({"details": "le docteur spécifé n'existe pas"}, status.HTTP_404_NOT_FOUND)
+        
+    @swagger_auto_schema(
+        operation_description="Permet de compter le nombre de patients d'un docteur",
+        responses={
+            200: openapi.Response(
+                description="Nombre de patients du docteur",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "doctor_id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "count": openapi.Schema(type=openapi.TYPE_INTEGER),
+                    }
+                )
+            ),
+            404: openapi.Response(description="Docteur inexistant"),
+            400: openapi.Response(description="Bad request"),
+        },
+        manual_parameters=[
+            openapi.Parameter(
+                'id',
+                openapi.IN_PATH,
+                description="ID du medical staff concerné",
+                type=openapi.TYPE_INTEGER,
+                required=True
+            ),
+            auth_header_param
+        ],
+        tags=tags
+    )
+    @action(
+        methods=["get"],
+        detail=False,
+        url_path="doctor/(?P<id>[^/.]+)/count",
+        permission_classes=[PatientPermission]
+    )
+    def patient_doctor_count(self, request, id=None):
+        try:
+            medical_staff = MedicalStaff.objects.get(id=id)
+
+            if medical_staff.role not in ["Doctor", "Specialist", "Ophthalmologist", "Dentist"]:
+                return Response(
+                    {"details": "le medical staff spécifié n'est pas un docteur"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Patients via consultations payées
+            consultation_patient_ids = Consultation.objects.filter(
+                idMedicalStaffGiver=medical_staff,
+                paymentStatus="Valid"
+            ).values_list('idPatient', flat=True)
+
+            # Unicité garantie
+            patient_ids = set(consultation_patient_ids)
+
+            return Response(
+                {
+                    "doctor_id": medical_staff.id,
+                    "count": len(patient_ids)
+                },
+                status=status.HTTP_200_OK
+            )
+
+        except MedicalStaff.DoesNotExist:
+            return Response(
+                {"details": "le docteur spécifié n'existe pas"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        
+    @swagger_auto_schema(
+        operation_description="Permet de compter le nombre de patients enregistrés",
+        responses={
+            200: openapi.Response(description="Nombre de patients enregistrés")
+        },
+        tags=tags
+    )
+    @action(methods=['get'], detail=False, url_path='count', permission_classes=[PatientAccessPermission])
+    def number_of_patients(self, request):
+        query = Patient.objects.all()
+        data = {}
+        data['patient_count'] = query.count()
+
+        return Response(data, status=status.HTTP_200_OK)

@@ -98,8 +98,10 @@ class MessageViewSet(ModelViewSet):
     pagination_class = CustomPagination
 
     def get_queryset(self):
-        queryset = Message.objects.all()
-        return queryset
+        user = self.request.user
+        if user.role == "Admin":
+            return Message.objects.all()
+        return Message.objects.filter(idMedicalStaff=user)
 
     def get_serializer_class(self):
         return MessageSerializer

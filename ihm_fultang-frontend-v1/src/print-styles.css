@@ -1,0 +1,44 @@
+/* Add at the end of index.css */
+
+/* ==================== PRINT STYLES ==================== */
+@media print {
+  /* Hide all navigation and UI elements */
+  .no-print,
+  nav,
+  header,
+  h1,
+  footer,
+  .sidebar,
+  button:not(.print-show) {
+    display: none !important;
+  }
+
+  /* Reset page margins */
+  @page {
+    margin: 1cm;
+    size: A4;
+  }
+
+  /* Show only main content */
+  body {
+    background: white !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Ensure tables print correctly */
+  table {
+    page-break-inside: avoid;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  /* Optimize text for print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

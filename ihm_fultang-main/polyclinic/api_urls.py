@@ -9,6 +9,7 @@ from .api_views.exam_request_api_view import ExamRequestViewSet
 from .api_views.hospitalisation_api_view import HospitalisationViewSet
 from .api_views.medical_folder_api_view import MedicalFolderViewSet
 from .api_views.message_api_view import MessageViewSet
+from .api_views.notification_api_view import NotificationViewSet
 from .api_views.polyclinic_category_api_view import PolyclinicProductCategoryViewSet
 from .api_views.polyclinic_product_api_view import PolyclinicProductViewSet
 from .api_views.parameters_api_view import ParametersViewSet
@@ -16,10 +17,12 @@ from .api_views.patient_access_api_view import PatientAccessViewSet
 from .api_views.patient_api_view import PatientViewSet
 from .api_views.prescription_api_view import PrescriptionViewSet
 from .api_views.room_api_view import RoomViewSet
+from .api_views.surgery_api_view import SurgeryViewSet
 from authentication.api_views.medical_staff_api_views import MedicalStaffViewSet
 from rest_framework.routers import DefaultRouter
 from django.urls import path
-from polyclinic.api_views.chat_api_view import ChatbotView
+# from polyclinic.api_views.chat_api_view import ChatbotView
+from polyclinic.api_views.helpcenter_api_view import HelpCenterCategoriesView
 
 
 router = DefaultRouter()
@@ -36,14 +39,20 @@ router.register(r'hospital', HospitalisationViewSet, basename='hospital')
 router.register(r'medical-folder', MedicalFolderViewSet, basename='medical-folder')
 router.register(r'medical-staff', MedicalStaffViewSet, basename='medical-staff')
 router.register(r'message', MessageViewSet, basename='message')
+router.register(r'notification', NotificationViewSet, basename='notification')
 #router.register(r'parameters', ParametersViewSet, basename='parameters')
 #router.register(r'patient-access', PatientAccessViewSet, basename='patient-access')
 router.register(r'patient', PatientViewSet, basename='patient')
 router.register(r'prescription', PrescriptionViewSet, basename='prescription')
 router.register(r'room', RoomViewSet, basename='room')
+router.register(r'surgery', SurgeryViewSet, basename='surgery')
 router.register(r'category-product', PolyclinicProductCategoryViewSet, basename='category-product')
 router.register(r'product', PolyclinicProductViewSet, basename='product')
 
+urlpatterns = [
+#     path('chatbot/', ChatbotView.as_view(), name='chatbot'),
+    path('help-center/categories/', HelpCenterCategoriesView.as_view(), name='help-categories'),
+]
+urlpatterns += router.urls
 
-urlpatterns = [path('chatbot/', ChatbotView.as_view(), name='chatbot'),]
 urlpatterns += router.urls

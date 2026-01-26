@@ -1,13 +1,15 @@
 from django.utils.timezone import now
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError  # ← AJOUT ICI
 from django.utils import timezone
 
 from accounting.serializers import FinancialOperationSerializer
 from authentication.serializers.medical_staff_serializers import MedicalStaffSerializer
 from polyclinic.models import Bill, BillItem, Patient
-from accounting.models import AccountState, BudgetExercise, FinancialOperation, Account
+from accounting.models_financier import AccountState, BudgetExercise, FinancialOperation, Account
 from polyclinic.serializers.bill_items_serializers import BillItemCreateSerializer, BillItemSerializer, BillItemUpdateSerializer
 from polyclinic.services.bill_service import BillService
+
 
 class BillSerializer(serializers.ModelSerializer):
     operator = MedicalStaffSerializer(read_only=True)
@@ -68,7 +70,7 @@ class BillCreateSerializer(serializers.ModelSerializer):
         bill.save()
         print("Final Bill Amount:", bill.amount)
 
-        ######## operation nécessaire pour le module comptabilité ##############
+        ######## opération nécessaire pour le module comptabilité ##############
 
         current_date = timezone.now().date()
         budget_exercises = BudgetExercise.objects.filter(

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { Calendar, Printer, Download, DollarSign, Users, Activity, FileText } from "lucide-react"
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 
 // Fonction pour générer des données simulées pour une journée
 const generateDailyData = (date) => {
@@ -12,7 +14,7 @@ const generateDailyData = (date) => {
     }))
 }
 
-export  function DailyFinancialReport() {
+export function DailyFinancialReport() {
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0])
     const [dailyData, setDailyData] = useState([])
 
@@ -45,10 +47,12 @@ export  function DailyFinancialReport() {
                 <div className="flex items-center space-x-4">
                     <div className="flex items-center">
                         <Calendar className="h-5 w-5 text-gray-400 mr-2" />
-                        <input
-                            type="date"
-                            value={selectedDate}
-                            onChange={handleDateChange}
+                        <DatePicker
+                            value={selectedDate ? dayjs(selectedDate) : null}
+                            onChange={(date, dateString) => setSelectedDate(dateString)}
+                            disabledDate={(current) => {
+                                return current && current.isAfter(dayjs(), 'day');
+                            }}
                             className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                     </div>
@@ -132,32 +136,32 @@ export  function DailyFinancialReport() {
             <div className="overflow-x-auto">
                 <table className="min-w-full bg-white border rounded-lg">
                     <thead className="bg-gray-50">
-                    <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Heure</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Consultations
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Examens
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                    </tr>
+                        <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Heure</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Consultations
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Examens
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                        </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                    {dailyData.map((hour, index) => (
-                        <tr key={index}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{hour.hour}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {hour.consultations.toLocaleString()} FCFA
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {hour.examens.toLocaleString()} FCFA
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {(hour.consultations + hour.examens).toLocaleString()} FCFA
-                            </td>
-                        </tr>
-                    ))}
+                        {dailyData.map((hour, index) => (
+                            <tr key={index}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{hour.hour}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {hour.consultations.toLocaleString()} FCFA
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {hour.examens.toLocaleString()} FCFA
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {(hour.consultations + hour.examens).toLocaleString()} FCFA
+                                </td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>
