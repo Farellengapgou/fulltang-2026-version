@@ -65,7 +65,7 @@ export function LaboratoryExamList() {
   const loadExamRequests = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axiosInstance.get("/exam/");
+      const response = await axiosInstance.get("/exam-request/");
       if (response.status === 200) {
         console.log(response.data);
         const data = response.data.results;

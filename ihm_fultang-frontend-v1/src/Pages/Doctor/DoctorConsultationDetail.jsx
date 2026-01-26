@@ -90,29 +90,49 @@ export function DoctorConsultationDetails() {
 
 
     const [activeTab, setActiveTab] = useState("diagnostic");
-    const [prescriptions, setPrescriptions] = useState([
-        {
-            id: Date.now(),
-            medicament: "",
-            dosage: "",
-            frequency: "",
-            duration: "",
-            instructions: "",
-            quantity:"",
-        },
-    ]);
-    const [exams, setExams] = useState([
-        {
-            id: Date.now(),
-            examName: "",
-            idExam:"",
-            notes: "",
-            isCustom: false,
-            idConsultation: consultation?.id,
-            idPatient: patientInfo?.id,
-            idMedicalStaff: consultation?.idMedicalStaffGiver?.id
-        },
-    ]);
+    const [prescriptions, setPrescriptions] = useState(
+        consultation?.prescriptions && consultation.prescriptions.length > 0
+            ? consultation.prescriptions.map(p => ({
+                id: p.id,
+                ...p.prescriptionDrug[0] // Assuming one drug per prescription for now, adapt if multiple
+            }))
+            : [
+                {
+                    id: Date.now(),
+                    medicament: "",
+                    dosage: "",
+                    frequency: "",
+                    duration: "",
+                    instructions: "",
+                    quantity: "",
+                },
+            ]
+    );
+    const [exams, setExams] = useState(
+        consultation?.exam_requests && consultation.exam_requests.length > 0
+            ? consultation.exam_requests.map(e => ({
+                id: e.id,
+                examName: e.idExam?.examName || e.examName,
+                idExam: e.idExam?.id || "another",
+                notes: e.notes,
+                isCustom: !e.idExam,
+                idConsultation: consultation?.id,
+                idPatient: patientInfo?.id,
+                idMedicalStaff: consultation?.idMedicalStaffGiver?.id
+            }))
+            : [
+                {
+                    id: Date.now(),
+                    examName: "",
+                    idExam: "",
+                    notes: "",
+                    isCustom: false,
+                    idConsultation: consultation?.id,
+                    idPatient: patientInfo?.id,
+                    idMedicalStaff: consultation?.idMedicalStaffGiver?.id
+                },
+            ]
+    );
     const [diagnostic, setDiagnostic] = useState("");
     const [doctorNote, setDoctorNote] = useState("");
     const [appointmentDate, setAppointmentDate] = useState(new Date());
@@ -416,7 +436,15 @@ export function DoctorConsultationDetails() {
     {
         e.preventDefault();
         setIsPrescribingExams(true);
-        let examsData = exams.map((exam) => Object.fromEntries(Object.entries(exam).filter(([key]) => (key !== "id" && key !== "isCustom" && exam.idExam !== "another"))));
+        let examsData = exams.map((exam) => {
+            const cleanExam = { ...exam };
+            delete cleanExam.id;
+            delete cleanExam.isCustom;
+            if (cleanExam.idExam === "another") {
+                delete cleanExam.idExam;
+            }
+            return cleanExam;
+        });
 
 
         try

@@ -8,9 +8,9 @@ class ConsultationPermissions(permissions.BasePermission):
         if view.action in ["destroy"]:
             return user.is_authenticated and user.role == "Admin"
         elif view.action in ["list", "retrieve", "update", "partial_update"]:
-            return user.is_authenticated and (user.role in ["Admin", "Receptionist", "Nurse", "Ophthalmologist", "Dentist", "Doctor", "Cashier"])
+            return user.is_authenticated and (user.role in ["Admin", "Receptionist", "Nurse", "Ophthalmologist", "Ophtalmologist", "Dentist", "Doctor", "Cashier"])
         elif view.action == "create":
             return user.is_authenticated and user.role in ["Admin", "Nurse", "Receptionist"]
         elif request.method in ["GET", "POST", "PUT", "PATCH"]:
-            return user.is_authenticated and user.role in ["Admin", "Nurse", "Ophthalmologist", "Dentist", "Doctor", "Receptionist", "Cashier"]
+            return user.is_authenticated and user.role in ["Admin", "Nurse", "Ophthalmologist", "Ophtalmologist", "Dentist", "Doctor", "Receptionist", "Cashier"]
         return False
