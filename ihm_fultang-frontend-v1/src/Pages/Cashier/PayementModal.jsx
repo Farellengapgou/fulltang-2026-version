@@ -341,13 +341,33 @@ export function PaymentModal({ isOpen, onClose, consultationData }) {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-0 focus:border-2  focus:border-primary-end"
                     >
                       <option value="">Select operation type</option>
-                      {financialOperations &&
-                        financialOperations.length > 0 &&
-                        financialOperations.map((operation) => (
-                          <option key={operation?.id} value={operation?.id}>
-                            {operation?.name}
-                          </option>
-                        ))}
+                      {(() => {
+                        const preferred = ["orange", "mtn", "uba"];
+                        const ops = Array.isArray(financialOperations)
+                          ? financialOperations
+                          : [];
+                        const preferredOps = preferred
+                          .map((name) =>
+                            ops.find(
+                              (operation) =>
+                                operation?.name?.toLowerCase?.() === name
+                            )
+                          )
+                          .filter(Boolean);
+                        const otherOps = ops.filter(
+                          (operation) =>
+                            !preferred.includes(
+                              operation?.name?.toLowerCase?.()
+                            )
+                        );
+                        return [...preferredOps, ...otherOps].map(
+                          (operation) => (
+                            <option key={operation?.id} value={operation?.id}>
+                              {operation?.name}
+                            </option>
+                          )
+                        );
+                      })()}
                     </select>
                   </div>
                 </div>

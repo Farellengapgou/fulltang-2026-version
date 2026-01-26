@@ -53,7 +53,7 @@ export function CashierNavBar() {
                 <button
                   onClick={() => {
                     // Navigate to the help center / messages page
-                    navigate(AppRoutesPaths.helpCenterPage);
+                  navigate(AppRoutesPaths.cashierMessage);
                   }}
                   className={applyNavLinkBtnStyle()}
                 >

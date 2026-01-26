@@ -54,6 +54,10 @@ export function AppRoute() {
   const CashierPage = React.lazy(async () => ({
     default: (await import("../Pages/Cashier/Cashier.jsx")).Cashier,
   }));
+  const CashierMessages = React.lazy(async () => ({
+    default: (await import("../Pages/Cashier/CashierMessagePage.jsx"))
+      .CashierMessagePage,
+  }));
   const ExamsList = React.lazy(async () => ({
     default: (await import("../Pages/Cashier/ExamsList.jsx")).ExamsList,
   }));
@@ -543,6 +547,10 @@ export function AppRoute() {
           element={<PatientDetailsPage />}
         />
         <Route path={AppRoutesPaths.cashierPage} element={<CashierPage />} />
+        <Route
+          path={AppRoutesPaths.cashierMessage}
+          element={<CashierMessages />}
+        />
         <Route path={AppRoutesPaths.examsList} element={<ExamsList />} />
         <Route
           path={AppRoutesPaths.hospitalisations}

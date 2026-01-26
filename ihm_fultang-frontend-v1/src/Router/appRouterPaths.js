@@ -19,6 +19,7 @@ export const AppRoutesPaths = {
   laboratoryAssistantPage: "/laboratory-assistant/home",
   receptionistPage: "/receptionist/patients",
   cashierPage: "/cashier/consultation-list",
+  cashierMessage: "/cashier/messages",
   consultationsList: "/cashier/consultations-list",
   examsList: "/cashier/exams-list",
   hospitalisations: "/cashier/hospitalisations-list",
