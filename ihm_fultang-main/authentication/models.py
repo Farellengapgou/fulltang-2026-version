@@ -22,12 +22,16 @@ ROLES = [
     ('Labtech', 'Labtech'),
     ('HRM', 'HRM'),
     ('Pharmacist', 'Pharmacist'),
-    ('Cashier', 'Cashier')
+    ('Cashier', 'Cashier'),
+    ('Specialist', 'Specialist'),
+    ('Ophthalmologist', 'Ophthalmologist'),
+    ('Dentist', 'Dentist'),
 ]
 
 ROLES_ACCOUNTING = [
     ('NoRole', 'NoRole'),
     ('Accountant', 'Accountant'),
+    ('MaterialAccountant', 'MaterialAccountant'),
     ('Auditor', 'Auditor'),
     ('FinanceManager', 'FinanceManager'),
 ]
@@ -37,12 +41,6 @@ ACCESS_LEVELS = [
     ('Executive', 'Executive'),
     ('Lead', 'Lead'),
     ('Staff', 'Staff'),
-]
-
-TYPEDOCTOR = [
-    ('Specialist', 'Specialist'),
-    ('Ophtalmologist', 'Ophtalmologist'),
-    ('Dentist', 'Dentist'),
 ]
 
 # cette classe définie notre classe d'utilsateur par défaut
@@ -55,6 +53,7 @@ class MedicalStaff(AbstractUser):
     userType = models.CharField(max_length=255, choices=USER_TYPE, default='Medical', null=False)
     role = models.CharField(max_length=20, choices=ROLES+ROLES_ACCOUNTING, default='NoRole')
     accessLevel = models.CharField(max_length=20, choices=ACCESS_LEVELS, default='Staff', null=False)
+    profilePicture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
 
     objects = CustomManager()
 

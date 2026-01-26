@@ -34,6 +34,8 @@ export function Nurse()
     const [errorStatus, setErrorStatus] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [currentTime, setCurrentTime] = useState("");
+
 
 
 
@@ -118,6 +120,16 @@ export function Nurse()
         fetchPatientList();
     }, []);
 
+    useEffect(() => {
+    const interval = setInterval(() => {
+        const now = new Date();
+        setCurrentTime(now.toLocaleTimeString());
+    }, 1000);
+
+    return () => clearInterval(interval);
+}, []);
+
+
 
 
 
@@ -140,7 +152,9 @@ export function Nurse()
                                 </div>
                             </div>
                             <div>
-                                <p className="text-white mt-28 text-xl font-bold mr-4">12:30:25 AM</p>
+                                
+                                <p className="text-white mt-28 text-xl font-bold mr-4">{currentTime}</p>
+
                             </div>
                         </div>
 

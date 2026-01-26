@@ -4,7 +4,7 @@ from django.utils.decorators import method_decorator
 from rest_framework.permissions import IsAuthenticated
 from accounting.serializers import PostJournalEntrySerializer, JournalEntrySerializer
 from rest_framework.viewsets import ModelViewSet
-from accounting.models import JournalEntry
+from accounting.models_financier import JournalEntry
 from django.db import transaction
 from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
@@ -130,17 +130,30 @@ class JournalEntryViewSet(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if not entry.is_balanced():
+        if not entry.is_balanced:
             return Response(
                 {'error': 'L\'écriture n\'est pas équilibrée'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        try:
+            staff_member = request.user.medical_staff_profile
+        except:
+             # Fallback if the user is not linked to a staff profile (e.g. admin)
+             # Ideally validation should be done by staff, but for now we might handle this gracefully or error
+             return Response(
+                {'error': "L'utilisateur n'est pas associé à un profil médical."},
+                status=status.HTTP_400_BAD_REQUEST
+             )
+
         with transaction.atomic():
-            entry.state = 'VALIDATED'
-            entry.validated_by = request.user
-            entry.validated_at = now()
-            entry.save()
+            # Use the model's post method to ensure all logic (voucher generation) runs
+            # entry.state = 'POSTED' 
+            # entry.validated_by = staff_member
+            # entry.validated_at = now()
+            # entry.save()
+            # Use the post methods defined in the model
+            entry.post(validated_by=staff_member)
 
         serializer = self.get_serializer(entry)
         return Response(serializer.data)

@@ -1,15 +1,15 @@
-import{ useState } from 'react';
-import {BedDouble, DollarSign, Users, CheckCircle, X} from 'lucide-react';
-import {CustomDashboard} from "../../GlobalComponents/CustomDashboard.jsx";
-import {adminNavLink} from "./adminNavLink.js";
-import {AdminNavBar} from "./AdminNavBar.jsx";
+import { useState } from 'react';
+import { BedDouble, DollarSign, Users, CheckCircle, X } from 'lucide-react';
+import { CustomDashboard } from "../../GlobalComponents/CustomDashboard.jsx";
+import { adminNavLink } from "./adminNavLink.js";
+import { AdminNavBar } from "./AdminNavBar.jsx";
 import PropTypes from "prop-types";
 import axiosInstance from "../../Utils/axiosInstance.js";
 
 
 
 
-export function AddHospitalRoomModal({isOpen, onClose, setSuccessMessage, setCanOpenSuccessModal}) {
+export function AddHospitalRoomModal({ isOpen, onClose, setSuccessMessage, setCanOpenSuccessModal }) {
 
     AddHospitalRoomModal.propTypes = {
         isOpen: PropTypes.bool.isRequired,
@@ -30,7 +30,7 @@ export function AddHospitalRoomModal({isOpen, onClose, setSuccessMessage, setCan
     const facilityOptions = ['Television', 'Air conditioning', 'Private bathroom', 'Mini fridge'];
 
 
-    function handleChange (e)  {
+    function handleChange(e) {
         const { name, value } = e.target;
         setRoomData(prev => (
             {
@@ -41,23 +41,21 @@ export function AddHospitalRoomModal({isOpen, onClose, setSuccessMessage, setCan
     }
 
 
-    function handleFacilityChange (facility) {
+    function handleFacilityChange(facility) {
         setRoomData(prev => (
             {
-            ...prev,
-            facilities: prev.facilities.includes(facility) ? prev.facilities.filter(f => f !== facility) : [...prev.facilities, facility]
+                ...prev,
+                facilities: prev.facilities.includes(facility) ? prev.facilities.filter(f => f !== facility) : [...prev.facilities, facility]
             }
         ));
     }
 
 
-    async function handleSubmit (e) {
+    async function handleSubmit(e) {
         e.preventDefault();
-        try
-        {
+        try {
             const response = await axiosInstance.post("/room/", roomData);
-            if (response.status === 201)
-            {
+            if (response.status === 201) {
                 setSuccessMessage("room added successfully !");
                 setError("");
                 setCanOpenSuccessModal(true);
@@ -65,9 +63,34 @@ export function AddHospitalRoomModal({isOpen, onClose, setSuccessMessage, setCan
             }
 
         }
-        catch (error)
-        {
-            setError("something went wrong, try later please !");
+        catch (error) {
+            // Extract specific error message from backend response
+            if (error.response && error.response.data) {
+                const errorData = error.response.data;
+
+                // Handle field-specific errors
+                if (errorData.roomNumber) {
+                    // Room number validation error (duplicate)
+                    setError(errorData.roomNumber[0] || "Room number error");
+                } else if (errorData.beds) {
+                    setError(errorData.beds[0] || "Invalid number of beds");
+                } else if (errorData.price) {
+                    setError(errorData.price[0] || "Invalid price");
+                } else if (errorData.type) {
+                    setError(errorData.type[0] || "Invalid room type");
+                } else if (errorData.detail) {
+                    // General error message
+                    setError(errorData.detail);
+                } else if (typeof errorData === 'string') {
+                    setError(errorData);
+                } else {
+                    // If none of the specific fields, show generic message
+                    setError("Something went wrong, try later please!");
+                }
+            } else {
+                setError("Something went wrong, try later please!");
+            }
+
             setCanOpenSuccessModal(false);
             setSuccessMessage("");
             console.log(error);
@@ -78,14 +101,14 @@ export function AddHospitalRoomModal({isOpen, onClose, setSuccessMessage, setCan
     if (!isOpen) return;
     return (
         <CustomDashboard linkList={adminNavLink} requiredRole={"Admin"}>
-            <AdminNavBar/>
+            <AdminNavBar />
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm transition-all duration-300">
                 <div className="bg-white rounded-xl shadow-xl w-[800px] ">
                     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                         <div className="bg-gradient-to-r from-primary-end to-primary-start px-6 py-4 flex justify-between items-center">
                             <h1 className="text-3xl font-bold text-white">Add A New Room</h1>
                             <button className="text-white hover:text-gray-200 transition-colors"
-                                    onClick={()=>{onClose()}}>
+                                onClick={() => { onClose() }}>
                                 <X size={30} />
                             </button>
                         </div>
@@ -172,15 +195,15 @@ export function AddHospitalRoomModal({isOpen, onClose, setSuccessMessage, setCan
                                 <h3 className="text-lg font-medium text-gray-900 mb-4">Room overview</h3>
                                 <div className="flex items-center space-x-4">
                                     <div className="flex items-center">
-                                        <BedDouble className="h-6 w-6 text-gray-400 mr-2"/>
+                                        <BedDouble className="h-6 w-6 text-gray-400 mr-2" />
                                         <span className="text-gray-600">{roomData.beds} lit(s)</span>
                                     </div>
                                     <div className="flex items-center">
-                                        <DollarSign className="h-6 w-6 text-gray-400 mr-2"/>
+                                        <DollarSign className="h-6 w-6 text-gray-400 mr-2" />
                                         <span className="text-gray-600">{roomData.price || 0} FCFA/nights</span>
                                     </div>
                                     <div className="flex items-center">
-                                        <Users className="h-6 w-6 text-gray-400 mr-2"/>
+                                        <Users className="h-6 w-6 text-gray-400 mr-2" />
                                         <span className="text-gray-600">Capacity: {roomData.beds * 2} persons</span>
                                     </div>
                                 </div>
@@ -196,7 +219,7 @@ export function AddHospitalRoomModal({isOpen, onClose, setSuccessMessage, setCan
                                     type="submit"
                                     className="bg-primary-end  text-white font-bold py-2 px-4 rounded-md transition-colors duration-300 flex items-center"
                                 >
-                                    <CheckCircle className="mr-2" size={20}/>
+                                    <CheckCircle className="mr-2" size={20} />
                                     Add The room
                                 </button>
                             </div>

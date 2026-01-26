@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { DatePicker, TimePicker } from 'antd';
+import dayjs from 'dayjs';
 import Modal from "./Modal"
 import PropTypes from "prop-types";
 
@@ -168,26 +170,28 @@ const EditConsultationModal = ({ isOpen, onClose, consultation, onSave }) => {
                         <label htmlFor="appointmentDate" className="block text-sm font-medium text-gray-700 mb-2">
                             Date du prochain rendez-vous
                         </label>
-                        <input
-                            type="date"
+                        <DatePicker
                             id="appointmentDate"
-                            name="appointmentDate"
-                            value={editedConsultation?.appointment?.atDate}
-                            onChange={(e) => handleChange(e, "appointment")}
-                            className="w-full p-2 border-2 border-gray-300 rounded-lg"
+                            placeholder="Appointment Date"
+                            value={editedConsultation?.appointment?.atDate ? dayjs(editedConsultation?.appointment?.atDate) : null}
+                            onChange={(date, dateString) => handleChange({ target: { name: 'atDate', value: dateString } }, "appointment")}
+                            disabledDate={(current) => {
+                                return current && current.isBefore(dayjs().startOf('day'));
+                            }}
+                            className="w-full p-2 border-2 border-gray-300 rounded-lg h-10"
                         />
                     </div>
                     <div>
                         <label htmlFor="appointmentTime" className="block text-sm font-medium text-gray-700 mb-2">
                             Heure du rendez-vous
                         </label>
-                        <input
-                            type="time"
+                        <TimePicker
                             id="appointmentTime"
-                            name="appointmentTime"
-                            value={editedConsultation?.appointment?.time}
-                            onChange={(e) => handleChange(e, "appointment")}
-                            className="w-full p-2 border-2 border-gray-300 rounded-lg"
+                            placeholder="Appointment Time"
+                            format="HH:mm"
+                            value={editedConsultation?.appointment?.time ? dayjs(editedConsultation?.appointment?.time, 'HH:mm') : null}
+                            onChange={(time, timeString) => handleChange({ target: { name: 'time', value: timeString } }, "appointment")}
+                            className="w-full p-2 border-2 border-gray-300 rounded-lg h-10"
                         />
                     </div>
                     <div>

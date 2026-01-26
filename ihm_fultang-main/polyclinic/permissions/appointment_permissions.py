@@ -8,9 +8,9 @@ class AppointmentPermissions(BasePermission):
         if view.action in ["destroy"]:
             return user.is_authenticated and user.role == "Admin"
         elif view.action in ["list", "create", "retrieve", "update", "partial_update"]:
-            return user.is_authenticated and user.role in ["Admin", "Nurse", "Doctor", "Receptionist", "Cashier"]
+            return user.is_authenticated and user.role in ["Admin", "Nurse", "Doctor", "Ophthalmologist", "Dentist", "Receptionist", "Cashier"]
         elif request.method in ["GET", "POST", "PUT", "PATCH"]:
-            return user.is_authenticated and user.role in ["Admin", "Nurse", "Doctor", "Receptionist", "Cashier"]
+            return user.is_authenticated and user.role in ["Admin", "Nurse", "Doctor", "Ophthalmologist", "Dentist", "Receptionist", "Cashier"]
         return False
 
     def has_object_permission(self, request, view, obj):

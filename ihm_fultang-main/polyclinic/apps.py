@@ -7,3 +7,4 @@ class PolyclinicConfig(AppConfig):
 
     def ready(self):
         import polyclinic.signals
+        import polyclinic.accounting_signals  # Register accounting integration signals

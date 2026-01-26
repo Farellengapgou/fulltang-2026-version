@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from accounting.permissions.accounting_staff_permissions import AccountingStaffPermission
 from accounting.serializers import FinancialOperationSerializer
-from accounting.models import FinancialOperation
+from accounting.models_financier import FinancialOperation
 from rest_framework.viewsets import ModelViewSet
 
 tags = ["financial-operation"]

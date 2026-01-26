@@ -1,6 +1,6 @@
 from django.utils import timezone
 from decimal import Decimal
-from accounting.models import ChartOfAccounts, Journal, TaxRate
+from accounting.models_financier import ChartOfAccounts, Journal, TaxRate
 
 class AccountingSetup:
     """Configuration initiale du module comptabilité"""
@@ -63,26 +63,26 @@ class AccountingSetup:
                 }
             )
 
-        @staticmethod
-        def create_default_journals():
-            """Crée les journaux comptables de base"""
-            journals = [
-                ('VTE', 'Journal des ventes', 'SALES'),
-                ('ACH', 'Journal des achats', 'PURCHASES'),
-                ('BQ', 'Journal de banque', 'BANK'),
-                ('CAI', 'Journal de caisse', 'CASH'),
-                ('OD', 'Opérations diverses', 'MISC'),
-            ]
+    @staticmethod
+    def create_default_journals():
+        """Crée les journaux comptables de base"""
+        journals = [
+            ('VTE', 'Journal des ventes', 'SALES'),
+            ('ACH', 'Journal des achats', 'PURCHASES'),
+            ('BQ', 'Journal de banque', 'BANK'),
+            ('CAI', 'Journal de caisse', 'CASH'),
+            ('OD', 'Opérations diverses', 'MISC'),
+        ]
 
-            for code, name, journal_type in journals:
-                Journal.objects.get_or_create(
-                    code=code,
-                    defaults={
-                        'name': name,
-                        'journal_type': journal_type,
-                        'is_active': True
-                    }
-                )
+        for code, name, journal_type in journals:
+            Journal.objects.get_or_create(
+                code=code,
+                defaults={
+                    'name': name,
+                    'journal_type': journal_type,
+                    'is_active': True
+                }
+            )
 
     @staticmethod
     def create_default_tax_rates():
