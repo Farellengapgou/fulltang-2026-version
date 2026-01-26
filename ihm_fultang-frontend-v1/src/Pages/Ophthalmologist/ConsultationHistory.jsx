@@ -1,13 +1,15 @@
-import {useEffect, useState} from "react"
+import { useEffect, useState } from "react"
 import { Search, Calendar, Eye, User, Clock, DollarSign } from "lucide-react"
-import {ophthaNavLink} from "./lib/OphthalmologistNavLink.js";
-import {OphthalmologistNavBar} from "./OphthalmologistComponents/OphthalmologistNavBar.jsx";
-import {useCalculateAge} from "../../Utils/compute.js";
-import {formatDateOnly, formatDateToTime} from "../../Utils/formatDateMethods.js";
-import {getStateStyles} from "./lib/applyStyleFunction.js";
-import {useNavigate} from "react-router-dom";
-import {CustomDashboard} from "../../GlobalComponents/CustomDashboard.jsx";
-import {useAuthentication} from "../../Utils/Provider.jsx";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
+import { ophthaNavLink } from "./lib/OphthalmologistNavLink.js";
+import { OphthalmologistNavBar } from "./OphthalmologistComponents/OphthalmologistNavBar.jsx";
+import { useCalculateAge } from "../../Utils/compute.js";
+import { formatDateOnly, formatDateToTime } from "../../Utils/formatDateMethods.js";
+import { getStateStyles } from "./lib/applyStyleFunction.js";
+import { useNavigate } from "react-router-dom";
+import { CustomDashboard } from "../../GlobalComponents/CustomDashboard.jsx";
+import { useAuthentication } from "../../Utils/Provider.jsx";
 import axiosInstance from "../../Utils/axiosInstance.js";
 import Loader from "../../GlobalComponents/Loader.jsx";
 import ServerErrorPage from "../../GlobalComponents/ServerError.jsx";
@@ -16,20 +18,17 @@ export function OphthaConsultationHistory() {
     const [searchTerm, setSearchTerm] = useState("");
     const [dateFilter, setDateFilter] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const {userData} = useAuthentication();
+    const { userData } = useAuthentication();
     const [consultationHistoryList, setConsultationHistoryList] = useState([]);
     const [errorStatus, setErrorStatus] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
 
-    async function loadConsultationHistory(idDoctor)
-    {
+    async function loadConsultationHistory(idDoctor) {
         setIsLoading(true);
-        try
-        {
-            const response =  await axiosInstance.get(`/consultation/doctor/${idDoctor}/?history=true`);
+        try {
+            const response = await axiosInstance.get(`/consultation/doctor/${idDoctor}/?history=true`);
             setIsLoading(false);
-            if(response.status === 200)
-            {
+            if (response.status === 200) {
                 setConsultationHistoryList(response?.data);
                 setErrorStatus(null);
                 setErrorMessage("");
@@ -37,8 +36,7 @@ export function OphthaConsultationHistory() {
             }
 
         }
-        catch (error)
-        {
+        catch (error) {
             setIsLoading(false);
             setErrorStatus(error.status);
             console.log(error);
@@ -46,14 +44,13 @@ export function OphthaConsultationHistory() {
     }
 
     useEffect(() => {
-        if (userData.id)
-        {
+        if (userData.id) {
             loadConsultationHistory(userData.id);
         }
     }, [userData.id]);
 
     const filteredConsultations = consultationHistoryList.filter((consultation) => {
-        const fullName = consultation?.idPatient?.firstName + " "+ consultation?.idPatient?.lastName;
+        const fullName = consultation?.idPatient?.firstName + " " + consultation?.idPatient?.lastName;
         const matchesSearch = fullName.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesDate = !dateFilter || new Date(consultation?.consultationDate || '').toISOString().split('T')[0] === dateFilter;
         return matchesSearch && matchesDate
@@ -61,14 +58,14 @@ export function OphthaConsultationHistory() {
 
     const navigate = useNavigate();
 
-    const {calculateAge} = useCalculateAge();
+    const { calculateAge } = useCalculateAge();
 
     return (
         <CustomDashboard linkList={ophthaNavLink} requiredRole={"Ophthalmologist"}>
-            <OphthalmologistNavBar/>
+            <OphthalmologistNavBar />
             <div className="mx-auto p-6">
                 <h1 className="text-2xl font-bold text-gray-800 mb-6">History of Consultations</h1>
-            
+
                 {/* Filters */}
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
                     <div className="relative flex-1">
@@ -83,11 +80,14 @@ export function OphthaConsultationHistory() {
                     </div>
                     <div className="flex items-center gap-4">
                         <Calendar className="text-gray-400 h-5 w-5" />
-                        <input
-                            type="date"
-                            value={dateFilter}
-                            onChange={(e) => setDateFilter(e.target.value)}
-                            className="px-4 py-2 border border-gray-300 focus:border-none rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none transition-all duration-300"
+                        <DatePicker
+                            placeholder="Filter by date"
+                            value={dateFilter ? dayjs(dateFilter) : null}
+                            onChange={(date, dateString) => setDateFilter(dateString)}
+                            disabledDate={(current) => {
+                                return current && current.isAfter(dayjs(), 'day');
+                            }}
+                            className="px-4 py-2 border border-gray-300 focus:border-none rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none transition-all duration-300 h-10 w-full"
                         />
                     </div>
                 </div>
@@ -95,11 +95,11 @@ export function OphthaConsultationHistory() {
                 {/* consultation history List */}
                 {isLoading ? (
                     <div className="h-[500px] w-full flex justify-center items-center">
-                        <Loader size={"medium"} color={"primary-end"}/>
+                        <Loader size={"medium"} color={"primary-end"} />
                     </div>
-                    ) : (
-                        errorStatus ? <ServerErrorPage errorStatus={errorStatus} message={errorMessage}/>  :
-                        ( filteredConsultations && filteredConsultations.length > 0 ?
+                ) : (
+                    errorStatus ? <ServerErrorPage errorStatus={errorStatus} message={errorMessage} /> :
+                        (filteredConsultations && filteredConsultations.length > 0 ?
                             (
                                 < div >
                                     < table className="w-full border-separate border-spacing-y-2 ">
@@ -132,7 +132,7 @@ export function OphthaConsultationHistory() {
                                                     <tr key={consultation.id} className="">
                                                         <td className={`px-6 py-5 rounded-l-xl bg-gray-100  border-l-4  ${getStateStyles(consultation?.statePatient).container}`}>
                                                             <div className="w-full flex items-center justify-center">
-                                                                <User className="h-6 w-6 text-gray-400 mr-2"/>
+                                                                <User className="h-6 w-6 text-gray-400 mr-2" />
                                                                 <div>
                                                                     <div className="text-md font-medium text-gray-900">
                                                                         {patientInfo?.firstName + " " + patientInfo?.lastName}
@@ -145,13 +145,13 @@ export function OphthaConsultationHistory() {
                                                         </td>
                                                         <td className="px-6 py-5 bg-gray-100 ">
                                                             <div className="w-full flex justify-center items-center ">
-                                                                <Clock className="h-5 w-5 text-gray-400 mr-2 mt-2"/>
+                                                                <Clock className="h-5 w-5 text-gray-400 mr-2 mt-2" />
                                                                 <div>
                                                                     <div className="text-sm text-center text-gray-900">
                                                                         {consultation?.consultationDate ? formatDateOnly(consultation?.consultationDate) : 'Not Specified'}
                                                                     </div>
                                                                     <div className="text-sm  text-center text-gray-500">
-                                                                        {consultation?.consultationDate ? formatDateToTime(consultation?.consultationDate) : 'Not Specified'} 
+                                                                        {consultation?.consultationDate ? formatDateToTime(consultation?.consultationDate) : 'Not Specified'}
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -170,18 +170,18 @@ export function OphthaConsultationHistory() {
                                                         </td>
                                                         <td className="px-6 py-5 bg-gray-100 ">
                                                             <div className="flex items-center justify-center text-sm text-gray-900">
-                                                                <DollarSign className="h-5 w-5 text-gray-400 mr-1"/>
+                                                                <DollarSign className="h-5 w-5 text-gray-400 mr-1" />
                                                                 {consultation?.consultationPrice ? consultation?.consultationPrice.toLocaleString() + ' FCFA' : ' - '}
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-5  bg-gray-100 rounded-r-xl">
                                                             <button
                                                                 onClick={() => {
-                                                                    navigate(`/doctor/consultation-history/details/${consultation?.id}`, {state: {consultation}})
+                                                                    navigate(`/doctor/consultation-history/details/${consultation?.id}`, { state: { consultation } })
                                                                 }}
                                                                 className="flex items-center text-primary-end hover:text-primary-start font-semibold hover:text-[17px] transition-all duration-500"
                                                             >
-                                                                <Eye className="h-5 w-5 "/>
+                                                                <Eye className="h-5 w-5 " />
                                                                 <span className="ml-2">Details</span>
                                                             </button>
                                                         </td>
@@ -191,10 +191,10 @@ export function OphthaConsultationHistory() {
                                         </tbody>
                                     </table>
                                 </div>
-                            ): (
+                            ) : (
                                 <div className="p-8 mt-24 flex items-center justify-center">
                                     <div className="flex flex-col">
-                                        <Calendar className="h-16 w-16 text-primary-end mx-auto mb-4"/>
+                                        <Calendar className="h-16 w-16 text-primary-end mx-auto mb-4" />
                                         <h2 className="text-2xl font-bold text-gray-800 mb-2 mx-auto">
                                             No Consultations History
                                         </h2>
@@ -211,7 +211,7 @@ export function OphthaConsultationHistory() {
                                 </div>
                             )
                         )
-                    )
+                )
                 }
             </div>
         </CustomDashboard>

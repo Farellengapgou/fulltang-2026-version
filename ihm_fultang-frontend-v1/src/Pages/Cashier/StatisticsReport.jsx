@@ -231,20 +231,18 @@ function CustomReportFilter({ onFilter }) {
             <div className="flex space-x-4 mb-4">
                 <div>
                     <label className="block text-gray-600 mb-2">Date de début</label>
-                    <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        className="border p-2 rounded w-full"
+                    <DatePicker
+                        value={startDate ? dayjs(startDate) : null}
+                        onChange={(date, dateString) => setStartDate(dateString)}
+                        className="border p-2 rounded w-full h-10"
                     />
                 </div>
                 <div>
                     <label className="block text-gray-600 mb-2">Date de fin</label>
-                    <input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        className="border p-2 rounded w-full"
+                    <DatePicker
+                        value={endDate ? dayjs(endDate) : null}
+                        onChange={(date, dateString) => setEndDate(dateString)}
+                        className="border p-2 rounded w-full h-10"
                     />
                 </div>
                 <div>

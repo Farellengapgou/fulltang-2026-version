@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import { X, Eye, Check, RotateCcw, Plus, Trash2 } from "lucide-react";
 import {
   journalEntryService,
@@ -22,12 +24,12 @@ export function JournalEntries() {
   const [showForm, setShowForm] = useState(false);
   const [journals, setJournals] = useState([]);
   const [accounts, setAccounts] = useState([]);
-  
+
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const [confirmConfig, setConfirmConfig] = useState({ title: "", message: "", onConfirm: () => {} });
+  const [confirmConfig, setConfirmConfig] = useState({ title: "", message: "", onConfirm: () => { } });
 
   const [formData, setFormData] = useState({
     entry_number: "",
@@ -210,14 +212,14 @@ export function JournalEntries() {
                   <div className="grid grid-cols-4 gap-4">
                     <div className="space-y-1">
                       <label className="text-xs font-semibold text-gray-500 uppercase">Date</label>
-                      <input
-                        type="date"
-                        value={formData.entry_date}
-                        onChange={(e) =>
-                          setFormData({ ...formData, entry_date: e.target.value })
+                      <DatePicker
+                        placeholder="Entry Date"
+                        value={formData.entry_date ? dayjs(formData.entry_date) : null}
+                        onChange={(date, dateString) =>
+                          setFormData({ ...formData, entry_date: dateString })
                         }
-                        required
-                        className="ft-input"
+                        allowClear={false}
+                        className="ft-input h-8 w-full"
                       />
                     </div>
                     <div className="space-y-1">
@@ -445,13 +447,12 @@ export function JournalEntries() {
                   </td>
                   <td className="ft-td text-center">
                     <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
-                        entry.state === "POSTED"
-                          ? "bg-green-100 text-green-700"
-                          : entry.state === "DRAFT"
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${entry.state === "POSTED"
+                        ? "bg-green-100 text-green-700"
+                        : entry.state === "DRAFT"
                           ? "bg-amber-100 text-amber-700"
                           : "bg-red-100 text-red-700"
-                      }`}
+                        }`}
                     >
                       {entry.state}
                     </span>
@@ -534,9 +535,8 @@ export function JournalEntries() {
                   </div>
                   <div>
                     <span className="block text-[10px] uppercase font-bold text-gray-400 mb-1">Statut</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-bold uppercase ${
-                      selectedEntry.state === "POSTED" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-                    }`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-bold uppercase ${selectedEntry.state === "POSTED" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+                      }`}>
                       {selectedEntry.state}
                     </span>
                   </div>
@@ -596,16 +596,16 @@ export function JournalEntries() {
         )}
       </div>
 
-      <SuccessModal 
-        isOpen={isSuccessModalOpen} 
-        canOpenSuccessModal={setIsSuccessModalOpen} 
-        message={modalMessage} 
-        makeAction={() => {}} 
+      <SuccessModal
+        isOpen={isSuccessModalOpen}
+        canOpenSuccessModal={setIsSuccessModalOpen}
+        message={modalMessage}
+        makeAction={() => { }}
       />
-      <ErrorModal 
-        isOpen={isErrorModalOpen} 
-        onCloseErrorModal={setIsErrorModalOpen} 
-        message={modalMessage} 
+      <ErrorModal
+        isOpen={isErrorModalOpen}
+        onCloseErrorModal={setIsErrorModalOpen}
+        message={modalMessage}
       />
       <ConfirmationModal
         isOpen={isConfirmModalOpen}

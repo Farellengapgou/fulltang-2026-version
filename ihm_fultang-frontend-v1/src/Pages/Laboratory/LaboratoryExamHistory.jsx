@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import { Search, Calendar, User, Stethoscope, Clock } from "lucide-react";
 import { FaArrowLeft, FaArrowRight, FaEye } from "react-icons/fa";
 import { laboratoryNavLink } from "./LaboratoryNavLink.js";
@@ -46,7 +48,7 @@ export function ExamHistory() {
                 setActualPageNumber(actualPageNumber - 1);
             }
         }
-        }
+    }
 
     // Chargement des données depuis /exam-result/
     const loadExamHistory = useCallback(async () => {
@@ -150,11 +152,11 @@ export function ExamHistory() {
                     </div>
                     <div className="flex items-center gap-4">
                         <Calendar className="text-gray-400 h-5 w-5" />
-                        <input
-                            type="date"
-                            value={dateFilter}
-                            onChange={(e) => setDateFilter(e.target.value)}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none transition-all duration-300"
+                        <DatePicker
+                            placeholder="Filter by date"
+                            value={dateFilter ? dayjs(dateFilter) : null}
+                            onChange={(date, dateString) => setDateFilter(dateString)}
+                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none transition-all duration-300 h-10"
                         />
                     </div>
                 </div>
@@ -170,54 +172,54 @@ export function ExamHistory() {
                     <div className="overflow-x-auto">
                         <table className="w-full border-separate border-spacing-y-2">
                             <thead>
-                            <tr>
-                                <th className="px-6 py-3 bg-primary-end rounded-l-xl text-center text-md text-white font-bold uppercase">
-                                    Patient
-                                </th>
-                                <th className="px-6 py-3 bg-primary-end text-center text-md text-white font-bold uppercase">
-                                    Date & Time
-                                </th>
-                                <th className="px-6 py-3 bg-primary-end text-center text-md text-white font-bold uppercase">
-                                    Doctor
-                                </th>
-                            </tr>
+                                <tr>
+                                    <th className="px-6 py-3 bg-primary-end rounded-l-xl text-center text-md text-white font-bold uppercase">
+                                        Patient
+                                    </th>
+                                    <th className="px-6 py-3 bg-primary-end text-center text-md text-white font-bold uppercase">
+                                        Date & Time
+                                    </th>
+                                    <th className="px-6 py-3 bg-primary-end text-center text-md text-white font-bold uppercase">
+                                        Doctor
+                                    </th>
+                                </tr>
                             </thead>
                             <tbody className="bg-white border-separate">
-                            {filteredExams.map((exam) => (
-                                <tr 
-                                    key={exam.id}
-                                    className="cursor-pointer hover:bg-gray-200 hover:opacity-60 transition-colors duration-200"
-                                    onClick={() => {
-                                        navigate(`${AppRoutesPaths.laboratoryExamResultDetails.replace(":id", exam.id)}`);
-                                    }}
-                                >
-                                    <td className="px-6 py-5 rounded-l-xl bg-gray-100 border-l-4 border-primary-start">
-                                        <div className="w-full flex items-center justify-center">
-                                            <User className="h-6 w-6 text-gray-400 mr-2" />
-                                            <div className="text-md font-medium text-gray-900">{exam.patientName}</div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-5 bg-gray-100">
-                                        <div className="w-full flex justify-center items-center">
-                                            <Clock className="h-5 w-5 text-gray-400 mr-2 mt-2" />
-                                            <div>
-                                                <div className="text-sm text-center text-gray-900">
-                                                    {exam.date ? formatDateOnly(exam.date) : "N/A"}
-                                                </div>
-                                                <div className="text-sm text-center text-gray-500">
-                                                    {exam.date ? formatDateToTime(exam.date) : "N/A"}
+                                {filteredExams.map((exam) => (
+                                    <tr
+                                        key={exam.id}
+                                        className="cursor-pointer hover:bg-gray-200 hover:opacity-60 transition-colors duration-200"
+                                        onClick={() => {
+                                            navigate(`${AppRoutesPaths.laboratoryExamResultDetails.replace(":id", exam.id)}`);
+                                        }}
+                                    >
+                                        <td className="px-6 py-5 rounded-l-xl bg-gray-100 border-l-4 border-primary-start">
+                                            <div className="w-full flex items-center justify-center">
+                                                <User className="h-6 w-6 text-gray-400 mr-2" />
+                                                <div className="text-md font-medium text-gray-900">{exam.patientName}</div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-5 bg-gray-100">
+                                            <div className="w-full flex justify-center items-center">
+                                                <Clock className="h-5 w-5 text-gray-400 mr-2 mt-2" />
+                                                <div>
+                                                    <div className="text-sm text-center text-gray-900">
+                                                        {exam.date ? formatDateOnly(exam.date) : "N/A"}
+                                                    </div>
+                                                    <div className="text-sm text-center text-gray-500">
+                                                        {exam.date ? formatDateToTime(exam.date) : "N/A"}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-5 bg-gray-100">
-                                        <div className="flex items-center justify-center text-sm text-gray-900">
-                                            <Stethoscope className="h-5 w-5 text-gray-400 mr-2" />
-                                            {exam.doctorName}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+                                        <td className="px-6 py-5 bg-gray-100">
+                                            <div className="flex items-center justify-center text-sm text-gray-900">
+                                                <Stethoscope className="h-5 w-5 text-gray-400 mr-2" />
+                                                {exam.doctorName}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
@@ -241,7 +243,7 @@ export function ExamHistory() {
                     </div>
                 )}
 
-                { filteredExams.length > 0 && numberOfExams > 0 && (
+                {filteredExams.length > 0 && numberOfExams > 0 && (
                     <div className="fixed w-full justify-center bottom-0 flex mt-6 mb-4 left-20">
                         <div className="flex gap-4">
                             <Tooltip placement={"left"} title={"previous slide"}>

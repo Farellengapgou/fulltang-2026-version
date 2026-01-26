@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import { X, Plus, Trash2, Save } from "lucide-react";
 import { getSuppliers, getWarehouses, getArticles, createGoodsReceipt } from "../../../Utils/api/materialAccounting.js";
 
@@ -142,13 +144,15 @@ export function GoodsReceiptModal({ isOpen, onClose, onRefresh, initialData = nu
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-bold text-gray-700">Date</label>
-                            <input
-                                type="date"
-                                required
+                            <DatePicker
+                                placeholder="Date"
                                 disabled={isReadOnly}
-                                value={formData.date}
-                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-end outline-none disabled:bg-gray-100 disabled:text-gray-600"
+                                value={formData.date ? dayjs(formData.date) : null}
+                                onChange={(date, dateString) => setFormData({ ...formData, date: dateString })}
+                                disabledDate={(current) => {
+                                    return current && current.isAfter(dayjs(), 'day');
+                                }}
+                                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-end outline-none disabled:bg-gray-100 disabled:text-gray-600 h-12"
                             />
                         </div>
                         <div className="space-y-2">
@@ -218,12 +222,15 @@ export function GoodsReceiptModal({ isOpen, onClose, onRefresh, initialData = nu
                                 </div>
                                 <div className="col-span-12 md:col-span-2 space-y-1">
                                     <label className="text-[10px] uppercase font-bold text-gray-500">Péremption</label>
-                                    <input
-                                        type="date"
+                                    <DatePicker
+                                        placeholder="Date expiration"
                                         disabled={isReadOnly}
-                                        value={line.expiry_date}
-                                        onChange={(e) => handleLineChange(index, 'expiry_date', e.target.value)}
-                                        className="w-full p-2 bg-white border border-gray-200 rounded-lg outline-none disabled:bg-gray-100"
+                                        value={line.expiry_date ? dayjs(line.expiry_date) : null}
+                                        onChange={(date, dateString) => handleLineChange(index, 'expiry_date', dateString)}
+                                        disabledDate={(current) => {
+                                            return current && current.isBefore(dayjs(), 'day');
+                                        }}
+                                        className="w-full p-2 bg-white border border-gray-200 rounded-lg outline-none disabled:bg-gray-100 h-10"
                                     />
                                 </div>
                                 {!isReadOnly && (

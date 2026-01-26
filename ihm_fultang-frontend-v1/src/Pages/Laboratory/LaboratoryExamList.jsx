@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import { Search, Calendar, Check, User, FileText, Clock, AlertCircle, Stethoscope } from "lucide-react";
 import { LaboratoryNavBar } from "./LaboratoryNavBar.jsx";
 import { FaArrowLeft, FaArrowRight, FaEye } from "react-icons/fa";
@@ -55,7 +57,7 @@ export function LaboratoryExamList() {
             if (response.status === 200) {
                 console.log(response.data);
                 const data = response.data.results;
-                
+
                 const transformed = data.map((exam) => ({
                     ...exam,
                     patientName: exam.idPatient
@@ -67,7 +69,7 @@ export function LaboratoryExamList() {
                     status: exam.examStatus || "En attente",
                     requestDate: exam.addDate,
                 }));
-                
+
                 setExamRequestList(transformed);
                 setNumberOfExams(response.data.count || transformed.length);
                 setNextUrl(response.data.next || "");
@@ -148,11 +150,11 @@ export function LaboratoryExamList() {
                     </div>
                     <div className="flex items-center gap-4">
                         <Calendar className="text-gray-400 h-5 w-5" />
-                        <input
-                            type="date"
-                            value={dateFilter}
-                            onChange={(e) => setDateFilter(e.target.value)}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none transition-all duration-300"
+                        <DatePicker
+                            placeholder="Filter by date"
+                            value={dateFilter ? dayjs(dateFilter) : null}
+                            onChange={(date, dateString) => setDateFilter(dateString)}
+                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none transition-all duration-300 h-10"
                         />
                     </div>
                     <select
@@ -198,7 +200,7 @@ export function LaboratoryExamList() {
                             </thead>
                             <tbody className="bg-white border-separate">
                                 {filteredExams.map((exam) => (
-                                    <tr key={exam.id} 
+                                    <tr key={exam.id}
                                         className="cursor-pointer hover:bg-gray-200 hover:opacity-60 transition-colors duration-200"
                                         onClick={() => {
                                             navigate(AppRoutesPaths.laboratoryExamenDetail.replace(":id", exam.id));
@@ -253,7 +255,7 @@ export function LaboratoryExamList() {
                             <AlertCircle className="h-16 w-16 text-primary-end mx-auto mb-4" />
                             <h2 className="text-2xl font-bold text-gray-800 mb-2 mx-auto">No Exam List</h2>
                             <p className="text-gray-600 mb-4 mx-auto text-center">
-                                There are no exam requests registered yet. 
+                                There are no exam requests registered yet.
                                 Once created, they will appear here.
                             </p>
                             <button
@@ -268,7 +270,7 @@ export function LaboratoryExamList() {
                     </div>
                 )}
 
-                { filteredExams.length > 0 && numberOfExams > 0 && (
+                {filteredExams.length > 0 && numberOfExams > 0 && (
                     <div className="fixed w-full justify-center bottom-0 flex mt-6 mb-4 left-20">
                         <div className="flex gap-4">
                             <Tooltip placement={"left"} title={"previous slide"}>

@@ -19,9 +19,9 @@ COPY requirements.txt /app
 # Installer les dépendances Python
 RUN pip install --no-cache-dir -r requirements.txt && \
     adduser \
-        --disabled-password \
-        --no-create-home \
-        django-user
+    --disabled-password \
+    --no-create-home \
+    django-user
 
 # Copier le reste de l'application dans le conteneur
 COPY . /app

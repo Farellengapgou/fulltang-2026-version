@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import { Download, Package, TrendingUp, AlertCircle, FileText, Printer, Search, Calendar } from "lucide-react";
 import { AccountantNavBar } from "../../Accountant/Components/AccountantNavBar.jsx";
 import { AccountantDashBoard } from "../../Accountant/Components/AccountantDashboard.jsx";
@@ -69,11 +71,15 @@ export function PerpetualInventory() {
                         </p>
                     </div>
                     <div className="flex gap-3">
-                        <input
-                            type="date"
-                            value={selectedDate}
-                            onChange={(e) => setSelectedDate(e.target.value)}
-                            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none"
+                        <DatePicker
+                            placeholder="Select Date"
+                            value={selectedDate ? dayjs(selectedDate) : null}
+                            onChange={(date, dateString) => setSelectedDate(dateString)}
+                            allowClear={false}
+                            disabledDate={(current) => {
+                                return current && current.isAfter(dayjs(), 'day');
+                            }}
+                            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none h-10"
                         />
                         <button className="flex items-center px-4 py-2 bg-primary-end text-white rounded-lg hover:bg-teal-700 transition-all">
                             <Download className="h-5 w-5 mr-2" />

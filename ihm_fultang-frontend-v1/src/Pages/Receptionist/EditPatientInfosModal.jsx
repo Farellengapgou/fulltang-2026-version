@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/style.css';
 import axiosInstance from "../../Utils/axiosInstance.js";
 
 export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal, setSuccessMessage, setIsLoading, patientData }) {
@@ -406,16 +408,39 @@ export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal,
                                     <label htmlFor="phoneNumber"
                                         className="block text-sm font-medium text-gray-700 mb-1">Phone
                                         Number</label>
-                                    <input
-                                        type="tel"
-                                        id="phoneNumber"
-                                        name="phoneNumber"
+                                    <PhoneInput
+                                        country={'cm'}
                                         value={formData.phoneNumber}
-                                        placeholder="Enter patient's phone number"
-                                        onChange={handleChange}
-                                        className={applyFormStyle()}
-                                        required={checkedFields.phoneNumber}
+                                        onChange={(value) => {
+                                            setFormData(prevData => ({ ...prevData, phoneNumber: value }));
+                                        }}
                                         disabled={!checkedFields.phoneNumber}
+                                        countryCodeEditable={false}
+                                        inputStyle={{
+                                            width: '100%',
+                                            height: '42px',
+                                            fontSize: '16px',
+                                            paddingLeft: '48px',
+                                            borderRadius: '0.375rem', // rounded-md
+                                            border: '1px solid #d1d5db', // border-gray-300
+                                            backgroundColor: checkedFields.phoneNumber ? 'white' : '#f3f4f6', // bg-gray-100 if disabled
+                                        }}
+                                        buttonStyle={{
+                                            borderRadius: '0.375rem 0 0 0.375rem',
+                                            border: '1px solid #d1d5db',
+                                            borderRight: 'none',
+                                            backgroundColor: '#f9fafb', // bg-gray-50
+                                        }}
+                                        dropdownStyle={{
+                                            borderRadius: '0.5rem',
+                                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                                        }}
+                                        containerStyle={{
+                                            width: '100%',
+                                        }}
+                                        enableSearch
+                                        searchPlaceholder="Search country..."
+                                        preferredCountries={['cm', 'fr', 'us', 'gb', 'ca']}
                                     />
                                 </div>
                             </div>

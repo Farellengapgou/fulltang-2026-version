@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import { FileText, Printer, Download } from "lucide-react";
 import { AccountantNavBar } from "../../Accountant/Components/AccountantNavBar.jsx";
 import { AccountantDashBoard } from "../../Accountant/Components/AccountantDashboard.jsx";
@@ -154,22 +156,28 @@ export function StockCard() {
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Date début
                             </label>
-                            <input
-                                type="date"
-                                value={dateFrom}
-                                onChange={(e) => setDateFrom(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none"
+                            <DatePicker
+                                placeholder="Start Date"
+                                value={dateFrom ? dayjs(dateFrom) : null}
+                                onChange={(date, dateString) => setDateFrom(dateString)}
+                                disabledDate={(current) => {
+                                    return current && current.isAfter(dayjs(), 'day');
+                                }}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none h-10"
                             />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Date fin
                             </label>
-                            <input
-                                type="date"
-                                value={dateTo}
-                                onChange={(e) => setDateTo(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none"
+                            <DatePicker
+                                placeholder="End Date"
+                                value={dateTo ? dayjs(dateTo) : null}
+                                onChange={(date, dateString) => setDateTo(dateString)}
+                                disabledDate={(current) => {
+                                    return current && current.isAfter(dayjs(), 'day');
+                                }}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none h-10"
                             />
                         </div>
                     </div>

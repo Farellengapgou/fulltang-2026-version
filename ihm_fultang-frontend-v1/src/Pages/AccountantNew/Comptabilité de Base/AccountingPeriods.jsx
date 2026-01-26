@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import { X, Plus, Calendar, Hash, CheckCircle, AlertCircle, Edit, Trash2, Lock, Unlock, Clock, Info } from "lucide-react";
 import { accountingPeriodService } from "../../../Services/Accounting/index.js";
 import Loader from "../../../GlobalComponents/Loader.jsx";
@@ -17,12 +19,12 @@ export function Periods() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showForm, setShowForm] = useState(false);
-  
+
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const [confirmConfig, setConfirmConfig] = useState({ title: "", message: "", onConfirm: () => {} });
+  const [confirmConfig, setConfirmConfig] = useState({ title: "", message: "", onConfirm: () => { } });
 
   const [formData, setFormData] = useState({
     fiscal_year: new Date().getFullYear(),
@@ -191,78 +193,78 @@ export function Periods() {
                 <div className="ft-modal-body space-y-6">
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-1">
-                        <label className="text-sm font-bold text-gray-700 ml-1">Année Fiscale</label>
-                        <div className="relative">
-                            <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                            <input
-                                type="number"
-                                value={formData.fiscal_year}
-                                onChange={(e) => setFormData({ ...formData, fiscal_year: parseInt(e.target.value) })}
-                                required
-                                className="ft-input pl-12"
-                            />
-                        </div>
+                      <label className="text-sm font-bold text-gray-700 ml-1">Année Fiscale</label>
+                      <div className="relative">
+                        <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <input
+                          type="number"
+                          value={formData.fiscal_year}
+                          onChange={(e) => setFormData({ ...formData, fiscal_year: parseInt(e.target.value) })}
+                          required
+                          className="ft-input pl-12"
+                        />
+                      </div>
                     </div>
                     <div className="space-y-1">
-                        <label className="text-sm font-bold text-gray-700 ml-1">Mois du Calendrier</label>
-                        <div className="relative">
-                            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                            <select
-                                value={formData.month}
-                                onChange={(e) => setFormData({ ...formData, month: parseInt(e.target.value) })}
-                                className="ft-select pl-12"
-                            >
-                                {monthNames.map((name, idx) => (
-                                    <option key={idx} value={idx + 1}>{name}</option>
-                                ))}
-                            </select>
-                        </div>
+                      <label className="text-sm font-bold text-gray-700 ml-1">Mois du Calendrier</label>
+                      <div className="relative">
+                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <select
+                          value={formData.month}
+                          onChange={(e) => setFormData({ ...formData, month: parseInt(e.target.value) })}
+                          className="ft-select pl-12"
+                        >
+                          {monthNames.map((name, idx) => (
+                            <option key={idx} value={idx + 1}>{name}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-1">
-                        <label className="text-sm font-bold text-gray-700 ml-1">Date d'Ouverture</label>
-                        <div className="relative">
-                            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                            <input
-                                type="date"
-                                value={formData.start_date}
-                                onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                                required
-                                className="ft-input pl-12"
-                            />
-                        </div>
+                      <label className="text-sm font-bold text-gray-700 ml-1">Date d'Ouverture</label>
+                      <div className="relative">
+                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <DatePicker
+                          placeholder="Start Date"
+                          value={formData.start_date ? dayjs(formData.start_date) : null}
+                          onChange={(date, dateString) => setFormData({ ...formData, start_date: dateString })}
+                          required
+                          className="ft-input pl-12 h-10 w-full"
+                        />
+                      </div>
                     </div>
                     <div className="space-y-1">
-                        <label className="text-sm font-bold text-gray-700 ml-1">Date de Clôture</label>
-                        <div className="relative">
-                            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                            <input
-                                type="date"
-                                value={formData.end_date}
-                                onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                                required
-                                className="ft-input pl-12"
-                            />
-                        </div>
+                      <label className="text-sm font-bold text-gray-700 ml-1">Date de Clôture</label>
+                      <div className="relative">
+                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <DatePicker
+                          placeholder="End Date"
+                          value={formData.end_date ? dayjs(formData.end_date) : null}
+                          onChange={(date, dateString) => setFormData({ ...formData, end_date: dateString })}
+                          required
+                          className="ft-input pl-12 h-10 w-full"
+                        />
+                      </div>
                     </div>
                   </div>
 
                   <div className="space-y-1">
                     <label className="text-sm font-bold text-gray-700 ml-1">Statut Inicial</label>
                     <div className="relative">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                            {formData.status === 'OPEN' ? <Unlock size={18} /> : <Lock size={18} />}
-                        </div>
-                        <select
-                            value={formData.status}
-                            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                            className="ft-select pl-12"
-                        >
-                            <option value="OPEN">OUVERTE - Saisie Autorisée</option>
-                            <option value="CLOSED">FERMÉE - Consultation Uniquement</option>
-                        </select>
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                        {formData.status === 'OPEN' ? <Unlock size={18} /> : <Lock size={18} />}
+                      </div>
+                      <select
+                        value={formData.status}
+                        onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                        className="ft-select pl-12"
+                      >
+                        <option value="OPEN">OUVERTE - Saisie Autorisée</option>
+                        <option value="CLOSED">FERMÉE - Consultation Uniquement</option>
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -295,78 +297,77 @@ export function Periods() {
                 <tr key={period.id} className="ft-tr">
                   <td className="ft-td">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-secondary/5 flex items-center justify-center text-secondary">
-                            <Hash size={20} />
-                        </div>
-                        <div>
-                            <span className="font-black text-secondary tracking-tight uppercase">M{period.month}</span>
-                            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{period.fiscal_year}</div>
-                        </div>
+                      <div className="w-10 h-10 rounded-xl bg-secondary/5 flex items-center justify-center text-secondary">
+                        <Hash size={20} />
+                      </div>
+                      <div>
+                        <span className="font-black text-secondary tracking-tight uppercase">M{period.month}</span>
+                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{period.fiscal_year}</div>
+                      </div>
                     </div>
                   </td>
                   <td className="ft-td">
-                    <span className="font-bold text-gray-700 uppercase italic text-xs">{monthNames[period.month-1]}</span>
+                    <span className="font-bold text-gray-700 uppercase italic text-xs">{monthNames[period.month - 1]}</span>
                   </td>
                   <td className="ft-td">
                     <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
-                        <Calendar size={12} />
-                        <span className="font-black text-gray-600 uppercase tracking-tighter">{period.start_date}</span>
-                        <span className="opacity-30">→</span>
-                        <span className="font-black text-gray-600 uppercase tracking-tighter">{period.end_date}</span>
+                      <Calendar size={12} />
+                      <span className="font-black text-gray-600 uppercase tracking-tighter">{period.start_date}</span>
+                      <span className="opacity-30">→</span>
+                      <span className="font-black text-gray-600 uppercase tracking-tighter">{period.end_date}</span>
                     </div>
                   </td>
                   <td className="ft-td text-center">
-                    <span className={`text-[10px] font-black px-3 py-1 rounded-full flex items-center justify-center gap-1 mx-auto w-fit ${
-                        period.status === "OPEN" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                    }`}>
-                        {period.status === "OPEN" ? <Unlock size={10} /> : <Lock size={10} />}
-                        {period.status === "OPEN" ? "OUVERTE" : "CLÔTURÉE"}
+                    <span className={`text-[10px] font-black px-3 py-1 rounded-full flex items-center justify-center gap-1 mx-auto w-fit ${period.status === "OPEN" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                      }`}>
+                      {period.status === "OPEN" ? <Unlock size={10} /> : <Lock size={10} />}
+                      {period.status === "OPEN" ? "OUVERTE" : "CLÔTURÉE"}
                     </span>
                   </td>
                   <td className="ft-td text-right">
                     <div className="flex justify-end gap-2">
-                        {period.status === "OPEN" ? (
+                      {period.status === "OPEN" ? (
                         <>
-                            <button
-                                onClick={() => handleEdit(period)}
-                                className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
-                                title="Modifier"
-                            >
-                                <Edit size={14} />
-                            </button>
-                            <button
-                                onClick={() => handleClosePeriod(period.id)}
-                                className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-600 hover:text-white transition-all shadow-sm"
-                                title="Clôturer"
-                            >
-                                <Lock size={14} />
-                            </button>
+                          <button
+                            onClick={() => handleEdit(period)}
+                            className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+                            title="Modifier"
+                          >
+                            <Edit size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleClosePeriod(period.id)}
+                            className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-600 hover:text-white transition-all shadow-sm"
+                            title="Clôturer"
+                          >
+                            <Lock size={14} />
+                          </button>
                         </>
-                        ) : (
-                            <button
-                                onClick={() => handleOpenPeriod(period.id)}
-                                className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
-                                title="Réouvrir"
-                            >
-                                <Unlock size={14} />
-                            </button>
-                        )}
+                      ) : (
                         <button
-                            onClick={() => handleDelete(period.id)}
-                            className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all shadow-sm"
-                            title="Supprimer"
+                          onClick={() => handleOpenPeriod(period.id)}
+                          className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
+                          title="Réouvrir"
                         >
-                            <Trash2 size={14} />
+                          <Unlock size={14} />
                         </button>
+                      )}
+                      <button
+                        onClick={() => handleDelete(period.id)}
+                        className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all shadow-sm"
+                        title="Supprimer"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   </td>
                 </tr>
               ))}
               {periods.length === 0 && (
                 <tr>
-                    <td colSpan="5" className="ft-td text-center text-gray-400 py-20 font-medium italic uppercase tracking-widest">
-                        Aucune période comptable configurée.
-                    </td>
+                  <td colSpan="5" className="ft-td text-center text-gray-400 py-20 font-medium italic uppercase tracking-widest">
+                    Aucune période comptable configurée.
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -374,46 +375,46 @@ export function Periods() {
         </div>
 
         <div className="mt-6">
-            <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-            />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </div>
 
         {/* Info Box */}
         <div className="mt-10 bg-secondary/5 rounded-[2rem] p-8 border border-secondary/10 flex gap-6 items-start">
-            <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center text-white shrink-0 shadow-lg shadow-secondary/20">
-                <Info size={24} />
+          <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center text-white shrink-0 shadow-lg shadow-secondary/20">
+            <Info size={24} />
+          </div>
+          <div className="space-y-3">
+            <h3 className="text-sm font-black text-secondary uppercase tracking-widest">Consignes de Gestion des Périodes</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-2 text-[11px] font-bold text-gray-500 uppercase tracking-tight">
+              <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> La clôture verrouille toutes les écritures du mois.</p>
+              <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> Seule une période ouverte autorise la saisie comptable.</p>
+              <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> Vérifiez les rapprochements banques avant clôture.</p>
+              <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> La réouverture est tracée dans le journal d'audit.</p>
             </div>
-            <div className="space-y-3">
-                <h3 className="text-sm font-black text-secondary uppercase tracking-widest">Consignes de Gestion des Périodes</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-2 text-[11px] font-bold text-gray-500 uppercase tracking-tight">
-                    <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> La clôture verrouille toutes les écritures du mois.</p>
-                    <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> Seule une période ouverte autorise la saisie comptable.</p>
-                    <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> Vérifiez les rapprochements banques avant clôture.</p>
-                    <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> La réouverture est tracée dans le journal d'audit.</p>
-                </div>
-            </div>
+          </div>
         </div>
 
-        <SuccessModal 
-            isOpen={isSuccessModalOpen} 
-            canOpenSuccessModal={setIsSuccessModalOpen} 
-            message={modalMessage} 
-            makeAction={() => {}} 
+        <SuccessModal
+          isOpen={isSuccessModalOpen}
+          canOpenSuccessModal={setIsSuccessModalOpen}
+          message={modalMessage}
+          makeAction={() => { }}
         />
-        <ErrorModal 
-            isOpen={isErrorModalOpen} 
-            onCloseErrorModal={setIsErrorModalOpen} 
-            message={modalMessage} 
+        <ErrorModal
+          isOpen={isErrorModalOpen}
+          onCloseErrorModal={setIsErrorModalOpen}
+          message={modalMessage}
         />
         <ConfirmationModal
-            isOpen={isConfirmModalOpen}
-            onClose={() => setIsConfirmModalOpen(false)}
-            onConfirm={confirmConfig.onConfirm}
-            title={confirmConfig.title}
-            message={confirmConfig.message}
+          isOpen={isConfirmModalOpen}
+          onClose={() => setIsConfirmModalOpen(false)}
+          onConfirm={confirmConfig.onConfirm}
+          title={confirmConfig.title}
+          message={confirmConfig.message}
         />
       </div>
     </CustomDashboard>

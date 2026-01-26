@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import { X, Plus, Trash2, Save } from "lucide-react";
 import { getWarehouses, getArticles, getStockLevels, createGoodsIssue, updateGoodsIssue } from "../../../Utils/api/materialAccounting.js";
 
@@ -165,13 +167,15 @@ export function GoodsIssueModal({ isOpen, onClose, onRefresh, initialData }) {
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-bold text-gray-700">Date</label>
-                            <input
-                                type="date"
-                                required
+                            <DatePicker
+                                placeholder="Date"
                                 disabled={isReadOnly}
-                                value={formData.date}
-                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none disabled:bg-gray-100 disabled:text-gray-600"
+                                value={formData.date ? dayjs(formData.date) : null}
+                                onChange={(date, dateString) => setFormData({ ...formData, date: dateString })}
+                                disabledDate={(current) => {
+                                    return current && current.isAfter(dayjs(), 'day');
+                                }}
+                                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none disabled:bg-gray-100 disabled:text-gray-600 h-12"
                             />
                         </div>
                     </div>

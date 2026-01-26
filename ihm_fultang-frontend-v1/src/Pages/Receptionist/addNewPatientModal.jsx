@@ -3,6 +3,8 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/style.css';
 import axiosInstance from "../../Utils/axiosInstance.js";
 import { useAuthentication } from "../../Utils/Provider.jsx";
 
@@ -265,49 +267,74 @@ export function AddNewPatientModal({ isOpen, onClose, setCanOpenSuccessModal, se
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone
-                                    Number</label>
-                                <input
-                                    type="number"
-                                    id="phone"
-                                    name="phoneNumber"
-                                    value={formData.phoneNumber}
-                                    placeholder={"enter patient's phone number"}
-                                    onChange={handleChange}
-                                    className={applyFormStyle()}
-                                    required={true}
-                                />
+                                <div>
+                                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone
+                                        Number</label>
+                                    <PhoneInput
+                                        country={'cm'}
+                                        value={formData.phoneNumber}
+                                        onChange={(value) => {
+                                            setFormData(prevData => ({ ...prevData, phoneNumber: value }));
+                                        }}
+                                        countryCodeEditable={false}
+                                        inputStyle={{
+                                            width: '100%',
+                                            height: '42px',
+                                            fontSize: '16px',
+                                            paddingLeft: '48px',
+                                            borderRadius: '0.375rem', // rounded-md
+                                            border: '1px solid #d1d5db', // border-gray-300
+                                            backgroundColor: 'white',
+                                        }}
+                                        buttonStyle={{
+                                            borderRadius: '0.375rem 0 0 0.375rem',
+                                            border: '1px solid #d1d5db',
+                                            borderRight: 'none',
+                                            backgroundColor: '#f9fafb', // bg-gray-50
+                                        }}
+                                        dropdownStyle={{
+                                            borderRadius: '0.5rem',
+                                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                                        }}
+                                        containerStyle={{
+                                            width: '100%',
+                                        }}
+                                        enableSearch
+                                        searchPlaceholder="Search country..."
+                                        preferredCountries={['cm', 'fr', 'us', 'gb', 'ca']}
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="email"
+                                        className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        value={formData.email}
+                                        placeholder={"enter patient's email"}
+                                        onChange={handleChange}
+                                        className={applyFormStyle()}
+                                        required={false}
+                                    />
+                                </div>
                             </div>
-                            <div>
-                                <label htmlFor="email"
-                                    className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    value={formData.email}
-                                    placeholder={"enter patient's email"}
-                                    onChange={handleChange}
-                                    className={applyFormStyle()}
-                                    required={false}
-                                />
-                            </div>
-                        </div>
 
-                        <div className="px-6 py-1 flex justify-center space-x-6">
-                            <button
-                                type="submit"
-                                className="px-4 py-2 bg-primary-end  hover:text-xl text-md text-white rounded-lg font-bold transition-all duration-300"
-                            >
-                                Save
-                            </button>
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="px-4 py-2 border bg-red-400 text-md hover:text-xl hover:bg-red-500 text-white font-bold rounded-lg  transition-all duration-300"
-                            >
-                                Cancel
-                            </button>
+                            <div className="px-6 py-1 flex justify-center space-x-6">
+                                <button
+                                    type="submit"
+                                    className="px-4 py-2 bg-primary-end  hover:text-xl text-md text-white rounded-lg font-bold transition-all duration-300"
+                                >
+                                    Save
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="px-4 py-2 border bg-red-400 text-md hover:text-xl hover:bg-red-500 text-white font-bold rounded-lg  transition-all duration-300"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
