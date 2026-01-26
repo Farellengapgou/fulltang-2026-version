@@ -1,15 +1,26 @@
 
 
 services:
-  #db:
-  #    image: postgres:13.0-alpine
-  #    volumes:
-  #        - postgres_data:/var/lib/postgresql/data/
-  #    env_file:
-  #        - .env
-  #    container_name: did_django_schedule_jobs_v2_db_prod
-  #    networks:
-  #        - main_prod
+  db:
+    image: postgres:15-alpine
+    container_name: fultang_db
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=fulltang_db
+      - POSTGRES_USER=fulltang_user
+      - POSTGRES_PASSWORD=fulltang_password_2026
+    ports:
+      - "5432:5432"
+    networks:
+      - fultang
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fulltang_user -d fulltang_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 
   fultang:
     build:
@@ -27,6 +38,10 @@ services:
     networks:
       - fultang
     container_name: fultang
+    depends_on:
+      db:
+        condition: service_healthy
+
 
   redis:
     image: redis:alpine
@@ -85,3 +100,7 @@ services:
 networks:
   fultang:
     driver: bridge
+
+volumes:
+  postgres_data:
+
