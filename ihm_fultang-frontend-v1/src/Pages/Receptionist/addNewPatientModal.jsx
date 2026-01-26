@@ -1,14 +1,13 @@
-import {XIcon} from "lucide-react";
-import {useState} from "react";
+import { XIcon } from "lucide-react";
+import { useState } from "react";
 import PropTypes from "prop-types";
 import PhoneInput from "react-phone-input-2"
 import "react-phone-input-2/lib/style.css"
 import axiosInstance from "../../Utils/axiosInstance.js";
-import {useAuthentication} from "../../Utils/Provider.jsx";
+import { useAuthentication } from "../../Utils/Provider.jsx";
 
 
-export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, setSuccessMessage, setIsLoading})
-{
+export function AddNewPatientModal({ isOpen, onClose, setCanOpenSuccessModal, setSuccessMessage, setIsLoading }) {
     AddNewPatientModal.propTypes = {
         isOpen: PropTypes.bool.isRequired,
         onClose: PropTypes.func.isRequired,
@@ -17,32 +16,31 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
         setIsLoading: PropTypes.func.isRequired
     }
 
-    const {userData} = useAuthentication();
-     const [formData, setFormData] = useState({
-            firstName: '',
-            lastName: '',
-            birthDate: '',
-            gender: 'Male',
-            address: '',
-            cniNumber: '',
-            phoneNumber: '',
-            email: '',
-            idMedicalStaff:'',
-        });
+    const { userData } = useAuthentication();
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        birthDate: '',
+        gender: 'Male',
+        address: '',
+        cniNumber: '',
+        phoneNumber: '',
+        email: '',
+        idMedicalStaff: '',
+    });
     const [error, setError] = useState("");
     const [isYears, setIsYears] = useState(false);
     const [isMonth, setIsMonth] = useState(false);
     const [isWeeks, setIsWeeks] = useState(false);
     const [isDay, setIsDay] = useState(false);
     const [age, setAge] = useState(0);
-    const [dateError, setDateError] =useState("");
+    const [dateError, setDateError] = useState("");
 
 
 
 
 
-    function calculateAge(birthDate)
-    {
+    function calculateAge(birthDate) {
         const today = new Date();
         const birth = new Date(birthDate);
         const diffTime = Math.abs(today - birth);
@@ -102,7 +100,7 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
                 });
             } else {
                 setDateError('');
-                setFormData(prevData => ({ ...prevData, [name]: value}));
+                setFormData(prevData => ({ ...prevData, [name]: value }));
                 setAge(calculateAge(value));
             }
         }
@@ -114,44 +112,38 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
 
 
 
-    async function handleSubmit (e)  {
+    async function handleSubmit(e) {
         e.preventDefault();
         setIsLoading(true);
-        if(!dateError)
-        {
+        if (!dateError) {
             formData.idMedicalStaff = userData.id;
             console.log(formData);
             console.log(userData);
-            try
-            {
+            try {
                 const response = await axiosInstance.post("/patient/", formData);
-                if (response.status === 201)
-                {
+                if (response.status === 201) {
                     setIsLoading(false);
                     setSuccessMessage("Patient added successfully !");
                     setCanOpenSuccessModal(true);
                     onClose();
                 }
             }
-            catch (error)
-            {
+            catch (error) {
                 setIsLoading(false);
                 setSuccessMessage("");
                 setCanOpenSuccessModal(false);
-               // setError(error.response.data.email);
+                // setError(error.response.data.email);
                 setError("something went wrong, try later please !");
                 console.log(error);
             }
         }
     }
 
-    function applyFormStyle()
-    {
+    function applyFormStyle() {
         return "w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-2 focus:border-primary-end";
     }
 
-    function applyAgeStyle()
-    {
+    function applyAgeStyle() {
         return "w-1/4 text-gray-500 text-md mr-1";
     }
 
@@ -167,7 +159,7 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
                     </div>
 
                     <button onClick={onClose} className="text-white hover:text-gray-200">
-                        <XIcon className="w-6 h-6"/>
+                        <XIcon className="w-6 h-6" />
                     </button>
 
                     {dateError && <p className="text-red-500  font-bold text-md ml-4">Error : {dateError}</p>}
@@ -176,7 +168,7 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label htmlFor="firstName"
-                                       className="block text-sm font-medium text-gray-700 mb-1">Firstname</label>
+                                    className="block text-sm font-medium text-gray-700 mb-1">Firstname</label>
                                 <input
                                     type="text"
                                     id="firstName"
@@ -190,7 +182,7 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
                             </div>
                             <div>
                                 <label htmlFor="lastName"
-                                       className="block text-sm font-medium text-gray-700 mb-1">Lastname</label>
+                                    className="block text-sm font-medium text-gray-700 mb-1">Lastname</label>
                                 <input
                                     type="text"
                                     id="lastName"
@@ -208,16 +200,16 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
                             <div>
                                 <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-1">Birth
                                     Date</label>
-                                    <input
-                                        type="date"
-                                        id="birthDate"
-                                        name="birthDate"
-                                        placeholder={"enter patient's birth date"}
-                                        value={formData.birthDate}
-                                        onChange={handleChange}
-                                        className={applyFormStyle()}
-                                        required={true}
-                                    />
+                                <input
+                                    type="date"
+                                    id="birthDate"
+                                    name="birthDate"
+                                    placeholder={"enter patient's birth date"}
+                                    value={formData.birthDate}
+                                    onChange={handleChange}
+                                    className={applyFormStyle()}
+                                    required={true}
+                                />
                             </div>
                             <div>
                                 <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-1">Age</label>
@@ -238,7 +230,7 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
                             </div>
                             <div>
                                 <label htmlFor="gender"
-                                       className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                                    className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
                                 <select
                                     id="gender"
                                     name="gender"
@@ -269,7 +261,7 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
                             </div>
                             <div className="col-span-2">
                                 <label htmlFor="email"
-                                       className="block text-sm font-medium text-gray-700 mb-1">Identity Card Number</label>
+                                    className="block text-sm font-medium text-gray-700 mb-1">Identity Card Number</label>
                                 <input
                                     type="text"
                                     id="idNumber"
@@ -285,7 +277,7 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label 
+                                <label
                                     htmlFor="email"
                                     className="block text-sm font-medium text-gray-700 mb-1"
                                 >
@@ -293,7 +285,7 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
                                 </label>
 
                                 <PhoneInput
-                                    country="cm"                 
+                                    country="cm"
                                     value={formData.phoneNumber}
                                     onChange={(value) =>
                                         setFormData((prev) => ({
@@ -301,7 +293,7 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
                                             phoneNumber: value,
                                         }))
                                     }
-                                    countryCodeEditable={false} 
+                                    countryCodeEditable={false}
                                     inputProps={{
                                         name: "phoneNumber",
                                         required: true,
@@ -319,7 +311,7 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
                                 />
                             </div>
                             <div>
-                                <label 
+                                <label
                                     htmlFor="email"
                                     className="block text-sm font-medium text-gray-700 mb-1"
                                 >
@@ -339,18 +331,19 @@ export function AddNewPatientModal({isOpen, onClose, setCanOpenSuccessModal, set
                         </div>
 
                         <div className="px-6 py-1 flex justify-center space-x-6">
-                            <button
-                                type="submit"
-                                className="px-4 py-2 bg-primary-end  hover:text-xl text-md text-white rounded-lg font-bold transition-all duration-300"
-                            >
-                                Save
-                            </button>
+
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-4 py-2 border bg-red-400 text-md hover:text-xl hover:bg-red-500 text-white font-bold rounded-lg  transition-all duration-300"
+                                className="px-4 py-2 border bg-red-400 text-md  hover:bg-red-500 text-white font-bold rounded-lg  transition-all duration-300"
                             >
                                 Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-4 py-2 bg-primary-end   text-md text-white rounded-lg font-bold transition-all duration-300"
+                            >
+                                Save
                             </button>
                         </div>
                     </form>
