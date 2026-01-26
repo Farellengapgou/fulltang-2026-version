@@ -40,6 +40,22 @@ export function LoginPage() {
       const response = await login(data);
       console.log("Login response:", response);
 
+ 
+            // const roleRoutes = {
+            //     "Pharmacist": appRouterPaths.pharmacyPage,
+            //     "Doctor": appRouterPaths.doctorPage,
+            //     "Ophthalmologist": appRouterPaths.ophthalmologistPage,
+            //     "Dentist": appRouterPaths.dentistPage,
+            //     "Nurse": appRouterPaths.nursePage,
+            //     "Labtech": appRouterPaths.laboratoryAssistantPage,
+            //     "Admin": appRouterPaths.adminHomePage,
+            //     "Receptionist": appRouterPaths.receptionistPage,
+            //     "Cashier": appRouterPaths.cashierPage,
+            //     "Specialist": appRouterPaths.specialistPage,
+            //     "Accountant": appRouterPaths.financialAccountantHome,
+            //     "MaterialAccountant": appRouterPaths.materialAccountingDashboard
+            // };
+ 
       const roleRoutes = {
         Pharmacist: appRouterPaths.pharmacyPage,
         Doctor: appRouterPaths.doctorPage,
@@ -54,6 +70,7 @@ export function LoginPage() {
         Accountant: appRouterPaths.financialAccountantHome,
         MaterialAccountant: appRouterPaths.materialAccountingDashboard,
       };
+ 
 
       if (roleRoutes[response]) {
         navigate(roleRoutes[response]);

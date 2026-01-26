@@ -83,7 +83,9 @@ export function AppointmentList(){
                         </button>
                         <button
                             onClick={() => setFilter("Completed")}
-                            className={`px-4 py-2 rounded-md hover:bg-primary-start duration-300 transition-all  hover:text-white ${filter === "Completed" ? "bg-primary-end text-white font-bold " : "bg-gray-100 text-gray-800 hover:bg-gray-200"} transition-colors`}
+                            className={`px-4 py-2 rounded-md hover:bg-primary-start duration-300 transition-all  hover:text-white ${
+                                filter === "Completed" ? "bg-primary-end text-white font-bold " : "bg-gray-100 text-gray-800 hover:bg-gray-200"} transition-colors`
+                            }
                         >
                             Honored appointments
                         </button>

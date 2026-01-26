@@ -16,6 +16,7 @@ export const AppRoutesPaths = {
 
   doctorPage: "/doctor/dashboard",
   ophthalmologistPage: "/ophthalmologist/dashboard",
+  dentistPage: "/dentist/dashboard",
   laboratoryAssistantPage: "/laboratory-assistant/home",
   receptionistPage: "/receptionist/patients",
   cashierPage: "/cashier/consultation-list",
@@ -65,6 +66,12 @@ export const AppRoutesPaths = {
   ophthaConsultationHistory: "/ophthalmologist/consultation-history",
   ophthaAppointment: "/ophthalmologist/appointments",
   ophthaMessage: "/ophthalmologist/messages",
+
+  dentistPatientList: "/dentist/patients",
+  dentistConsultationList: "/dentist/consultation-list",
+  dentistConsultationHistory: "/dentist/consultation-history",
+  dentistAppointment: "/dentist/appointments",
+  dentistMessage: "/dentist/messages",
 
   nurseMessage: "/nurse/messages",
   receptionistMessage: "/receptionist/messages",
