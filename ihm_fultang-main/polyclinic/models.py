@@ -8,7 +8,7 @@ from mptt.models import MPTTModel, TreeForeignKey
 
 TYPEDOCTOR = [
     ('Specialist', 'Specialist'),
-    ('Ophtalmologist', 'Ophtalmologist'),
+    ('Ophthalmologist', 'Ophthalmologist'),
     ('Dentist', 'Dentist'),
 ]
 
