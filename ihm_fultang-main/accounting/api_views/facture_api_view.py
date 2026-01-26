@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from accounting.permissions.accounting_staff_permissions import AccountingStaffPermission
 from accounting.serializers import FactureSerializer
-from accounting.models import Facture
+from accounting.models_financier import Facture
 from rest_framework.viewsets import ModelViewSet
 
 tags = ["facture"]
