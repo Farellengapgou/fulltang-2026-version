@@ -3,10 +3,12 @@ import { FiSettings, FiRefreshCw, FiMail } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutesPaths } from '../../Router/appRouterPaths.js';
 import { useMessageBadge } from '../../Utils/useMessageBadge.js';
-
+import { UserProfileModal } from '../../GlobalComponents/UserProfileModal';
 export function PharmacyNavbar({ username }) {
   const navigate = useNavigate();
   const messageCount = useMessageBadge();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
   return (
     <div className="flex justify-between items-center px-4 py-3 bg-white border-b ">
       <h1 className="text-xl font-semibold" style={{ color: '#2F4B8F' }}>Pharmacist</h1>
@@ -33,18 +35,36 @@ export function PharmacyNavbar({ username }) {
               {messageCount > 99 ? "99+" : messageCount}
             </span>
           )}
-        </div>
-        <div className="flex items-center gap-2 ml-2">
+          {/* </div> */}
+          {/* <div className="flex items-center gap-2 ml-2">
           <span className="text-sm text-gray-600">Username.N</span>
           <div className="w-8 h-8 rounded-full shadow-sm overflow-hidden">
-            <img 
-              src="/doctor.png" 
-              alt="Profile" 
+            <img
+              src="/doctor.png"
+              alt="Profile"
               className="w-full h-full object-cover"
             />
+          </div> */}
+          <div
+            className="flex items-center gap-2 ml-2 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => setIsProfileOpen(true)}  // <--- AJOUTER LE ONCLICK ICI
+          >
+            <span className="text-sm text-gray-600">{username || "Pharmacy"}</span> {/* Utilisez la prop username si dispo */}
+            <div className="w-8 h-8 rounded-full shadow-sm overflow-hidden bg-gray-200"> {/* Ajout bg-gray pour si l'image charge pas */}
+              <img
+                src="/doctor.png"
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
       </div>
+      <UserProfileModal
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+      />
+
     </div>
   );
 }
