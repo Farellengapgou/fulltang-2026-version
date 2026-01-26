@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react"
 import { DentistNavBar } from "./DentistComponents/DentistNavBar.jsx"
 import { dentistNavLink } from "./lib/dentistNavLink.js"
@@ -1018,3 +1019,20 @@ export function DentistMessagePage({
     </DashboardComponent>
   )
 }
+ 
+import { DoctorMessagePage } from "../Doctor/DoctorMessagePage.jsx";
+import { CustomDashboard } from "../../GlobalComponents/CustomDashboard.jsx";
+import { dentistNavLink } from "./DentistNavLink.js";
+import { DentistNavBar } from "./DentistNavBar.jsx";
+
+export function DentistMessagePage() {
+  return (
+    <DoctorMessagePage
+      DashboardComponent={CustomDashboard}
+      NavBarComponent={DentistNavBar}
+      navLink={dentistNavLink}
+      requiredRole="Dentist"
+    />
+  );
+}
+ 
