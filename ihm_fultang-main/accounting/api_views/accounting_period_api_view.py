@@ -41,3 +41,15 @@ class AccountingPeriodViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         except ValueError as e:
             return Response({'error': str(e)}, status=400)
+    
+    @action(detail=True, methods=['post'])
+    def open_period(self, request, pk=None):
+        """Reopen a closed accounting period"""
+        period = self.get_object()
+        if period.state == 'LOCKED':
+            return Response({'error': 'Cannot reopen a locked period'}, status=400)
+        
+        period.state = 'OPEN'
+        period.save()
+        serializer = self.get_serializer(period)
+        return Response(serializer.data)

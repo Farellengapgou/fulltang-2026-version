@@ -18,6 +18,8 @@ export const accountingPeriodService = {
     axiosInstanceAccountant.get(`${API_BASE}/current_period/`),
   closePeriod: (id) =>
     axiosInstanceAccountant.post(`${API_BASE}/${id}/close_period/`, {}),
+  openPeriod: (id) =>
+    axiosInstanceAccountant.post(`${API_BASE}/${id}/open_period/`, {}),
 
   getPeriodsByYear: (year) =>
     axiosInstanceAccountant.get(`${API_BASE}/?year=${year}`),

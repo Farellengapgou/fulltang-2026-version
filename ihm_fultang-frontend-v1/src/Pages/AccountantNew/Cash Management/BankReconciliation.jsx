@@ -316,19 +316,19 @@ export function BankReconciliation() {
                     </div>
                   </td>
                   <td className="ft-td text-right font-mono font-black text-gray-600">
-                    {(r.variance || 0).toLocaleString()}
+                    {(r.statement_balance || 0).toLocaleString()}
                   </td>
                   <td className="ft-td text-right font-mono font-black text-gray-600">
-                    {r.book_balance.toLocaleString()}
+                    {(r.book_balance || 0).toLocaleString()}
                   </td>
                   <td
                     className={`ft-td text-right font-mono font-black ${
-                      Math.abs(r.variance) < 0.01
+                      Math.abs(r.variance || 0) < 0.01
                         ? "text-green-600"
                         : "text-red-600"
                     }`}
                   >
-                    {r.variance.toLocaleString()}
+                    {(r.variance || 0).toLocaleString()}
                   </td>
                   <td className="ft-td text-center">
                     <span

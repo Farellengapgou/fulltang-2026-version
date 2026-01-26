@@ -32,6 +32,16 @@
         text-base text-gray-800 transition-all duration-300;
   }
 
+  /* Hide native calendar icon for date inputs to avoid double icons */
+  .ft-input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+  .ft-input[type="date"]::-webkit-inner-spin-button,
+  .ft-input[type="date"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
   .ft-select {
     @apply w-full px-4 py-2 border-2 border-gray-200 rounded-md 
         focus:outline-none focus:border-2 focus:border-primary-end

@@ -838,6 +838,20 @@ class Budget(models.Model):
     
     def __str__(self):
         return f"Budget {self.fiscal_year} - {self.name}"
+    
+    @property
+    def total_budget(self):
+        """Calculate total budget from all budget lines"""
+        return sum(line.get_annual_total() for line in self.lines.all())
+    
+    def clean(self):
+        """Validate budget data"""
+        if self.start_date and self.end_date:
+            if self.end_date <= self.start_date:
+                raise ValidationError({
+                    'end_date': 'La date de fin doit être postérieure à la date de début'
+                })
+        super().clean()
 
 
 class BudgetLine(models.Model):
@@ -890,10 +904,12 @@ class AccountingPeriod(models.Model):
     
     year = models.PositiveIntegerField()
     month = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(12)])
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
     state = models.CharField(max_length=10, choices=PERIOD_STATES, default='OPEN')
     
     closed_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,  # ✅ CORRECTION 10
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True, blank=True,
         related_name='closed_periods'
@@ -907,6 +923,15 @@ class AccountingPeriod(models.Model):
     
     def __str__(self):
         return f"{self.month:02d}/{self.year}"
+    
+    def clean(self):
+        """Validate accounting period data"""
+        if self.start_date and self.end_date:
+            if self.end_date <= self.start_date:
+                raise ValidationError({
+                    'end_date': 'La date de fin doit être postérieure à la date de début'
+                })
+        super().clean()
     
     def can_post_entries(self):
         return self.state == 'OPEN'

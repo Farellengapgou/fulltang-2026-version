@@ -13,6 +13,7 @@ import { FinancialAccountantNavLink } from "../NavLink.js";
 import { SuccessModal } from "../../Modals/SuccessModal.jsx";
 import { ErrorModal } from "../../Modals/ErrorModal.jsx";
 import { ConfirmationModal } from "../../Modals/ConfirmAction.Modal.jsx";
+import { PhoneInput } from "../../../GlobalComponents/PhoneInput.jsx";
 
 export function Customers() {
   const [customers, setCustomers] = useState([]);
@@ -57,7 +58,10 @@ export function Customers() {
 
       setCustomers(customersData.data.results || customersData.data);
       setTotalPages(Math.ceil((customersData.data.count || 0) / 10));
-      setAccounts(accountsData.data.results || accountsData.data);
+      // Filter accounts to show only class 4 (Tiers)
+      const allAccounts = accountsData.data.results || accountsData.data;
+      const class4Accounts = allAccounts.filter(acc => acc.account_class === '4');
+      setAccounts(class4Accounts);
     } catch (error) {
       console.error("Erreur:", error);
     } finally {
@@ -191,7 +195,7 @@ export function Customers() {
                 </button>
               </div>
               <form onSubmit={handleSubmit}>
-                <div className="ft-modal-body grid grid-cols-2 gap-6">
+                <div className="ft-modal-body grid grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto">
                   <div className="space-y-1">
                     <label className="text-sm font-bold text-gray-700 ml-1">Numéro Client</label>
                     <input
@@ -255,12 +259,10 @@ export function Customers() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-bold text-gray-700 ml-1">Téléphone</label>
-                    <input
-                        type="tel"
-                        placeholder="+237 ..."
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="ft-input"
+                    <PhoneInput
+                      value={formData.phone}
+                      onChange={(value) => setFormData({ ...formData, phone: value })}
+                      required={false}
                     />
                   </div>
                   <div className="col-span-2 space-y-1">
