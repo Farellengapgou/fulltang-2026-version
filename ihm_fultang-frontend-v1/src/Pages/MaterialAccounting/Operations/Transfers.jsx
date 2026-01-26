@@ -6,6 +6,9 @@ import { MaterialAccountingNavLink } from "../NavLink.js";
 import { getTransfers, sendTransfer, receiveTransfer, deleteTransfer } from "../../../Utils/api/materialAccounting.js";
 import { TransferModal } from "../Components/TransferModal.jsx";
 import { TransferDetailModal } from "../Components/TransferDetailModal.jsx";
+import { ConfirmationModal } from "../../Modals/ConfirmAction.Modal.jsx";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
+import { SuccessModal } from "../../Modals/SuccessModal.jsx";
 
 export function Transfers() {
     const [transfers, setTransfers] = useState([]);
@@ -13,6 +16,16 @@ export function Transfers() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTransferId, setSelectedTransferId] = useState(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: "",
+        message: "",
+        onConfirm: null
+    });
+    const [canOpenSuccessModal, setCanOpenSuccessModal] = useState(false);
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     useEffect(() => {
         loadData();
@@ -37,37 +50,64 @@ export function Transfers() {
 
     const handleSendTransfer = async (e, id) => {
         e.stopPropagation();
-        if (!window.confirm("Voulez-vous expédier ce transfert ?")) return;
-        try {
-            await sendTransfer(id);
-            loadData();
-        } catch (error) {
-            const msg = error.detail || (error.errors ? error.errors.join("\n") : "Erreur lors de l'expédition");
-            alert(msg);
-        }
+        setConfirmModal({
+            isOpen: true,
+            title: "Expédier le transfert",
+            message: "Voulez-vous expédier ce transfert ? Le stock du dépôt source sera diminué.",
+            onConfirm: async () => {
+                try {
+                    await sendTransfer(id);
+                    loadData();
+                    setSuccessMessage("Transfert expédié avec succès");
+                    setCanOpenSuccessModal(true);
+                } catch (error) {
+                    const msg = error.detail || (error.errors ? error.errors.join("\n") : "Erreur lors de l'expédition");
+                    setErrorMessage(msg);
+                    setCanOpenErrorModal(true);
+                }
+            }
+        });
     };
 
     const handleReceiveTransfer = async (e, id) => {
         e.stopPropagation();
-        if (!window.confirm("Voulez-vous confirmer la réception ?")) return;
-        try {
-            await receiveTransfer(id);
-            loadData();
-        } catch (error) {
-            const msg = error.detail || "Erreur lors de la réception";
-            alert(msg);
-        }
+        setConfirmModal({
+            isOpen: true,
+            title: "Confirmer la réception",
+            message: "Voulez-vous confirmer la réception ? Le stock du dépôt de destination sera augmenté.",
+            onConfirm: async () => {
+                try {
+                    await receiveTransfer(id);
+                    loadData();
+                    setSuccessMessage("Réception confirmée avec succès");
+                    setCanOpenSuccessModal(true);
+                } catch (error) {
+                    const msg = error.detail || "Erreur lors de la réception";
+                    setErrorMessage(msg);
+                    setCanOpenErrorModal(true);
+                }
+            }
+        });
     };
 
     const handleDeleteTransfer = async (e, id) => {
         e.stopPropagation();
-        if (!window.confirm("Voulez-vous supprimer ce transfert ?")) return;
-        try {
-            await deleteTransfer(id);
-            loadData();
-        } catch (error) {
-            alert(error.detail || "Erreur lors de la suppression");
-        }
+        setConfirmModal({
+            isOpen: true,
+            title: "Supprimer le transfert",
+            message: "Voulez-vous vraiment supprimer ce transfert ? Cette action est irréversible.",
+            onConfirm: async () => {
+                try {
+                    await deleteTransfer(id);
+                    loadData();
+                    setSuccessMessage("Transfert supprimé avec succès");
+                    setCanOpenSuccessModal(true);
+                } catch (error) {
+                    setErrorMessage(error.detail || "Erreur lors de la suppression");
+                    setCanOpenErrorModal(true);
+                }
+            }
+        });
     };
 
     const formatDate = (dateString) => {
@@ -204,6 +244,23 @@ export function Transfers() {
                 }}
                 transferId={selectedTransferId}
                 onRefresh={loadData}
+            />
+            <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+            />
+            <SuccessModal 
+                isOpen={canOpenSuccessModal} 
+                canOpenSuccessModal={setCanOpenSuccessModal} 
+                message={successMessage} 
+            />
+            <ErrorModal 
+                isOpen={canOpenErrorModal} 
+                onCloseErrorModal={setCanOpenErrorModal} 
+                message={errorMessage} 
             />
         </AccountantDashBoard>
     );

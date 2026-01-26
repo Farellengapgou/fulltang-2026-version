@@ -12,6 +12,8 @@ import {
     startCountingInventory,
     validateInventory
 } from "../../../Utils/api/materialAccounting.js";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
+import { SuccessModal } from "../../Modals/SuccessModal.jsx";
 
 const STATUS_MAP = {
     PLANNED: { label: "Planifié", color: "text-blue-700 bg-blue-50" },
@@ -29,7 +31,11 @@ export function InventoryDetail() {
     const [lines, setLines] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isActionLoading, setIsActionLoading] = useState(false);
-    const [savedLines, setSavedLines] = useState({}); // Tracking saved state for feedback
+    const [savedLines, setSavedLines] = useState({});
+    const [canOpenSuccessModal, setCanOpenSuccessModal] = useState(false);
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     useEffect(() => {
         loadData();
@@ -55,10 +61,12 @@ export function InventoryDetail() {
         try {
             setIsActionLoading(true);
             await actionFn(id);
-            alert(successMsg);
+            setSuccessMessage(successMsg);
             loadData();
+            setCanOpenSuccessModal(true);
         } catch (error) {
-            alert(`Erreur : ${error.detail || error.message || JSON.stringify(error)}`);
+            setErrorMessage(`Erreur : ${error.detail || error.message || JSON.stringify(error)}`);
+            setCanOpenErrorModal(true);
         } finally {
             setIsActionLoading(false);
         }
@@ -76,7 +84,8 @@ export function InventoryDetail() {
                 setSavedLines(prev => ({ ...prev, [lineId]: false }));
             }, 2000);
         } catch (error) {
-            alert("Erreur lors de la sauvegarde de la ligne");
+            setErrorMessage("Erreur lors de la sauvegarde de la ligne");
+            setCanOpenErrorModal(true);
         }
     };
 
@@ -239,6 +248,8 @@ export function InventoryDetail() {
                     </div>
                 </div>
             </div>
+            <SuccessModal isOpen={canOpenSuccessModal} canOpenSuccessModal={setCanOpenSuccessModal} message={successMessage} />
+            <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
         </AccountantDashBoard>
     );
 }

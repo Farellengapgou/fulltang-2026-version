@@ -11,6 +11,7 @@ import {
   getWarehouses,
   getStockLevels,
 } from "../../../Utils/api/materialAccounting.js";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
 
 export function StockCard() {
   const [selectedArticleId, setSelectedArticleId] = useState("");
@@ -20,6 +21,8 @@ export function StockCard() {
   const [stockCardData, setStockCardData] = useState(null);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -79,7 +82,8 @@ export function StockCard() {
 
   const handleGenerate = async () => {
     if (!selectedArticleId) {
-      alert("Veuillez sélectionner un article");
+      setErrorMessage("Veuillez sélectionner un article");
+      setCanOpenErrorModal(true);
       return;
     }
     setIsLoading(true);
@@ -96,7 +100,11 @@ export function StockCard() {
       });
     } catch (error) {
       console.error("Error generating stock card:", error);
-      alert("Erreur lors de la génération de la fiche de stock");
+      setErrorMessage(
+        "Erreur lors de la génération de la fiche de stock: " +
+          (error.detail || error.message),
+      );
+      setCanOpenErrorModal(true);
     } finally {
       setIsLoading(false);
     }
@@ -107,7 +115,8 @@ export function StockCard() {
   };
 
   const handleExportPDF = () => {
-    alert("Export PDF - Fonctionnalité à implémenter avec jsPDF");
+    setErrorMessage("Export PDF - Fonctionnalité à implémenter avec jsPDF");
+    setCanOpenErrorModal(true);
   };
 
   return (
@@ -456,6 +465,11 @@ export function StockCard() {
           </div>
         )}
       </div>
+      <ErrorModal
+        isOpen={canOpenErrorModal}
+        onCloseErrorModal={setCanOpenErrorModal}
+        message={errorMessage}
+      />
     </AccountantDashBoard>
   );
 }

@@ -15,7 +15,7 @@ import {
     getArticles,
     deleteArticle,
 } from "../../../Utils/api/materialAccounting.js";
-
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
 import { ArticleModal } from "../Components/ArticleModal.jsx";
 
 export function Articles() {
@@ -26,6 +26,8 @@ export function Articles() {
     const [showModal, setShowModal] = useState(false);
     const [editingArticle, setEditingArticle] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         loadArticles();
@@ -77,7 +79,8 @@ export function Articles() {
                 loadArticles();
             } catch (error) {
                 console.error("Error deleting article:", error);
-                alert("Erreur lors de la suppression de l'article");
+                setErrorMessage("Erreur lors de la suppression de l'article");
+                setCanOpenErrorModal(true);
             }
         }
     };
@@ -382,6 +385,7 @@ export function Articles() {
                 onRefresh={loadArticles}
                 editingArticle={editingArticle}
             />
+            <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
         </AccountantDashBoard>
     );
 }

@@ -3,12 +3,15 @@ import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import { X, Plus, Trash2, Save } from "lucide-react";
 import { getWarehouses, getArticles, getStockLevels, createGoodsIssue, updateGoodsIssue } from "../../../Utils/api/materialAccounting.js";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
 
 export function GoodsIssueModal({ isOpen, onClose, onRefresh, initialData }) {
     const [warehouses, setWarehouses] = useState([]);
     const [articles, setArticles] = useState([]);
     const [availableArticles, setAvailableArticles] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const isReadOnly = initialData && initialData.status !== 'DRAFT';
 
@@ -115,7 +118,8 @@ export function GoodsIssueModal({ isOpen, onClose, onRefresh, initialData }) {
             onRefresh();
             onClose();
         } catch (error) {
-            alert(`Erreur lors de l'enregistrement : ${error.detail || error.message || error}`);
+            setErrorMessage(`Erreur lors de l'enregistrement : ${error.detail || error.message || error}`);
+            setCanOpenErrorModal(true);
         } finally {
             setIsLoading(false);
         }
@@ -296,6 +300,7 @@ export function GoodsIssueModal({ isOpen, onClose, onRefresh, initialData }) {
                     )}
                 </div>
             </div>
+            <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
         </div>
     );
 }

@@ -17,7 +17,9 @@ import {
     updateSupplier,
     deleteSupplier,
 } from "../../../Utils/api/materialAccounting.js";
-
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
+import { ConfirmationModal } from "../../Modals/ConfirmAction.Modal.jsx";
+import { SuccessModal } from "../../Modals/SuccessModal.jsx";
 import { SupplierModal } from "../Components/SupplierModal.jsx";
 
 export function Suppliers() {
@@ -28,6 +30,16 @@ export function Suppliers() {
     const [showModal, setShowModal] = useState(false);
     const [editingSupplier, setEditingSupplier] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: "",
+        message: "",
+        onConfirm: null
+    });
+    const [canOpenSuccessModal, setCanOpenSuccessModal] = useState(false);
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState(""); 
+    const [successMessage, setSuccessMessage] = useState("");
 
     const supplierTypes = {
         PHARMA: "Pharmaceutique",
@@ -96,14 +108,23 @@ export function Suppliers() {
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("Voulez-vous vraiment supprimer ce fournisseur ?")) {
-            try {
-                await deleteSupplier(id);
-                loadSuppliers();
-            } catch (error) {
-                console.error("Error deleting supplier:", error);
+        setConfirmModal({
+            isOpen: true,
+            title: "Supprimer le fournisseur",
+            message: "Voulez-vous vraiment supprimer ce fournisseur ? Cette action est irréversible.",
+            onConfirm: async () => {
+                try {
+                    await deleteSupplier(id);
+                    loadSuppliers();
+                    setSuccessMessage("Fournisseur supprimé avec succès");
+                    setCanOpenSuccessModal(true);
+                } catch (error) {
+                    console.error("Error deleting supplier:", error);
+                    setErrorMessage("Erreur lors de la suppression du fournisseur: " + (error.detail || error.message));
+                    setCanOpenErrorModal(true);
+                }
             }
-        }
+        });
     };
 
     if (isLoading) {
@@ -360,6 +381,19 @@ export function Suppliers() {
                 onClose={() => setShowModal(false)}
                 onRefresh={loadSuppliers}
                 editingSupplier={editingSupplier}
+            />
+            <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
+            <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+            />
+            <SuccessModal 
+                isOpen={canOpenSuccessModal} 
+                canOpenSuccessModal={setCanOpenSuccessModal} 
+                message={successMessage} 
             />
         </AccountantDashBoard>
     );

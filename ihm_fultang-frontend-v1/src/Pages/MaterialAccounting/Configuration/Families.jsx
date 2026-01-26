@@ -14,7 +14,9 @@ import {
     getFamilies,
     deleteFamily,
 } from "../../../Utils/api/materialAccounting.js";
-
+import { ConfirmationModal } from "../../Modals/ConfirmAction.Modal.jsx";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
+import { SuccessModal } from "../../Modals/SuccessModal.jsx";
 import { FamilyModal } from "../Components/FamilyModal.jsx";
 
 export function Families() {
@@ -24,6 +26,16 @@ export function Families() {
     const [showModal, setShowModal] = useState(false);
     const [editingFamily, setEditingFamily] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: "",
+        message: "",
+        onConfirm: null
+    });
+    const [canOpenSuccessModal, setCanOpenSuccessModal] = useState(false);
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     useEffect(() => {
         loadFamilies();
@@ -67,14 +79,23 @@ export function Families() {
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("Voulez-vous vraiment supprimer cette famille ?")) {
-            try {
-                await deleteFamily(id);
-                loadFamilies();
-            } catch (error) {
-                console.error("Error deleting family:", error);
+        setConfirmModal({
+            isOpen: true,
+            title: "Supprimer la famille",
+            message: "Voulez-vous vraiment supprimer cette famille ? Cette action est irréversible.",
+            onConfirm: async () => {
+                try {
+                    await deleteFamily(id);
+                    loadFamilies();
+                    setSuccessMessage("Famille supprimée avec succès");
+                    setCanOpenSuccessModal(true);
+                } catch (error) {
+                    console.error("Error deleting family:", error);
+                    setErrorMessage("Erreur lors de la suppression de la famille: " + (error.detail || error.message));
+                    setCanOpenErrorModal(true);
+                }
             }
-        }
+        });
     };
 
     if (isLoading) {
@@ -292,6 +313,23 @@ export function Families() {
                 onClose={() => setShowModal(false)}
                 onRefresh={loadFamilies}
                 editingFamily={editingFamily}
+            />
+            <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+            />
+            <SuccessModal 
+                isOpen={canOpenSuccessModal} 
+                canOpenSuccessModal={setCanOpenSuccessModal} 
+                message={successMessage} 
+            />
+            <ErrorModal 
+                isOpen={canOpenErrorModal} 
+                onCloseErrorModal={setCanOpenErrorModal} 
+                message={errorMessage} 
             />
         </AccountantDashBoard>
     );

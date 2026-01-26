@@ -44,19 +44,18 @@ export function AddMedicalStaff() {
     setPassword(medicalStaffData.password);
   }
 
-  useEffect(() => {
-    if (medicalStaffData.role) {
-      medicalStaffData.isStaff = medicalStaffData.role === "Admin";
-    }
-    if (
-      medicalStaffData.role === "Accountant" ||
-      medicalStaffData.role === "MaterialAccountant"
-    ) {
-      medicalStaffData.userType = "Accountant";
-    } else {
-      medicalStaffData.userType = "Medical";
-    }
-  }, [medicalStaffData]);
+    useEffect(() => {
+        if (medicalStaffData.role) {
+            medicalStaffData.isStaff = medicalStaffData.role === 'Admin';
+        }
+        if (["Accountant", "MaterialAccountant"].includes(medicalStaffData.role)) {
+            medicalStaffData.userType = "Accountant";
+        } else {
+            medicalStaffData.userType = "Medical";
+        }
+    }, [medicalStaffData]);
+
+
 
   useEffect(() => {
     console.log(medicalStaffData);
