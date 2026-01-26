@@ -5,7 +5,7 @@ import userIcon from "../../assets/userIcon.png";
 import { useNavigate } from "react-router-dom";
 import { useMessageBadge } from "../../Utils/useMessageBadge.js";
 import { UserProfileModal } from '../../GlobalComponents/UserProfileModal';
-
+import { useState } from "react";
 export function AdminNavBar() {
 
     const { logout, userData } = useAuthentication();
@@ -56,8 +56,8 @@ export function AdminNavBar() {
                             </button>
                         </Tooltip>
                         <Tooltip placement={"top"} title={"Profile"}>
-                            <div className="ml-3 flex">
-                                onClick={() => setIsProfileOpen(true)}
+                            <div className="ml-3 flex"  onClick={() => setIsProfileOpen(true)}>
+                               
                                 <p className="font-bold text-secondary text-xl mt-2">{"Hello " + userData?.username + "!"}</p>
                                 <img src={userIcon} alt={"user-icon"} className="w-12 h-12 ml-2 mr-3" />
 
