@@ -1,8 +1,9 @@
 from django.urls import path
 from authentication.api_views.auth_api_views import (
     CustomTokenObtainPairView,
+    PasswordResetRequestView,
     UserProfileView,
-    PasswordResetView,
+    PasswordResetConfirmView,
     LogoutAllView
 )
 from authentication.api_views.profile_api_views import (
@@ -17,7 +18,8 @@ urlpatterns = [
     path('login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
     path('me/', UserProfileView.as_view(), name='user_profile'),
-    path('reset-password/', PasswordResetView.as_view(), name='password_reset'),
+    path('password-reset/request/', PasswordResetRequestView.as_view(), name='password-reset-request'),
+    path('password-reset/confirm/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
     path('logout/', LogoutAllView.as_view(), name='logout_all'),
     
     # Profile Management

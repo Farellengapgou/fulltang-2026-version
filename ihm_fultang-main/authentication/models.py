@@ -2,6 +2,9 @@ from django.contrib.auth.models import AbstractUser
 from authentication.managers import CustomManager
 from django.db import models
 from django.core.exceptions import ValidationError
+import secrets
+from django.utils import timezone
+from datetime import timedelta
 
 SEXE = [
     ('Male', 'Male'),
@@ -83,3 +86,25 @@ class MedicalStaff(AbstractUser):
 
     def __str__(self):
         return self.username
+    
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(MedicalStaff, on_delete=models.CASCADE)
+    token = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+    expires_at = models.DateTimeField()
+    new_password_hash = models.CharField(max_length=255, blank=True)  # Nouveau champ
+
+    
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = secrets.token_urlsafe(32)
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(hours=24)
+        super().save(*args, **kwargs)
+    
+    def is_valid(self):
+        return not self.is_used and timezone.now() < self.expires_at
+    
+    def __str__(self):
+        return f"Token for {self.user.username}"
