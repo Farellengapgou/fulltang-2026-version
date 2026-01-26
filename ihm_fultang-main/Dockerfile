@@ -5,13 +5,14 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # Dépendances système optionnelles; commenter cette section si le réseau/DNS bloque apt-get
-# RUN apt-get update && apt-get install -y \
-#     gcc \
-#     libpq-dev \
-#     libmariadb-dev \
-#     pkg-config \
-#     build-essential \
-#     default-libmysqlclient-dev
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    libmariadb-dev \
+    pkg-config \
+    build-essential \
+    default-libmysqlclient-dev
+
 
 # Copier les fichiers requirements.txt dans le conteneur
 COPY requirements.txt /app
@@ -19,17 +20,17 @@ COPY requirements.txt /app
 # Installer les dépendances Python
 RUN pip install --no-cache-dir -r requirements.txt && \
     adduser \
-        --disabled-password \
-        --no-create-home \
-        django-user
+    --disabled-password \
+    --no-create-home \
+    django-user
 
 # Copier le reste de l'application dans le conteneur
 COPY . /app
 
 # on donne les droits de lecture et ecriture à tous le monde à la bd (pour celery et celery beat)
-RUN chmod -R 777 /app
-# RUN chmod 666 db.sqlite3 && \
-#     chmod -R 777 /app
+RUN touch db.sqlite3 && \
+    chmod 666 db.sqlite3 && \
+    chmod -R 777 /app
 
 # Exposer le port sur lequel l'application va fonctionner
 EXPOSE 8009

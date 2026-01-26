@@ -55,6 +55,13 @@ export function DoctorMessagePage({
   // const [totalPages, setTotalPages] = useState(1)
 
   const { userData } = useAuthentication()
+  const userId =
+    userData?.id ??
+    userData?.user_id ??
+    userData?.userId ??
+    userData?.pk ??
+    null
+  const welcomeDismissKey = userId ? `fultang_welcome_dismissed_${userId}` : null
 
   const normalizeNotification = (notification) => {
     const priority = (notification?.computed_priority || notification?.priority || "GREEN").toUpperCase()
@@ -111,24 +118,49 @@ export function DoctorMessagePage({
       const response = await axiosInstance.get("/message/")
       const results = response.data?.results ?? response.data ?? []
       const normalized = results.map(normalizeMessage)
-      setMessageList(normalized)
-      if (userData?.role && userData.role !== "Admin") {
-        const welcomeKey = `fultang_welcome_message_${userData.id}`
-        if (!localStorage.getItem(welcomeKey) && normalized.length === 0) {
-          const displayName = userData?.username || "Utilisateur"
-          const welcomeMessage = {
-            id: `welcome-${userData.id}`,
-            subject: "Bienvenue sur Fultang",
-            senderName: "Fultang",
-            content: `Bonjour ${displayName}, bienvenue sur Fultang. Nous sommes heureux de vous compter parmi nous.`,
-            createdAt: new Date().toISOString(),
-            isRead: false,
-            priority: "low",
+      setMessageList((prev) => {
+        let nextList = normalized
+        if (userData?.role && userData.role !== "Admin" && userId) {
+          const welcomeKey = `fultang_welcome_message_${userId}`
+          const dismissedWelcome = welcomeDismissKey
+            ? localStorage.getItem(welcomeDismissKey)
+            : null
+          const existingWelcome = prev.find(
+            (msg) => typeof msg.id === "string" && msg.id.startsWith(`welcome-${userId}`)
+          )
+          if (!localStorage.getItem(welcomeKey)) {
+            const displayName = userData?.username || "Utilisateur"
+            const welcomeMessage = {
+              id: `welcome-${userId}`,
+              subject: "Bienvenue sur Fultang",
+              senderName: "Fultang",
+              content: `Bonjour ${displayName}, bienvenue sur Fultang. Nous sommes heureux de vous compter parmi nous.`,
+              createdAt: new Date().toISOString(),
+              isRead: false,
+              priority: "low",
+            }
+            nextList = [welcomeMessage, ...normalized]
+            localStorage.setItem(welcomeKey, "true")
+          } else if (!dismissedWelcome && normalized.length === 0) {
+            if (existingWelcome) {
+              nextList = [existingWelcome]
+            } else {
+              const displayName = userData?.username || "Utilisateur"
+              const welcomeMessage = {
+                id: `welcome-${userId}`,
+                subject: "Bienvenue sur Fultang",
+                senderName: "Fultang",
+                content: `Bonjour ${displayName}, bienvenue sur Fultang. Nous sommes heureux de vous compter parmi nous.`,
+                createdAt: new Date().toISOString(),
+                isRead: false,
+                priority: "low",
+              }
+              nextList = [welcomeMessage]
+            }
           }
-          setMessageList([welcomeMessage])
-          localStorage.setItem(welcomeKey, "true")
         }
-      }
+        return nextList
+      })
       setErrorStatus(null)
       setErrorMessage("")
     } catch (error) {
@@ -205,6 +237,9 @@ export function DoctorMessagePage({
   function deleteMessage(messageId) {
     if (typeof messageId === "string" && messageId.startsWith("welcome-")) {
       setMessageList(prev => prev.filter(msg => msg.id !== messageId))
+      if (welcomeDismissKey) {
+        localStorage.setItem(welcomeDismissKey, "true")
+      }
       if (selectedMessage?.id === messageId) {
         setIsModalOpen(false)
         setSelectedMessage(null)
@@ -299,12 +334,16 @@ export function DoctorMessagePage({
 
   useEffect(() => {
     retrieveDoctorNotifications()
+  }, [])
+
+  useEffect(() => {
+    if (!userId) return
     retrieveDoctorMessages()
     // VERSION API BACKEND PAGINATION: 
     // if (userData.id) {
     //   retrieveDoctorMessages(userData.id, currentPage)
     // }
-  }, [])
+  }, [userId])
 
   useEffect(() => {
     if (!showComposer) return
@@ -893,24 +932,6 @@ export function DoctorMessagePage({
               </div>
 
               <div className="flex gap-3 justify-end pt-4 border-t border-gray-200">
-                <button
-                  onClick={deleteAllMessages}
-                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                >
-                  Supprimer tout
-                </button>
-                <button
-                  onClick={() => {
-                    if (isEditingMessage) {
-                      handleSaveEdit()
-                    } else {
-                      setIsEditingMessage(true)
-                    }
-                  }}
-                  className="px-4 py-2 bg-primary-end text-white rounded-lg hover:bg-primary-start transition-colors"
-                >
-                  {isEditingMessage ? "Enregistrer" : "Modifier"}
-                </button>
                 <button
                   onClick={() => {
                     deleteMessage(selectedMessage.id)

@@ -1,202 +1,345 @@
-import {
-    FaChartLine,
-    FaCalculator,
-    FaEdit,
-    FaChartBar,
-    FaUserTie,
-} from 'react-icons/fa';
-import {
-    TrendingUp,
-    FileText,
-    Calendar,
-    PieChart
-} from 'lucide-react';
-
 import { useNavigate } from "react-router-dom";
 import { AppRoutesPaths as AppRouterPaths } from "../../../Router/appRouterPaths.js";
 import { CustomDashboard } from "../../../GlobalComponents/CustomDashboard.jsx";
 import StatCard from "../../../GlobalComponents/StatCard.jsx";
 import QuickActionButton from "../../../GlobalComponents/QuickActionButton.jsx";
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { FinancialAccountantNavBar } from "../NavBar.jsx";
 import { FinancialAccountantNavLink } from "../NavLink.js";
+import Loader from "../../../GlobalComponents/Loader";
+import {
+  financialReportService,
+  accountingPeriodService,
+} from "../../../Services/Accounting";
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import {
+  Wallet,
+  Landmark,
+  TrendingUp,
+  Calendar,
+  DollarSign,
+  TrendingDown,
+  ArrowUpRight,
+  ArrowDownRight,
+} from "lucide-react";
 
-export function FinancialAccountantHomePage() {
-    const navigate = useNavigate();
-    const [stats, setStats] = useState({
-        totalRevenue: 0,
-        monthlyExpenses: 0,
-        pendingInvoices: 0,
-        cashBalance: 0,
-        journalEntries: 0,
-        payrollCost: 0,
-        budgetVariance: 0,
-        pendingReconciliations: 0
-    });
+export function DashBoard() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [balanceSheet, setBalanceSheet] = useState(null);
+  const [incomeStatement, setIncomeStatement] = useState(null);
+  const [currentPeriod, setCurrentPeriod] = useState(null);
+  const [error, setError] = useState(null);
 
-    const [recentActivities, setRecentActivities] = useState([]);
-    const expenseBreakdown = [];
-    const currentPeriodLabel = new Date().toLocaleDateString('fr-FR', {
-        month: 'long',
-        year: 'numeric'
-    });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [bs, is, period] = await Promise.all([
+          financialReportService.getBalanceSheet(),
+          financialReportService.getIncomeStatement(),
+          accountingPeriodService.getCurrentPeriod(),
+        ]);
 
-    useEffect(() => {
-        async function fetchFinancialStats() {
-            try {
-                setStats((prev) => prev);
-                setRecentActivities([]);
-            } catch (error) {
-                console.error("Erreur lors de la récupération des statistiques financières:", error);
-            }
-        }
-        fetchFinancialStats();
-    }, []);
-
-    // Fonction pour formater les montants en FCFA
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('fr-FR', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        }).format(amount) + ' FCFA';
+        setBalanceSheet(bs.data);
+        setIncomeStatement(is.data);
+        setCurrentPeriod(period.data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
 
+    fetchData();
+  }, []);
+
+  if (loading) return <Loader size="medium" color="primary-end" />;
+
+  if (error) {
     return (
-        <CustomDashboard linkList={FinancialAccountantNavLink} requiredRole={"Accountant"}>
-            <FinancialAccountantNavBar />
-            <div className="p-6 space-y-6">
-                {/* En-tête du dashboard */}
-                <div className="bg-gradient-to-r from-primary-end to-primary-start rounded-lg p-6 text-white">
-                    <h1 className="text-3xl font-bold mb-2">Tableau de Bord Comptabilité Financière</h1>
-                    <p className="opacity-90 font-semibold text-xl">
-                        Pilotez la santé financière de votre établissement médical avec des indicateurs en temps réel.
-                    </p>
-                    <div className="mt-4 text-sm opacity-80">
-                        Période : {currentPeriodLabel} | Dernière mise à jour : {new Date().toLocaleDateString('fr-FR')}
-                    </div>
-                </div>
-
-                {/* Indicateurs financiers clés */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <StatCard
-                        icon={TrendingUp}
-                        title="Résultat d'Exploitation"
-                        value={formatCurrency(stats.totalRevenue - stats.monthlyExpenses)}
-                        description="Bénéfice mensuel"
-                        color="bg-blue-500"
-                    />
-                    <StatCard
-                        icon={FaUserTie}
-                        title="Masse Salariale"
-                        value={formatCurrency(stats.payrollCost)}
-                        description="Coût du personnel"
-                        color="bg-orange-500"
-                    />
-                    <StatCard
-                        icon={FaEdit}
-                        title="Écritures Comptables"
-                        value={stats.journalEntries}
-                        description="Saisies du mois"
-                        color="bg-indigo-500"
-                    />
-                    <StatCard
-                        icon={FileText}
-                        title="Factures en Attente"
-                        value={stats.pendingInvoices}
-                        description="À valider"
-                        color="bg-yellow-500"
-                    />
-                </div>
-
-
-                {/* Actions rapides */}
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                    <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                        <FaChartBar className="mr-2" />
-                        Accès Rapide - Comptabilité
-                    </h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <QuickActionButton
-                            icon={FaEdit}
-                            label="Nouvelle Écriture"
-                            onClick={() => navigate(AppRouterPaths.financialAccountantJournalEntries)}
-                        />
-                        <QuickActionButton
-                            icon={FaChartLine}
-                            label="Analyse Financière"
-                            onClick={() => navigate(AppRouterPaths.financialRatios)}
-                        />
-                        <QuickActionButton
-                            icon={FaUserTie}
-                            label="Comptabilité Paie"
-                            onClick={() => navigate(AppRouterPaths.financialAccountPayroll)}
-                        />
-                        <QuickActionButton
-                            icon={FaCalculator}
-                            label="Budget & Contrôle"
-                            onClick={() => navigate(AppRouterPaths.budgetEntry)}
-                        />
-                    </div>
-                </div>
-
-                {/* Tableaux de bord et activités récentes */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Répartition des dépenses */}
-                    <div className="bg-gray-100 rounded-lg shadow-lg p-6">
-                        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                            <PieChart className="mr-2" />
-                            Répartition des Charges
-                        </h3>
-                        <div className="space-y-3">
-                            {expenseBreakdown.length === 0 ? (
-                                <p className="text-sm text-gray-600">Aucune donnée disponible.</p>
-                            ) : (
-                                expenseBreakdown.map((item) => (
-                                    <div key={item.label} className="flex justify-between items-center">
-                                        <span className="text-sm font-medium">{item.label}</span>
-                                        <div className="flex items-center">
-                                            <div className="w-32 bg-gray-200 rounded-full h-2 mr-2">
-                                                <div className={`${item.color} h-2 rounded-full`} style={{width: item.value}}></div>
-                                            </div>
-                                            <span className="text-sm text-gray-600">{item.value}</span>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Activités récentes */}
-                    <div className="bg-gray-100 rounded-lg shadow-lg p-6">
-                        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                            <Calendar className="mr-2" />
-                            Activités Récentes
-                        </h3>
-                        <div className="space-y-3">
-                            {recentActivities.map((activity) => (
-                                <div key={activity.id} className="bg-white flex items-start p-3  rounded-lg">
-                                    <div className={`p-2 rounded-full mr-3 ${
-                                        activity.type === 'journal' ? 'bg-blue-100 text-blue-600' :
-                                            activity.type === 'reconciliation' ? 'bg-green-100 text-green-600' :
-                                                activity.type === 'payroll' ? 'bg-purple-100 text-purple-600' :
-                                                    'bg-orange-100 text-orange-600'
-                                    }`}>
-                                        {activity.type === 'journal' && <FaEdit className="w-3 h-3" />}
-                                        {activity.type === 'reconciliation' && <FaCalculator className="w-3 h-3" />}
-                                        {activity.type === 'payroll' && <FaUserTie className="w-3 h-3" />}
-                                        {activity.type === 'analysis' && <FaChartLine className="w-3 h-3" />}
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-900">{activity.action}</p>
-                                        <p className="text-xs text-gray-600">{activity.description}</p>
-                                        <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </CustomDashboard>
+      <CustomDashboard
+        linkList={FinancialAccountantNavLink}
+        requiredRole={"Accountant"}
+      >
+        <FinancialAccountantNavBar />
+        <div className="flex items-center justify-center h-[600px]">
+          <div className="text-center">
+            <div className="text-red-500 text-6xl mb-4">⚠️</div>
+            <h3 className="text-2xl font-bold text-red-600 mb-2">
+              Error Loading Data
+            </h3>
+            <p className="text-gray-600">{error}</p>
+          </div>
+        </div>
+      </CustomDashboard>
     );
+  }
+
+  const totalAssets =
+    balanceSheet?.assets?.reduce((sum, a) => sum + a.balance, 0) || 0;
+  const totalLiabilities =
+    balanceSheet?.liabilities?.reduce((sum, l) => sum + l.balance, 0) || 0;
+  const totalEquity =
+    balanceSheet?.equity?.reduce((sum, e) => sum + e.balance, 0) || 0;
+  const totalRevenue = incomeStatement?.total_revenue || 0;
+  const totalExpense = incomeStatement?.total_expense || 0;
+  const netIncome = incomeStatement?.net_income || 0;
+
+  const balanceChartData = [
+    { name: "Assets", value: totalAssets },
+    { name: "Liabilities", value: totalLiabilities },
+    { name: "Equity", value: totalEquity },
+  ];
+
+  const incomeChartData = [
+    { name: "Revenue", value: totalRevenue },
+    { name: "Expenses", value: totalExpense },
+  ];
+
+  const COLORS = ["#4DB6AC", "#FF6B6B", "#4ECDC4"];
+
+  return (
+    <CustomDashboard
+      linkList={FinancialAccountantNavLink}
+      requiredRole={"Accountant"}
+    >
+      <FinancialAccountantNavBar />
+
+      <div className="p-6 space-y-6">
+        {/* Page Header */}
+        <div className="bg-gradient-to-r from-primary-end to-primary-start rounded-lg p-6 text-white">
+          <h1 className="text-3xl font-bold mb-2">Accounting Dashboard</h1>
+          <p className="opacity-90 font-semibold text-md">
+            Financial overview for period {currentPeriod?.month}/
+            {currentPeriod?.year}
+          </p>
+        </div>
+
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            icon={Wallet}
+            title="Total Assets"
+            value={totalAssets.toLocaleString() + " FCFA"}
+            description="Current assets"
+            color="bg-blue-500"
+          />
+          <StatCard
+            icon={Landmark}
+            title="Total Liabilities"
+            value={totalLiabilities.toLocaleString() + " FCFA"}
+            description="Current liabilities"
+            color="bg-red-500"
+          />
+          <StatCard
+            icon={DollarSign}
+            title="Equity"
+            value={totalEquity.toLocaleString() + " FCFA"}
+            description="Owner's equity"
+            color="bg-teal-500"
+          />
+          <StatCard
+            icon={netIncome >= 0 ? TrendingUp : TrendingDown}
+            title="Net Income"
+            value={netIncome.toLocaleString() + " FCFA"}
+            description={netIncome >= 0 ? "Profit" : "Loss"}
+            color={netIncome >= 0 ? "bg-green-500" : "bg-orange-500"}
+          />
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Balance Sheet Chart */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              Balance Sheet Distribution
+            </h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={balanceChartData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) =>
+                    `${name}: ${(percent * 100).toFixed(0)}%`
+                  }
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {balanceChartData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Income Statement Chart */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              Revenue vs Expenses
+            </h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={incomeChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="value" fill="#4DB6AC" radius={[10, 10, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Detailed Tables */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Assets */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <ArrowUpRight className="text-blue-500" size={20} />
+              <h3 className="text-lg font-bold text-gray-800">Assets</h3>
+            </div>
+            <div className="space-y-3">
+              {balanceSheet?.assets?.map((asset) => (
+                <div
+                  key={asset.id}
+                  className="flex justify-between items-center border-b border-gray-100 pb-2"
+                >
+                  <div>
+                    <p className="text-xs text-gray-500">{asset.code}</p>
+                    <p className="text-sm font-semibold text-gray-700">
+                      {asset.label}
+                    </p>
+                  </div>
+                  <p className="text-sm font-bold text-secondary">
+                    {asset.balance.toLocaleString()}
+                  </p>
+                </div>
+              ))}
+              {balanceSheet?.assets?.length === 0 && (
+                <p className="text-center text-gray-400 py-4">
+                  No assets recorded
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Liabilities */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <ArrowDownRight className="text-red-500" size={20} />
+              <h3 className="text-lg font-bold text-gray-800">Liabilities</h3>
+            </div>
+            <div className="space-y-3">
+              {balanceSheet?.liabilities?.map((liability) => (
+                <div
+                  key={liability.id}
+                  className="flex justify-between items-center border-b border-gray-100 pb-2"
+                >
+                  <div>
+                    <p className="text-xs text-gray-500">{liability.code}</p>
+                    <p className="text-sm font-semibold text-gray-700">
+                      {liability.label}
+                    </p>
+                  </div>
+                  <p className="text-sm font-bold text-secondary">
+                    {liability.balance.toLocaleString()}
+                  </p>
+                </div>
+              ))}
+              {balanceSheet?.liabilities?.length === 0 && (
+                <p className="text-center text-gray-400 py-4">
+                  No liabilities recorded
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Equity */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Landmark className="text-teal-500" size={20} />
+              <h3 className="text-lg font-bold text-gray-800">Equity</h3>
+            </div>
+            <div className="space-y-3">
+              {balanceSheet?.equity?.map((eq) => (
+                <div
+                  key={eq.id}
+                  className="flex justify-between items-center border-b border-gray-100 pb-2"
+                >
+                  <div>
+                    <p className="text-xs text-gray-500">{eq.code}</p>
+                    <p className="text-sm font-semibold text-gray-700">
+                      {eq.label}
+                    </p>
+                  </div>
+                  <p className="text-sm font-bold text-secondary">
+                    {eq.balance.toLocaleString()}
+                  </p>
+                </div>
+              ))}
+              {balanceSheet?.equity?.length === 0 && (
+                <p className="text-center text-gray-400 py-4">
+                  No equity recorded
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">
+            Quick Actions
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <QuickActionButton
+              icon={Calendar}
+              label="Périodes Comptables"
+              onClick={() => navigate(AppRouterPaths.periodClose)}
+            />
+            <QuickActionButton
+              icon={Wallet}
+              label="View Accounts"
+              onClick={() => navigate(AppRouterPaths.cashPositions)}
+            />
+            <QuickActionButton
+              icon={DollarSign}
+              label="Ecriture Comptable"
+              onClick={() =>
+                navigate(AppRouterPaths.financialAccountantJournalEntries)
+              }
+            />
+            <QuickActionButton
+              icon={TrendingUp}
+              label="Reports"
+              onClick={() => navigate(AppRouterPaths.financialStatements)}
+            />
+          </div>
+        </div>
+      </div>
+    </CustomDashboard>
+  );
 }

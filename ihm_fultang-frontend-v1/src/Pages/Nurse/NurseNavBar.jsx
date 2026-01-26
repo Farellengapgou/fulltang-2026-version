@@ -3,6 +3,8 @@ import {useAuthentication} from "../../Utils/Provider.jsx";
 import {Tooltip} from "antd";
 import PropTypes from "prop-types";
 import userIcon from "../../assets/userIcon.png";
+import { useNavigate } from "react-router-dom";
+import { useMessageBadge } from "../../Utils/useMessageBadge.js";
 
 
 export function NurseNavBar({children})
@@ -16,6 +18,8 @@ export function NurseNavBar({children})
 
 
     const {logout} = useAuthentication();
+    const navigate = useNavigate();
+    const messageCount = useMessageBadge();
     const applyNavLinkBtnStyle = () => {
         return " w-12 h-10 border-2 bg-gray-100 flex justify-center items-center rounded-xl shadow-xl hover:bg-secondary text-secondary text-xl hover:text-white transition-all duration-300";
     }
@@ -34,26 +38,20 @@ export function NurseNavBar({children})
                         <span>Nurse</span>
                     </div>
                     <div className="flex gap-2 mt-5 mb-4 mr-5">
-                        {/*
-                        <button className={applyNavLinkBtnStyle()}>
-                            <FaFlag/>
-                        </button>
-                        <button className={applyNavLinkBtnStyle()}>
-                            <FaCog/>
-                        </button>
-                        <Tooltip placement={"top"} title={"Notification"}>
-                            <button className={applyNavLinkBtnStyle()}>
-                                <FaBell/>
-                            </button>
-                        </Tooltip>
-                        <button className={applyNavLinkBtnStyle()}>
-                            <FaEnvelope/>
-                        </button>
-                        <Tooltip placement={"top"} title={"Profile"}>
-                            <button className={applyNavLinkBtnStyle()}>
-                                <FaUser/>
-                            </button>
-                        </Tooltip>*/}
+                        <div className="relative">
+                            <Tooltip placement={"top"} title={"Messages"}>
+                                <button
+                                    onClick={() => navigate("/nurse/messages")}
+                                    className={applyNavLinkBtnStyle()}>
+                                    <FaEnvelope/>
+                                </button>
+                            </Tooltip>
+                            {messageCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse pointer-events-none">
+                                    {messageCount > 99 ? "99+" : messageCount}
+                                </span>
+                            )}
+                        </div>
                         <Tooltip placement={"top"} title={"LogOut"}>
                             <button
                                 onClick={() => {

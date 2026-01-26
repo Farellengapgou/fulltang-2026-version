@@ -1,16 +1,16 @@
-import {ReceptionistNavBar} from "./ReceptionistNavBar.jsx";
-import {FaArrowLeft, FaArrowRight, FaEdit, FaEye, FaPlus, FaSearch, FaCalendarPlus} from "react-icons/fa";
-import {Tooltip} from "antd";
-import {DashBoard} from "../../GlobalComponents/DashBoard.jsx";
-import {receptionistNavLink} from "./receptionistNavLink.js";
-import {useEffect, useState} from "react";
-import {AddNewPatientModal} from "./addNewPatientModal.jsx";
-import {SuccessModal} from "../Modals/SuccessModal.jsx";
+import { ReceptionistNavBar } from "./ReceptionistNavBar.jsx";
+import { FaArrowLeft, FaArrowRight, FaEdit, FaEye, FaPlus, FaSearch, FaCalendarPlus } from "react-icons/fa";
+import { Tooltip } from "antd";
+import { DashBoard } from "../../GlobalComponents/DashBoard.jsx";
+import { receptionistNavLink } from "./receptionistNavLink.js";
+import { useEffect, useState } from "react";
+import { AddNewPatientModal } from "./addNewPatientModal.jsx";
+import { SuccessModal } from "../Modals/SuccessModal.jsx";
 import Wait from "../Modals/wait.jsx";
-import {ViewPatientDetailsModal} from "./ViewPatientDetailsModal.jsx";
-import {EditPatientInfosModal} from "./EditPatientInfosModal.jsx";
+import { ViewPatientDetailsModal } from "./ViewPatientDetailsModal.jsx";
+import { EditPatientInfosModal } from "./EditPatientInfosModal.jsx";
 import { ScheduleSurgeryModal } from "./ScheduleSurgeryModal.jsx";
- 
+
 import axiosInstance from "../../Utils/axiosInstance.js";
 import Loader from "../../GlobalComponents/Loader.jsx";
 import noPatientImage from "../../assets/noPatients.png";
@@ -98,13 +98,21 @@ export function Receptionist() {
 
 
 
-    // Effect to reload patients when search term is cleared
+    // Dynamic search with debounce
     useEffect(() => {
-        if (searchTerm === "") {
-            fetchPatients();
-        }
+        const delayDebounceFn = setTimeout(() => {
+            if (searchTerm) {
+                const url = `/patient/?search=${searchTerm}`;
+                fetchNextOrPreviousPatientList(url);
+            } else {
+                fetchPatients();
+            }
+        }, 500); // 500ms delay
+
+        return () => clearTimeout(delayDebounceFn);
     }, [searchTerm]);
 
+    // Manual search button (optional now, but kept for UX preference if user triggers it immediately)
     async function handleSearch() {
         const url = searchTerm ? `/patient/?search=${searchTerm}` : "/patient/";
         await fetchNextOrPreviousPatientList(url);
@@ -180,34 +188,28 @@ export function Receptionist() {
                             </div>
                             : (patients.length > 0 ?
                                 (
-                                    <div className="ml-5 mr-5 ">
-                                        <table className="w-full border-separate border-spacing-y-2">
-                                            <thead>
-                                                <tr className="">
-                                                    <th className="text-center text-white p-4 text-xl font-bold bg-primary-end  border-gray-200 rounded-l-2xl ">No</th>
-                                                    <th className="text-center text-white p-4 text-xl font-bold bg-primary-end  border-gray-200">First
-                                                        Name
-                                                    </th>
-                                                    <th className="text-center text-white p-4 text-xl font-bold bg-primary-end  border-gray-200 ">Last
-                                                        Name
-                                                    </th>
-                                                    <th className="text-center text-white p-4 text-xl font-bold bg-primary-end  border-gray-200 ">Gender</th>
-                                                    <th className="text-center text-white p-4 text-xl font-bold bg-primary-end  border-gray-200 ">Address</th>
-                                                    <th className="text-center text-white p-4 text-xl font-bold bg-primary-end  flex-col rounded-r-2xl">
-                                                        <p>Operations</p>
-                                                    </th>
+                                    <div className="bg-white rounded-[2rem] shadow-sm border border-gray-50 p-6 overflow-hidden mx-5">
+                                        <table className="ft-table">
+                                            <thead className="ft-thead">
+                                                <tr>
+                                                    <th className="ft-th">No</th>
+                                                    <th className="ft-th">First Name</th>
+                                                    <th className="ft-th">Last Name</th>
+                                                    <th className="ft-th">Gender</th>
+                                                    <th className="ft-th">Address</th>
+                                                    <th className="ft-th text-center">Operations</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
 
                                                 {patients.map((patient, index) => (
-                                                    <tr key={patient.id || index} className="">
-                                                        <td className="p-4 text-md text-blue-900 rounded-l-lg bg-gray-100 text-center">{index + 1}</td>
-                                                        <td className="p-4 text-md text-center bg-gray-100 font-bold">{patient.firstName}</td>
-                                                        <td className="p-4 text-md text-center bg-gray-100">{patient.lastName}</td>
-                                                        <td className="p-4 text-md text-center bg-gray-100">{patient.gender}</td>
-                                                        <td className="p-4 text-center text-md bg-gray-100 ">{patient.address}</td>
-                                                        <td className="p-4 relative bg-gray-100 rounded-r-lg">
+                                                    <tr key={patient.id || index} className="ft-tr">
+                                                        <td className="ft-td text-center text-secondary font-bold">{index + 1}</td>
+                                                        <td className="ft-td text-center font-bold">{patient.firstName}</td>
+                                                        <td className="ft-td text-center">{patient.lastName}</td>
+                                                        <td className="ft-td text-center">{patient.gender}</td>
+                                                        <td className="ft-td text-center ">{patient.address}</td>
+                                                        <td className="ft-td text-center">
                                                             <div className="w-full items-center justify-center flex gap-6">
                                                                 <Tooltip placement={"left"} title={"view details"}>
                                                                     <button
@@ -231,49 +233,6 @@ export function Receptionist() {
                                                         </td>
                                                     </tr>
                                                 ))}
-
-                                            {patients.map((patient, index) => (
-                                                <tr key={patient.id || index} className="">
-                                                    <td className="p-4 text-md text-blue-900 rounded-l-lg bg-gray-100 text-center">{index + 1}</td>
-                                                    <td className="p-4 text-md text-center bg-gray-100 font-bold">{patient.firstName}</td>
-                                                    <td className="p-4 text-md text-center bg-gray-100">{patient.lastName}</td>
-                                                    <td className="p-4 text-md text-center bg-gray-100">{patient.gender}</td>
-                                                    <td className="p-4 text-center text-md bg-gray-100 ">{patient.address}</td>
-                                                    <td className="p-4 relative bg-gray-100 rounded-r-lg">
-                                                        <div className="w-full items-center justify-center flex gap-6">
-                                                            <Tooltip placement={"left"} title={"view details"}>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setSelectedPatientDetails(patient), setCanOpenViewPatientDetailModal(true)
-                                                                    }}
-                                                                    className="flex items-center justify-center w-9 h-9 text-primary-end text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300">
-                                                                    <FaEye/>
-                                                                </button>
-                                                            </Tooltip>
-                                                            <Tooltip placement={"right"} title={"Edit"}>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setSelectedPatientDetails(patient), setCanOpenEditPatientDetailModal(true)
-                                                                    }}
-                                                                    className="flex items-center justify-center w-9 h-9 text-green-500 text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300">
-                                                                    <FaEdit/>
-                                                                </button>
-                                                            </Tooltip>
-                                                            <Tooltip placement={"right"} title={"Schedule surgery"}>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setSelectedPatientForSurgery(patient);
-                                                                        setCanOpenScheduleSurgeryModal(true);
-                                                                    }}
-                                                                    className="flex items-center justify-center w-9 h-9 text-blue-500 text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300">
-                                                                    <FaCalendarPlus/>
-                                                                </button>
-                                                            </Tooltip>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-
                                             </tbody>
                                         </table>
 
@@ -365,7 +324,7 @@ export function Receptionist() {
                         setSuccessMessage={setSuccessMessage}
                         setIsLoading={setIsLoading}
                     />
-                    {isLoading && <Wait/>}
+                    {isLoading && <Wait />}
 
                 </>
 

@@ -1,361 +1,402 @@
-import { useState, useEffect, useCallback } from "react";
-import { Search, Plus, Edit2, Trash2, Calculator, Building, Package, Users, Banknote, TrendingDown, TrendingUp, Eye } from "lucide-react";
-import {AccountantNavBar} from "../../Accountant/Components/AccountantNavBar.jsx";
-import {AccountantDashBoard} from "../../Accountant/Components/AccountantDashboard.jsx";
-import {FinancialAccountantNavLink} from "../NavLink.js";
-import {AccountModal} from "./AccountModal.jsx";
-import {ViewAccountDetailsModal} from "./ViewAccountDetailsModal.jsx";
-import {Tooltip} from "antd"; // Import du nouveau modal
-
-
-// Classes OHADA avec leurs icônes et descriptions
-export const ohadaClasses = {
-    "1": { name: "Capitaux", icon: Building, color: "blue" },
-    "2": { name: "Immobilisations", icon: Calculator, color: "green" },
-    "3": { name: "Stocks", icon: Package, color: "yellow" },
-    "4": { name: "Tiers", icon: Users, color: "purple" },
-    "5": { name: "Trésorerie", icon: Banknote, color: "indigo" },
-    "6": { name: "Charges", icon: TrendingDown, color: "red" },
-    "7": { name: "Produits", icon: TrendingUp, color: "emerald" }
-};
-
+import { useState, useEffect } from "react";
+import { X, Search, Trash2, Edit } from "lucide-react";
+import { chartOfAccountsService } from "../../../Services/Accounting";
+import Loader from "../../../GlobalComponents/Loader";
+import Pagination from "../../../GlobalComponents/Pagination";
+import { CustomDashboard } from "../../../GlobalComponents/CustomDashboard.jsx";
+import { FinancialAccountantNavBar } from "../NavBar.jsx";
+import { FinancialAccountantNavLink } from "../NavLink.js";
+import { SuccessModal } from "../../Modals/SuccessModal.jsx";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
+import { ConfirmationModal } from "../../Modals/ConfirmAction.Modal.jsx";
 
 export function ChartOfAccounts() {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [classFilter, setClassFilter] = useState("");
-    const [typeFilter, setTypeFilter] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [accountsList, setAccountsList] = useState([]);
-    const [showCreateModal, setShowCreateModal] = useState(false);
-    const [editingAccount, setEditingAccount] = useState(null);
-    const [viewingAccount, setViewingAccount] = useState(null); // Nouvel état pour le modal de détails
-    const [errorStatus, setErrorStatus] = useState(null);
-    const [errorMessage, setErrorMessage] = useState("");
+  const [accounts, setAccounts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [confirmConfig, setConfirmConfig] = useState({
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
 
-    const loadChartOfAccounts = useCallback(async () => {
-        setIsLoading(true);
+  const [formData, setFormData] = useState({
+    code: "",
+    label: "",
+    account_class: "1",
+    account_type: "ASSET",
+    is_active: true,
+  });
+  const [codeError, setCodeError] = useState("");
+
+  const fetchAccounts = async () => {
+    try {
+      setLoading(true);
+      const response = await chartOfAccountsService.getAllAccounts({
+        page: currentPage,
+        search: searchTerm,
+      });
+      setAccounts(response.data.results || response.data);
+      setTotalPages(Math.ceil((response.data.count || 0) / 10));
+    } catch (error) {
+      console.error("Erreur:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAccounts();
+  }, [currentPage, searchTerm]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validate that code starts with the account class digit
+    if (formData.code && formData.account_class) {
+      if (!formData.code.startsWith(formData.account_class)) {
+        setCodeError(`Le code doit commencer par ${formData.account_class} pour la classe sélectionnée`);
+        return;
+      }
+    }
+    setCodeError("");
+    
+    try {
+      if (editingId) {
+        await chartOfAccountsService.updateAccount(editingId, formData);
+        setModalMessage("Le compte a été mis à jour avec succès.");
+      } else {
+        await chartOfAccountsService.createAccount(formData);
+        setModalMessage("Le compte a été créé avec succès.");
+      }
+      setShowForm(false);
+      setIsSuccessModalOpen(true);
+      setEditingId(null);
+      fetchAccounts();
+    } catch (error) {
+      console.error("Erreur:", error);
+      setModalMessage(
+        error.response?.data
+          ? JSON.stringify(error.response.data)
+          : error.message,
+      );
+      setIsErrorModalOpen(true);
+    }
+  };
+
+  const handleEdit = (account) => {
+    setFormData(account);
+    setEditingId(account.id);
+    setShowForm(true);
+  };
+
+  const handleDelete = (id) => {
+    setConfirmConfig({
+      title: "Supprimer Compte",
+      message:
+        "Êtes-vous sûr de vouloir supprimer ce compte ? Cette action peut impacter vos écritures.",
+      onConfirm: async () => {
         try {
-            setAccountsList([]);
-            setErrorStatus(null);
-            setErrorMessage("");
+          await chartOfAccountsService.deleteAccount(id);
+          setModalMessage("Le compte a été supprimé avec succès.");
+          setIsSuccessModalOpen(true);
+          fetchAccounts();
         } catch (error) {
-            console.error(error);
-            setErrorStatus(500);
-            setErrorMessage("Une erreur est survenue lors du chargement du plan comptable.");
-        } finally {
-            setIsLoading(false);
+          console.error("Erreur:", error);
+          setModalMessage(
+            error.response?.data
+              ? JSON.stringify(error.response.data)
+              : error.message,
+          );
+          setIsErrorModalOpen(true);
         }
-    }, []);
-
-
-    useEffect(() => {
-        loadChartOfAccounts();
-    }, [loadChartOfAccounts]);
-
-
-    // Filtrage des comptes
-    const filteredAccounts = accountsList.filter((account) => {
-        const matchesSearch =
-            account.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            account.label.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesClass = !classFilter || account.class === classFilter;
-        const matchesType = !typeFilter || account.type === typeFilter;
-        return matchesSearch && matchesClass && matchesType;
+      },
     });
+    setIsConfirmModalOpen(true);
+  };
 
-    // Fonction pour obtenir l'icône d'une classe
-    function getClassIcon(classNumber) {
-        const IconComponent = ohadaClasses[classNumber]?.icon || Calculator;
-        return <IconComponent className="h-5 w-5" />;
-    }
+  if (loading) return <Loader />;
 
-    // Fonction pour obtenir la couleur d'une classe
-    function getClassColor(classNumber) {
-        const colorMap = {
-            "blue": "text-blue-600",
-            "green": "text-green-600",
-            "yellow": "text-yellow-600",
-            "purple": "text-purple-600",
-            "indigo": "text-indigo-600",
-            "red": "text-red-600",
-            "emerald": "text-emerald-600"
-        };
-        return colorMap[ohadaClasses[classNumber]?.color] || "text-gray-600";
-    }
+  return (
+    <CustomDashboard
+      linkList={FinancialAccountantNavLink}
+      requiredRole={"Accountant"}
+    >
+      <FinancialAccountantNavBar />
+      <div className="ft-page">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-secondary">Plan Comptable</h1>
+          <button
+            onClick={() => {
+              setEditingId(null);
+              setFormData({
+                code: "",
+                label: "",
+                account_class: "1",
+                account_type: "ASSET",
+                is_active: true,
+              });
+              setShowForm(true);
+            }}
+            className="ft-btn ft-btn-md ft-btn-primary"
+          >
+            + Nouveau Compte
+          </button>
+        </div>
 
-    // Fonction pour formater le montant
-    function formatAmount(amount) {
-        return new Intl.NumberFormat('fr-FR', {
-            style: 'currency',
-            currency: 'XAF',
-            minimumFractionDigits: 0
-        }).format(amount);
-    }
+        {/* Search Bar Refined */}
+        <div className="mb-6">
+          <div className="relative max-w-md">
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </span>
+            <input
+              type="text"
+              placeholder="Rechercher par code ou libellé..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="ft-input pl-10"
+            />
+          </div>
+        </div>
 
-    // Fonction pour formater la date
-    function formatDate(dateString) {
-        return new Date(dateString).toLocaleDateString('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    }
-
-    // Fonction pour voir les détails d'un compte
-    const handleViewDetails = (account) => {
-        setViewingAccount(account);
-    };
-
-
-
-
-
-    if (errorStatus)
-    {
-        return (
-            <div className="mx-auto p-6">
-                <div className="text-center">
-                    <h2 className="text-xl font-bold text-red-600 mb-2">Erreur {errorStatus}</h2>
-                    <p className="text-gray-600">{errorMessage}</p>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <AccountantDashBoard linkList={FinancialAccountantNavLink} requiredRole={"Accountant"}>
-            <AccountantNavBar></AccountantNavBar>
-            <div className="mx-auto p-12">
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold text-gray-800">Plan Comptable OHADA</h1>
-                    <button
-                        onClick={() => setShowCreateModal(true)}
-                        className="flex items-center px-4 py-2 bg-primary-end text-white rounded-lg hover:bg-teal-700 transition-all duration-300"
-                    >
-                        <Plus className="h-5 w-5 mr-2" />
-                        Nouveau compte
-                    </button>
-                </div>
-
-                {/* Statistiques des classes OHADA */}
-                <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-4 mb-6">
-                    {Object.entries(ohadaClasses).map(([classNum, classInfo]) => {
-                        const IconComponent = classInfo.icon;
-                        const count = accountsList.filter(acc => acc.class === classNum).length;
-                        return (
-                            <div key={classNum} className="bg-white p-4 rounded-lg shadow border-l-4 border-primary-end">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-gray-600">Classe {classNum}</p>
-                                        <p className="text-lg font-bold">{count}</p>
-                                        <p className="text-xs text-gray-500">{classInfo.name}</p>
-                                    </div>
-                                    <IconComponent className={`h-8 w-8 ${getClassColor(classNum)}`} />
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* Filtres */}
-                <div className="flex flex-col md:flex-row gap-4 mb-6">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                        <input
-                            type="text"
-                            placeholder="Rechercher par code ou libellé..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none transition-all duration-300"
-                        />
-                    </div>
-                    <select
-                        value={classFilter}
-                        onChange={(e) => setClassFilter(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none"
-                    >
-                        <option value="">Toutes les classes</option>
-                        {Object.entries(ohadaClasses).map(([num, info]) => (
-                            <option key={num} value={num}>Classe {num} - {info.name}</option>
-                        ))}
-                    </select>
-                    <select
-                        value={typeFilter}
-                        onChange={(e) => setTypeFilter(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none"
-                    >
-                        <option value="">Tous les types</option>
-                        <option value="Actif">Actif</option>
-                        <option value="Passif">Passif</option>
-                        <option value="Charge">Charge</option>
-                        <option value="Produit">Produit</option>
-                    </select>
-                </div>
-
-                {/* Table des comptes */}
-                {filteredAccounts && filteredAccounts.length > 0 ? (
-                    <div className="overflow-x-auto">
-                        <table className="w-full border-separate border-spacing-y-2">
-                            <thead>
-                            <tr>
-                                <th className="px-6 py-3 bg-primary-end rounded-l-xl text-center text-md text-white font-bold uppercase">
-                                    Code
-                                </th>
-                                <th className="px-6 py-3 bg-primary-end text-center text-md text-white font-bold uppercase">
-                                    Libellé
-                                </th>
-                                <th className="px-6 py-3 bg-primary-end text-center text-md text-white font-bold uppercase">
-                                    Classe
-                                </th>
-                                <th className="px-6 py-3 bg-primary-end text-center text-md text-white font-bold uppercase">
-                                    Type
-                                </th>
-                                <th className="px-6 py-3 bg-primary-end text-center text-md text-white font-bold uppercase">
-                                    Solde
-                                </th>
-                                <th className="px-6 py-3 bg-primary-end text-center text-md text-white font-bold uppercase">
-                                    Dernière utilisation
-                                </th>
-                                <th className="px-6 py-3 text-center text-md text-white font-bold bg-primary-end rounded-r-xl uppercase">
-                                    Actions
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody className="bg-white border-separate">
-                            {filteredAccounts.map((account) => (
-                                <tr key={account.id}>
-                                    <td className="px-6 py-5 rounded-l-xl bg-gray-50 border-l-4 border-primary-end">
-                                        <div className="text-center">
-                                            <div className="text-lg font-bold text-gray-900">{account.code}</div>
-                                            <div className={`text-xs ${account.isActive ? 'text-green-600' : 'text-red-600'}`}>
-                                                {account.isActive ? 'Actif' : 'Inactif'}
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-5 bg-gray-50">
-                                        <div className="text-center">
-                                            <div className="text-md font-medium text-gray-900">{account.label}</div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-5 bg-gray-50">
-                                        <div className="flex items-center justify-center">
-                                            <div className={`${getClassColor(account.class)} mr-2`}>
-                                                {getClassIcon(account.class)}
-                                            </div>
-                                            <div className="text-center">
-                                                <div className="text-sm font-medium">Classe {account.class}</div>
-                                                <div className="text-xs text-gray-500">{ohadaClasses[account.class]?.name}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-5 bg-gray-50">
-                                        <div className="text-center">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                account.type === 'Actif' ? 'bg-green-100 text-green-800' :
-                                                    account.type === 'Passif' ? 'bg-blue-100 text-blue-800' :
-                                                        account.type === 'Charge' ? 'bg-red-100 text-red-800' :
-                                                            'bg-emerald-100 text-emerald-800'
-                                            }`}>
-                                                {account.type}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-5 bg-gray-50">
-                                        <div className="text-center text-md font-semibold text-gray-900">
-                                            {formatAmount(account.balance)}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-5 bg-gray-50">
-                                        <div className="text-center text-sm text-gray-600">
-                                            {formatDate(account.lastUsed)}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-5 bg-gray-50 rounded-r-xl">
-                                        <div className="flex items-center justify-center gap-5">
-                                            <Tooltip placement={"left"} title={"View Details"}>
-                                                <button
-                                                    onClick={() => handleViewDetails(account)}
-                                                    className="text-primary-end hover:text-blue-800 transition-colors"
-                                                    title="Voir détails"
-                                                >
-                                                    <Eye className="h-5 w-5"/>
-                                                </button>
-                                            </Tooltip>
-
-                                            <Tooltip placement={"bottom"} title={"Edit"}>
-                                                <button
-                                                    onClick={() => setEditingAccount(account)}
-                                                    className="text-green-600 hover:text-green-800 transition-colors"
-                                                    title="Modifier"
-                                                >
-                                                    <Edit2 className="h-5 w-5"/>
-                                                </button>
-                                            </Tooltip>
-
-                                            <Tooltip placement={"right"} title={"Delete"}>
-                                                <button
-                                                    onClick={() => {
-                                                        if (confirm("Êtes-vous sûr de vouloir supprimer ce compte ?")) {
-                                                            console.log("Supprimer:", account.id);
-                                                        }
-                                                    }}
-                                                    className="text-red-600 hover:text-red-800 transition-colors"
-                                                    title="Supprimer"
-                                                >
-                                                    <Trash2 className="h-5 w-5"/>
-                                                </button>
-                                            </Tooltip>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                    </div>
-                ) : (
-                    <div className="p-8 mt-24 flex items-center justify-center">
-                        <div className="flex flex-col">
-                            <Calculator className="h-16 w-16 text-primary-end mx-auto mb-4"/>
-                            <h2 className="text-2xl font-bold text-gray-800 mb-2 mx-auto">Aucun compte trouvé</h2>
-                            <p className="text-gray-600 mb-4 mx-auto text-center">
-                                Aucun compte ne correspond à vos critères de recherche. Essayez de modifier vos filtres ou créez un nouveau compte.
-                            </p>
-                            <button
-                                className="px-4 hover:bg-teal-700 duration-300 mx-auto py-2 bg-primary-end text-white rounded-lg transition-all"
-                                onClick={() => setShowCreateModal(true)}
-                            >
-                                Créer un compte
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {/* Modal de création/modification */}
-                {(showCreateModal || editingAccount) && (
-                    <AccountModal
-                        account={editingAccount}
-                        onClose={() => {
-                            setShowCreateModal(false);
-                            setEditingAccount(null);
-                        }}
-                        onSave={(formData) => {
-                            console.log("Sauvegarder:", formData);
-                            // Ici on ferait l'appel API pour sauvegarder
-                            loadChartOfAccounts(); // Recharger les données
-                        }}
+        {/* Modal pour le formulaire */}
+        {showForm && (
+          <div className="ft-modal-overlay">
+            <div className="ft-modal">
+              <div className="ft-modal-header">
+                <h2 className="ft-modal-title">
+                  {editingId ? "Modifier le Compte" : "Nouveau Compte"}
+                </h2>
+                <button
+                  onClick={() => setShowForm(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              <form onSubmit={handleSubmit}>
+                <div className="ft-modal-body grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">
+                      Code
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ex: 101000"
+                      value={formData.code}
+                      onChange={(e) =>
+                        setFormData({ ...formData, code: e.target.value })
+                      }
+                      required
+                      className="ft-input"
                     />
-                )}
-
-                {/* Modal de visualisation des détails */}
-                {viewingAccount && (
-                    <ViewAccountDetailsModal
-                        isOpen={!!viewingAccount}
-                        account={viewingAccount}
-                        onClose={() => setViewingAccount(null)}
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">
+                      Libellé
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ex: Capital social"
+                      value={formData.label}
+                      onChange={(e) =>
+                        setFormData({ ...formData, label: e.target.value })
+                      }
+                      required
+                      className="ft-input"
                     />
-                )}
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">
+                      Classe de compte
+                    </label>
+                    <select
+                      value={formData.account_class}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          account_class: e.target.value,
+                        })
+                      }
+                      className="ft-select"
+                    >
+                      <option value="1">1 - Capitaux</option>
+                      <option value="2">2 - Immobilisations</option>
+                      <option value="3">3 - Stocks</option>
+                      <option value="4">4 - Tiers</option>
+                      <option value="5">5 - Trésorerie</option>
+                      <option value="6">6 - Charges</option>
+                      <option value="7">7 - Produits</option>
+                      <option value="8">8 - Spéciaux</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">
+                      Type de compte
+                    </label>
+                    <select
+                      value={formData.account_type}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          account_type: e.target.value,
+                        })
+                      }
+                      className="ft-select"
+                    >
+                      <option value="ASSET">Actif</option>
+                      <option value="LIABILITY">Passif</option>
+                      <option value="EQUITY">Capitaux Propres</option>
+                      <option value="REVENUE">Produit</option>
+                      <option value="EXPENSE">Charge</option>
+                    </select>
+                  </div>
+
+                  {codeError && (
+                    <div className="col-span-2 bg-red-50 border border-red-200 rounded-lg p-3">
+                      <p className="text-sm text-red-600 font-medium flex items-center gap-2">
+                        <AlertCircle size={16} />
+                        {codeError}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <div className="ft-modal-footer">
+                  <button
+                    type="button"
+                    onClick={() => setShowForm(false)}
+                    className="ft-btn ft-btn-md ft-btn-outline"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    className="ft-btn ft-btn-md ft-btn-primary"
+                  >
+                    {editingId ? "Mettre à jour" : "Créer le compte"}
+                  </button>
+                </div>
+              </form>
             </div>
-        </AccountantDashBoard>
-    );
+          </div>
+        )}
+
+        <div className="ft-card overflow-hidden">
+          <table className="ft-table">
+            <thead className="ft-thead">
+              <tr>
+                <th className="ft-th">Code</th>
+                <th className="ft-th">Libellé</th>
+                <th className="ft-th text-center">Classe</th>
+                <th className="ft-th text-center">Type</th>
+                <th className="ft-th text-center">Statut</th>
+                <th className="ft-th text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {accounts.map((account) => (
+                <tr key={account.id} className="ft-tr">
+                  <td className="ft-td font-bold text-secondary uppercase tracking-tight">
+                    {account.code}
+                  </td>
+                  <td className="ft-td font-medium">{account.label}</td>
+                  <td className="ft-td text-center">
+                    <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-600 font-mono">
+                      {account.account_class}
+                    </span>
+                  </td>
+                  <td className="ft-td text-center">
+                    <span className="text-xs font-semibold uppercase px-2.5 py-1 rounded-full bg-blue-100 text-blue-700">
+                      {account.account_type === 'ASSET' && 'Actif'}
+                      {account.account_type === 'LIABILITY' && 'Passif'}
+                      {account.account_type === 'EQUITY' && 'Capitaux'}
+                      {account.account_type === 'REVENUE' && 'Produit'}
+                      {account.account_type === 'EXPENSE' && 'Charge'}
+                    </span>
+                  </td>
+                  <td className="ft-td text-center">
+                    <span
+                      className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
+                        account.is_active
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {account.is_active ? "Actif" : "Inactif"}
+                    </span>
+                  </td>
+                  <td className="ft-td text-right">
+                    <div className="flex justify-end gap-3 transition-opacity">
+                      <button
+                        onClick={() => handleEdit(account)}
+                        className="text-secondary hover:text-primary-end font-semibold text-xs"
+                      >
+                        <Edit size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(account.id)}
+                        className="text-red-600 hover:text-red-800 font-semibold text-xs"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {accounts.length === 0 && (
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="ft-td text-center text-gray-500 py-12"
+                  >
+                    Aucun compte trouvé.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-6 flex justify-center">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      </div>
+
+      <SuccessModal
+        isOpen={isSuccessModalOpen}
+        canOpenSuccessModal={setIsSuccessModalOpen}
+        message={modalMessage}
+        makeAction={() => {}}
+      />
+      <ErrorModal
+        isOpen={isErrorModalOpen}
+        onCloseErrorModal={setIsErrorModalOpen}
+        message={modalMessage}
+      />
+      <ConfirmationModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={confirmConfig.onConfirm}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+      />
+    </CustomDashboard>
+  );
 }

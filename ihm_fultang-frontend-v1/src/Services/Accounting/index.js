@@ -1,0 +1,19 @@
+// Barrel export pour tous les services de comptabilité
+export { chartOfAccountsService } from "./chartOfAccountsService";
+export { journalEntryService } from "./journalEntryService";
+export { journalService } from "./journalService";
+export { customerService } from "./customerService";
+export { supplierService } from "./supplierService";
+export { financialReportService } from "./financialReportService";
+export { inventoryService } from "./inventoryService";
+export { fixedAssetService } from "./fixedAssetService";
+export { payrollService } from "./payrollService";
+export { vatService } from "./vatService";
+export { budgetService } from "./budgetService";
+export { accountingPeriodService } from "./accountingPeriodService";
+export { bankReconciliationService } from "./bankReconciliationService";
+export { taxService } from "./taxService";
+export { bankAccountService } from "./bankAccountService";
+export { analyticAccountService } from "./analyticAccountService";
+export { financialRatioService } from "./financialRatioService";
+export { accountingOperationService } from "./accountingOperationService";

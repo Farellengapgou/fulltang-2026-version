@@ -1,17 +1,18 @@
 import { useState, useEffect } from "react";
-import {CustomDashboard} from "../../GlobalComponents/CustomDashboard.jsx";
-import {adminNavLink} from "./adminNavLink.js";
-import {AdminNavBar} from "./AdminNavBar.jsx";
+import { CustomDashboard } from "../../GlobalComponents/CustomDashboard.jsx";
+import { adminNavLink } from "./adminNavLink.js";
+import { AdminNavBar } from "./AdminNavBar.jsx";
 import medicationImage from "../../assets/medication.jpeg"
 import axiosInstance from "../../Utils/axiosInstance.js";
-import {SuccessModal} from "../Modals/SuccessModal.jsx";
-import {ErrorModal} from "../Modals/ErrorModal.jsx";
+import { SuccessModal } from "../Modals/SuccessModal.jsx";
+import { ErrorModal } from "../Modals/ErrorModal.jsx";
 import Wait from "../Modals/wait.jsx";
 import { AddCategoryModal } from "./AddCategoryModal.jsx";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 
 
-export function AddMedication()
-{
+export function AddMedication() {
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +31,7 @@ export function AddMedication()
         min_stock_level: 10,
         requires_prescription: false,
         expiry_date: '',
-        created_at: new Date().toISOString(), 
+        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
     });
 
@@ -49,7 +50,7 @@ export function AddMedication()
         fetchCategories();
     }, []);
 
-    function handleChange (e) {
+    function handleChange(e) {
         const { name, value, type, checked } = e.target;
         setMedicationData(prevData => ({
             ...prevData,
@@ -57,7 +58,7 @@ export function AddMedication()
         }));
     }
 
-    async function handleSubmit (e) {
+    async function handleSubmit(e) {
         e.preventDefault();
         setIsLoading(true);
 
@@ -71,11 +72,9 @@ export function AddMedication()
         };
         console.log("Sending data:", finalData);
 
-        try
-        {
+        try {
             const response = await axiosInstance.post("/product/", finalData);
-            if (response.status === 201)
-            {
+            if (response.status === 201) {
                 setIsLoading(false);
                 setErrorMessage("");
                 setSuccessMessage(`The product ${finalData.name} created successfully`);
@@ -83,8 +82,7 @@ export function AddMedication()
                 setCanOpenErrorModal(false);
             }
         }
-        catch (error)
-        {
+        catch (error) {
             setIsLoading(false);
             console.log(error);
             setSuccessMessage("");
@@ -94,17 +92,15 @@ export function AddMedication()
         }
     }
 
-    function applyInputStyle()
-    {
+    function applyInputStyle() {
         return "w-full px-4 py-2 border-2 border-gray-200 rounded-md focus:outline-none  focus:border-2  focus:border-primary-end";
     }
 
-    function applyLabelStyle()
-    {
+    function applyLabelStyle() {
         return "block text-md font-semibold text-gray-600 mb-1";
     }
 
-    return(
+    return (
         <>
             <AddCategoryModal
                 isOpen={showAddCategoryModal}
@@ -115,13 +111,13 @@ export function AddMedication()
                 }}
             />
             <CustomDashboard linkList={adminNavLink} requiredRole={"Admin"}>
-                <AdminNavBar/>
+                <AdminNavBar />
                 <div className="flex m-5">
                     <div className="w-1/2 mr-6 flex flex-col items-center justify-center">
                         <h1 className="text-4xl font-bold text-secondary mb-4">Add a new medication</h1>
                         <p className="text-justify text-secondary font-normal text-md mb-5">Please complete all
                             fields below to add a new product to Fultang Clinic.</p>
-                        <img src={medicationImage} alt={"image"} className={"w-[700px] h-[500px] rounded-2xl"}/>
+                        <img src={medicationImage} alt={"image"} className={"w-[700px] h-[500px] rounded-2xl"} />
                     </div>
 
                     <div className="w-1/2 p-6 mt-8 flex items-center justify-center">
@@ -177,7 +173,7 @@ export function AddMedication()
                                                 </option>
                                             ))}
                                         </select>
-                    
+
                                         {/* Bouton + */}
                                         <button
                                             type="button"
@@ -241,13 +237,20 @@ export function AddMedication()
                                     <label className={applyLabelStyle()}>
                                         Expiry date
                                     </label>
-                                    <input
-                                        type="date"
-                                        name="expiry_date"
-                                        value={medicationData.expiry_date}
-                                        onChange={handleChange}
-                                        className={applyInputStyle()}
-                                        required
+                                    <DatePicker
+                                        placeholder="Select expiry date"
+                                        value={medicationData.expiry_date ? dayjs(medicationData.expiry_date) : null}
+                                        onChange={(date, dateString) => {
+                                            setMedicationData(prevData => ({
+                                                ...prevData,
+                                                expiry_date: dateString
+                                            }));
+                                        }}
+                                        disabledDate={(current) => {
+                                            return current && current.isBefore(dayjs().startOf('day'));
+                                        }}
+                                        className="w-full h-10 border-2 border-gray-200 rounded-md focus:outline-none focus:border-2 focus:border-primary-end"
+                                        style={{ width: '100%' }}
                                     />
                                 </div>
                             </div>
@@ -290,9 +293,9 @@ export function AddMedication()
                         </form>
                     </div>
                 </div>
-                <SuccessModal isOpen={canOpenSuccessModal} canOpenSuccessModal={setCanOpenSuccessModal} message={successMessage}/>
-                <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage}/>
-                {isLoading && <Wait/>}
+                <SuccessModal isOpen={canOpenSuccessModal} canOpenSuccessModal={setCanOpenSuccessModal} message={successMessage} />
+                <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
+                {isLoading && <Wait />}
             </CustomDashboard>
         </>
     )

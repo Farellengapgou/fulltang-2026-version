@@ -1,6 +1,8 @@
 import { XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import axiosInstance from "../../Utils/axiosInstance.js";
 
 export function ScheduleSurgeryModal({
@@ -149,14 +151,17 @@ export function ScheduleSurgeryModal({
               >
                 Surgery Date & Time
               </label>
-              <input
-                type="datetime-local"
+              <DatePicker
+                showTime
                 id="scheduledAt"
-                name="scheduledAt"
-                value={scheduledAt}
-                onChange={(e) => setScheduledAt(e.target.value)}
-                className={applyFormStyle()}
-                required={true}
+                placeholder="Select date and time"
+                value={scheduledAt ? dayjs(scheduledAt) : null}
+                onChange={(date, dateString) => setScheduledAt(dateString)}
+                disabledDate={(current) => {
+                  return current && current.isBefore(dayjs().startOf('day'));
+                }}
+                className="w-full h-10 border border-gray-300 rounded-md focus:outline-none focus:border-2 focus:border-primary-end"
+                style={{ width: '100%' }}
               />
             </div>
 

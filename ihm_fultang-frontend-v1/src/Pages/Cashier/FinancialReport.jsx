@@ -9,6 +9,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import {
   FileText,
   Calendar,
@@ -193,18 +195,17 @@ export function FinancialReport() {
         .map(
           (d) => `
       <tr>
-        <td style="padding:8px;border:1px solid #ddd;text-align:center">${
-          d.month
-        }</td>
+        <td style="padding:8px;border:1px solid #ddd;text-align:center">${d.month
+            }</td>
         <td style="padding:8px;border:1px solid #ddd;text-align:right">${(
-          d.consultations || 0
-        ).toLocaleString()} FCFA</td>
+              d.consultations || 0
+            ).toLocaleString()} FCFA</td>
         <td style="padding:8px;border:1px solid #ddd;text-align:right">${(
-          d.examens || 0
-        ).toLocaleString()} FCFA</td>
+              d.examens || 0
+            ).toLocaleString()} FCFA</td>
         <td style="padding:8px;border:1px solid #ddd;text-align:right">${(
-          d.total || 0
-        ).toLocaleString()} FCFA</td>
+              d.total || 0
+            ).toLocaleString()} FCFA</td>
       </tr>
     `
         )
@@ -313,17 +314,17 @@ export function FinancialReport() {
 
           {filterType === "custom" && (
             <div className="flex gap-4">
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              <DatePicker
+                placeholder="Start Date"
+                value={startDate ? dayjs(startDate) : null}
+                onChange={(date, dateString) => setStartDate(dateString)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 h-10"
               />
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              <DatePicker
+                placeholder="End Date"
+                value={endDate ? dayjs(endDate) : null}
+                onChange={(date, dateString) => setEndDate(dateString)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 h-10"
               />
             </div>
           )}

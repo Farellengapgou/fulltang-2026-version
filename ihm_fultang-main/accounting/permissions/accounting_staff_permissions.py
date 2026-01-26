@@ -7,9 +7,9 @@ class AccountingStaffPermission(BasePermission):
         if user.role == "Admin":
             return user.is_authenticated
         if view.action in ["destroy"]:
-            return user.is_authenticated and (user.role == "Admin" or user.role == "Accountant")
+            return user.is_authenticated and (user.role == "Admin" or user.role == "Accountant" or user.role == "MaterialAccountant")
         elif view.action in ["list", "create", "retrieve", "update", "partial_update"]:
-            return user.is_authenticated and (user.userType == "Accountant" or user.role == "Cashier")
+            return user.is_authenticated and (user.userType == "Accountant" or user.role == "MaterialAccountant" or user.role == "Cashier")
         elif request.method in ["GET", "POST", "PUT", "PATCH"]:
-            return user.is_authenticated and (user.userType == "Accountant" or user.role == "Cashier")
+            return user.is_authenticated and (user.userType == "Accountant" or user.role == "MaterialAccountant" or user.role == "Cashier")
         return False
