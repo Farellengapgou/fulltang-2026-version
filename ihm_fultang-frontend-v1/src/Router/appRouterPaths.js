@@ -12,6 +12,9 @@ export const AppRoutesPaths = {
   pharmacySales: "/pharmacy/sales",
   pharmacyReports: "/pharmacy/reports",
   pharmacyPrescriptions: "/pharmacy/prescriptions",
+  pharmacyPrescriptionSales: "/pharmacy/sales/prescription",
+  pharmacyOTCSales: "/pharmacy/sales/otc",
+  pharmacySalesHistory: "/pharmacy/sales/history",
 
   doctorPage: "/doctor/dashboard",
   ophthalmologistPage: "/ophthalmologist/dashboard",

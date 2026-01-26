@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useNavigate } from "react-router-dom"
 import PropTypes from 'prop-types';
 import { useMessageBadge } from "../../../Utils/useMessageBadge.js";
+import { UserProfileModal } from '../../../GlobalComponents/UserProfileModal.jsx';
 
 export function DoctorNavBar({ messageCount, messagePath = "/doctor/messages", title = "Doctor" }) {
     const navigate = useNavigate()

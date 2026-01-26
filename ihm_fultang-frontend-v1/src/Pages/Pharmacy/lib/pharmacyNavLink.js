@@ -1,11 +1,11 @@
-import { FaHome, FaPills, FaFileAlt, FaBoxes, FaQuestionCircle, FaChartLine } from "react-icons/fa";
+import { FaHome, FaPills, FaBoxes, FaQuestionCircle, FaChartLine, FaFilePrescription, FaShoppingBasket, FaHistory, FaCashRegister } from "react-icons/fa";
 import { AppRoutesPaths as appRoutes } from "../../../Router/appRouterPaths.js";
 import { Package } from "lucide-react";
 
 export const pharmacyNavLink = [
     {
         name: "Dashboard",
-        link: "/pharmacy/dashboard",
+        link: appRoutes.pharmacyPage,
         icon: FaHome,
     },
     {
@@ -15,40 +15,40 @@ export const pharmacyNavLink = [
             {
                 icon: Package,
                 name: "Medications List",
-                link: "/pharmacy/medications"
+                link: appRoutes.pharmacyMedicationList
             },
             {
                 icon: FaBoxes,
                 name: "Add Medication",
-                link: "/pharmacy/add-medication"
+                link: appRoutes.pharmacyAddMedication
             }
         ]
     },
     {
         name: 'Sales',
-        icon: FaFileAlt,
+        icon: FaCashRegister,
         subLinks: [
             {
                 name: "Prescription Sales",
-                link: "/pharmacy/sales?tab=prescription",
-                icon: FaFileAlt
+                link: appRoutes.pharmacyPrescriptionSales,
+                icon: FaFilePrescription
             },
             {
                 name: "OTC Sales",
-                link: "/pharmacy/sales?tab=otc",
-                icon: FaFileAlt
+                link: appRoutes.pharmacyOTCSales,
+                icon: FaShoppingBasket
             },
             {
                 name: "Sales History",
-                link: "/pharmacy/sales?tab=history",
-                icon: FaFileAlt
+                link: appRoutes.pharmacySalesHistory,
+                icon: FaHistory
             }
         ]
     },
     {
         name: 'Stock Report',
         icon: FaChartLine,
-        link: "/pharmacy/reports",
+        link: appRoutes.pharmacyReports,
     },
     {
         name: 'Help Center',

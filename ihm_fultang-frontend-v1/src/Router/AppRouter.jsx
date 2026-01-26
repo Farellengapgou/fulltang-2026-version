@@ -279,6 +279,18 @@ export function AppRoute() {
     default: (await import("../Pages/Pharmacy/PharmacyStockReport.jsx"))
       .PharmacyStockReport,
   }));
+  const PharmacyPrescriptionSales = React.lazy(async () => ({
+    default: (await import("../Pages/Pharmacy/Sales/PrescriptionSalesPage.jsx"))
+      .PrescriptionSalesPage,
+  }));
+  const PharmacyOTCSales = React.lazy(async () => ({
+    default: (await import("../Pages/Pharmacy/Sales/OTCSalesPage.jsx"))
+      .OTCSalesPage,
+  }));
+  const PharmacySalesHistory = React.lazy(async () => ({
+    default: (await import("../Pages/Pharmacy/Sales/SalesHistoryPage.jsx"))
+      .SalesHistoryPage,
+  }));
 
   const CreateFactureAccountant = React.lazy(async () => ({
     default: (await import("../Pages/Accountant/CreateFacture.jsx"))
@@ -591,6 +603,18 @@ export function AppRoute() {
         <Route
           path={AppRoutesPaths.pharmacyReports}
           element={<PharmacyStockReport />}
+        />
+        <Route
+          path={AppRoutesPaths.pharmacyPrescriptionSales}
+          element={<PharmacyPrescriptionSales />}
+        />
+        <Route
+          path={AppRoutesPaths.pharmacyOTCSales}
+          element={<PharmacyOTCSales />}
+        />
+        <Route
+          path={AppRoutesPaths.pharmacySalesHistory}
+          element={<PharmacySalesHistory />}
         />
         <Route
           path={AppRoutesPaths.nurseMedicalStaffsPage}
