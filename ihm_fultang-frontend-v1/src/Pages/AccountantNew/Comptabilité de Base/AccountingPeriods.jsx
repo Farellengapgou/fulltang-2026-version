@@ -31,6 +31,7 @@ export function Periods() {
     end_date: "",
     status: "OPEN",
   });
+  const [dateError, setDateError] = useState("");
   const [editingId, setEditingId] = useState(null);
 
   const fetchPeriods = async () => {
@@ -54,12 +55,31 @@ export function Periods() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate dates
+    if (formData.start_date && formData.end_date) {
+      if (new Date(formData.end_date) < new Date(formData.start_date)) {
+        setDateError("La date de clôture ne peut pas être antérieure à la date d'ouverture");
+        return;
+      }
+    }
+    setDateError("");
+    
     try {
+      // Map frontend fields to backend expected fields
+      const payload = {
+        year: formData.fiscal_year,
+        month: formData.month,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        status: formData.status,
+      };
+      
       if (editingId) {
-        await accountingPeriodService.updatePeriod(editingId, formData);
+        await accountingPeriodService.updatePeriod(editingId, payload);
         setModalMessage("La période comptable a été modifiée avec succès.");
       } else {
-        await accountingPeriodService.createPeriod(formData);
+        await accountingPeriodService.createPeriod(payload);
         setModalMessage("La période comptable a été créée avec succès.");
       }
       setShowForm(false);
@@ -148,6 +168,7 @@ export function Periods() {
       status: "OPEN",
     });
     setEditingId(null);
+    setDateError("");
   };
 
   const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
@@ -249,8 +270,17 @@ export function Periods() {
                     </div>
                   </div>
 
+                  {dateError && (
+                    <div className="col-span-2 bg-red-50 border border-red-200 rounded-lg p-3">
+                      <p className="text-sm text-red-600 font-medium flex items-center gap-2">
+                        <AlertCircle size={16} />
+                        {dateError}
+                      </p>
+                    </div>
+                  )}
+
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Statut Inicial</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Statut Initial</label>
                     <div className="relative">
                         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                             {formData.status === 'OPEN' ? <Unlock size={18} /> : <Lock size={18} />}
@@ -310,9 +340,13 @@ export function Periods() {
                   <td className="ft-td">
                     <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
                         <Calendar size={12} />
-                        <span className="font-black text-gray-600 uppercase tracking-tighter">{period.start_date}</span>
+                        <span className="font-black text-gray-600 uppercase tracking-tighter">
+                          {period.start_date ? new Date(period.start_date).toLocaleDateString('fr-FR') : 'N/A'}
+                        </span>
                         <span className="opacity-30">→</span>
-                        <span className="font-black text-gray-600 uppercase tracking-tighter">{period.end_date}</span>
+                        <span className="font-black text-gray-600 uppercase tracking-tighter">
+                          {period.end_date ? new Date(period.end_date).toLocaleDateString('fr-FR') : 'N/A'}
+                        </span>
                     </div>
                   </td>
                   <td className="ft-td text-center">

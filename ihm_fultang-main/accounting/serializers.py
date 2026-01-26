@@ -129,6 +129,18 @@ class ChartOfAccountsSerializer(serializers.ModelSerializer):
                 "Le code comptable doit contenir au moins 3 chiffres"
             )
         return value
+    
+    def validate(self, attrs):
+        code = attrs.get('code')
+        account_class = attrs.get('account_class')
+        
+        if code and account_class:
+            if not code.startswith(account_class):
+                raise serializers.ValidationError({
+                    'code': f"Le code doit commencer par {account_class} pour la classe sélectionnée"
+                })
+        
+        return attrs
 
 
 class JournalSerializer(serializers.ModelSerializer):
@@ -335,6 +347,14 @@ class SupplierSerializer(serializers.ModelSerializer):
                 "Ce code fournisseur existe déjà"
             )
         return value
+    
+    def validate_account(self, value):
+        """Ensure supplier account is class 4 (Tiers)"""
+        if value and value.account_class != '4':
+            raise serializers.ValidationError(
+                "Le compte fournisseur doit être de classe 4 (Comptes de tiers)"
+            )
+        return value
 
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user
@@ -356,6 +376,14 @@ class CustomerSerializer(serializers.ModelSerializer):
             'created_by_name'
         ]
         read_only_fields = ['created_at', 'created_by']
+    
+    def validate_account(self, value):
+        """Ensure customer account is class 4 (Tiers)"""
+        if value and value.account_class != '4':
+            raise serializers.ValidationError(
+                "Le compte client doit être de classe 4 (Comptes de tiers)"
+            )
+        return value
 
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user

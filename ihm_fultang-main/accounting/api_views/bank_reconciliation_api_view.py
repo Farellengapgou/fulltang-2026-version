@@ -26,3 +26,12 @@ class BankReconciliationViewSet(viewsets.ModelViewSet):
             'adjusted_balance': float(reconciliation.calculate_adjusted_balance()),
             'book_balance': float(reconciliation.book_balance)
         })
+    
+    @action(detail=True, methods=['post'])
+    def finalize(self, request, pk=None):
+        """Finalize bank reconciliation - mark as reconciled"""
+        reconciliation = self.get_object()
+        reconciliation.is_reconciled = True
+        reconciliation.save()
+        serializer = self.get_serializer(reconciliation)
+        return Response(serializer.data)

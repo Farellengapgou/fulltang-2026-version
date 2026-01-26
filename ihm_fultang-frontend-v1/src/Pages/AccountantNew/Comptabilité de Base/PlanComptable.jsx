@@ -36,6 +36,7 @@ export function ChartOfAccounts() {
     account_type: "ASSET",
     is_active: true,
   });
+  const [codeError, setCodeError] = useState("");
 
   const fetchAccounts = async () => {
     try {
@@ -59,6 +60,16 @@ export function ChartOfAccounts() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate that code starts with the account class digit
+    if (formData.code && formData.account_class) {
+      if (!formData.code.startsWith(formData.account_class)) {
+        setCodeError(`Le code doit commencer par ${formData.account_class} pour la classe sélectionnée`);
+        return;
+      }
+    }
+    setCodeError("");
+    
     try {
       if (editingId) {
         await chartOfAccountsService.updateAccount(editingId, formData);
@@ -253,6 +264,15 @@ export function ChartOfAccounts() {
                       <option value="EXPENSE">Charge</option>
                     </select>
                   </div>
+
+                  {codeError && (
+                    <div className="col-span-2 bg-red-50 border border-red-200 rounded-lg p-3">
+                      <p className="text-sm text-red-600 font-medium flex items-center gap-2">
+                        <AlertCircle size={16} />
+                        {codeError}
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <div className="ft-modal-footer">
                   <button
@@ -298,8 +318,14 @@ export function ChartOfAccounts() {
                       {account.account_class}
                     </span>
                   </td>
-                  <td className="ft-td text-center text-xs font-semibold uppercase text-gray-500">
-                    {account.account_type}
+                  <td className="ft-td text-center">
+                    <span className="text-xs font-semibold uppercase px-2.5 py-1 rounded-full bg-blue-100 text-blue-700">
+                      {account.account_type === 'ASSET' && 'Actif'}
+                      {account.account_type === 'LIABILITY' && 'Passif'}
+                      {account.account_type === 'EQUITY' && 'Capitaux'}
+                      {account.account_type === 'REVENUE' && 'Produit'}
+                      {account.account_type === 'EXPENSE' && 'Charge'}
+                    </span>
                   </td>
                   <td className="ft-td text-center">
                     <span

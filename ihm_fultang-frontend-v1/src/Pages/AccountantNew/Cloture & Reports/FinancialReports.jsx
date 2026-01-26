@@ -71,7 +71,7 @@ export function FinancialReports() {
               Production des documents de synthèse comptable
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 no-print">
             <button
               onClick={() => window.print()}
               className="ft-btn ft-btn-md ft-btn-outl gap-2"
@@ -88,7 +88,7 @@ export function FinancialReports() {
         </div>
 
         {/* Search & Filter Header */}
-        <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-50 mb-10">
+        <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-50 mb-10 no-print">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-1">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
@@ -150,7 +150,7 @@ export function FinancialReports() {
         </div>
 
         {data && (
-          <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-gray-50">
+          <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-gray-50 print:shadow-none print:border-0 print:rounded-none print:p-0">
             {reportType === "balance_sheet" && (
               <div className="space-y-12">
                 <div className="text-center border-b pb-8">
