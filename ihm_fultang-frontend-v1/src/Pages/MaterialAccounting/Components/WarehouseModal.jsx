@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Save } from "lucide-react";
 import { createWarehouse, updateWarehouse } from "../../../Utils/api/materialAccounting.js";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
 
 export function WarehouseModal({ isOpen, onClose, onRefresh, editingWarehouse }) {
     const [isLoading, setIsLoading] = useState(false);
@@ -11,6 +12,8 @@ export function WarehouseModal({ isOpen, onClose, onRefresh, editingWarehouse })
         location: "",
         is_active: true
     });
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const warehouseTypes = [
         { value: "CENTRAL", label: "Magasin Central" },
@@ -54,7 +57,8 @@ export function WarehouseModal({ isOpen, onClose, onRefresh, editingWarehouse })
             onClose();
         } catch (error) {
             console.error("Error saving warehouse:", error);
-            alert("Erreur lors de l'enregistrement du dépôt");
+            setErrorMessage("Erreur lors de l'enregistrement du dépôt");
+            setCanOpenErrorModal(true);
         } finally {
             setIsLoading(false);
         }
@@ -160,6 +164,7 @@ export function WarehouseModal({ isOpen, onClose, onRefresh, editingWarehouse })
                     </div>
                 </form>
             </div>
+            <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
         </div>
     );
 }

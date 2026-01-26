@@ -1,12 +1,12 @@
 import { XIcon } from "lucide-react";
 import { useState } from "react";
 import PropTypes from "prop-types";
- 
+
 import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css';
- 
+
 import axiosInstance from "../../Utils/axiosInstance.js";
 import { useAuthentication } from "../../Utils/Provider.jsx";
 
@@ -269,7 +269,7 @@ export function AddNewPatientModal({ isOpen, onClose, setCanOpenSuccessModal, se
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
- 
+
                                 <div>
                                     <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone
                                         Number</label>
@@ -322,22 +322,23 @@ export function AddNewPatientModal({ isOpen, onClose, setCanOpenSuccessModal, se
                                     />
                                 </div>
                             </div>
- 
+
 
                             <div className="px-6 py-1 flex justify-center space-x-6">
                                 <button
-                                    type="submit"
-                                    className="px-4 py-2 bg-primary-end  hover:text-xl text-md text-white rounded-lg font-bold transition-all duration-300"
-                                >
-                                    Save
-                                </button>
-                                <button
                                     type="button"
                                     onClick={onClose}
-                                    className="px-4 py-2 border bg-red-400 text-md hover:text-xl hover:bg-red-500 text-white font-bold rounded-lg  transition-all duration-300"
+                                    className="px-4 py-2 border bg-red-400 text-md  hover:bg-red-500 text-white font-bold rounded-lg  transition-all duration-300"
                                 >
                                     Cancel
                                 </button>
+                                <button
+                                    type="submit"
+                                    className="px-4 py-2 bg-primary-end  text-md text-white rounded-lg font-bold transition-all duration-300"
+                                >
+                                    Save
+                                </button>
+
                             </div>
                         </div>
                     </form>

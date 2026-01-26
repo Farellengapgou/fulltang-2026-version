@@ -3,12 +3,15 @@ import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import { X, Plus, Trash2, Save } from "lucide-react";
 import { getSuppliers, getWarehouses, getArticles, createGoodsReceipt } from "../../../Utils/api/materialAccounting.js";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
 
 export function GoodsReceiptModal({ isOpen, onClose, onRefresh, initialData = null }) {
     const [suppliers, setSuppliers] = useState([]);
     const [warehouses, setWarehouses] = useState([]);
     const [articles, setArticles] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const isReadOnly = initialData && initialData.status !== 'DRAFT';
 
@@ -94,7 +97,8 @@ export function GoodsReceiptModal({ isOpen, onClose, onRefresh, initialData = nu
             onRefresh();
             onClose();
         } catch (error) {
-            alert("Erreur lors de la création du bon d'entrée");
+            setErrorMessage("Erreur lors de la création du bon d'entrée");
+            setCanOpenErrorModal(true);
         } finally {
             setIsLoading(false);
         }
@@ -274,6 +278,7 @@ export function GoodsReceiptModal({ isOpen, onClose, onRefresh, initialData = nu
                     )}
                 </div>
             </div>
+            <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
         </div>
     );
 }

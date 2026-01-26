@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { X, Save } from "lucide-react";
 import { createCategory, updateCategory, getChartOfAccounts } from "../../../Utils/api/materialAccounting.js";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
+
 
 export function CategoryModal({ isOpen, onClose, onRefresh, editingCategory }) {
     const [isLoading, setIsLoading] = useState(false);
@@ -13,6 +15,8 @@ export function CategoryModal({ isOpen, onClose, onRefresh, editingCategory }) {
         default_expense_account: "",
         is_active: true
     });
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         if (editingCategory) {
@@ -89,7 +93,8 @@ export function CategoryModal({ isOpen, onClose, onRefresh, editingCategory }) {
             onClose();
         } catch (error) {
             console.error("Error saving category:", error);
-            alert("Erreur lors de l'enregistrement de la catégorie");
+            setErrorMessage("Erreur lors de l'enregistrement de la catégorie");
+            setCanOpenErrorModal(true);
         } finally {
             setIsLoading(false);
         }
@@ -217,6 +222,7 @@ export function CategoryModal({ isOpen, onClose, onRefresh, editingCategory }) {
                     </div>
                 </form>
             </div>
+            <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
         </div>
     );
 }

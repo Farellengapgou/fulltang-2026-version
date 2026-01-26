@@ -254,7 +254,7 @@ class PatientViewSet(ModelViewSet):
     def patient_doctor(self, request, id=None):
         try:
             medical_staff = MedicalStaff.objects.get(id=id)
-            if medical_staff.role not in ["Doctor", "Specialist", "Ophthalmologist", "Dentist"]:
+            if medical_staff.role not in ["Doctor", "Specialist", "Ophthalmologist", "Ophtalmologist", "Dentist"]:
                 return Response({"details": "le medical staff specifie n'est pas un docteur"},
                                 status.HTTP_404_NOT_FOUND)
             # Récupérer les consultations payées effectuées par ce docteur
@@ -310,7 +310,7 @@ class PatientViewSet(ModelViewSet):
         try:
             medical_staff = MedicalStaff.objects.get(id=id)
 
-            if medical_staff.role not in ["Doctor", "Specialist", "Ophthalmologist", "Dentist"]:
+            if medical_staff.role not in ["Doctor", "Specialist", "Ophthalmologist", "Ophtalmologist", "Dentist"]:
                 return Response(
                     {"details": "le medical staff spécifié n'est pas un docteur"},
                     status=status.HTTP_400_BAD_REQUEST

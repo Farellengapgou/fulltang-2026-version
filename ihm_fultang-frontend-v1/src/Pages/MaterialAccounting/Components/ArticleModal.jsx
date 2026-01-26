@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { X, Save } from "lucide-react";
 import { createArticle, updateArticle, getCategories, getChartOfAccounts } from "../../../Utils/api/materialAccounting.js";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
 
 export function ArticleModal({ isOpen, onClose, onRefresh, editingArticle }) {
     const [isLoading, setIsLoading] = useState(false);
     const [categories, setCategories] = useState([]);
     const [families, setFamilies] = useState([]);
     const [accounts, setAccounts] = useState([]);
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const [formData, setFormData] = useState({
         code: "",
@@ -255,7 +258,8 @@ export function ArticleModal({ isOpen, onClose, onRefresh, editingArticle }) {
             const errorMessage = error.response?.data
                 ? JSON.stringify(error.response.data, null, 2)
                 : error.message || "Erreur inconnue";
-            alert("Erreur lors de l'enregistrement de l'article:\n" + errorMessage);
+            setErrorMessage("Erreur lors de l'enregistrement de l'article:\n" + errorMessage);
+            setCanOpenErrorModal(true);
         } finally {
             setIsLoading(false);
         }
@@ -588,6 +592,7 @@ export function ArticleModal({ isOpen, onClose, onRefresh, editingArticle }) {
                     </button>
                 </div>
             </div>
+            <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
         </div>
     );
 }

@@ -1,6 +1,7 @@
+from decimal import Decimal
 from django.utils.timezone import now
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError  # ← AJOUT ICI
+from rest_framework.exceptions import ValidationError
 from django.utils import timezone
 
 from accounting.serializers import FinancialOperationSerializer
@@ -8,12 +9,14 @@ from authentication.serializers.medical_staff_serializers import MedicalStaffSer
 from polyclinic.models import Bill, BillItem, Patient
 from accounting.models_financier import AccountState, BudgetExercise, FinancialOperation, Account
 from polyclinic.serializers.bill_items_serializers import BillItemCreateSerializer, BillItemSerializer, BillItemUpdateSerializer
+from polyclinic.serializers.patient_serializers import PatientSerializer
 from polyclinic.services.bill_service import BillService
 
 
 class BillSerializer(serializers.ModelSerializer):
     operator = MedicalStaffSerializer(read_only=True)
     operation = FinancialOperationSerializer(read_only=True)
+    patient = PatientSerializer(read_only=True)
     bill_items = serializers.SerializerMethodField()
 
     class Meta:
@@ -81,15 +84,17 @@ class BillCreateSerializer(serializers.ModelSerializer):
         if not budget_exercises.exists():
             raise ValidationError({"details": "Aucun exercice budgétaire en cours trouvé."})
 
-        account_state = AccountState.objects.filter(
+        # Utiliser le premier exercice budgétaire trouvé
+        current_budget_exercise = budget_exercises.first()
+
+        # Récupérer ou créer l'état de compte
+        account_state, created = AccountState.objects.get_or_create(
             account=account,
-            budgetExercise__in=budget_exercises
-        ).first()
+            budgetExercise=current_budget_exercise,
+            defaults={'balance': 0}
+        )
 
-        if account_state is None:
-            raise ValidationError({"details": "Aucun état de compte trouvé pour la période budgétaire actuelle."})
-
-        account_state.balance += bill.amount
+        account_state.balance += Decimal(str(bill.amount))
         account_state.save()
 
         return bill

@@ -1,7 +1,10 @@
 from rest_framework import serializers
 from polyclinic.models import Consultation, ConsultationType, PatientAccess, MedicalFolderPage, TYPEDOCTOR, Appointment
 from authentication.models import MedicalStaff
+from authentication.models import MedicalStaff
 from polyclinic.serializers.appointment_serializers.get_serializer import AppointmentSerializer
+from polyclinic.serializers.exam_request_serializers import ExamRequestSerializer
+from polyclinic.serializers.prescription_serializers import PrescriptionSerializer
 from polyclinic.serializers.medical_folder_page_serializers import MedicalFolderPageSerializer
 from authentication.serializers.medical_staff_serializers import MedicalStaffSerializer
 from polyclinic.serializers.patient_serializers import PatientSerializer
@@ -13,7 +16,10 @@ class ConsultationSerializer(serializers.ModelSerializer):
     idPatient = PatientSerializer(read_only=True)
     idMedicalStaffSender = MedicalStaffSerializer(read_only=True)
     idMedicalStaffGiver = MedicalStaffSerializer(read_only=True)
+    idMedicalStaffGiver = MedicalStaffSerializer(read_only=True)
     appointments = serializers.SerializerMethodField()
+    exam_requests = serializers.SerializerMethodField()
+    prescriptions = serializers.SerializerMethodField()
     class Meta:
         model = Consultation
         fields = '__all__'
@@ -21,6 +27,14 @@ class ConsultationSerializer(serializers.ModelSerializer):
 
     def get_appointments(self, obj):
         return AppointmentSerializer(Appointment.objects.filter(idConsultation=obj), many=True).data
+
+    def get_exam_requests(self, obj):
+        from polyclinic.models import ExamRequest
+        return ExamRequestSerializer(ExamRequest.objects.filter(idConsultation=obj), many=True).data
+
+    def get_prescriptions(self, obj):
+        from polyclinic.models import Prescription
+        return PrescriptionSerializer(Prescription.objects.filter(idConsultation=obj), many=True).data
 
 class ConsultationCreateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -35,7 +49,7 @@ class ConsultationCreateSerializer(serializers.ModelSerializer):
             medical_folder_page.save()
             # on donne les acces au medecin
             medical_staff = validated_data['idMedicalStaffGiver']
-            if medical_staff.role not in ["Doctor"] + TYPEDOCTOR:
+            if medical_staff.role not in ["Doctor", "Dentist", "Ophthalmologist"] + TYPEDOCTOR:
                 raise ValidationError({"details": "le medical staff giver doit être un docteur"})
             patient_access = PatientAccess.objects.filter(idPatient=validated_data['idPatient'])
             patient_access = patient_access.filter(idMedicalStaff=medical_staff).first()

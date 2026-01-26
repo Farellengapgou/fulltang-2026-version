@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { X, Send, CheckCircle, Package, Trash2, Printer } from "lucide-react";
 import { getTransferDetails, sendTransfer, receiveTransfer, deleteTransfer } from "../../../Utils/api/materialAccounting.js";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
 
 export function TransferDetailModal({ isOpen, onClose, transferId, onRefresh }) {
     const [transfer, setTransfer] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isActionLoading, setIsActionLoading] = useState(false);
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         if (isOpen && transferId) {
@@ -35,7 +38,8 @@ export function TransferDetailModal({ isOpen, onClose, transferId, onRefresh }) 
             onRefresh();
         } catch (error) {
             const msg = error.detail || (error.errors ? error.errors.join("\n") : "Erreur lors de l'expédition");
-            alert(msg);
+            setErrorMessage(msg);
+            setCanOpenErrorModal(true);
         } finally {
             setIsActionLoading(false);
         }
@@ -50,7 +54,8 @@ export function TransferDetailModal({ isOpen, onClose, transferId, onRefresh }) 
             onRefresh();
         } catch (error) {
             const msg = error.detail || "Erreur lors de la réception";
-            alert(msg);
+            setErrorMessage(msg);
+            setCanOpenErrorModal(true);
         } finally {
             setIsActionLoading(false);
         }
@@ -64,7 +69,8 @@ export function TransferDetailModal({ isOpen, onClose, transferId, onRefresh }) 
             onRefresh();
             onClose();
         } catch (error) {
-            alert(error.detail || "Erreur lors de la suppression");
+            setErrorMessage(error.detail || "Erreur lors de la suppression");
+            setCanOpenErrorModal(true);
         } finally {
             setIsActionLoading(false);
         }
@@ -212,6 +218,7 @@ export function TransferDetailModal({ isOpen, onClose, transferId, onRefresh }) 
                     </div>
                 </div>
             </div>
+            <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
         </div>
     );
 }
