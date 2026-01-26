@@ -13,6 +13,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
 from django.http import JsonResponse
+#pour l'envoie des email
+from django.core.mail import send_mail
+from django.conf import settings
 
 tags = ["medical-staff"]
 active_param = openapi.Parameter(
@@ -134,10 +137,51 @@ class MedicalStaffViewSet(ModelViewSet):
         else:
             return MedicalStaffSerializer
 
+    # def perform_create(self, serializer):
+    #     if 'id' in serializer.validated_data:
+    #         serializer.validated_data.pop('id')
+    #     serializer.save()
+    
     def perform_create(self, serializer):
+        # 1. On récupère le mot de passe et l'email AVANT que serializer.save() ne les hache/transforme
+        password = serializer.validated_data.get('password')
+        email = serializer.validated_data.get('email')
+        username = serializer.validated_data.get('username')
+        
+        # 2. Nettoyage de l'ID (code déjà existant normalement)
         if 'id' in serializer.validated_data:
             serializer.validated_data.pop('id')
+            
+        # 3. On sauvegarde l'utilisateur (C'est ici que le mot de passe est crypté en base)
         serializer.save()
+
+        # 4. On envoie l'email car on a toujours les variables 'email' et 'password' en mémoire
+        if email and password:
+            try:
+                subject = 'Bienvenue sur Fultang - Vos identifiants de connexion'
+                message = f"""
+                    Bonjour,
+
+                    Votre compte professionnel a été créé avec succès.
+
+                    Voici vos identifiants de connexion :
+                    Nom d'utilisateur : {username}
+                    Mot de passe : {password}
+
+                    Veuillez vous connecter ici : {settings.FRONTEND_URL}
+
+                    Cordialement,
+                    L'équipe Fultang
+                    """
+                from_email = settings.EMAIL_HOST_USER
+                recipient_list = [email]
+                
+                # fail_silently=True permet d'éviter de planter la création si l'email échoue
+                send_mail(subject, message, from_email, recipient_list, fail_silently=True)
+                print(f"Email envoyé à {email}")
+            except Exception as e:
+                print(f"Erreur lors de l'envoi de l'email : {str(e)}")
+    
 
     def perform_update(self, serializer):
         if 'id' in serializer.validated_data:

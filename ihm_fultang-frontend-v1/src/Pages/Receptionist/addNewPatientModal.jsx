@@ -330,7 +330,7 @@ export function AddNewPatientModal({ isOpen, onClose, setCanOpenSuccessModal, se
                             </div>
                         </div>
 
-                        <div className="px-6 py-1 flex justify-center space-x-6">
+                        <div className="px-6 py-1 flex justify-end space-x-6">
 
                             <button
                                 type="button"
