@@ -1,4 +1,5 @@
 from django.db import models, transaction
+from django.apps import apps
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -52,7 +53,8 @@ class StockChartOfAccounts(models.Model):
         """Calcule le solde du compte sur une période en utilisant AccountPeriodBalance si possible"""
         # 1. Utilisation prioritaire des soldes matérialisés pour performance (O(1) vs O(N))
         if end_date:
-            period = StockAccountingPeriod.objects.filter(year=end_date.year, month=end_date.month).first()
+            AccountingPeriod = apps.get_model('accounting', 'AccountingPeriod')
+            period = AccountingPeriod.objects.filter(year=end_date.year, month=end_date.month).first()
             if period and period.state in ['CLOSED', 'LOCKED']:
                 balance = StockAccountPeriodBalance.objects.filter(account=self, period=period).first()
                 if balance:
@@ -218,7 +220,8 @@ class StockJournalEntry(models.Model):
 
     def check_period_is_open(self):
         """Vérifie que la date de l'écriture tombe dans une période ouverte"""
-        period = StockAccountingPeriod.objects.filter(
+        AccountingPeriod = apps.get_model('accounting', 'AccountingPeriod')
+        period = AccountingPeriod.objects.filter(
             year=self.entry_date.year, 
             month=self.entry_date.month
         ).first()
@@ -270,7 +273,8 @@ class StockJournalEntry(models.Model):
 
     def update_period_balances(self):
         """Met à jour AccountPeriodBalance for each line of the entry"""
-        period = StockAccountingPeriod.objects.filter(
+        AccountingPeriod = apps.get_model('accounting', 'AccountingPeriod')
+        period = AccountingPeriod.objects.filter(
             year=self.entry_date.year, 
             month=self.entry_date.month
         ).first()
@@ -352,8 +356,9 @@ class StockJournalEntryLine(models.Model):
     credit_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     
     # Références optionnelles
-    partner_supplier = models.ForeignKey('Supplier', on_delete=models.SET_NULL, null=True, blank=True)
-    partner_customer = models.ForeignKey('Customer', on_delete=models.SET_NULL, null=True, blank=True)
+    # Références optionnelles
+    partner_supplier = models.ForeignKey('StockSupplier', on_delete=models.SET_NULL, null=True, blank=True)
+    partner_customer = models.ForeignKey('StockCustomer', on_delete=models.SET_NULL, null=True, blank=True)
     analytic_account = models.ForeignKey('AnalyticAccount', on_delete=models.SET_NULL, null=True, blank=True)
     
     class Meta:
@@ -1132,7 +1137,7 @@ class Article(models.Model):
     
     # Fournisseur principal
     preferred_supplier = models.ForeignKey(
-        'accounting.Supplier',
+        'StockSupplier',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -1346,7 +1351,7 @@ class Batch(models.Model):
     """Lots de fabrication/réception"""
     article = models.ForeignKey('Article', on_delete=models.CASCADE, related_name='batches')
     supplier = models.ForeignKey(
-        'accounting.Supplier',
+        'StockSupplier',
         on_delete=models.SET_NULL,
         null=True,
         blank=True
@@ -1673,7 +1678,7 @@ class GoodsReceiptNote(models.Model):
     
     # Fournisseur (si achat)
     supplier = models.ForeignKey(
-        'accounting.Supplier',
+        'StockSupplier',
         on_delete=models.PROTECT,
         null=True,
         blank=True
@@ -1850,47 +1855,49 @@ class GoodsReceiptNote(models.Model):
         
         # Les modèles JournalEntry, JournalEntryLine et Journal sont déjà définis plus haut
         
-        # Récupérer le journal d'achats
-        journal = StockJournal.objects.get(journal_type='PURCHASES')
+        # Récupérer le journal d'achats (Modèle Journal financier)
+        Journal = apps.get_model('accounting', 'Journal')
+        journal = Journal.objects.get(journal_type='PURCHASES')
+        
+        # Récupérer les modèles d'entrée journal (Modèles financiers)
+        JournalEntry = apps.get_model('accounting', 'JournalEntry')
+        JournalEntryLine = apps.get_model('accounting', 'JournalEntryLine')
         
         # Créer l'écriture
-        entry = StockJournalEntry.objects.create(
+        entry = JournalEntry.objects.create(
             journal=journal,
             entry_date=self.receipt_date,
             reference=self.receipt_number,
             description=f"Réception {self.supplier.name if self.supplier else 'N/A'} - {self.receipt_number}",
             state='DRAFT',
-            created_by=self.validated_by
+            created_by=self.created_by # Utiliser le créateur du bon
         )
         
         # Pour chaque ligne, créer les lignes d'écriture
         sequence = 1
         for line in self.lines.all():
             # Débit stock
-            StockJournalEntryLine.objects.create(
+            JournalEntryLine.objects.create(
                 journal_entry=entry,
                 sequence=sequence,
                 account=line.article.stock_account,
                 label=f"Stock {line.article.name}",
                 debit_amount=line.line_amount,
-                credit_amount=0,
-                partner_supplier=self.supplier
+                credit_amount=0
             )
             sequence += 1
         
         # Crédit fournisseur (total)
-        # Crédit fournisseur (total)
         if not self.supplier or not self.supplier.account:
             raise ValidationError(f"Le fournisseur {self.supplier.name} n'a pas de compte comptable associé (ex: 401). Veuillez le configurer dans la fiche fournisseur.")
 
-        StockJournalEntryLine.objects.create(
+        JournalEntryLine.objects.create(
             journal_entry=entry,
             sequence=sequence,
             account=self.supplier.account,
             label=f"Fournisseur {self.supplier.name}",
             debit_amount=0,
-            credit_amount=self.total_amount,
-            partner_supplier=self.supplier
+            credit_amount=self.total_amount
         )
         
         # Mettre à jour les totaux et valider
@@ -1951,6 +1958,8 @@ class GoodsReceiptLine(models.Model):
         discounted_price = self.unit_price * (1 - discount_rate / 100)
         self.line_amount = self.quantity_received * discounted_price
         super().save(*args, **kwargs)
+        # Mettre à jour le total du bon
+        self.receipt.update_totals()
 
 
 # ==================== BONS DE SORTIE ====================
@@ -2123,42 +2132,60 @@ class GoodsIssueNote(models.Model):
             raise ValidationError("Le bon doit être validé/réservé avant confirmation")
         
         for line in self.lines.all():
-            # 1. Déduire des lots par FEFO
-            remaining_to_deduct = line.quantity
-            batches = Batch.objects.filter(
-                article=line.article,
-                remaining_quantity__gt=0,
-                is_blocked=False
-            ).order_by('expiry_date', 'reception_date')
-            
-            for batch in batches:
-                if remaining_to_deduct <= 0:
-                    break
-                    
-                deduction = min(batch.remaining_quantity, remaining_to_deduct)
+            if line.article.requires_batch:
+                # 1. Déduire des lots par FEFO
+                remaining_to_deduct = line.quantity
+                batches = Batch.objects.filter(
+                    article=line.article,
+                    remaining_quantity__gt=0,
+                    is_blocked=False
+                ).order_by('expiry_date', 'reception_date')
                 
+                for batch in batches:
+                    if remaining_to_deduct <= 0:
+                        break
+                        
+                    deduction = min(batch.remaining_quantity, remaining_to_deduct)
+                    
+                    StockMovement.objects.create(
+                        movement_type='OUT',
+                        movement_reason=self.issue_type,
+                        article=line.article,
+                        batch=batch,
+                        source_depot=self.depot,
+                        quantity=deduction,
+                        unit_price=line.unit_price,
+                        total_value=deduction * line.unit_price,
+                        operation_date=timezone.now(),
+                        reference_document=self.issue_number,
+                        document_type='GOODS_ISSUE',
+                        status='CONFIRMED',
+                        created_by=user
+                    )
+                    
+                    batch.remaining_quantity -= deduction
+                    batch.save()
+                    remaining_to_deduct -= deduction
+                
+                if remaining_to_deduct > 0:
+                    raise ValidationError(f"Stock insuffisant dans les lots pour {line.article.name} (Manquant: {remaining_to_deduct}). Vérifiez l'état des lots.")
+            else:
+                # Pas de gestion par lots : Créer un mouvement sans lot
                 StockMovement.objects.create(
                     movement_type='OUT',
                     movement_reason=self.issue_type,
                     article=line.article,
-                    batch=batch,
+                    batch=None,
                     source_depot=self.depot,
-                    quantity=deduction,
+                    quantity=line.quantity,
                     unit_price=line.unit_price,
-                    total_value=deduction * line.unit_price,
+                    total_value=line.line_amount,
                     operation_date=timezone.now(),
                     reference_document=self.issue_number,
                     document_type='GOODS_ISSUE',
                     status='CONFIRMED',
                     created_by=user
                 )
-                
-                batch.remaining_quantity -= deduction
-                batch.save()
-                remaining_to_deduct -= deduction
-            
-            if remaining_to_deduct > 0:
-                raise ValidationError(f"Stock insuffisant dans les lots pour {line.article.name} (Manquant: {remaining_to_deduct}). Vérifiez l'état des lots.")
 
             # 2. Mettre à jour le stock global
             stock = Stock.objects.select_for_update().get(article=line.article, depot=self.depot)
@@ -2179,30 +2206,35 @@ class GoodsIssueNote(models.Model):
             
         # Les modèles sont déjà définis plus haut
         
-        # 1. Identifier le journal (STK ou Divers)
-        journal = StockJournal.objects.filter(code='STK').first() or StockJournal.objects.filter(journal_type='MISCELLANEOUS').first()
+        # 1. Identifier le journal (STK ou Divers) - Modèle financier
+        Journal = apps.get_model('accounting', 'Journal')
+        journal = Journal.objects.filter(code='STK').first() or Journal.objects.filter(journal_type='MISC').first()
         if not journal:
-            raise ValidationError("Journal de stock (STK) ou Opérations Diverses (MISCELLANEOUS) non trouvé")
+            raise ValidationError("Journal de stock (STK) ou Opérations Diverses (MISC) non trouvé dans la comptabilité financière")
             
-        # 2. Créer l'entête de l'écriture
-        entry = StockJournalEntry.objects.create(
+        # 2. Créer l'entête de l'écriture (Modèle financier)
+        JournalEntry = apps.get_model('accounting', 'JournalEntry')
+        JournalEntryLine = apps.get_model('accounting', 'JournalEntryLine')
+        
+        entry = JournalEntry.objects.create(
             journal=journal,
             entry_date=self.issue_date,
             description=f"Sortie de stock {self.issue_number} - {self.get_issue_type_display()}",
             reference=self.issue_number,
-            created_by=user,
+            created_by=self.created_by,
             state='DRAFT'
         )
         
         # 3. Lignes d'écriture (OHADA)
         total_value = sum(line.line_amount for line in self.lines.all())
         
-        # Débit : Compte de charges (6031 Variation de stock)
-        acc_603 = StockChartOfAccounts.objects.filter(code='6031').first() or StockChartOfAccounts.objects.filter(code__startswith='603').first()
+        # Débit : Compte de charges (6031 Variation de stock) - Modèle financier
+        ChartOfAccounts = apps.get_model('accounting', 'ChartOfAccounts')
+        acc_603 = ChartOfAccounts.objects.filter(code='6031').first() or ChartOfAccounts.objects.filter(code__startswith='603').first()
         if not acc_603:
-            raise ValidationError("Compte de variation de stock (603) non trouvé")
+            raise ValidationError("Compte de variation de stock (603) non trouvé dans le plan comptable financier")
 
-        StockJournalEntryLine.objects.create(
+        JournalEntryLine.objects.create(
             journal_entry=entry,
             sequence=1,
             account=acc_603,
@@ -2214,11 +2246,11 @@ class GoodsIssueNote(models.Model):
         # Crédit : Compte de stock (31 ou 37)
         # On utilise le compte de stock de l'article si défini, sinon un compte 3111 par défaut
         for i, line in enumerate(self.lines.all()):
-             acc_stock = line.article.stock_account or StockChartOfAccounts.objects.filter(code='3111').first() or StockChartOfAccounts.objects.filter(code__startswith='311').first()
+             acc_stock = line.article.stock_account or ChartOfAccounts.objects.filter(code='3111').first() or ChartOfAccounts.objects.filter(code__startswith='311').first()
              if not acc_stock:
                  raise ValidationError(f"Compte de stock pour {line.article.name} non trouvé")
              
-             StockJournalEntryLine.objects.create(
+             JournalEntryLine.objects.create(
                 journal_entry=entry,
                 sequence=i+2,
                 account=acc_stock,
@@ -2256,8 +2288,14 @@ class GoodsIssueLine(models.Model):
         unique_together = ['issue', 'sequence']
     
     def save(self, *args, **kwargs):
+        # Initialiser le prix avec le PMP actuel si non défini (Brouillon)
+        if self.unit_price == 0 and self.article:
+            self.unit_price = self.article.weighted_average_price
+            
         self.line_amount = self.quantity * self.unit_price
         super().save(*args, **kwargs)
+        # Mettre à jour le total du bon
+        self.issue.update_total()
 
 
 # ==================== TRANSFERTS INTER-DEPOTS ====================
@@ -2465,7 +2503,7 @@ class StockInventory(models.Model):
 
 class StockInventoryLine(models.Model):
     """Lignes de comptage inventaire"""
-    inventory = models.ForeignKey('Inventory', on_delete=models.CASCADE, related_name='stock_lines')
+    inventory = models.ForeignKey('StockInventory', on_delete=models.CASCADE, related_name='lines')
     article = models.ForeignKey('Article', on_delete=models.PROTECT)
     batch = models.ForeignKey('Batch', on_delete=models.PROTECT, null=True, blank=True)
     

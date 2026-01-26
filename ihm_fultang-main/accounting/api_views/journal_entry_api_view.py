@@ -130,7 +130,7 @@ class JournalEntryViewSet(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if not entry.is_balanced():
+        if not entry.is_balanced:
             return Response(
                 {'error': 'L\'écriture n\'est pas équilibrée'},
                 status=status.HTTP_400_BAD_REQUEST

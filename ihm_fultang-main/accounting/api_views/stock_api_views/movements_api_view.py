@@ -84,6 +84,10 @@ def apply_movement_filters(qs, params):
         elif val in ["false", "0", "no"]:
             qs = qs.filter(journal_entry__isnull=True)
 
+    # Optimization: in global view, hide the "OUT" leg of transfers to avoid doubling records
+    if not warehouse_id:
+        qs = qs.exclude(movement_reason="TRANSFER", movement_type="OUT")
+
     return qs
 
 

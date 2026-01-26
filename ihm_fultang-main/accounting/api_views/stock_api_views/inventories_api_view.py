@@ -225,7 +225,7 @@ class InventoryViewSet(ModelViewSet):
     def lines(self, request, pk=None):
         inventory = self.get_object()
         lines = (
-            InventoryLine.objects.filter(inventory_id=inventory.pk)
+            StockInventoryLine.objects.filter(inventory_id=inventory.pk)
             .select_related("article", "batch")
             .order_by("id")
         )
@@ -268,10 +268,10 @@ class InventoryViewSet(ModelViewSet):
         """Récupère une ligne spécifique"""
         inventory = self.get_object()
         try:
-            line = InventoryLine.objects.select_related("article", "batch").get(
+            line = StockInventoryLine.objects.select_related("article", "batch").get(
                 inventory_id=pk, pk=line_id
             )
-        except InventoryLine.DoesNotExist:
+        except StockInventoryLine.DoesNotExist:
             return Response(
                 {"detail": "Ligne non trouvée"}, status=status.HTTP_404_NOT_FOUND
             )
@@ -298,8 +298,8 @@ class InventoryViewSet(ModelViewSet):
             )
 
         try:
-            line = InventoryLine.objects.get(inventory_id=pk, pk=line_id)
-        except InventoryLine.DoesNotExist:
+            line = StockInventoryLine.objects.get(inventory_id=pk, pk=line_id)
+        except StockInventoryLine.DoesNotExist:
             return Response(
                 {"detail": "Ligne non trouvée"}, status=status.HTTP_404_NOT_FOUND
             )
@@ -329,8 +329,8 @@ class InventoryViewSet(ModelViewSet):
             )
 
         try:
-            line = InventoryLine.objects.get(inventory_id=pk, pk=line_id)
-        except InventoryLine.DoesNotExist:
+            line = StockInventoryLine.objects.get(inventory_id=pk, pk=line_id)
+        except StockInventoryLine.DoesNotExist:
             return Response(
                 {"detail": "Ligne non trouvée"}, status=status.HTTP_404_NOT_FOUND
             )
@@ -361,8 +361,8 @@ class InventoryViewSet(ModelViewSet):
             )
 
         try:
-            line = InventoryLine.objects.get(inventory_id=pk, pk=line_id)
-        except InventoryLine.DoesNotExist:
+            line = StockInventoryLine.objects.get(inventory_id=pk, pk=line_id)
+        except StockInventoryLine.DoesNotExist:
             return Response(
                 {"detail": "Ligne non trouvée"}, status=status.HTTP_404_NOT_FOUND
             )
