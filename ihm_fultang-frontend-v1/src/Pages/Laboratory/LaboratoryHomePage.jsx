@@ -32,6 +32,7 @@ export function LaboratoryHomePage() {
                         examRequests: examRequestsArray.length
                     });
                 }
+                console.log('Exam request stats fetched successfully:', response.data);
             } catch (error) {
                 console.error("Error fetching exam request stats:", error);
             }

@@ -1,6 +1,53 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
-from accounting.models import *
+from django.db import transaction
+from django.utils import timezone
+from decimal import Decimal
+from datetime import date
+
+from .models_financier import (
+    BudgetExercise, Account, AccountState, FinancialOperation, Facture,
+    ChartOfAccounts, Journal, JournalEntry, JournalEntryLine,
+    Supplier, Customer, Asset, AnalyticAccount, Budget, BudgetLine,
+    AccountingPeriod, AccountPeriodBalance, TaxRate, TaxDeclaration, 
+    BankAccount, BankReconciliation, FinancialRatio, AccountingOperation,
+    Inventory, Payroll, PayrollLine, VAT
+)
+
+from accounting.models_financier import (
+    ChartOfAccounts, JournalEntry, JournalEntryLine, Journal,
+    Supplier, Customer, Asset, Inventory, Payroll, PayrollLine,
+    VAT, Budget, BudgetLine, AccountingPeriod, BankAccount,
+    AnalyticAccount, FinancialRatio, AccountingOperation,
+    BankReconciliation, TaxRate, TaxDeclaration
+)
+
+
+class AnalyticAccountSerializer(ModelSerializer):
+    class Meta:
+        model = AnalyticAccount
+        fields = '__all__'
+
+
+class AccountingOperationSerializer(serializers.ModelSerializer):
+    created_by_name = serializers.CharField(
+        source='created_by.get_full_name', read_only=True
+    )
+
+    class Meta:
+        model = AccountingOperation
+        fields = [
+            'id', 'operation_type', 'operation_id', 'amount', 
+            'journal_entry', 'bill', 'created_at', 'created_by', 'created_by_name'
+        ]
+        read_only_fields = ['created_at', 'created_by']
+
+    def create(self, validated_data):
+        validated_data['created_by'] = self.context['request'].user
+        return super().create(validated_data)
+
+
+# ============ SERIALIZERS EXISTANTS ============
 
 class BudgetExerciseSerializer(ModelSerializer):
     class Meta:
@@ -13,10 +60,12 @@ class AccountSerializer(ModelSerializer):
         model = Account
         fields = '__all__'
 
+
 class AccountStateSerializer(ModelSerializer):
     class Meta:
         model = AccountState
         fields = '__all__'
+
 
 class AccountStateCreateSerializer(ModelSerializer):
     class Meta:
@@ -29,36 +78,23 @@ class FinancialOperationSerializer(ModelSerializer):
         model = FinancialOperation
         fields = '__all__'
 
+
 class FactureSerializer(ModelSerializer):
     class Meta:
         model = Facture
         fields = '__all__'
 
-class AccountingViewSerializer(ModelSerializer):
-    amount = serializers.FloatField(default=0)
 
+class AccountingViewSerializer(ModelSerializer):
+    amount = serializers.DecimalField(max_digits=15, decimal_places=2, default=0)
     account = AccountSerializer()
-    
+
     class Meta:
         model = AccountState
         fields = ['id', 'balance', 'account', 'amount']
 
 
-################## Nouveau ##################################
-# accounting/serializers.py
-
-from rest_framework import serializers
-from django.db import transaction
-from django.utils import timezone
-from decimal import Decimal
-from .models import (
-    ChartOfAccounts, Journal, JournalEntry, JournalEntryLine,
-    Supplier, Asset, AnalyticAccount, Budget, BudgetLine,
-    AccountingPeriod, TaxRate, TaxDeclaration, BankAccount,
-    BankReconciliation, FinancialRatio, AccountingOperation
-)
-from authentication.models import MedicalStaff
-
+# ============ NOUVEAUX SERIALIZERS ============
 
 class ChartOfAccountsSerializer(serializers.ModelSerializer):
     balance = serializers.SerializerMethodField()
@@ -75,17 +111,15 @@ class ChartOfAccountsSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at']
 
     def get_balance(self, obj):
-        """Calcule le solde du compte"""
+        if not self.context or not isinstance(self.context, dict):
+            return obj.get_balance()
         start_date = self.context.get('start_date')
         end_date = self.context.get('end_date')
-        return float(obj.get_balance(start_date, end_date))
-
+        return obj.get_balance(start_date, end_date)
     def get_children_count(self, obj):
-        """Retourne le nombre de sous-comptes"""
-        return obj.chartofaccounts_set.count()
+        return obj.sub_accounts.count()
 
     def validate_code(self, value):
-        """Valide le format du code comptable"""
         if not value.isdigit():
             raise serializers.ValidationError(
                 "Le code comptable doit contenir uniquement des chiffres"
@@ -95,39 +129,17 @@ class ChartOfAccountsSerializer(serializers.ModelSerializer):
                 "Le code comptable doit contenir au moins 3 chiffres"
             )
         return value
-
+    
     def validate(self, attrs):
-        """Validation croisée"""
-        # Vérifier la cohérence classe/type
+        code = attrs.get('code')
         account_class = attrs.get('account_class')
-        account_type = attrs.get('account_type')
-
-        class_type_mapping = {
-            '1': ['EQUITY', 'LIABILITY'],
-            '2': ['ASSET'],
-            '3': ['ASSET'],
-            '4': ['ASSET', 'LIABILITY'],
-            '5': ['ASSET'],
-            '6': ['EXPENSE'],
-            '7': ['REVENUE'],
-            '8': ['ASSET', 'LIABILITY']
-        }
-
-        if account_class in class_type_mapping:
-            if account_type not in class_type_mapping[account_class]:
+        
+        if code and account_class:
+            if not code.startswith(account_class):
                 raise serializers.ValidationError({
-                    'account_type': f"Type incompatible avec la classe {account_class}"
+                    'code': f"Le code doit commencer par {account_class} pour la classe sélectionnée"
                 })
-
-        # Vérifier la hiérarchie parent
-        parent = attrs.get('parent')
-        if parent:
-            code = attrs.get('code', '')
-            if not code.startswith(parent.code):
-                raise serializers.ValidationError({
-                    'parent': "Le compte parent doit avoir un code compatible"
-                })
-
+        
         return attrs
 
 
@@ -150,28 +162,28 @@ class JournalSerializer(serializers.ModelSerializer):
         ]
 
     def get_entries_count(self, obj):
-        """Retourne le nombre d'écritures dans ce journal"""
         return obj.journalentry_set.count()
 
 
 class JournalEntryLineSerializer(serializers.ModelSerializer):
     account_code = serializers.CharField(source='account.code', read_only=True)
     account_label = serializers.CharField(source='account.label', read_only=True)
-    partner_name = serializers.CharField(source='partner.name', read_only=True)
+    partner_supplier_name = serializers.CharField(source='partner_supplier.name', read_only=True, allow_null=True)
+    partner_customer_name = serializers.CharField(source='partner_customer.name', read_only=True, allow_null=True)
     analytic_account_name = serializers.CharField(
-        source='analytic_account.name', read_only=True
+        source='analytic_account.name', read_only=True, allow_null=True
     )
 
     class Meta:
         model = JournalEntryLine
         fields = [
             'id', 'sequence', 'account', 'account_code', 'account_label',
-            'label', 'debit_amount', 'credit_amount', 'partner', 'partner_name',
+            'label', 'debit_amount', 'credit_amount', 'partner_supplier', 'partner_supplier_name',
+            'partner_customer', 'partner_customer_name',
             'analytic_account', 'analytic_account_name'
         ]
 
     def validate(self, attrs):
-        """Validation des montants"""
         debit = attrs.get('debit_amount', 0)
         credit = attrs.get('credit_amount', 0)
 
@@ -200,7 +212,7 @@ class JournalEntrySerializer(serializers.ModelSerializer):
         source='created_by.get_full_name', read_only=True
     )
     validated_by_name = serializers.CharField(
-        source='validated_by.get_full_name', read_only=True
+        source='validated_by.get_full_name', read_only=True, allow_null=True
     )
     is_balanced = serializers.SerializerMethodField()
     can_edit = serializers.SerializerMethodField()
@@ -220,16 +232,12 @@ class JournalEntrySerializer(serializers.ModelSerializer):
         ]
 
     def get_is_balanced(self, obj):
-        """Vérifie si l'écriture est équilibrée"""
-        return obj.is_balanced()
+        return obj.is_balanced
 
     def get_can_edit(self, obj):
-        """Vérifie si l'écriture peut être modifiée"""
         return obj.state == 'DRAFT'
 
     def validate_entry_date(self, value):
-        """Valide la date d'écriture"""
-        # Vérifier que la période n'est pas clôturée
         try:
             period = AccountingPeriod.objects.get(
                 year=value.year,
@@ -240,7 +248,6 @@ class JournalEntrySerializer(serializers.ModelSerializer):
                     f"La période {period} est clôturée"
                 )
         except AccountingPeriod.DoesNotExist:
-            # Créer automatiquement la période si elle n'existe pas
             AccountingPeriod.objects.create(
                 year=value.year,
                 month=value.month
@@ -249,7 +256,6 @@ class JournalEntrySerializer(serializers.ModelSerializer):
         return value
 
     def validate_lines(self, lines_data):
-        """Valide les lignes d'écriture"""
         if len(lines_data) < 2:
             raise serializers.ValidationError(
                 "Une écriture doit avoir au moins 2 lignes"
@@ -258,7 +264,7 @@ class JournalEntrySerializer(serializers.ModelSerializer):
         total_debit = sum(line.get('debit_amount', 0) for line in lines_data)
         total_credit = sum(line.get('credit_amount', 0) for line in lines_data)
 
-        if abs(total_debit - total_credit) > 0.01:
+        if abs(total_debit - total_credit) > Decimal('0.01'):
             raise serializers.ValidationError(
                 f"L'écriture n'est pas équilibrée: "
                 f"Débit={total_debit}, Crédit={total_credit}"
@@ -268,7 +274,6 @@ class JournalEntrySerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        """Création d'une écriture avec ses lignes"""
         lines_data = validated_data.pop('lines')
         validated_data['created_by'] = self.context['request'].user
 
@@ -286,7 +291,6 @@ class JournalEntrySerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        """Mise à jour d'une écriture"""
         if instance.state != 'DRAFT':
             raise serializers.ValidationError(
                 "Seules les écritures en brouillon peuvent être modifiées"
@@ -294,16 +298,13 @@ class JournalEntrySerializer(serializers.ModelSerializer):
 
         lines_data = validated_data.pop('lines', None)
 
-        # Mettre à jour l'écriture
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
         if lines_data is not None:
-            # Supprimer les anciennes lignes
             instance.lines.all().delete()
 
-            # Créer les nouvelles lignes
             for i, line_data in enumerate(lines_data, 1):
                 line_data['sequence'] = i
                 JournalEntryLine.objects.create(
@@ -317,12 +318,11 @@ class JournalEntrySerializer(serializers.ModelSerializer):
 
 
 class SupplierSerializer(serializers.ModelSerializer):
-    account_label = serializers.CharField(source='account.label', read_only=True)
+    account_label = serializers.CharField(source='account.label', read_only=True, allow_null=True)
     created_by_name = serializers.CharField(
         source='created_by.get_full_name', read_only=True
     )
     balance = serializers.SerializerMethodField()
-    orders_total_current_year = serializers.SerializerMethodField()
 
     class Meta:
         model = Supplier
@@ -331,21 +331,14 @@ class SupplierSerializer(serializers.ModelSerializer):
             'email', 'website', 'payment_terms', 'credit_limit',
             'discount_rate', 'tax_id', 'trade_register', 'account',
             'account_label', 'is_active', 'created_at', 'created_by',
-            'created_by_name', 'balance', 'orders_total_current_year'
+            'created_by_name', 'balance'
         ]
         read_only_fields = ['created_at', 'created_by']
 
     def get_balance(self, obj):
-        """Retourne le solde fournisseur"""
-        return float(obj.get_balance())
-
-    def get_orders_total_current_year(self, obj):
-        """Retourne le CA de l'année en cours"""
-        current_year = timezone.now().year
-        return float(obj.get_orders_total(current_year))
+        return obj.get_balance()
 
     def validate_code(self, value):
-        """Valide l'unicité du code fournisseur"""
         if self.instance and self.instance.code == value:
             return value
 
@@ -354,15 +347,45 @@ class SupplierSerializer(serializers.ModelSerializer):
                 "Ce code fournisseur existe déjà"
             )
         return value
-
-    def validate_email(self, value):
-        """Valide le format email"""
-        if value and '@' not in value:
-            raise serializers.ValidationError("Format email invalide")
+    
+    def validate_account(self, value):
+        """Ensure supplier account is class 4 (Tiers)"""
+        if value and value.account_class != '4':
+            raise serializers.ValidationError(
+                "Le compte fournisseur doit être de classe 4 (Comptes de tiers)"
+            )
         return value
 
     def create(self, validated_data):
-        """Création avec utilisateur connecté"""
+        validated_data['created_by'] = self.context['request'].user
+        return super().create(validated_data)
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    account_label = serializers.CharField(source='account.label', read_only=True)
+    created_by_name = serializers.CharField(
+        source='created_by.get_full_name', read_only=True
+    )
+
+    class Meta:
+        model = Customer
+        fields = [
+            'id', 'code', 'name', 'customer_type', 'address', 'phone',
+            'email', 'payment_terms', 'credit_limit', 'account',
+            'account_label', 'is_active', 'created_at', 'created_by',
+            'created_by_name'
+        ]
+        read_only_fields = ['created_at', 'created_by']
+    
+    def validate_account(self, value):
+        """Ensure customer account is class 4 (Tiers)"""
+        if value and value.account_class != '4':
+            raise serializers.ValidationError(
+                "Le compte client doit être de classe 4 (Comptes de tiers)"
+            )
+        return value
+
+    def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user
         return super().create(validated_data)
 
@@ -378,10 +401,10 @@ class AssetSerializer(serializers.ModelSerializer):
         source='expense_account.label', read_only=True
     )
     department_name = serializers.CharField(
-        source='department.name', read_only=True
+        source='department.name', read_only=True, allow_null=True
     )
     responsible_name = serializers.CharField(
-        source='responsible.get_full_name', read_only=True
+        source='responsible.get_full_name', read_only=True, allow_null=True
     )
     annual_depreciation = serializers.SerializerMethodField()
     accumulated_depreciation = serializers.SerializerMethodField()
@@ -405,19 +428,15 @@ class AssetSerializer(serializers.ModelSerializer):
         read_only_fields = ['asset_number', 'created_at', 'created_by']
 
     def get_annual_depreciation(self, obj):
-        """Retourne l'amortissement annuel"""
-        return float(obj.calculate_annual_depreciation())
+        return obj.calculate_annual_depreciation()
 
     def get_accumulated_depreciation(self, obj):
-        """Retourne les amortissements cumulés"""
-        return float(obj.get_accumulated_depreciation())
+        return obj.get_accumulated_depreciation()
 
     def get_net_book_value(self, obj):
-        """Retourne la valeur nette comptable"""
-        return float(obj.get_net_book_value())
+        return obj.get_net_book_value()
 
     def validate(self, attrs):
-        """Validation métier des immobilisations"""
         acquisition_cost = attrs.get('acquisition_cost')
         salvage_value = attrs.get('salvage_value', 0)
         useful_life_years = attrs.get('useful_life_years')
@@ -432,17 +451,9 @@ class AssetSerializer(serializers.ModelSerializer):
                 'useful_life_years': "La durée d'utilité doit être positive"
             })
 
-        # Vérifier que les comptes sont cohérents
-        asset_account = attrs.get('asset_account')
-        if asset_account and asset_account.account_type != 'ASSET':
-            raise serializers.ValidationError({
-                'asset_account': "Le compte d'immobilisation doit être de type ASSET"
-            })
-
         return attrs
 
     def create(self, validated_data):
-        """Création avec numéro automatique"""
         validated_data['created_by'] = self.context['request'].user
         return super().create(validated_data)
 
@@ -451,14 +462,14 @@ class BudgetLineSerializer(serializers.ModelSerializer):
     account_code = serializers.CharField(source='account.code', read_only=True)
     account_label = serializers.CharField(source='account.label', read_only=True)
     analytic_account_name = serializers.CharField(
-        source='analytic_account.name', read_only=True
+        source='analytic_account.name', read_only=True, allow_null=True
     )
     annual_total = serializers.SerializerMethodField()
 
     class Meta:
         model = BudgetLine
         fields = [
-            'id', 'account', 'account_code', 'account_label',
+            'id', 'budget', 'account', 'account_code', 'account_label',
             'analytic_account', 'analytic_account_name',
             'january', 'february', 'march', 'april', 'may', 'june',
             'july', 'august', 'september', 'october', 'november', 'december',
@@ -466,8 +477,7 @@ class BudgetLineSerializer(serializers.ModelSerializer):
         ]
 
     def get_annual_total(self, obj):
-        """Retourne le total annuel"""
-        return float(obj.get_annual_total())
+        return obj.get_annual_total()
 
 
 class BudgetSerializer(serializers.ModelSerializer):
@@ -476,7 +486,7 @@ class BudgetSerializer(serializers.ModelSerializer):
         source='created_by.get_full_name', read_only=True
     )
     approved_by_name = serializers.CharField(
-        source='approved_by.get_full_name', read_only=True
+        source='approved_by.get_full_name', read_only=True, allow_null=True
     )
     total_budget = serializers.SerializerMethodField()
 
@@ -494,11 +504,9 @@ class BudgetSerializer(serializers.ModelSerializer):
         ]
 
     def get_total_budget(self, obj):
-        """Calcule le budget total"""
-        return float(sum(line.get_annual_total() for line in obj.lines.all()))
+        return sum(line.get_annual_total() for line in obj.lines.all())
 
     def validate(self, attrs):
-        """Validation des dates"""
         start_date = attrs.get('start_date')
         end_date = attrs.get('end_date')
 
@@ -510,7 +518,6 @@ class BudgetSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        """Création avec utilisateur connecté"""
         validated_data['created_by'] = self.context['request'].user
         return super().create(validated_data)
 
@@ -534,8 +541,7 @@ class TaxRateSerializer(serializers.ModelSerializer):
         ]
 
     def get_rate_percentage(self, obj):
-        """Retourne le taux en pourcentage"""
-        return float(obj.rate * 100)
+        return obj.rate * 100
 
 
 class TaxDeclarationSerializer(serializers.ModelSerializer):
@@ -557,38 +563,16 @@ class TaxDeclarationSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_by', 'created_at', 'penalties']
 
     def get_total_due(self, obj):
-        """Retourne le montant total dû"""
-        return float(obj.tax_amount + obj.penalties)
+        return obj.tax_amount + obj.penalties
 
     def get_is_overdue(self, obj):
-        """Vérifie si la déclaration est en retard"""
         return (obj.status in ['DRAFT', 'SUBMITTED'] and
                 timezone.now().date() > obj.due_date)
 
-    def validate(self, attrs):
-        """Validation des périodes"""
-        declaration_type = attrs.get('declaration_type')
-        period_month = attrs.get('period_month')
-        period_quarter = attrs.get('period_quarter')
-
-        if 'MONTHLY' in declaration_type and not period_month:
-            raise serializers.ValidationError({
-                'period_month': "Le mois est requis pour une déclaration mensuelle"
-            })
-
-        if 'QUARTERLY' in declaration_type and not period_quarter:
-            raise serializers.ValidationError({
-                'period_quarter': "Le trimestre est requis pour une déclaration trimestrielle"
-            })
-
-        return attrs
-
     def create(self, validated_data):
-        """Création avec calcul automatique des pénalités"""
         validated_data['created_by'] = self.context['request'].user
         instance = super().create(validated_data)
 
-        # Calculer les pénalités si applicable
         if instance.submission_date:
             instance.penalties = instance.calculate_penalties()
             instance.save()
@@ -596,9 +580,48 @@ class TaxDeclarationSerializer(serializers.ModelSerializer):
         return instance
 
 
+class BankAccountSerializer(serializers.ModelSerializer):
+    account_label = serializers.CharField(source='account.label', read_only=True)
+
+    class Meta:
+        model = BankAccount
+        fields = [
+            'id', 'account', 'account_label', 'bank_name', 'account_number',
+            'iban', 'swift_code', 'balance_date', 'balance_amount', 'is_active'
+        ]
+
+
+class BankReconciliationSerializer(serializers.ModelSerializer):
+    bank_account_name = serializers.CharField(
+        source='bank_account.bank_name', read_only=True
+    )
+    created_by_name = serializers.CharField(
+        source='created_by.get_full_name', read_only=True
+    )
+    is_reconciled_status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BankReconciliation
+        fields = [
+            'id', 'bank_account', 'bank_account_name', 'reconciliation_date',
+            'statement_balance', 'book_balance', 'outstanding_checks',
+            'deposits_in_transit', 'bank_charges', 'is_reconciled',
+            'is_reconciled_status', 'notes', 'created_by', 'created_by_name',
+            'created_at'
+        ]
+        read_only_fields = ['created_by', 'created_at']
+
+    def get_is_reconciled_status(self, obj):
+        return obj.check_reconciliation()
+
+    def create(self, validated_data):
+        validated_data['created_by'] = self.context['request'].user
+        return super().create(validated_data)
+
+
 class AccountingPeriodSerializer(serializers.ModelSerializer):
     closed_by_name = serializers.CharField(
-        source='closed_by.get_full_name', read_only=True
+        source='closed_by.get_full_name', read_only=True, allow_null=True
     )
     period_label = serializers.SerializerMethodField()
     entries_count = serializers.SerializerMethodField()
@@ -612,12 +635,9 @@ class AccountingPeriodSerializer(serializers.ModelSerializer):
         read_only_fields = ['closed_by', 'closed_at']
 
     def get_period_label(self, obj):
-        """Retourne le libellé de la période"""
         return f"{obj.month:02d}/{obj.year}"
 
     def get_entries_count(self, obj):
-        """Retourne le nombre d'écritures sur la période"""
-        from datetime import date
         start_date = date(obj.year, obj.month, 1)
         if obj.month == 12:
             end_date = date(obj.year + 1, 1, 1)
@@ -630,125 +650,135 @@ class AccountingPeriodSerializer(serializers.ModelSerializer):
         ).count()
 
 
-# Serializers pour les rapports
-class BalanceSheetSerializer(serializers.Serializer):
-    """Serializer pour le bilan comptable"""
-    assets = serializers.DictField()
-    liabilities = serializers.DictField()
-    equity = serializers.DictField()
-    total_assets = serializers.DecimalField(max_digits=15, decimal_places=2)
-    total_liabilities_equity = serializers.DecimalField(max_digits=15, decimal_places=2)
-    is_balanced = serializers.BooleanField()
-
-
-class IncomeStatementSerializer(serializers.Serializer):
-    """Serializer pour le compte de résultat"""
-    revenues = serializers.DictField()
-    expenses = serializers.DictField()
-    total_revenues = serializers.DecimalField(max_digits=15, decimal_places=2)
-    total_expenses = serializers.DecimalField(max_digits=15, decimal_places=2)
-    net_income = serializers.DecimalField(max_digits=15, decimal_places=2)
-    gross_margin = serializers.DecimalField(max_digits=15, decimal_places=2)
-    operating_margin = serializers.DecimalField(max_digits=15, decimal_places=2)
-
-
-class TrialBalanceSerializer(serializers.Serializer):
-    """Serializer pour la balance comptable"""
-    account_code = serializers.CharField()
-    account_label = serializers.CharField()
-    opening_balance = serializers.DecimalField(max_digits=15, decimal_places=2)
-    debit_movements = serializers.DecimalField(max_digits=15, decimal_places=2)
-    credit_movements = serializers.DecimalField(max_digits=15, decimal_places=2)
-    closing_balance = serializers.DecimalField(max_digits=15, decimal_places=2)
-
-
-# Serializer pour actions spéciales
-class PostJournalEntrySerializer(serializers.Serializer):
-    """Serializer pour valider une écriture"""
-    entry_id = serializers.IntegerField()
-    validation_note = serializers.CharField(max_length=500, required=False)
-
-    def validate_entry_id(self, value):
-        """Valide que l'écriture existe et peut être validée"""
-        try:
-            entry = JournalEntry.objects.get(id=value)
-            if entry.state != 'DRAFT':
-                raise serializers.ValidationError(
-                    "Seules les écritures en brouillon peuvent être validées"
-                )
-            if not entry.is_balanced():
-                raise serializers.ValidationError(
-                    "L'écriture n'est pas équilibrée"
-                )
-            return value
-        except JournalEntry.DoesNotExist:
-            raise serializers.ValidationError("Écriture non trouvée")
-
-
-class ClosePeriodSerializer(serializers.Serializer):
-    """Serializer pour clôturer une période"""
-    year = serializers.IntegerField()
-    month = serializers.IntegerField(min_value=1, max_value=12)
-    closure_note = serializers.CharField(max_length=1000, required=False)
-
-    def validate(self, attrs):
-        """Valide que la période peut être clôturée"""
-        year = attrs['year']
-        month = attrs['month']
-
-        try:
-            period = AccountingPeriod.objects.get(year=year, month=month)
-            if period.state != 'OPEN':
-                raise serializers.ValidationError(
-                    f"La période {period} n'est pas ouverte"
-                )
-        except AccountingPeriod.DoesNotExist:
-            raise serializers.ValidationError(
-                f"La période {month:02d}/{year} n'existe pas"
-            )
-
-        # Vérifier qu'il n'y a pas d'écritures en brouillon
-        from datetime import date
-        start_date = date(year, month, 1)
-        if month == 12:
-            end_date = date(year + 1, 1, 1)
-        else:
-            end_date = date(year, month + 1, 1)
-
-        draft_entries = JournalEntry.objects.filter(
-            entry_date__gte=start_date,
-            entry_date__lt=end_date,
-            state='DRAFT'
-        ).count()
-
-        if draft_entries > 0:
-            raise serializers.ValidationError(
-                f"Il reste {draft_entries} écriture(s) en brouillon sur cette période"
-            )
-
-        return attrs
-
-
-class GenerateDepreciationSerializer(serializers.Serializer):
-    """Serializer pour générer les amortissements"""
-    period_date = serializers.DateField()
-    asset_ids = serializers.ListField(
-        child=serializers.IntegerField(),
-        required=False,
-        help_text="IDs des immobilisations à amortir (toutes si vide)"
+class InventorySerializer(serializers.ModelSerializer):
+    supplier_name = serializers.CharField(source='supplier.name', read_only=True, allow_null=True)
+    account_label = serializers.CharField(source='stock_account.label', read_only=True)
+    created_by_name = serializers.CharField(
+        source='created_by.get_full_name', read_only=True
     )
 
-    def validate_asset_ids(self, value):
-        """Valide que les immobilisations existent"""
-        if value:
-            existing_ids = Asset.objects.filter(
-                id__in=value, is_active=True
-            ).values_list('id', flat=True)
+    class Meta:
+        model = Inventory
+        fields = [
+            'id', 'inventory_number', 'name', 'inventory_type', 'quantity',
+            'unit_cost', 'total_value', 'reorder_level', 'reorder_quantity',
+            'stock_account', 'account_label', 'supplier', 'supplier_name',
+            'location', 'expiration_date', 'is_active', 'created_at', 'created_by',
+            'created_by_name'
+        ]
+        read_only_fields = ['inventory_number', 'total_value', 'created_at', 'created_by']
 
-            missing_ids = set(value) - set(existing_ids)
-            if missing_ids:
-                raise serializers.ValidationError(
-                    f"Immobilisations non trouvées: {list(missing_ids)}"
-                )
+    def create(self, validated_data):
+        validated_data['created_by'] = self.context['request'].user
+        return super().create(validated_data)
 
-        return value
+
+class PayrollLineSerializer(serializers.ModelSerializer):
+    employee_name = serializers.CharField(source='employee.get_full_name', read_only=True)
+
+    class Meta:
+        model = PayrollLine
+        fields = [
+            'id', 'payroll', 'employee', 'employee_name', 'gross_salary',
+            'tax_deduction', 'social_security', 'health_insurance',
+            'other_deductions', 'total_deductions', 'net_salary',
+            'employer_contributions'
+        ]
+
+
+class PayrollSerializer(serializers.ModelSerializer):
+    lines = PayrollLineSerializer(many=True, read_only=True)
+    created_by_name = serializers.CharField(
+        source='created_by.get_full_name', read_only=True
+    )
+    salary_expense_account_label = serializers.CharField(
+        source='salary_expense_account.label', read_only=True
+    )
+    total_gross = serializers.DecimalField(
+        source='total_gross_salary', max_digits=15, decimal_places=2, required=False
+    )
+    total_net = serializers.DecimalField(
+        source='total_net_salary', max_digits=15, decimal_places=2, read_only=True
+    )
+
+    salary_expense_account = serializers.PrimaryKeyRelatedField(
+        queryset=ChartOfAccounts.objects.all(), required=False
+    )
+
+    class Meta:
+        model = Payroll
+        fields = [
+            'id', 'payroll_number', 'payroll_period', 'period_start', 'period_end',
+            'total_gross_salary', 'total_gross', 'total_deductions', 'total_net_salary',
+            'total_net', 'total_employer_contributions', 'status', 'salary_expense_account',
+            'salary_expense_account_label', 'created_by', 'created_by_name',
+            'created_at', 'lines'
+        ]
+        read_only_fields = ['payroll_number', 'created_at', 'created_by', 'total_net_salary']
+
+    def create(self, validated_data):
+        validated_data['created_by'] = self.context['request'].user
+        return super().create(validated_data)
+
+
+class VATSerializer(serializers.ModelSerializer):
+    created_by_name = serializers.CharField(
+        source='created_by.get_full_name', read_only=True
+    )
+
+    class Meta:
+        model = VAT
+        fields = [
+            'id', 'vat_number', 'vat_type', 'period_month', 'period_year',
+            'amount', 'related_operation', 'journal_entry', 'status',
+            'created_at', 'created_by', 'created_by_name'
+        ]
+        read_only_fields = ['vat_number', 'created_at', 'created_by']
+
+    def create(self, validated_data):
+        validated_data['created_by'] = self.context['request'].user
+        return super().create(validated_data)
+
+
+class FinancialRatioSerializer(serializers.ModelSerializer):
+    calculated_by_name = serializers.CharField(
+        source='calculated_by.get_full_name', read_only=True
+    )
+
+    class Meta:
+        model = FinancialRatio
+        fields = [
+            'id', 'period_year', 'period_month', 'ratio_type', 'ratio_name',
+            'ratio_value', 'calculation_date', 'calculated_by', 'calculated_by_name'
+        ]
+        read_only_fields = ['calculation_date', 'calculated_by']
+
+    def create(self, validated_data):
+        validated_data['calculated_by'] = self.context['request'].user
+        return super().create(validated_data)
+    
+class PostJournalEntrySerializer(serializers.ModelSerializer):
+    """Serializer pour valider/poster une écriture comptable"""
+    lines = JournalEntryLineSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = JournalEntry
+        fields = [
+            'id', 'entry_number', 'entry_date', 'journal', 'reference',
+            'description', 'state', 'total_debit', 'total_credit',
+            'created_by', 'validated_by', 'validated_at', 'lines'
+        ]
+        read_only_fields = [
+            'entry_number', 'total_debit', 'total_credit',
+            'created_by', 'validated_by', 'validated_at'
+        ]
+    
+    def validate(self, attrs):
+        if self.instance and self.instance.state != 'DRAFT':
+            raise serializers.ValidationError(
+                "Seules les écritures en brouillon peuvent être validées"
+            )
+        return attrs
+
+# Alias du serializer pour FixedAsset
+FixedAssetSerializer = AssetSerializer

@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/style.css';
 import axiosInstance from "../../Utils/axiosInstance.js";
 
 export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal, setSuccessMessage, setIsLoading, patientData }) {
@@ -54,10 +58,10 @@ export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal,
 
 
     function calculateAge(birthDate) {
-        const today = new Date();
-        const birth = new Date(birthDate);
-        const diffTime = Math.abs(today - birth);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const today = dayjs();
+        const birth = dayjs(birthDate);
+        const diffDays = today.diff(birth, 'day');
+
         if (diffDays < 7) {
             setIsDay(true);
             setIsWeeks(false);
@@ -83,33 +87,32 @@ export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal,
             setIsWeeks(false);
             setIsMonth(false);
             setIsYears(true);
-            let _age = today.getFullYear() - birth.getFullYear();
-            const monthDiff = today.getMonth() - birth.getMonth();
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-                _age--;
-            }
-            return _age;
+            return today.diff(birth, 'year');
         }
     }
 
 
 
+    function handleDateChange(date, dateString) {
+        if (!date) {
+            setFormData(prevData => ({ ...prevData, birthDate: '' }));
+            setAge(0);
+            return;
+        }
+
+        const today = dayjs();
+        if (date.isAfter(today)) {
+            setDateError('The birth date cannot be in the future');
+        } else {
+            setDateError('');
+            setFormData(prevData => ({ ...prevData, birthDate: dateString }));
+            setAge(calculateAge(dateString));
+        }
+    }
+
     function handleChange(e) {
         const { name, value } = e.target;
-        if (name === 'birthDate') {
-            const selectedDate = new Date(value);
-            const today = new Date();
-            if (selectedDate > today) {
-                setDateError('The birth date cannot be in the future');
-            } else {
-                setDateError('');
-                setFormData(prevData => ({ ...prevData, [name]: value }));
-                setAge(calculateAge(value));
-            }
-        }
-        else {
-            setFormData(prevData => ({ ...prevData, [name]: value }));
-        }
+        setFormData(prevData => ({ ...prevData, [name]: value }));
     }
 
 
@@ -188,7 +191,7 @@ export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal,
                                 />
                                 <div className="flex-1">
                                     <label htmlFor="firstName"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Firstname</label>
+                                        className="block text-sm font-medium text-gray-700 mb-1">Firstname</label>
                                     <input
                                         type="text"
                                         id="firstName"
@@ -215,7 +218,7 @@ export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal,
                                 />
                                 <div className="flex-1">
                                     <label htmlFor="lastName"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Lastname</label>
+                                        className="block text-sm font-medium text-gray-700 mb-1">Lastname</label>
                                     <input
                                         type="text"
                                         id="lastName"
@@ -243,18 +246,18 @@ export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal,
                                     className={applyCheckboxStyle()}
                                 />
                                 <div className="flex-1">
-                                    <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-1">Birth
-                                        Date</label>
-                                    <input
-                                        type="date"
+                                    <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-1">Birth Date</label>
+                                    <DatePicker
                                         id="birthDate"
-                                        name="birthDate"
-                                        placeholder="Enter patient's birth date"
-                                        value={formData.birthDate}
-                                        onChange={handleChange}
-                                        className={applyFormStyle()}
-                                        required={checkedFields.birthDate}
+                                        placeholder="Select birth date"
+                                        value={formData.birthDate ? dayjs(formData.birthDate) : null}
+                                        onChange={handleDateChange}
+                                        disabledDate={(current) => {
+                                            return current && (current.isAfter(dayjs(), 'day') || current.isBefore(dayjs('1900-01-01'), 'day'));
+                                        }}
+                                        className="w-full h-10 border border-gray-300 rounded-md focus:outline-none focus:border-2 focus:border-primary-end"
                                         disabled={!checkedFields.birthDate}
+                                        style={{ width: '100%' }}
                                     />
                                 </div>
                             </div>
@@ -262,7 +265,7 @@ export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal,
                             <div className="flex items-center">
                                 <div>
                                     <label htmlFor="age"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                                        className="block text-sm font-medium text-gray-700 mb-1">Age</label>
                                     <div className={`${applyFormStyle()} flex justify-between`}>
                                         <input
                                             id="age"
@@ -291,7 +294,7 @@ export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal,
                                 />
                                 <div className="flex-1">
                                     <label htmlFor="gender"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                                        className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
                                     <select
                                         id="gender"
                                         name="gender"
@@ -320,7 +323,7 @@ export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal,
                                 />
                                 <div className="flex-1">
                                     <label htmlFor="address"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                                        className="block text-sm font-medium text-gray-700 mb-1">Address</label>
                                     <input
                                         type="text"
                                         id="address"
@@ -346,7 +349,7 @@ export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal,
                                 />
                                 <div className="flex-1">
                                     <label htmlFor="email"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                        className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                                     <input
                                         type="email"
                                         id="email"
@@ -403,18 +406,41 @@ export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal,
                                 />
                                 <div className="flex-1">
                                     <label htmlFor="phoneNumber"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Phone
+                                        className="block text-sm font-medium text-gray-700 mb-1">Phone
                                         Number</label>
-                                    <input
-                                        type="tel"
-                                        id="phoneNumber"
-                                        name="phoneNumber"
+                                    <PhoneInput
+                                        country={'cm'}
                                         value={formData.phoneNumber}
-                                        placeholder="Enter patient's phone number"
-                                        onChange={handleChange}
-                                        className={applyFormStyle()}
-                                        required={checkedFields.phoneNumber}
+                                        onChange={(value) => {
+                                            setFormData(prevData => ({ ...prevData, phoneNumber: value }));
+                                        }}
                                         disabled={!checkedFields.phoneNumber}
+                                        countryCodeEditable={false}
+                                        inputStyle={{
+                                            width: '100%',
+                                            height: '42px',
+                                            fontSize: '16px',
+                                            paddingLeft: '48px',
+                                            borderRadius: '0.375rem', // rounded-md
+                                            border: '1px solid #d1d5db', // border-gray-300
+                                            backgroundColor: checkedFields.phoneNumber ? 'white' : '#f3f4f6', // bg-gray-100 if disabled
+                                        }}
+                                        buttonStyle={{
+                                            borderRadius: '0.375rem 0 0 0.375rem',
+                                            border: '1px solid #d1d5db',
+                                            borderRight: 'none',
+                                            backgroundColor: '#f9fafb', // bg-gray-50
+                                        }}
+                                        dropdownStyle={{
+                                            borderRadius: '0.5rem',
+                                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                                        }}
+                                        containerStyle={{
+                                            width: '100%',
+                                        }}
+                                        enableSearch
+                                        searchPlaceholder="Search country..."
+                                        preferredCountries={['cm', 'fr', 'us', 'gb', 'ca']}
                                     />
                                 </div>
                             </div>
@@ -430,7 +456,7 @@ export function EditPatientInfosModal({ isOpen, onClose, setCanOpenSuccessModal,
                             </button>
                             <button
                                 type="button"
-                                onClick={()=>{setError(""),onClose()}}
+                                onClick={() => { setError(""), onClose() }}
                                 className="px-4 py-2 border bg-red-400 text-md hover:text-xl hover:bg-red-500 text-white font-bold rounded-lg transition-all duration-300"
                             >
                                 Cancel

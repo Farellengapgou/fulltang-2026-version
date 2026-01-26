@@ -1,4 +1,4 @@
-import {FaFileInvoiceDollar, FaHome, FaNotesMedical, FaPlus,FaUserMd, FaUsers} from "react-icons/fa";
+import {FaFileInvoiceDollar, FaHome, FaNotesMedical, FaPlus,FaUserMd, FaUsers, FaEnvelope} from "react-icons/fa";
 import {AppRoutesPaths as appRoutes} from "../../Router/appRouterPaths.js";
 import {Bed, BedDouble, Calendar} from "lucide-react";
 import {FiList} from "react-icons/fi";
@@ -34,6 +34,11 @@ export const adminNavLink = [
             }
         ]
     },
+    {
+        name: 'Messages',
+        icon: FaEnvelope,
+        link: appRoutes.adminMessage
+    },
   /*  {
         name: 'Consultation List',
         icon: FiList,
@@ -62,18 +67,18 @@ export const adminNavLink = [
         
     },
     {
-        name: 'Drugs',
+        name: 'Medications',
         icon: FaPills,
         subLinks: [
             {
                 icon: FaListAlt,
-                name: "Drugs List",
-                link: appRoutes.adminDrugsListPage,
+                name: "Medications List",
+                link: appRoutes.adminMedicationsListPage,
             },
             {
                 icon: FaPlus,
-                name: "Add A Drug",
-                link: appRoutes.addDrug
+                name: "Add A Medication",
+                link: appRoutes.addMedication
             }
         ]
         

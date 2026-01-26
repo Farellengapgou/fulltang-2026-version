@@ -16,6 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from polyclinic import api_urls
+from polyclinic.api_views.chat_api_view import ChatbotView
 from accounting import urls as accounting_urls
 from authentication import urls as authentication_urls
 from rest_framework import permissions
@@ -42,14 +43,18 @@ urlpatterns = [
 
     #path('api/', api_urls()),
     path('admin/', admin.site.urls),
+    path('api/v1/medical/chatbot/', ChatbotView.as_view(), name='chatbot-medical'),
     path('api/v1/medical/', include(api_urls)),
-    path('api/v1/accounting/', include(accounting_urls)),
+    path('api/v1/accounting/', include(accounting_urls.urlpatterns)),
+    path('api/v1/material-accounting/', include(accounting_urls.material_urlpatterns)),
     path('api/v1/auth/', include(authentication_urls)),
     path('api/v1/doc', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/v1/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('swagger.json', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('api/v1/chatbot/', include('polyclinic.api_urls')),
 
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

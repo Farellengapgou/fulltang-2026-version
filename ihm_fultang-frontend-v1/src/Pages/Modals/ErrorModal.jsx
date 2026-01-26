@@ -20,7 +20,11 @@ export function ErrorModal({ isOpen, onCloseErrorModal, message }) {
                         <h3 className="text-3xl font-bold text-red-500">Error</h3>
                     </div>
                 </div>
-                <p className="mb-6 mt-3 text-md">{message}</p>
+                <div className="mb-6 mt-3 text-md space-y-1">
+                    {message.split("\n").map((line, index) => (
+                        <p key={index}>{line}</p>
+                    ))}
+                </div>
                 <div className="flex justify-center">
                     <button
                         onClick={() => onCloseErrorModal(false)}

@@ -19,20 +19,41 @@ import axios from "axios";
 }
 */
 
-
-const token = localStorage.getItem("token_key_fultang");
-
-
+ 
 const axiosInstance = axios.create(
     {
     baseURL: import.meta.env.VITE_BACKEND_FULTANG_API_BASE_MEDICALSTAFF_URL,
     headers:
         {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
         }
     }
 );
+
+ // Request interceptor to add the token dynamically before each request
+axiosInstance.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem("token_key_fultang");
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
+axiosInstance.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token_key_fultang");
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    } else {
+        delete config.headers.Authorization;
+    }
+    return config;
+});
+
 
 //ErrorInterceptor(axiosInstance);
 export default axiosInstance;

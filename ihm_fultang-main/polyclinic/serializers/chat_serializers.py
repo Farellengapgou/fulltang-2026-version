@@ -1,4 +1,8 @@
 from rest_framework import serializers
 
 class UserQuerySerializer(serializers.Serializer):
-    question = serializers.CharField(max_length=1000)
+    question = serializers.CharField(
+        max_length=1000,
+        required=True,
+        help_text="Question posée au chatbot"
+    )

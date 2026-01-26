@@ -18,5 +18,9 @@ app.conf.beat_schedule = {
     'update_consultations_status': {
         'task': 'polyclinic.tasks.update_consultations_status',
         'schedule': crontab(hour='*/30')
-    }
+    },
+    'notify_upcoming_surgeries': {
+        'task': 'polyclinic.tasks.notify_upcoming_surgeries',
+        'schedule': crontab(minute='*/1')
+    },
 }

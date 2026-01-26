@@ -1,25 +1,25 @@
-import {FaArrowLeft, FaArrowRight, FaEdit, FaEye, FaPlus, FaSearch, FaTrash,} from "react-icons/fa";
-import {Tooltip} from "antd";
-import {useEffect, useState} from "react";
-import {SuccessModal} from "../Modals/SuccessModal.jsx";
+import { FaArrowLeft, FaArrowRight, FaEdit, FaEye, FaPlus, FaSearch, FaTrash, } from "react-icons/fa";
+import { Tooltip } from "antd";
+import { useEffect, useState } from "react";
+import { SuccessModal } from "../Modals/SuccessModal.jsx";
 import Wait from "../Modals/wait.jsx";
-import {ErrorModal} from "../Modals/ErrorModal.jsx";
+import { ErrorModal } from "../Modals/ErrorModal.jsx";
 import axiosInstance from "../../Utils/axiosInstance.js";
-import {CustomDashboard} from "../../GlobalComponents/CustomDashboard.jsx";
-import {AdminNavBar} from "./AdminNavBar.jsx";
-import {adminNavLink} from "./adminNavLink.js";
-import {ConfirmationModal} from "../Modals/ConfirmAction.Modal.jsx";
-import {AppRoutesPaths as appRouterPaths} from "../../Router/appRouterPaths.js";
-import {useNavigate} from "react-router-dom";
-import {EditExamInfosModal} from "./EditExamInfosModal.jsx";
+import { CustomDashboard } from "../../GlobalComponents/CustomDashboard.jsx";
+import { AdminNavBar } from "./AdminNavBar.jsx";
+import { adminNavLink } from "./adminNavLink.js";
+import { ConfirmationModal } from "../Modals/ConfirmAction.Modal.jsx";
+import { AppRoutesPaths as appRouterPaths } from "../../Router/appRouterPaths.js";
+import { useNavigate } from "react-router-dom";
+import { EditExamInfosModal } from "./EditExamInfosModal.jsx";
 import Loader from "../../GlobalComponents/Loader.jsx";
 import ServerErrorPage from "../../GlobalComponents/ServerError.jsx";
 
 
-export function AdminExamsList()
-{
+export function AdminExamsList() {
 
     const [waitFetchingData, setWaitFetchingData] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
     const [errorStatus, setErrorStatus] = useState(null);
     const [serverErrorMessage, setServerErrorMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -46,17 +46,13 @@ export function AdminExamsList()
 
 
     function updateActualPageNumber(action) {
-        if (action === "next")
-        {
-            if(actualPageNumber < calculateNumberOfSlide())
-            {
+        if (action === "next") {
+            if (actualPageNumber < calculateNumberOfSlide()) {
                 setActualPageNumber(actualPageNumber + 1);
             }
         }
-        else
-        {
-            if(actualPageNumber > 1)
-            {
+        else {
+            if (actualPageNumber > 1) {
                 setActualPageNumber(actualPageNumber - 1);
             }
         }
@@ -107,9 +103,21 @@ export function AdminExamsList()
         fetchExamList();
     }, []);
 
+    // Effect to reload exams when search term is cleared
+    useEffect(() => {
+        if (searchTerm === "") {
+            fetchExamList();
+        }
+    }, [searchTerm]);
+
+    async function handleSearch() {
+        const url = searchTerm ? `/exam/?search=${searchTerm}` : "/exam/";
+        await fetchExamData(url);
+    }
 
 
-    async function deleteExam(examId){
+
+    async function deleteExam(examId) {
         setIsLoading(true);
         try {
             const response = await axiosInstance.delete(`/exam/${examId}/`);
@@ -136,9 +144,9 @@ export function AdminExamsList()
 
 
 
-    return(
+    return (
         <CustomDashboard linkList={adminNavLink} requiredRole={"Admin"}>
-            <AdminNavBar/>
+            <AdminNavBar />
             <div className="mt-5 flex flex-col relative">
 
                 {/*Header content with search bar*/}
@@ -146,14 +154,18 @@ export function AdminExamsList()
                     <p className="font-bold text-xl mt-2 ml-5"> List Of Exam </p>
                     <div className="flex mr-5">
                         <div className="flex w-[300px] h-10 border-2 border-secondary rounded-lg">
-                            <FaSearch className="text-xl text-secondary m-2"/>
+                            <FaSearch className="text-xl text-secondary m-2" />
                             <input
                                 type="text"
                                 placeholder={"search for a specific exam"}
                                 className="border-none focus:outline-none focus:ring-0"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <button className="ml-2 w-20 h-10 text-white bg-secondary rounded-lg">
+                        <button
+                            onClick={handleSearch}
+                            className="ml-2 w-20 h-10 text-white bg-secondary rounded-lg">
                             Search
                         </button>
                     </div>
@@ -163,60 +175,60 @@ export function AdminExamsList()
                 {/*List of registered exam*/}
 
                 {waitFetchingData ? (
-                        <div className="h-[500px] w-full flex justify-center items-center">
-                            <Loader size={"medium"} color={"primary-end"}/>
+                    <div className="h-[500px] w-full flex justify-center items-center">
+                        <Loader size={"medium"} color={"primary-end"} />
+                    </div>
+                ) :
+                    errorStatus ? (
+                        <div className="mt-16">
+                            <ServerErrorPage errorStatus={errorStatus} message={serverErrorMessage} />
                         </div>
                     ) :
-                    errorStatus ? (
-                            <div className="mt-16">
-                                <ServerErrorPage errorStatus={errorStatus} message={serverErrorMessage}/>
-                            </div>
-                        ) :
-                        examList.length >0 ? (
+                        examList.length > 0 ? (
                             <div className="ml-5 mr-5 ">
                                 <table className="w-full border-separate border-spacing-y-2">
                                     <thead>
-                                    <tr className="bg-gradient-to-l from-primary-start to-primary-end">
-                                        <th className="text-center text-white p-4 text-xl font-bold  rounded-l-lg ">No</th>
-                                        <th className="text-center text-white p-4 text-xl font-bold">Name</th>
-                                        <th className="text-center text-white p-4 text-xl font-bold">Cost</th>
-                                        <th className="text-center text-white p-4 text-xl font-bold">Description</th>
-                                        <th className="text-center text-white p-4 text-xl font-bold  rounded-r-lg">
-                                            <p>Operations</p>
-                                        </th>
-                                    </tr>
+                                        <tr className="bg-gradient-to-l from-primary-start to-primary-end">
+                                            <th className="text-center text-white p-4 text-xl font-bold  rounded-l-lg ">No</th>
+                                            <th className="text-center text-white p-4 text-xl font-bold">Name</th>
+                                            <th className="text-center text-white p-4 text-xl font-bold">Cost</th>
+                                            <th className="text-center text-white p-4 text-xl font-bold">Description</th>
+                                            <th className="text-center text-white p-4 text-xl font-bold  rounded-r-lg">
+                                                <p>Operations</p>
+                                            </th>
+                                        </tr>
                                     </thead>
                                     <tbody>
-                                    {examList.map((exam, index) => (
-                                        <tr key={exam.id || index} className="bg-gray-100">
-                                            <td className="p-4 text-md text-blue-900 rounded-l-lg text-center">{index + 1}</td>
-                                            <td className="p-4 text-md text-center font-bold">{exam.examName}</td>
-                                            <td className="p-4 text-md text-center">{exam.examCost}</td>
-                                            <td className="p-4 text-md text-center">{exam.examDescription}</td>
-                                            <td className="p-4 relative rounded-r-lg">
-                                                <div className="w-full items-center justify-center flex gap-6">
-                                                    <Tooltip placement={"top"} title={"Edit Patient Informations"}>
-                                                        <button
-                                                            onClick={() => {
-                                                                setSelectedExamDetails(exam), setCanOpenEditExamDetailModal(true)
-                                                            }}
-                                                            className="flex items-center justify-center w-9 h-9 text-green-500 text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300">
-                                                            <FaEdit/>
-                                                        </button>
-                                                    </Tooltip>
-                                                    <Tooltip placement={"top"} title={"delete patient"}>
-                                                        <button
-                                                            onClick={() => {
-                                                                setExamToDelete(exam), setCanOpenConfirmActionModal(true)
-                                                            }}
-                                                            className="flex items-center justify-center w-9 h-9 text-red-400 text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300">
-                                                            <FaTrash/>
-                                                        </button>
-                                                    </Tooltip>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                        {examList.map((exam, index) => (
+                                            <tr key={exam.id || index} className="bg-gray-100">
+                                                <td className="p-4 text-md text-blue-900 rounded-l-lg text-center">{index + 1}</td>
+                                                <td className="p-4 text-md text-center font-bold">{exam.examName}</td>
+                                                <td className="p-4 text-md text-center">{exam.examCost}</td>
+                                                <td className="p-4 text-md text-center">{exam.examDescription}</td>
+                                                <td className="p-4 relative rounded-r-lg">
+                                                    <div className="w-full items-center justify-center flex gap-6">
+                                                        <Tooltip placement={"top"} title={"Edit Patient Informations"}>
+                                                            <button
+                                                                onClick={() => {
+                                                                    setSelectedExamDetails(exam), setCanOpenEditExamDetailModal(true)
+                                                                }}
+                                                                className="flex items-center justify-center w-9 h-9 text-green-500 text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300">
+                                                                <FaEdit />
+                                                            </button>
+                                                        </Tooltip>
+                                                        <Tooltip placement={"top"} title={"delete patient"}>
+                                                            <button
+                                                                onClick={() => {
+                                                                    setExamToDelete(exam), setCanOpenConfirmActionModal(true)
+                                                                }}
+                                                                className="flex items-center justify-center w-9 h-9 text-red-400 text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300">
+                                                                <FaTrash />
+                                                            </button>
+                                                        </Tooltip>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
                                     </tbody>
                                 </table>
 
@@ -226,17 +238,17 @@ export function AdminExamsList()
                                     <div className="flex gap-4">
                                         <Tooltip placement={"left"} title={"previous slide"}>
                                             <button
-                                                onClick={async ()=> {await fetchNextOrPreviousPatientList(previousUrlForRenderExamList), updateActualPageNumber("prev")}}
+                                                onClick={async () => { await fetchNextOrPreviousPatientList(previousUrlForRenderExamList), updateActualPageNumber("prev") }}
                                                 className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl  text-secondary hover:text-2xl duration-300 transition-all  hover:text-white shadow-xl flex justify-center items-center mt-2">
-                                                <FaArrowLeft/>
+                                                <FaArrowLeft />
                                             </button>
                                         </Tooltip>
                                         <p className="text-secondary text-2xl font-bold mt-4">{actualPageNumber}/{calculateNumberOfSlide()}</p>
                                         <Tooltip placement={"right"} title={"next slide"}>
                                             <button
-                                                onClick={async ()=> {await fetchNextOrPreviousPatientList(nexUrlForRenderExamList), updateActualPageNumber("next")}}
+                                                onClick={async () => { await fetchNextOrPreviousPatientList(nexUrlForRenderExamList), updateActualPageNumber("next") }}
                                                 className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl  text-secondary hover:text-2xl duration-300 transition-all  hover:text-white shadow-xl flex justify-center items-center mt-2">
-                                                <FaArrowRight/>
+                                                <FaArrowRight />
                                             </button>
                                         </Tooltip>
                                     </div>
@@ -246,22 +258,22 @@ export function AdminExamsList()
                                 {/* Add new exam button */}
                                 <Tooltip placement={"top"} title={"Add New Exam"}>
                                     <button
-                                        onClick={()=>navigate(appRouterPaths.addExam)}
+                                        onClick={() => navigate(appRouterPaths.addExam)}
                                         className="flex justify-center items-center fixed bottom-5 right-16 rounded-full w-14 h-14 bg-gradient-to-r text-3xl font-bold text-white from-primary-start to-primary-end hover:text-4xl transition-all duration-300">
-                                        <FaPlus/>
+                                        <FaPlus />
                                     </button>
                                 </Tooltip>
 
 
                                 {/* Modals content */}
-                                <EditExamInfosModal isOpen={canOpenEditExamDetailModal} onClose={()=>{setCanOpenEditExamDetailModal(false)}} setCanOpenSuccessModal={setCanOPenSuccessModal} setSuccessMessage={setSuccessMessage} setIsLoading={setIsLoading} examData={selectedExamDetails}/>
-                                <SuccessModal isOpen={canOpenSuccessModal} message={successMessage} canOpenSuccessModal={setCanOPenSuccessModal} makeAction={async ()=> {await fetchExamList(), calculateNumberOfSlide()}}/>
-                                <ErrorModal isOpen={canOpenErrorMessageModal} onCloseErrorModal={()=>{setCanOpenErrorMessageModal(false)}} message={errorMessage}/>
-                        
-                                <ConfirmationModal isOpen={canOpenConfirmActionModal} onClose={() => setCanOpenConfirmActionModal(false)} onConfirm={async () => await deleteExam(examToDelete.id)} title={"Delete Exam"} message={`Are you sure you want to delete the ${examToDelete.role + " "} ${examToDelete.first_name + " " + examToDelete.last_name} ?`}/>
+                                <EditExamInfosModal isOpen={canOpenEditExamDetailModal} onClose={() => { setCanOpenEditExamDetailModal(false) }} setCanOpenSuccessModal={setCanOPenSuccessModal} setSuccessMessage={setSuccessMessage} setIsLoading={setIsLoading} examData={selectedExamDetails} />
+                                <SuccessModal isOpen={canOpenSuccessModal} message={successMessage} canOpenSuccessModal={setCanOPenSuccessModal} makeAction={async () => { await fetchExamList(), calculateNumberOfSlide() }} />
+                                <ErrorModal isOpen={canOpenErrorMessageModal} onCloseErrorModal={() => { setCanOpenErrorMessageModal(false) }} message={errorMessage} />
+
+                                <ConfirmationModal isOpen={canOpenConfirmActionModal} onClose={() => setCanOpenConfirmActionModal(false)} onConfirm={async () => await deleteExam(examToDelete.id)} title={"Delete Exam"} message={`Are you sure you want to delete the exam "${examToDelete.examName}"?`} />
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center h-[600px]  bg-gradient-to-b from-white to-teal-50   p-8">
+                            <div className="flex flex-col items-center justify-center h-[600px]  bg-gradient-to-b from-white to-teal-50 p-8 ml-4">
                                 <div className="mb-6 relative">
                                     <svg
                                         className="w-24 h-24 text-primary-end"
@@ -284,7 +296,7 @@ export function AdminExamsList()
                                     Your medical team is the heart of your clinic. Start building your team by adding your first member of the exam.
                                 </p>
                                 <button
-                                    onClick={()=>navigate(appRouterPaths.addExam)}
+                                    onClick={() => navigate(appRouterPaths.addExam)}
                                     className="bg-primary-end hover:bg-primary-start text-white font-bold py-2 px-4 rounded-full transition-all duration-300 flex items-center"
                                 >
                                     <svg
