@@ -3,6 +3,7 @@ import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import { X, Save } from "lucide-react";
 import { getWarehouses, createPhysicalInventory } from "../../../Utils/api/materialAccounting.js";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
 
 export function InventoryModal({ isOpen, onClose, onRefresh }) {
     const [warehouses, setWarehouses] = useState([]);
@@ -14,6 +15,8 @@ export function InventoryModal({ isOpen, onClose, onRefresh }) {
         inventory_date: new Date().toISOString().split('T')[0],
         notes: ""
     });
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         if (isOpen) {
@@ -44,7 +47,8 @@ export function InventoryModal({ isOpen, onClose, onRefresh }) {
             onRefresh();
             onClose();
         } catch (error) {
-            alert(`Erreur lors de la création : ${error.detail || error.message || JSON.stringify(error)}`);
+            setErrorMessage(`Erreur lors de la création : ${error.detail || error.message || JSON.stringify(error)}`);
+            setCanOpenErrorModal(true);
         } finally {
             setIsLoading(false);
         }
@@ -140,6 +144,7 @@ export function InventoryModal({ isOpen, onClose, onRefresh }) {
                     </div>
                 </form>
             </div>
+            <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
         </div>
     );
 }

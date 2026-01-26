@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Save } from "lucide-react";
 import { createFamily, updateFamily, getCategories } from "../../../Utils/api/materialAccounting.js";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
 
 export function FamilyModal({ isOpen, onClose, onRefresh, editingFamily }) {
     const [isLoading, setIsLoading] = useState(false);
@@ -12,6 +13,8 @@ export function FamilyModal({ isOpen, onClose, onRefresh, editingFamily }) {
         category: "",
         is_active: true
     });
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         loadCategories();
@@ -94,7 +97,8 @@ export function FamilyModal({ isOpen, onClose, onRefresh, editingFamily }) {
                 console.error("Server Response:", error.response.data);
                 console.error("Status:", error.response.status);
             }
-            alert("Erreur lors de l'enregistrement de la famille: " + (error.response?.data?.detail || error.message));
+            setErrorMessage("Erreur lors de l'enregistrement de la famille: " + (error.response?.data?.detail || error.message));
+            setCanOpenErrorModal(true);
         } finally {
             setIsLoading(false);
         }
@@ -203,6 +207,7 @@ export function FamilyModal({ isOpen, onClose, onRefresh, editingFamily }) {
                     </div>
                 </form>
             </div>
+            <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
         </div>
     );
 }

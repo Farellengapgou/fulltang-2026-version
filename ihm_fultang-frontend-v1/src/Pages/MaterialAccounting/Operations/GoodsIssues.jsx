@@ -5,6 +5,9 @@ import { AccountantDashBoard } from "../../Accountant/Components/AccountantDashb
 import { MaterialAccountingNavLink } from "../NavLink.js";
 import { getGoodsIssues, validateGoodsIssue, confirmGoodsIssue, postGoodsIssue, deleteGoodsIssue, getGoodsIssueDetails } from "../../../Utils/api/materialAccounting.js";
 import { GoodsIssueModal } from "../Components/GoodsIssueModal.jsx";
+import { ConfirmationModal } from "../../Modals/ConfirmAction.Modal.jsx";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
+import { SuccessModal } from "../../Modals/SuccessModal.jsx";
 
 export function GoodsIssues() {
     const [issues, setIssues] = useState([]);
@@ -12,6 +15,16 @@ export function GoodsIssues() {
     const [searchTerm, setSearchTerm] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedIssue, setSelectedIssue] = useState(null);
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: "",
+        message: "",
+        onConfirm: null
+    });
+    const [canOpenSuccessModal, setCanOpenSuccessModal] = useState(false);
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     useEffect(() => {
         loadData();
@@ -92,51 +105,83 @@ export function GoodsIssues() {
     };
 
     const handleValidate = async (id) => {
-        if (window.confirm("Voulez-vous valider ce bon ? Les articles seront RÉSERVÉS dans le stock.")) {
-            try {
-                await validateGoodsIssue(id);
-                loadData();
-            } catch (error) {
-                console.error("Error validating issue:", error);
-                alert("Erreur lors de la validation: " + (error.detail || error.message));
+        setConfirmModal({
+            isOpen: true,
+            title: "Valider le bon de sortie",
+            message: "Voulez-vous valider ce bon ? Les articles seront RÉSERVÉS dans le stock.",
+            onConfirm: async () => {
+                try {
+                    await validateGoodsIssue(id);
+                    loadData();
+                    setSuccessMessage("Bon de sortie validé et articles réservés avec succès");
+                    setCanOpenSuccessModal(true);
+                } catch (error) {
+                    console.error("Error validating issue:", error);
+                    setErrorMessage("Erreur lors de la validation: " + (error.detail || error.message));
+                    setCanOpenErrorModal(true);
+                }
             }
-        }
+        });
     };
 
     const handleConfirm = async (id) => {
-        if (window.confirm("Confirmer la sortie physique ? Le stock sera réellement DIMINUÉ.")) {
-            try {
-                await confirmGoodsIssue(id);
-                loadData();
-            } catch (error) {
-                console.error("Error confirming issue:", error);
-                alert("Erreur lors de la confirmation: " + (error.detail || error.message));
+        setConfirmModal({
+            isOpen: true,
+            title: "Confirmer la sortie physique",
+            message: "Confirmer la sortie physique ? Le stock sera réellement DIMINUÉ.",
+            onConfirm: async () => {
+                try {
+                    await confirmGoodsIssue(id);
+                    loadData();
+                    setSuccessMessage("Sortie physique confirmée, stock diminué avec succès");
+                    setCanOpenSuccessModal(true);
+                } catch (error) {
+                    console.error("Error confirming issue:", error);
+                    setErrorMessage("Erreur lors de la confirmation: " + (error.detail || error.message));
+                    setCanOpenErrorModal(true);
+                }
             }
-        }
+        });
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("Voulez-vous vraiment supprimer ce bon de sortie ?")) {
-            try {
-                await deleteGoodsIssue(id);
-                loadData();
-            } catch (error) {
-                console.error("Error deleting issue:", error);
-                alert("Erreur lors de la suppression: " + (error.detail || error.message));
+        setConfirmModal({
+            isOpen: true,
+            title: "Supprimer le bon de sortie",
+            message: "Voulez-vous vraiment supprimer ce bon de sortie ? Cette action est irréversible.",
+            onConfirm: async () => {
+                try {
+                    await deleteGoodsIssue(id);
+                    loadData();
+                    setSuccessMessage("Bon de sortie supprimé avec succès");
+                    setCanOpenSuccessModal(true);
+                } catch (error) {
+                    console.error("Error deleting issue:", error);
+                    setErrorMessage("Erreur lors de la suppression: " + (error.detail || error.message));
+                    setCanOpenErrorModal(true);
+                }
             }
-        }
+        });
     };
 
     const handlePost = async (id) => {
-        if (window.confirm("Voulez-vous comptabiliser ce bon ? Cette action génèrera les écritures comptables.")) {
-            try {
-                await postGoodsIssue(id);
-                loadData();
-            } catch (error) {
-                console.error("Error posting issue:", error);
-                alert("Erreur lors de la comptabilisation: " + (error.detail || error.message));
+        setConfirmModal({
+            isOpen: true,
+            title: "Comptabiliser le bon de sortie",
+            message: "Voulez-vous comptabiliser ce bon ? Cette action génèrera les écritures comptables.",
+            onConfirm: async () => {
+                try {
+                    await postGoodsIssue(id);
+                    loadData();
+                    setSuccessMessage("Bon de sortie comptabilisé avec succès");
+                    setCanOpenSuccessModal(true);
+                } catch (error) {
+                    console.error("Error posting issue:", error);
+                    setErrorMessage("Erreur lors de la comptabilisation: " + (error.detail || error.message));
+                    setCanOpenErrorModal(true);
+                }
             }
-        }
+        });
     };
 
     return (
@@ -307,6 +352,23 @@ export function GoodsIssues() {
                 onClose={() => setIsModalOpen(false)}
                 onRefresh={loadData}
                 initialData={selectedIssue}
+            />
+            <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+            />
+            <SuccessModal 
+                isOpen={canOpenSuccessModal} 
+                canOpenSuccessModal={setCanOpenSuccessModal} 
+                message={successMessage} 
+            />
+            <ErrorModal 
+                isOpen={canOpenErrorModal} 
+                onCloseErrorModal={setCanOpenErrorModal} 
+                message={errorMessage} 
             />
         </AccountantDashBoard>
     );

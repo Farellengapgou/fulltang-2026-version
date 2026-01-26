@@ -3,11 +3,15 @@ import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import { X, Plus, Trash2, Save, ArrowRight } from "lucide-react";
 import { getWarehouses, getStockLevels, createTransfer } from "../../../Utils/api/materialAccounting.js";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
+
 
 export function TransferModal({ isOpen, onClose, onRefresh }) {
     const [warehouses, setWarehouses] = useState([]);
     const [articles, setArticles] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const [formData, setFormData] = useState({
         from_warehouse: "", // Should be ID
@@ -73,17 +77,22 @@ export function TransferModal({ isOpen, onClose, onRefresh }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
         if (formData.from_warehouse === formData.to_warehouse) {
-            alert("Le dépôt de départ et d'arrivée doivent être différents");
+            setErrorMessage("Le dépôt de départ et d'arrivée doivent être différents");
+            setCanOpenErrorModal(true);
             return;
         }
+        
         try {
             setIsLoading(true);
             await createTransfer(formData);
             onRefresh();
             onClose();
         } catch (error) {
-            alert("Erreur lors de la création du transfert");
+            console.error("Error creating transfer:", error);
+            setErrorMessage("Erreur lors de la création du transfert: " + (error.detail || error.message));
+            setCanOpenErrorModal(true);
         } finally {
             setIsLoading(false);
         }
@@ -237,6 +246,7 @@ export function TransferModal({ isOpen, onClose, onRefresh }) {
                     </button>
                 </div>
             </div>
+            <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
         </div>
     );
 }

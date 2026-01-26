@@ -48,11 +48,9 @@ export function AddMedicalStaff() {
         if (medicalStaffData.role) {
             medicalStaffData.isStaff = medicalStaffData.role === 'Admin';
         }
-        if(medicalStaffData.role === "Accountant")
-        {
-           medicalStaffData.userType = "Accountant";
-        }
-        else {
+        if (["Accountant", "MaterialAccountant"].includes(medicalStaffData.role)) {
+            medicalStaffData.userType = "Accountant";
+        } else {
             medicalStaffData.userType = "Medical";
         }
     }, [medicalStaffData]);

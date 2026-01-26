@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Save, Building, Phone, Mail, Globe, MapPin, Calculator } from "lucide-react";
 import { createSupplier, updateSupplier, getChartOfAccounts } from "../../../Utils/api/materialAccounting.js";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
 
 export function SupplierModal({ isOpen, onClose, onRefresh, editingSupplier }) {
     const [isLoading, setIsLoading] = useState(false);
@@ -18,6 +19,8 @@ export function SupplierModal({ isOpen, onClose, onRefresh, editingSupplier }) {
         account: "",
         is_active: true
     });
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const supplierTypes = [
         { value: "PHARMA", label: "Labo Pharma" },
@@ -100,7 +103,8 @@ export function SupplierModal({ isOpen, onClose, onRefresh, editingSupplier }) {
             onClose();
         } catch (error) {
             console.error("Error saving supplier:", error);
-            alert("Erreur lors de l'enregistrement du fournisseur");
+            setErrorMessage("Erreur lors de l'enregistrement du fournisseur");
+            setCanOpenErrorModal(true);
         } finally {
             setIsLoading(false);
         }
@@ -297,6 +301,7 @@ export function SupplierModal({ isOpen, onClose, onRefresh, editingSupplier }) {
                     </div>
                 </form>
             </div>
+            <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
         </div>
     );
 }

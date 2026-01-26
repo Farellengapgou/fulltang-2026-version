@@ -16,7 +16,9 @@ import {
     updateCategory,
     deleteCategory,
 } from "../../../Utils/api/materialAccounting.js";
-
+import { ConfirmationModal } from "../../Modals/ConfirmAction.Modal.jsx";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
+import { SuccessModal } from "../../Modals/SuccessModal.jsx";
 import { CategoryModal } from "../Components/CategoryModal.jsx";
 
 export function Categories() {
@@ -26,6 +28,16 @@ export function Categories() {
     const [showModal, setShowModal] = useState(false);
     const [editingCategory, setEditingCategory] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: "",
+        message: "",
+        onConfirm: null
+    });
+    const [canOpenSuccessModal, setCanOpenSuccessModal] = useState(false);
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     useEffect(() => {
         loadCategories();
@@ -66,14 +78,23 @@ export function Categories() {
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("Voulez-vous vraiment supprimer cette catégorie ?")) {
-            try {
-                await deleteCategory(id);
-                loadCategories();
-            } catch (error) {
-                console.error("Error deleting category:", error);
+        setConfirmModal({
+            isOpen: true,
+            title: "Supprimer la catégorie",
+            message: "Voulez-vous vraiment supprimer cette catégorie ? Cette action est irréversible.",
+            onConfirm: async () => {
+                try {
+                    await deleteCategory(id);
+                    loadCategories();
+                    setSuccessMessage("Catégorie supprimée avec succès");
+                    setCanOpenSuccessModal(true);
+                } catch (error) {
+                    console.error("Error deleting category:", error);
+                    setErrorMessage("Erreur lors de la suppression de la catégorie: " + (error.detail || error.message));
+                    setCanOpenErrorModal(true);
+                }
             }
-        }
+        });
     };
 
     if (isLoading) {
@@ -290,6 +311,23 @@ export function Categories() {
                 onClose={() => setShowModal(false)}
                 onRefresh={loadCategories}
                 editingCategory={editingCategory}
+            />
+            <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+            />
+            <SuccessModal 
+                isOpen={canOpenSuccessModal} 
+                canOpenSuccessModal={setCanOpenSuccessModal} 
+                message={successMessage} 
+            />
+            <ErrorModal 
+                isOpen={canOpenErrorModal} 
+                onCloseErrorModal={setCanOpenErrorModal} 
+                message={errorMessage} 
             />
         </AccountantDashBoard>
     );

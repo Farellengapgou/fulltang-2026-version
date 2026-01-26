@@ -6,6 +6,9 @@ import { MaterialAccountingNavLink } from "../NavLink.js";
 import { getGoodsReceipts, validateGoodsReceipt, deleteGoodsReceipt, postGoodsReceipt, getGoodsReceiptDetails } from "../../../Utils/api/materialAccounting.js";
 import { GoodsReceiptModal } from "../Components/GoodsReceiptModal.jsx";
 import { CheckCircle, FileCheck } from "lucide-react";
+import { ErrorModal } from "../../Modals/ErrorModal.jsx";
+import { SuccessModal } from "../../Modals/SuccessModal.jsx";
+import { ConfirmationModal } from "../../Modals/ConfirmAction.Modal.jsx";
 
 export function GoodsReceipts() {
     const [receipts, setReceipts] = useState([]);
@@ -14,6 +17,16 @@ export function GoodsReceipts() {
     const [statusFilter, setStatusFilter] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedReceipt, setSelectedReceipt] = useState(null);
+    const [canOpenSuccessModal, setCanOpenSuccessModal] = useState(false);
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: "",
+        message: "",
+        onConfirm: null
+    });
 
     useEffect(() => {
         loadData();
@@ -70,27 +83,43 @@ export function GoodsReceipts() {
     });
 
     const handleValidate = async (id) => {
-        if (window.confirm("Voulez-vous vraiment valider ce bon ? Cette action est irréversible.")) {
-            try {
-                await validateGoodsReceipt(id);
-                loadData();
-            } catch (error) {
-                console.error("Error validating receipt:", error);
-                alert("Erreur lors de la validation: " + (error.detail || error.message));
+        setConfirmModal({
+            isOpen: true,
+            title: "Valider le bon",
+            message: "Voulez-vous vraiment valider ce bon ? Cette action est irréversible.",
+            onConfirm: async () => {
+                try {
+                    await validateGoodsReceipt(id);
+                    loadData();
+                    setSuccessMessage("Bon d'entrée validé avec succès");
+                    setCanOpenSuccessModal(true);
+                } catch (error) {
+                    console.error("Error validating receipt:", error);
+                    setErrorMessage("Erreur lors de la validation: " + (error.detail || error.message));
+                    setCanOpenErrorModal(true);
+                }
             }
-        }
+        });
     };
 
     const handlePost = async (id) => {
-        if (window.confirm("Voulez-vous vraiment comptabiliser ce bon ? Une écriture comptable sera générée.")) {
-            try {
-                await postGoodsReceipt(id);
-                loadData();
-            } catch (error) {
-                console.error("Error posting receipt:", error);
-                alert("Erreur lors de la comptabilisation: " + (error.detail || error.message));
+        setConfirmModal({
+            isOpen: true,
+            title: "Comptabiliser le bon",
+            message: "Voulez-vous vraiment comptabiliser ce bon ? Une écriture comptable sera générée.",
+            onConfirm: async () => {
+                try {
+                    await postGoodsReceipt(id);
+                    loadData();
+                    setSuccessMessage("Bon d'entrée comptabilisé avec succès");
+                    setCanOpenSuccessModal(true);
+                } catch (error) {
+                    console.error("Error posting receipt:", error);
+                    setErrorMessage("Erreur lors de la comptabilisation: " + (error.detail || error.message));
+                    setCanOpenErrorModal(true);
+                }
             }
-        }
+        });
     };
 
     const handleEdit = async (receipt) => {
@@ -127,15 +156,23 @@ export function GoodsReceipts() {
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("Voulez-vous vraiment supprimer ce bon d'entrée ? Cette action est irréversible.")) {
-            try {
-                await deleteGoodsReceipt(id);
-                loadData();
-            } catch (error) {
-                console.error("Error deleting receipt:", error);
-                alert("Erreur lors de la suppression: " + (error.detail || error.message));
+        setConfirmModal({
+            isOpen: true,
+            title: "Supprimer le bon",
+            message: "Voulez-vous vraiment supprimer ce bon d'entrée ? Cette action est irréversible.",
+            onConfirm: async () => {
+                try {
+                    await deleteGoodsReceipt(id);
+                    loadData();
+                    setSuccessMessage("Bon d'entrée supprimé avec succès");
+                    setCanOpenSuccessModal(true);
+                } catch (error) {
+                    console.error("Error deleting receipt:", error);
+                    setErrorMessage("Erreur lors de la suppression: " + (error.detail || error.message));
+                    setCanOpenErrorModal(true);
+                }
             }
-        }
+        });
     };
 
     return (
@@ -320,6 +357,15 @@ export function GoodsReceipts() {
                 onClose={() => setIsModalOpen(false)}
                 onRefresh={loadData}
                 initialData={selectedReceipt}
+            />
+            <SuccessModal isOpen={canOpenSuccessModal} canOpenSuccessModal={setCanOpenSuccessModal} message={successMessage} />
+            <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
+            <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
             />
         </AccountantDashBoard>
     );
