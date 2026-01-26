@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import { X, Plus, Trash2, Save, ArrowRight } from "lucide-react";
 import { getWarehouses, getStockLevels, createTransfer } from "../../../Utils/api/materialAccounting.js";
 
@@ -135,12 +137,14 @@ export function TransferModal({ isOpen, onClose, onRefresh }) {
 
                         <div className="space-y-2">
                             <label className="text-sm font-bold text-gray-700">Date du transfert</label>
-                            <input
-                                type="date"
-                                required
-                                value={formData.date}
-                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-end outline-none"
+                            <DatePicker
+                                placeholder="Transfer Date"
+                                value={formData.date ? dayjs(formData.date) : null}
+                                onChange={(date, dateString) => setFormData({ ...formData, date: dateString })}
+                                disabledDate={(current) => {
+                                    return current && current.isAfter(dayjs(), 'day');
+                                }}
+                                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-end outline-none h-12"
                             />
                         </div>
                         <div className="space-y-2">

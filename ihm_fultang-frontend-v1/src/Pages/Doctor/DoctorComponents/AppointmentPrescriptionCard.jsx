@@ -1,10 +1,12 @@
 import PropTypes from "prop-types";
+import { DatePicker, TimePicker } from 'antd';
+import dayjs from 'dayjs';
 
-export default function AppointmentPrescriptionCard({applyInputStyle, onSubmit, endConsultation, appointmentDate, appointmentTime, setAppointmentDate, setAppointmentTime, requirements, setRequirements, appointmentReason, setAppointmentReason,isPrescribingAppointment}) {
+export default function AppointmentPrescriptionCard({ applyInputStyle, onSubmit, endConsultation, appointmentDate, appointmentTime, setAppointmentDate, setAppointmentTime, requirements, setRequirements, appointmentReason, setAppointmentReason, isPrescribingAppointment }) {
 
     AppointmentPrescriptionCard.propTypes = {
         applyInputStyle: PropTypes.func.isRequired,
-        onSubmit:PropTypes.func.isRequired,
+        onSubmit: PropTypes.func.isRequired,
         endConsultation: PropTypes.func.isRequired,
         appointmentDate: PropTypes.object.isRequired,
         appointmentTime: PropTypes.object.isRequired,
@@ -23,22 +25,24 @@ export default function AppointmentPrescriptionCard({applyInputStyle, onSubmit, 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Date of next
                         appointment</label>
-                    <input
-                        value={appointmentDate}
-                        onChange={(e) => setAppointmentDate(e.target.value)}
-                        required={true}
-                        type="date"
-                        className={applyInputStyle()}/>
+                    <DatePicker
+                        value={appointmentDate ? dayjs(appointmentDate) : null}
+                        onChange={(date, dateString) => setAppointmentDate(dateString)}
+                        placeholder="Select Date"
+                        disabledDate={(current) => {
+                            return current && current.isBefore(dayjs().startOf('day'));
+                        }}
+                        className={applyInputStyle() + " h-10 w-full"} />
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Appointment
                         time</label>
-                    <input
-                        type="time"
-                        value={appointmentTime}
-                        onChange={(e) => setAppointmentTime(e.target.value)}
-                        required={true}
-                        className={applyInputStyle()}
+                    <TimePicker
+                        value={appointmentTime ? dayjs(appointmentTime, 'HH:mm') : null}
+                        onChange={(time, timeString) => setAppointmentTime(timeString)}
+                        format="HH:mm"
+                        placeholder="Select Time"
+                        className={applyInputStyle() + " h-10 w-full"}
                     />
                 </div>
             </div>
@@ -70,14 +74,14 @@ export default function AppointmentPrescriptionCard({applyInputStyle, onSubmit, 
 
             <div className="flex justify-end gap-4">
                 <button disabled={isPrescribingAppointment}
-                        type="submit"
-                        className="bg-primary-end hover:bg-primary-start font-semibold text-white py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed">
+                    type="submit"
+                    className="bg-primary-end hover:bg-primary-start font-semibold text-white py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed">
                     {isPrescribingAppointment ? "Processing..." : "Submit"}
                 </button>
 
                 <button type={"button"}
-                        onClick={endConsultation}
-                        className="px-4 py-2 bg-primary-end hover:bg-primary-start transition-all duration-300 text-white font-bold rounded-lg"
+                    onClick={endConsultation}
+                    className="px-4 py-2 bg-primary-end hover:bg-primary-start transition-all duration-300 text-white font-bold rounded-lg"
                 >
                     End consultation
                 </button>

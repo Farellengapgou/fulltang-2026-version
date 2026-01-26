@@ -1,13 +1,15 @@
-import {useEffect, useState} from "react"
+import { useEffect, useState } from "react"
 import { Search, Calendar, Eye, User, Clock, DollarSign } from "lucide-react"
-import {doctorNavLink} from "./lib/doctorNavLink.js";
-import {DoctorNavBar} from "./DoctorComponents/DoctorNavBar.jsx";
-import {useCalculateAge} from "../../Utils/compute.js";
-import {formatDateOnly, formatDateToTime} from "../../Utils/formatDateMethods.js";
-import {getStateStyles} from "./lib/applyStyleFunction.js";
-import {useNavigate} from "react-router-dom";
-import {CustomDashboard} from "../../GlobalComponents/CustomDashboard.jsx";
-import {useAuthentication} from "../../Utils/Provider.jsx";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
+import { doctorNavLink } from "./lib/doctorNavLink.js";
+import { DoctorNavBar } from "./DoctorComponents/DoctorNavBar.jsx";
+import { useCalculateAge } from "../../Utils/compute.js";
+import { formatDateOnly, formatDateToTime } from "../../Utils/formatDateMethods.js";
+import { getStateStyles } from "./lib/applyStyleFunction.js";
+import { useNavigate } from "react-router-dom";
+import { CustomDashboard } from "../../GlobalComponents/CustomDashboard.jsx";
+import { useAuthentication } from "../../Utils/Provider.jsx";
 import axiosInstance from "../../Utils/axiosInstance.js";
 import Loader from "../../GlobalComponents/Loader.jsx";
 import ServerErrorPage from "../../GlobalComponents/ServerError.jsx";
@@ -17,21 +19,18 @@ export function ConsultationHistory() {
     const [searchTerm, setSearchTerm] = useState("");
     const [dateFilter, setDateFilter] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const {userData} = useAuthentication();
+    const { userData } = useAuthentication();
     const [consultationHistoryList, setConsultationHistoryList] = useState([]);
     const [errorStatus, setErrorStatus] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
 
 
-    async function loadConsultationHistory(idDoctor)
-    {
+    async function loadConsultationHistory(idDoctor) {
         setIsLoading(true);
-        try
-        {
-            const response =  await axiosInstance.get(`/consultation/doctor/${idDoctor}/?history=true`);
+        try {
+            const response = await axiosInstance.get(`/consultation/doctor/${idDoctor}/?history=true`);
             setIsLoading(false);
-            if(response.status === 200)
-            {
+            if (response.status === 200) {
                 setConsultationHistoryList(response?.data);
                 setErrorStatus(null);
                 setErrorMessage("");
@@ -39,8 +38,7 @@ export function ConsultationHistory() {
             }
 
         }
-        catch (error)
-        {
+        catch (error) {
             setIsLoading(false);
             setErrorStatus(error.status);
             console.log(error);
@@ -48,15 +46,14 @@ export function ConsultationHistory() {
     }
 
     useEffect(() => {
-        if (userData.id)
-        {
+        if (userData.id) {
             loadConsultationHistory(userData.id);
         }
     }, [userData.id]);
 
 
     const filteredConsultations = consultationHistoryList.filter((consultation) => {
-        const fullName = consultation?.idPatient?.firstName + " "+ consultation?.idPatient?.lastName;
+        const fullName = consultation?.idPatient?.firstName + " " + consultation?.idPatient?.lastName;
         const matchesSearch = fullName.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesDate = !dateFilter || new Date(consultation?.consultationDate || '').toISOString().split('T')[0] === dateFilter;
         return matchesSearch && matchesDate
@@ -65,12 +62,12 @@ export function ConsultationHistory() {
 
     const navigate = useNavigate();
 
-    const {calculateAge} = useCalculateAge();
+    const { calculateAge } = useCalculateAge();
 
 
     return (
         <CustomDashboard linkList={doctorNavLink} requiredRole={"Doctor"}>
-            <DoctorNavBar/>
+            <DoctorNavBar />
             <div className="mx-auto p-6">
                 <h1 className="text-2xl font-bold text-gray-800 mb-6">History of Consultations</h1>
 
@@ -88,11 +85,14 @@ export function ConsultationHistory() {
                     </div>
                     <div className="flex items-center gap-4">
                         <Calendar className="text-gray-400 h-5 w-5" />
-                        <input
-                            type="date"
-                            value={dateFilter}
-                            onChange={(e) => setDateFilter(e.target.value)}
-                            className="px-4 py-2 border border-gray-300 focus:border-none rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none transition-all duration-300"
+                        <DatePicker
+                            placeholder="Filter by date"
+                            value={dateFilter ? dayjs(dateFilter) : null}
+                            onChange={(date, dateString) => setDateFilter(dateString)}
+                            disabledDate={(current) => {
+                                return current && current.isAfter(dayjs(), 'day');
+                            }}
+                            className="px-4 py-2 border border-gray-300 focus:border-none rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none transition-all duration-300 h-10"
                         />
                     </div>
                 </div>
@@ -100,11 +100,11 @@ export function ConsultationHistory() {
                 {/* consultation history List */}
                 {isLoading ? (
                     <div className="h-[500px] w-full flex justify-center items-center">
-                        <Loader size={"medium"} color={"primary-end"}/>
+                        <Loader size={"medium"} color={"primary-end"} />
                     </div>
-                    ) : (
-                        errorStatus ? <ServerErrorPage errorStatus={errorStatus} message={errorMessage}/>  :
-                        ( filteredConsultations && filteredConsultations.length > 0 ?
+                ) : (
+                    errorStatus ? <ServerErrorPage errorStatus={errorStatus} message={errorMessage} /> :
+                        (filteredConsultations && filteredConsultations.length > 0 ?
                             (
                                 < div >
                                     < table className="w-full border-separate border-spacing-y-2 ">
@@ -137,7 +137,7 @@ export function ConsultationHistory() {
                                                     <tr key={consultation.id} className="">
                                                         <td className={`px-6 py-5 rounded-l-xl bg-gray-100  border-l-4  ${getStateStyles(consultation?.statePatient).container}`}>
                                                             <div className="w-full flex items-center justify-center">
-                                                                <User className="h-6 w-6 text-gray-400 mr-2"/>
+                                                                <User className="h-6 w-6 text-gray-400 mr-2" />
                                                                 <div>
                                                                     <div
                                                                         className="text-md font-medium text-gray-900">{patientInfo?.firstName + " " + patientInfo?.lastName}</div>
@@ -149,7 +149,7 @@ export function ConsultationHistory() {
                                                         </td>
                                                         <td className="px-6 py-5 bg-gray-100 ">
                                                             <div className="w-full flex justify-center items-center ">
-                                                                <Clock className="h-5 w-5 text-gray-400 mr-2 mt-2"/>
+                                                                <Clock className="h-5 w-5 text-gray-400 mr-2 mt-2" />
                                                                 <div>
                                                                     <div className="text-sm text-center text-gray-900">{consultation?.consultationDate ? formatDateOnly(consultation?.consultationDate) : 'Not Specified'}</div>
                                                                     <div className="text-sm  text-center text-gray-500">{consultation?.consultationDate ? formatDateToTime(consultation?.consultationDate) : 'Not Specified'} </div>
@@ -162,26 +162,26 @@ export function ConsultationHistory() {
                                                         </td>
                                                         <td className="px-6 py-4 bg-gray-100 ">
                                                             <div className="flex items-center justify-center text-sm text-gray-900">
-                                                    <span
-                                                        className={`px-2 py-1 rounded-full border-2 text-sm font-medium ${getStateStyles(consultation?.statePatient).badge}`}>
-                                                        {consultation?.statePatient || 'Not Critical'}
-                                                    </span>
+                                                                <span
+                                                                    className={`px-2 py-1 rounded-full border-2 text-sm font-medium ${getStateStyles(consultation?.statePatient).badge}`}>
+                                                                    {consultation?.statePatient || 'Not Critical'}
+                                                                </span>
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-5 bg-gray-100 ">
                                                             <div className="flex items-center justify-center text-sm text-gray-900">
-                                                                <DollarSign className="h-5 w-5 text-gray-400 mr-1"/>
+                                                                <DollarSign className="h-5 w-5 text-gray-400 mr-1" />
                                                                 {consultation?.consultationPrice ? consultation?.consultationPrice.toLocaleString() + ' FCFA' : ' - '}
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-5  bg-gray-100 rounded-r-xl">
                                                             <button
                                                                 onClick={() => {
-                                                                    navigate(`/doctor/consultation-history/details/${consultation?.id}`, {state: {consultation}})
+                                                                    navigate(`/doctor/consultation-history/details/${consultation?.id}`, { state: { consultation } })
                                                                 }}
                                                                 className="flex items-center text-primary-end hover:text-primary-start font-semibold hover:text-[17px] transition-all duration-500"
                                                             >
-                                                                <Eye className="h-5 w-5 "/>
+                                                                <Eye className="h-5 w-5 " />
                                                                 <span className="ml-2">Details</span>
                                                             </button>
                                                         </td>
@@ -191,10 +191,10 @@ export function ConsultationHistory() {
                                         </tbody>
                                     </table>
                                 </div>
-                            ): (
+                            ) : (
                                 <div className="p-8 mt-24 flex items-center justify-center">
                                     <div className="flex flex-col">
-                                        <Calendar className="h-16 w-16 text-primary-end mx-auto mb-4"/>
+                                        <Calendar className="h-16 w-16 text-primary-end mx-auto mb-4" />
                                         <h2 className="text-2xl font-bold text-gray-800 mb-2 mx-auto">No Consultations
                                             History</h2>
                                         <p className="text-gray-600 mb-4 mx-auto text-center">You don't have any saved consultations yet. Once your medical consultations have been carried out, their history will appear here for better monitoring of your patients.</p>
@@ -210,7 +210,7 @@ export function ConsultationHistory() {
                                 </div>
                             )
                         )
-                    )
+                )
                 }
             </div>
         </CustomDashboard>

@@ -1,8 +1,10 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import PropTypes from "prop-types";
 import axiosInstance from "../../Utils/axiosInstance.js";
 
-export function EditDrugInfosModal ({ isOpen, onClose, setCanOpenSuccessModal, setSuccessMessage, setIsLoading, drugData }) {
+export function EditDrugInfosModal({ isOpen, onClose, setCanOpenSuccessModal, setSuccessMessage, setIsLoading, drugData }) {
     EditDrugInfosModal.propTypes = {
         isOpen: PropTypes.bool.isRequired,
         onClose: PropTypes.func.isRequired,
@@ -14,7 +16,7 @@ export function EditDrugInfosModal ({ isOpen, onClose, setCanOpenSuccessModal, s
 
     const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
-        name:'',
+        name: '',
         generic_name: '',
         category: '',
         brand: '',
@@ -38,7 +40,7 @@ export function EditDrugInfosModal ({ isOpen, onClose, setCanOpenSuccessModal, s
         description: false,
         requires_prescription: false,
         updated_at: false,
-        
+
     });
 
     async function fetchCategories() {
@@ -67,7 +69,7 @@ export function EditDrugInfosModal ({ isOpen, onClose, setCanOpenSuccessModal, s
 
 
 
-    function handleChange (e) {
+    function handleChange(e) {
         const { name, value, type, checked } = e.target;
         setFormData(prevData => ({
             ...prevData,
@@ -83,28 +85,28 @@ export function EditDrugInfosModal ({ isOpen, onClose, setCanOpenSuccessModal, s
     async function handleSubmit(e) {
         e.preventDefault();
         setIsLoading(true);
-            const updatedData = Object.keys(checkedFields).reduce((acc, key) => {
-                if (checkedFields[key]) {
-                    acc[key] = formData[key];
-                }
-                return acc;
-            }, {});
-
-            try {
-                const response = await axiosInstance.patch(`/product/${drugData.id}/`, updatedData);
-                if (response.status === 200) {
-                    setIsLoading(false);
-                    setSuccessMessage(`${drugData.name} 's information has been updated successfully!`);
-                    setCanOpenSuccessModal(true);
-                    onClose();
-                }
-            } catch (error) {
-                setIsLoading(false);
-                setSuccessMessage("");
-                setCanOpenSuccessModal(false);
-                setError("Something went wrong, please try again later!");
-                console.log(error);
+        const updatedData = Object.keys(checkedFields).reduce((acc, key) => {
+            if (checkedFields[key]) {
+                acc[key] = formData[key];
             }
+            return acc;
+        }, {});
+
+        try {
+            const response = await axiosInstance.patch(`/product/${drugData.id}/`, updatedData);
+            if (response.status === 200) {
+                setIsLoading(false);
+                setSuccessMessage(`${drugData.name} 's information has been updated successfully!`);
+                setCanOpenSuccessModal(true);
+                onClose();
+            }
+        } catch (error) {
+            setIsLoading(false);
+            setSuccessMessage("");
+            setCanOpenSuccessModal(false);
+            setError("Something went wrong, please try again later!");
+            console.log(error);
+        }
         setIsLoading(false);
     }
 
@@ -127,8 +129,8 @@ export function EditDrugInfosModal ({ isOpen, onClose, setCanOpenSuccessModal, s
 
     if (!isOpen) return null;
 
-return (
-    <>
+    return (
+        <>
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm transition-all duration-300">
                 <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
                     <div className="bg-gradient-to-r from-primary-end to-primary-start px-6 py-4 rounded-t-lg flex-col flex justify-center items-center">
@@ -151,7 +153,7 @@ return (
                                 />
                                 <div className="flex-1">
                                     <label htmlFor="Name"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                        className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                                     <input
                                         type="text"
                                         id="name"
@@ -177,7 +179,7 @@ return (
                                 />
                                 <div className="flex-1">
                                     <label htmlFor="Generic_name"
-                                           className="block text-sm font-medium text-gray-700 mb-1">Generic name</label>
+                                        className="block text-sm font-medium text-gray-700 mb-1">Generic name</label>
                                     <input
                                         type="text"
                                         id="generic_name"
@@ -276,7 +278,7 @@ return (
                                         className={applyFormStyle()}
                                         required={checkedFields.price}
                                         disabled={!checkedFields.price}
-                                        />
+                                    />
                                 </div>
                             </div>
 
@@ -302,7 +304,7 @@ return (
                                         className={applyFormStyle()}
                                         required={checkedFields.current_stock}
                                         disabled={!checkedFields.current_stock}
-                                        />
+                                    />
                                 </div>
                             </div>
 
@@ -318,15 +320,16 @@ return (
                                 <div className="flex-1">
                                     <label htmlFor="lastName"
                                         className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
-                                    <input
-                                        type="date"
+                                    <DatePicker
                                         id="expiry_date"
-                                        name="expiry_date"
-                                        value={formatDate(formData.expiry_date)}
-                                        onChange={handleChange}
-                                        className={applyFormStyle()}
-                                        required={formatDate(checkedFields.expiry_date)}
+                                        placeholder="Expiry Date"
+                                        value={formData.expiry_date ? dayjs(formData.expiry_date) : null}
+                                        onChange={(date, dateString) => handleChange({ target: { name: 'expiry_date', value: dateString } })}
+                                        className={applyFormStyle() + " h-10"}
                                         disabled={!checkedFields.expiry_date}
+                                        disabledDate={(current) => {
+                                            return current && current.isBefore(dayjs(), 'day');
+                                        }}
                                     />
                                 </div>
                             </div>
@@ -406,7 +409,7 @@ return (
                                 type="button"
                                 onClick={() => {
                                     setError(""),
-                                    onClose()
+                                        onClose()
                                 }}
                                 className="px-4 py-2 border bg-red-400 text-md hover:text-xl hover:bg-red-500 text-white font-bold rounded-lg transition-all duration-300"
                             >
@@ -416,6 +419,6 @@ return (
                     </form>
                 </div>
             </div>
-    </>
-)
+        </>
+    )
 }

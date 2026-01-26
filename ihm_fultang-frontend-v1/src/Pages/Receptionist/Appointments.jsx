@@ -94,38 +94,36 @@ export function Appointments() {
             ) : errorStatus ? (
                 <ServerErrorPage errorStatus={errorStatus} message={errorMessage} />
             ) : (
-                <div className="ml-5 mr-5 ">
-                    <table className="w-full border-separate border-spacing-y-2">
-                        <thead>
-                            <tr className=" ">
-                                <th className="text-center text-white p-4 text-xl font-bold bg-primary-end rounded-l-2xl ">No</th>
-                                <th className="text-center text-white p-4 text-xl font-bold bg-primary-end ">Doctor</th>
-                                <th className="text-center text-white p-4 text-xl font-bold bg-primary-end ">Patient</th>
-                                <th className="text-center text-white p-4 text-xl font-bold bg-primary-end  ">Reason</th>
-                                <th className="text-center text-white p-4 text-xl font-bold bg-primary-end  ">Scheduled Time</th>
-                                <th className="text-center text-white p-4 text-xl font-bold bg-primary-end flex-col rounded-r-2xl">
-                                    <p>Requirements</p>
-                                </th>
+                <div className="bg-white rounded-[2rem] shadow-sm border border-gray-50 p-6 overflow-hidden mx-5">
+                    <table className="ft-table">
+                        <thead className="ft-thead">
+                            <tr>
+                                <th className="ft-th">No</th>
+                                <th className="ft-th">Doctor</th>
+                                <th className="ft-th">Patient</th>
+                                <th className="ft-th">Reason</th>
+                                <th className="ft-th">Scheduled Time</th>
+                                <th className="ft-th text-center">Requirements</th>
                             </tr>
                         </thead>
                         <tbody>
                             {currentAppointments.length > 0 ? (
                                 currentAppointments.map((appointment, index) => (
-                                    <tr key={appointment.id || index} className="">
-                                        <td className="p-4 text-md text-blue-900 rounded-l-lg bg-gray-100 text-center">
+                                    <tr key={appointment.id || index} className="ft-tr">
+                                        <td className="ft-td text-center text-secondary font-bold">
                                             {(currentPage - 1) * appointmentsPerPage + index + 1}
                                         </td>
-                                        <td className="p-4 text-md text-center bg-gray-100 font-bold">
+                                        <td className="ft-td text-center font-bold">
                                             {appointment.idMedicalStaff ? `Dr. ${appointment.idMedicalStaff.first_name} ${appointment.idMedicalStaff.last_name}` : "N/A"}
                                         </td>
-                                        <td className="p-4 text-md bg-gray-100 text-center">
+                                        <td className="ft-td text-center">
                                             {appointment.idPatient ? `${appointment.idPatient.firstName} ${appointment.idPatient.lastName}` : "N/A"}
                                         </td>
-                                        <td className="p-4 text-md bg-gray-100 text-center">{appointment.reason || "N/A"}</td>
-                                        <td className="p-4 text-center bg-gray-100 text-md">
+                                        <td className="ft-td text-center">{appointment.reason || "N/A"}</td>
+                                        <td className="ft-td text-center">
                                             {new Date(appointment.atDate).toLocaleString()}
                                         </td>
-                                        <td className="p-4 relative bg-gray-100 rounded-r-lg">
+                                        <td className="ft-td text-center">
                                             <div className="w-full items-center justify-center flex gap-6">
                                                 <p>{appointment.requirements || "N/A"}</p>
                                             </div>

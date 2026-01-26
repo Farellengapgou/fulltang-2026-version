@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import { X, Save } from "lucide-react";
 import { getWarehouses, createPhysicalInventory } from "../../../Utils/api/materialAccounting.js";
 
@@ -92,12 +94,14 @@ export function InventoryModal({ isOpen, onClose, onRefresh }) {
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-bold text-gray-700">Date</label>
-                                <input
-                                    type="date"
-                                    required
-                                    value={formData.inventory_date}
-                                    onChange={(e) => setFormData({ ...formData, inventory_date: e.target.value })}
-                                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"
+                                <DatePicker
+                                    placeholder="Inventory Date"
+                                    value={formData.inventory_date ? dayjs(formData.inventory_date) : null}
+                                    onChange={(date, dateString) => setFormData({ ...formData, inventory_date: dateString })}
+                                    disabledDate={(current) => {
+                                        return current && current.isAfter(dayjs(), 'day');
+                                    }}
+                                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none h-12"
                                 />
                             </div>
                         </div>

@@ -1,14 +1,13 @@
-import {FaArrowLeft, FaArrowRight, FaSearch} from "react-icons/fa";
-import {Tooltip} from "antd";
-import {useEffect, useState} from "react";
+import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { Tooltip } from "antd";
+import { useEffect, useState } from "react";
 import axiosInstance from "../Utils/axiosInstance.js";
 import Loader from "./Loader.jsx";
 import ServerErrorPage from "./ServerError.jsx";
-import {calculateNumberOfSlides} from "../Utils/paginationFunctions.js";
+import { calculateNumberOfSlides } from "../Utils/paginationFunctions.js";
 
 
-export function MedicalStaffList()
-{
+export function MedicalStaffList() {
 
 
 
@@ -72,17 +71,13 @@ export function MedicalStaffList()
 
 
     function updateActualPageNumber(action) {
-        if (action === "next")
-        {
-            if(actualPageNumber < calculateNumberOfSlides(numberOfMedicalStaff,5))
-            {
+        if (action === "next") {
+            if (actualPageNumber < calculateNumberOfSlides(numberOfMedicalStaff, 5)) {
                 setActualPageNumber(actualPageNumber + 1);
             }
         }
-        else
-        {
-            if(actualPageNumber > 1)
-            {
+        else {
+            if (actualPageNumber > 1) {
                 setActualPageNumber(actualPageNumber - 1);
             }
         }
@@ -103,7 +98,7 @@ export function MedicalStaffList()
                 </div>
                 <div className="flex mr-5 mt-2">
                     <div className="flex w-[400px] h-10 border-2 border-secondary rounded-lg">
-                        <FaSearch className="text-xl text-secondary m-2"/>
+                        <FaSearch className="text-xl text-secondary m-2" />
                         <input
                             placeholder={"search for a specific medical staff member"}
                             type="text"
@@ -118,43 +113,43 @@ export function MedicalStaffList()
 
 
             {isLoading ? (<div className="h-[500px] w-full flex justify-center items-center">
-                <Loader size={"medium"} color={"primary-end"}/>
-            </div>): errorStatus ? (
-                    <div className="mt-16">
-                        <ServerErrorPage errorStatus={errorStatus} message={errorMessage}/>
-                    </div>
-                ) : medicalStaffList.length > 0 ?
+                <Loader size={"medium"} color={"primary-end"} />
+            </div>) : errorStatus ? (
+                <div className="mt-16">
+                    <ServerErrorPage errorStatus={errorStatus} message={errorMessage} />
+                </div>
+            ) : medicalStaffList.length > 0 ?
                 (
                     <>
-                        <div className="ml-5 mr-5 mt-2 border-2 h-[500px] rounded-lg shadow-lg  p-2">
-                            <table className="w-full border-separate border-spacing-y-2">
-                                <thead>
-                                <tr>
-                                    <th className="text-center p-3 text-xl font-bold border-r-2 border-gray-200">No</th>
-                                    <th className="text-center p-3 text-xl font-bold border-r-2 border-gray-200">First
-                                        Name
-                                    </th>
-                                    <th className="text-center p-3 text-xl font-bold border-r-2 border-gray-200 ">Last
-                                        Name
-                                    </th>
-                                    <th className="text-center p-3 text-xl font-bold border-r-2 border-gray-200 ">Gender</th>
-                                    <th className="text-center p-3 text-xl font-bold border-r-2 border-gray-200 ">Email</th>
-                                    <th className="text-center p-3 text-xl font-bold border-r-2 border-gray-200 ">Role</th>
-                                    <th className="text-center p-3 text-xl font-bold ">CNI number</th>
-                                </tr>
-                                </thead>
-                                <tbody className="mt-5">
-                                {medicalStaffList.map((person, index) => (
-                                    <tr key={index} className="bg-gray-100">
-                                        <td className="p-6 text-md text-blue-900 rounded-l-lg text-center">{index + 1}</td>
-                                        <td className="p-6 text-md text-blue-900  text-center">{person.first_name}</td>
-                                        <td className="p-6 text-md text-center ">{person.last_name}</td>
-                                        <td className="p-6 text-md text-center ">{person.gender}</td>
-                                        <td className="p-6 text-md text-center ">{person.email}</td>
-                                        <td className="p-6 text-md text-center ">{person.role}</td>
-                                        <td className="p-6 flex justify-center rounded-r-xl">{person.cniNumber}</td>
+                        <div className="bg-white rounded-[2rem] shadow-sm border border-gray-50 p-6 overflow-hidden mx-5">
+                            <table className="ft-table">
+                                <thead className="ft-thead">
+                                    <tr>
+                                        <th className="ft-th">No</th>
+                                        <th className="ft-th">First Name</th>
+                                        <th className="ft-th">Last Name</th>
+                                        <th className="ft-th">Gender</th>
+                                        <th className="ft-th">Email</th>
+                                        <th className="ft-th">Role</th>
+                                        <th className="ft-th text-right">CNI number</th>
                                     </tr>
-                                ))}
+                                </thead>
+                                <tbody>
+                                    {medicalStaffList.map((person, index) => (
+                                        <tr key={index} className="ft-tr">
+                                            <td className="ft-td text-center text-secondary font-bold">{(actualPageNumber - 1) * 5 + index + 1}</td>
+                                            <td className="ft-td text-center font-bold">{person.first_name}</td>
+                                            <td className="ft-td text-center">{person.last_name}</td>
+                                            <td className="ft-td text-center">{person.gender}</td>
+                                            <td className="ft-td text-center">{person.email}</td>
+                                            <td className="ft-td text-center">
+                                                <span className="px-3 py-1 bg-secondary/10 text-secondary rounded-full text-xs font-bold uppercase">
+                                                    {person.role}
+                                                </span>
+                                            </td>
+                                            <td className="ft-td text-right font-mono text-gray-500">{person.cniNumber}</td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
@@ -164,23 +159,23 @@ export function MedicalStaffList()
                             <div className="flex gap-4">
                                 <Tooltip placement={"left"} title={"previous slide"}>
                                     <button
-                                        onClick={async () => {await fetchNextOrPreviousPatientList(previousUrlForRenderMedicalStaffList), updateActualPageNumber("prev")}}
+                                        onClick={async () => { await fetchNextOrPreviousPatientList(previousUrlForRenderMedicalStaffList), updateActualPageNumber("prev") }}
                                         className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl  text-secondary hover:text-2xl duration-300 transition-all  hover:text-white shadow-xl flex justify-center items-center mt-2">
-                                        <FaArrowLeft/>
+                                        <FaArrowLeft />
                                     </button>
                                 </Tooltip>
-                                <p className="text-secondary text-2xl font-bold mt-4">{actualPageNumber}/{calculateNumberOfSlides(numberOfMedicalStaff,5)}</p>
+                                <p className="text-secondary text-2xl font-bold mt-4">{actualPageNumber}/{calculateNumberOfSlides(numberOfMedicalStaff, 5)}</p>
                                 <Tooltip placement={"right"} title={"next slide"}>
                                     <button
-                                        onClick={async () => {await fetchNextOrPreviousPatientList(nexUrlForRenderMedicalStaffList), updateActualPageNumber("next")}}
+                                        onClick={async () => { await fetchNextOrPreviousPatientList(nexUrlForRenderMedicalStaffList), updateActualPageNumber("next") }}
                                         className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl  text-secondary hover:text-2xl duration-300 transition-all  hover:text-white shadow-xl flex justify-center items-center mt-2">
-                                        <FaArrowRight/>
+                                        <FaArrowRight />
                                     </button>
                                 </Tooltip>
                             </div>
                         </div>
                     </>
-                ) :(
+                ) : (
                     <div className="flex flex-col items-center justify-center h-[500px]  p-8">
                         <div className="mb-6 relative">
                             <svg
