@@ -57,6 +57,7 @@ export function AdminNavBar() {
                         </Tooltip>
                         <Tooltip placement={"top"} title={"Profile"}>
                             <div className="ml-3 flex">
+                                onClick={() => setIsProfileOpen(true)}
                                 <p className="font-bold text-secondary text-xl mt-2">{"Hello " + userData?.username + "!"}</p>
                                 <img src={userIcon} alt={"user-icon"} className="w-12 h-12 ml-2 mr-3" />
 
@@ -65,6 +66,11 @@ export function AdminNavBar() {
                     </div>
                 </div>
             </div>
+            <UserProfileModal
+                isOpen={isProfileOpen}
+                onClose={() => setIsProfileOpen(false)}
+            />
+
         </>
     )
 }
