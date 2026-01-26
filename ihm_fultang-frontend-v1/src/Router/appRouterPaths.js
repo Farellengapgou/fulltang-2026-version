@@ -6,12 +6,11 @@ export const AppRoutesPaths = {
   forgottenPasswordPage: "/forgotten-password",
 
   // --- PHARMACY ROUTES ---
-  // pharmacyRoot: "/pharmacy",
   pharmacyPage: "/pharmacy/dashboard",
-  PharmacistPage: "/pharmacy/list",
-  PharmacyMedication: "//pharmacy/Medication",
-  pharmacyAdd: "/pharmacy/add",
-
+  pharmacyMedicationList: "/pharmacy/medications",
+  pharmacyAddMedication: "/pharmacy/add-medication",
+  pharmacySales: "/pharmacy/sales",
+  pharmacyReports: "/pharmacy/reports",
   pharmacyPrescriptions: "/pharmacy/prescriptions",
 
   doctorPage: "/doctor/dashboard",

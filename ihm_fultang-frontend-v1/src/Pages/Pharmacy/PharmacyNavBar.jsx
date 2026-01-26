@@ -1,30 +1,68 @@
 import React from 'react';
-import { FiSettings, FiRefreshCw } from 'react-icons/fi';
+import { FaCog, FaEnvelope, FaSignOutAlt } from 'react-icons/fa';
+import { Tooltip } from 'antd';
+import { useAuthentication } from '../../Utils/Provider.jsx';
+import { useNavigate } from 'react-router-dom';
+import userIcon from '../../assets/userIcon.png';
 
-export function PharmacyNavbar({ username }) {
+export function PharmacyNavbar({ messageCount = 0 }) {
+  const navigate = useNavigate();
+  const { logout, userData } = useAuthentication();
+
+  const applyNavLinkBtnStyle = () => {
+    return "w-12 h-10 mt-1 border-2 bg-gray-100 flex justify-center items-center rounded-xl shadow-xl hover:bg-secondary text-secondary text-xl hover:text-white transition-all duration-300";
+  };
+
   return (
-    <div className="flex justify-between items-center px-4 py-3 bg-white border-b ">
-      <h1 className="text-xl font-semibold" style={{ color: '#2F4B8F' }}>Pharmacist</h1>
-      <div className="flex items-center gap-4">
-        <div className="p-2 rounded-lg shadow-sm hover:shadow-md bg-white transition-shadow">
-          <button className="text-gray-500 hover:text-gray-700">
-            <FiSettings className="w-5 h-5 text-blue" />
-          </button>
-        </div>
-        <div className="p-2 rounded-lg shadow-sm hover:shadow-md bg-white transition-shadow">
-          <button className="text-gray-500 hover:text-gray-700">
-            <FiRefreshCw className="w-5 h-5" />
-          </button>
-        </div>
-        <div className="flex items-center gap-2 ml-2">
-          <span className="text-sm text-gray-600">Username.N</span>
-          <div className="w-8 h-8 rounded-full shadow-sm overflow-hidden">
-            <img 
-              src="/doctor.png" 
-              alt="Profile" 
-              className="w-full h-full object-cover"
-            />
+    <div className="border-b-2 m-3 border-b-gray-300">
+      <div className="w-full h-[70px] flex justify-between">
+        <h1 className="ml-3 text-4xl text-secondary mt-3.5 font-bold">
+          Pharmacist
+        </h1>
+        <div className="flex gap-3 mt-3.5 mb-4 mr-5">
+          <Tooltip placement="top" title="Settings">
+            <button className={applyNavLinkBtnStyle()}>
+              <FaCog />
+            </button>
+          </Tooltip>
+
+          <div className="relative">
+            <Tooltip placement="top" title="Messages">
+              <button
+                onClick={() => navigate("/pharmacy/messages")}
+                className={applyNavLinkBtnStyle()}
+              >
+                <FaEnvelope />
+              </button>
+            </Tooltip>
+            {messageCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse pointer-events-none">
+                {messageCount > 99 ? "99+" : messageCount}
+              </span>
+            )}
           </div>
+
+          <Tooltip placement="top" title="Logout">
+            <button
+              onClick={() => logout()}
+              className="w-12 h-10 mt-1 border-2 bg-red-400 flex justify-center items-center rounded-xl shadow-xl hover:bg-white text-white text-xl hover:text-red-500 transition-all duration-300"
+            >
+              <FaSignOutAlt />
+            </button>
+          </Tooltip>
+
+          <Tooltip placement="top" title="My Profile">
+            <div className="ml-3 flex cursor-pointer hover:opacity-80 transition-opacity">
+              <p className="font-bold text-secondary text-xl mt-2">
+                {"Hello " + (userData?.username || "Pharmacist") + "!"}
+              </p>
+              <img
+                src={userData?.profilePicture || userIcon}
+                alt="user-icon"
+                className="w-12 h-12 ml-2 mr-3 rounded-full object-cover border-2 border-gray-200"
+              />
+            </div>
+          </Tooltip>
         </div>
       </div>
     </div>
