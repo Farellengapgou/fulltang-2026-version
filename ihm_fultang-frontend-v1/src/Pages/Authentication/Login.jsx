@@ -76,25 +76,25 @@ export function LoginPage() {
         navigate(roleRoutes[response]);
       } else if (response === "bad role") {
         setIsLoginErrorPresent(true);
-        setLoginError("Rôle non reconnu ou invalide.");
+        setLoginError("Unrecognized or invalid role.");
       } else if (response === "No role") {
         setIsLoginErrorPresent(true);
         setLoginError(
-          "Vous n'avez pas de spécialisation attribuée. Contactez un administrateur.",
+          "You have no assigned specialization. Please contact an administrator.",
         );
       } else if (response === 401) {
         setIsLoginErrorPresent(true);
-        setLoginError("Nom d'utilisateur ou mot de passe incorrect.");
+        setLoginError("Incorrect username or password.");
       } else if (response === 404) {
         setIsLoginErrorPresent(true);
-        setLoginError("Utilisateur non trouvé dans le système.");
+        setLoginError("User not found in the system.");
       } else {
         setIsLoginErrorPresent(true);
-        setLoginError("Une erreur est survenue lors de la connexion.");
+        setLoginError("An error occurred during login.");
       }
     } catch (error) {
       setIsLoginErrorPresent(true);
-      setLoginError("Erreur réseau ou serveur. Veuillez réessayer.");
+      setLoginError("Network or server error. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -120,13 +120,13 @@ export function LoginPage() {
 
       <div className="relative w-[80rem] z-10 ml-[1rem] text-white">
         <h2 className="text-5xl text-secondary text-black font-semibold mb-10 leading-tight">
-          Bienvenue sur FULTANG
+          Welcome to FULTANG
         </h2>
 
         <p className="text-black text-secondary text-3xl mb-8 leading-relaxed">
-          Polyclinic Fultang est une application de gestion hospitalière
-          assurant la prise en charge et le suivi des patients de leur arrivée à
-          leur sortie, via la plateforme.
+          Polyclinic Fultang is a hospital management application that
+          supports patient care and follow-up from admission to discharge
+          through the platform.
         </p>
       </div>
 
@@ -135,10 +135,10 @@ export function LoginPage() {
         <div className="ml-[13rem] mr-[10rem]  p-10 bg-white flex flex-col justify-center rounded-2xl">
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-secondary mb-2">
-              Connexion
+              Sign In
             </h2>
             <p className="text-gray-600 text-xl">
-              Entrez vos identifiants pour continuer
+              Enter your credentials to continue
             </p>
           </div>
 
@@ -156,7 +156,7 @@ export function LoginPage() {
           <form className="space-y-5" onSubmit={handleLogin}>
             <div className="space-y-1.5">
               <label className="text-xl font-semibold text-gray-600 mb-1 block">
-                Nom d'utilisateur
+                Username
               </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -169,7 +169,7 @@ export function LoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-md bg-white focus:outline-none focus:border-2 focus:border-primary-end transition-all duration-300 text-gray-800"
-                  placeholder="Votre identifiant"
+                  placeholder="Your username"
                 />
               </div>
             </div>
@@ -177,13 +177,13 @@ export function LoginPage() {
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
                 <label className="text-xl font-semibold text-gray-600 mb-1 block">
-                  Mot de passe
+                  Password
                 </label>
                 <Link
                   to={appRouterPaths.forgottenPasswordPage}
                   className="text-sm font-bold text-secondary hover:underline transition-colors duration-300"
                 >
-                  Mot de Passe Oublié ?
+                  Forgot Password?
                 </Link>
               </div>
               <div className="relative group">
@@ -218,7 +218,7 @@ export function LoginPage() {
               disabled={isLoading}
               className="w-full text-xl py-4 bg-secondary text-white font-bold rounded-lg shadow-md hover:shadow-lg hover:bg-[#3d9d94] transition-all duration-500 ease-in-out flex items-center justify-center gap-2 mt-4"
             >
-              {isLoading ? "Connexion en cours..." : "S'identifier"}
+              {isLoading ? "Signing in..." : "Sign in"}
             </button>
           </form>
 
@@ -228,7 +228,7 @@ export function LoginPage() {
               className="inline-flex items-center gap-2 text-gray-400 hover:text-secondary transition-colors duration-500 ease-in-out text-md font-semibold"
             >
               <ArrowLeft className="w-4 h-4" />
-              Retour à l'accueil
+              Back to home
             </Link>
           </div>
         </div>

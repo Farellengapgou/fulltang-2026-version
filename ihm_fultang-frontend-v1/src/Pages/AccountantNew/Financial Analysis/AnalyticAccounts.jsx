@@ -31,7 +31,7 @@ export function AnalyticAccounts() {
       const response = await analyticAccountService.getAllAnalyticAccounts();
       setAccounts(response.data.results || response.data);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -46,7 +46,7 @@ export function AnalyticAccounts() {
     try {
       await analyticAccountService.createAnalyticAccount(formData);
       setShowForm(false);
-      setModalMessage("Le compte analytique a été créé avec succès.");
+      setModalMessage("The analytic account was created successfully.");
       setIsSuccessModalOpen(true);
       setFormData({
         code: "",
@@ -56,7 +56,7 @@ export function AnalyticAccounts() {
       });
       fetchAccounts();
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
       setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
       setIsErrorModalOpen(true);
     }
@@ -73,14 +73,14 @@ export function AnalyticAccounts() {
       <div className="ft-page">
         <div className="flex justify-between items-center mb-10">
           <div>
-            <h1 className="text-3xl font-black text-secondary tracking-tight uppercase">Comptabilité Analytique</h1>
-            <p className="text-gray-400 text-sm font-medium mt-1 uppercase tracking-widest">Gestion des sections et centres de coûts</p>
+            <h1 className="text-3xl font-black text-secondary tracking-tight uppercase">Analytic Accounting</h1>
+            <p className="text-gray-400 text-sm font-medium mt-1 uppercase tracking-widest">Sections and cost centers management</p>
           </div>
           <button
             onClick={() => setShowForm(true)}
             className="ft-btn ft-btn-md ft-btn-primary"
           >
-            <Plus size={20} /> Nouvelle Section
+            <Plus size={20} /> New Section
           </button>
         </div>
 
@@ -89,7 +89,7 @@ export function AnalyticAccounts() {
           <div className="ft-modal-overlay">
             <div className="ft-modal max-w-xl">
               <div className="ft-modal-header">
-                <h2 className="ft-modal-title">Nouveau Compte Analytique</h2>
+                <h2 className="ft-modal-title">New Analytic Account</h2>
                 <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                   <X size={28} />
                 </button>
@@ -97,12 +97,12 @@ export function AnalyticAccounts() {
               <form onSubmit={handleSubmit}>
                 <div className="ft-modal-body space-y-6">
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Code Analytique</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Analytic Code</label>
                     <div className="relative">
                         <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <input
                             type="text"
-                            placeholder="Ex: CC-MARK-2026"
+                            placeholder="e.g. CC-MARK-2026"
                             value={formData.code}
                             onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                             required
@@ -111,12 +111,12 @@ export function AnalyticAccounts() {
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Intitulé de la section</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Section Name</label>
                     <div className="relative">
                         <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <input
                             type="text"
-                            placeholder="Nom du centre ou projet"
+                            placeholder="Center or project name"
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             required
@@ -125,7 +125,7 @@ export function AnalyticAccounts() {
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Type Analytique</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Analytic Type</label>
                     <div className="relative">
                         <LayoutGrid className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <select
@@ -133,19 +133,19 @@ export function AnalyticAccounts() {
                             onChange={(e) => setFormData({ ...formData, analytic_type: e.target.value })}
                             className="ft-select pl-12"
                         >
-                            <option value="COST_CENTER">Centre de Coût</option>
+                            <option value="COST_CENTER">Cost Center</option>
                             <option value="PROJECT">Projet</option>
-                            <option value="DEPARTMENT">Département</option>
+                            <option value="DEPARTMENT">Department</option>
                         </select>
                     </div>
                   </div>
                 </div>
                 <div className="ft-modal-footer">
                   <button type="button" onClick={() => setShowForm(false)} className="ft-btn ft-btn-md ft-btn-outline">
-                    Annuler
+                    Cancel
                   </button>
                   <button type="submit" className="ft-btn ft-btn-md ft-btn-primary">
-                    Enregistrer la section
+                    Save section
                   </button>
                 </div>
               </form>
@@ -157,10 +157,10 @@ export function AnalyticAccounts() {
           <table className="ft-table">
             <thead className="ft-thead">
               <tr>
-                <th className="ft-th">Code Section</th>
-                <th className="ft-th">Intitulé Analytique</th>
-                <th className="ft-th">Type de Section</th>
-                <th className="ft-th text-center">Statut</th>
+                <th className="ft-th">Section Code</th>
+                <th className="ft-th">Analytic Name</th>
+                <th className="ft-th">Section Type</th>
+                <th className="ft-th text-center">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -177,7 +177,7 @@ export function AnalyticAccounts() {
                   <td className="ft-td font-medium text-gray-700">{a.name}</td>
                   <td className="ft-td">
                     <span className="text-[10px] font-black px-3 py-1 bg-secondary/5 text-secondary rounded-lg uppercase tracking-wider">
-                        {a.analytic_type ? a.analytic_type.replace('_', ' ') : 'NON DÉFINI'}
+                        {a.analytic_type ? a.analytic_type.replace('_', ' ') : 'UNDEFINED'}
                     </span>
                   </td>
                   <td className="ft-td text-center">
@@ -185,7 +185,7 @@ export function AnalyticAccounts() {
                         a.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                     }`}>
                         {a.is_active ? <CheckCircle size={10} /> : <AlertCircle size={10} />}
-                        {a.is_active ? "ACTIF" : "INACTIF"}
+                        {a.is_active ? "ACTIVE" : "INACTIVE"}
                     </span>
                   </td>
                 </tr>
@@ -193,7 +193,7 @@ export function AnalyticAccounts() {
               {accounts.length === 0 && (
                 <tr>
                     <td colSpan="4" className="ft-td text-center text-gray-400 py-20 font-medium italic uppercase tracking-widest">
-                        Aucun compte analytique répertorié.
+                        No analytic account listed.
                     </td>
                 </tr>
               )}

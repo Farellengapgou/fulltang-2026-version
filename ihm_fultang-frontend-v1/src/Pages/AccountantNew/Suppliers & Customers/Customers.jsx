@@ -63,7 +63,7 @@ export function Customers() {
       const class4Accounts = allAccounts.filter(acc => acc.account_class === '4');
       setAccounts(class4Accounts);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -78,17 +78,17 @@ export function Customers() {
     try {
       if (editingId) {
         await customerService.updateCustomer(editingId, formData);
-        setModalMessage("Fiche client mise à jour avec succès.");
+        setModalMessage("Customer record updated successfully.");
       } else {
         await customerService.createCustomer(formData);
-        setModalMessage("Nouveau client créé avec succès.");
+        setModalMessage("New customer created successfully.");
       }
       setShowForm(false);
       setIsSuccessModalOpen(true);
       resetForm();
       fetchData();
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
       setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
       setIsErrorModalOpen(true);
     }
@@ -102,16 +102,16 @@ export function Customers() {
 
   const handleDelete = (id) => {
     setConfirmConfig({
-      title: "Supprimer Client",
-      message: "Êtes-vous sûr de vouloir supprimer ce client ? Toutes les données associées seront perdues.",
+      title: "Delete Customer",
+      message: "Are you sure you want to delete this customer? All related data will be lost.",
       onConfirm: async () => {
         try {
           await customerService.deleteCustomer(id);
-          setModalMessage("Le client a été supprimé.");
+          setModalMessage("The customer was deleted.");
           setIsSuccessModalOpen(true);
           fetchData();
         } catch (error) {
-          console.error("Erreur:", error);
+          console.error("Error:", error);
           setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
           setIsErrorModalOpen(true);
         }
@@ -126,7 +126,7 @@ export function Customers() {
       setSelectedCustomer(response.data);
       setShowBalance(true);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     }
   };
 
@@ -155,7 +155,7 @@ export function Customers() {
       <FinancialAccountantNavBar />
       <div className="ft-page">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-black text-secondary tracking-tight uppercase">Base Clients</h1>
+          <h1 className="text-3xl font-black text-secondary tracking-tight uppercase">Customer Directory</h1>
           <button
             onClick={() => {
               resetForm();
@@ -163,17 +163,17 @@ export function Customers() {
             }}
             className="ft-btn ft-btn-md ft-btn-primary"
           >
-            <Plus size={20} /> Nouveau Client
+            <Plus size={20} /> New Customer
           </button>
         </div>
 
-        {/* Search Bar - Stylisé */}
+        {/* Search Bar - Styled */}
         <div className="flex justify-end mb-8">
             <div className="relative w-full max-w-md">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
                     type="text"
-                    placeholder="Rechercher par nom, code ou email..."
+                    placeholder="Search by name, code, or email..."
                     value={searchTerm}
                     onChange={(e) => {
                         setSearchTerm(e.target.value);
@@ -189,7 +189,7 @@ export function Customers() {
           <div className="ft-modal-overlay">
             <div className="ft-modal max-w-3xl">
               <div className="ft-modal-header">
-                <h2 className="ft-modal-title">{editingId ? "Modifier le Client" : "Nouveau Client"}</h2>
+                <h2 className="ft-modal-title">{editingId ? "Edit Customer" : "New Customer"}</h2>
                 <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                   <X size={28} />
                 </button>
@@ -197,10 +197,10 @@ export function Customers() {
               <form onSubmit={handleSubmit}>
                 <div className="ft-modal-body grid grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto">
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Numéro Client</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Customer Number</label>
                     <input
                         type="text"
-                        placeholder="Ex: CLT-2026-001"
+                        placeholder="e.g. CUS-2026-001"
                         value={formData.code}
                         onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                         required
@@ -208,10 +208,10 @@ export function Customers() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Nom / Raison Sociale</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Name / Company</label>
                     <input
                         type="text"
-                        placeholder="Nom complet"
+                        placeholder="Full name"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         required
@@ -219,27 +219,27 @@ export function Customers() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Type de Client</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Customer Type</label>
                     <select
                         value={formData.customer_type}
                         onChange={(e) => setFormData({ ...formData, customer_type: e.target.value })}
                         className="ft-select"
                     >
-                        <option value="INDIVIDUAL">Particulier</option>
-                        <option value="CORPORATE">Entreprise</option>
-                        <option value="INSURANCE">Assurance / Mutuelle</option>
-                        <option value="GOVERNMENT">Organisme Public</option>
+                        <option value="INDIVIDUAL">Individual</option>
+                        <option value="CORPORATE">Company</option>
+                        <option value="INSURANCE">Insurance / Mutual</option>
+                        <option value="GOVERNMENT">Public Organization</option>
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Liaison Plan Comptable</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Ledger Link</label>
                     <select
                         value={formData.account}
                         onChange={(e) => setFormData({ ...formData, account: e.target.value })}
                         required
                         className="ft-select"
                     >
-                        <option value="">Sélectionner un compte (Classe 4)</option>
+                        <option value="">Select an account (Class 4)</option>
                         {accounts.map((a) => (
                         <option key={a.id} value={a.id}>
                             {a.code} - {a.label}
@@ -258,7 +258,7 @@ export function Customers() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Téléphone</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Phone</label>
                     <PhoneInput
                       value={formData.phone}
                       onChange={(value) => setFormData({ ...formData, phone: value })}
@@ -266,9 +266,9 @@ export function Customers() {
                     />
                   </div>
                   <div className="col-span-2 space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Adresse de facturation</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Billing Address</label>
                     <textarea
-                        placeholder="Quartier, Ville, Pays"
+                        placeholder="District, City, Country"
                         value={formData.address}
                         onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                         className="ft-input"
@@ -276,7 +276,7 @@ export function Customers() {
                     ></textarea>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Délai de paiement (jours)</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Payment terms (days)</label>
                     <input
                         type="number"
                         value={formData.payment_terms}
@@ -285,7 +285,7 @@ export function Customers() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Limite de crédit (FCFA)</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Credit limit (FCFA)</label>
                     <input
                         type="number"
                         step="0.01"
@@ -297,10 +297,10 @@ export function Customers() {
                 </div>
                 <div className="ft-modal-footer">
                   <button type="button" onClick={() => setShowForm(false)} className="ft-btn ft-btn-md ft-btn-outline">
-                    Annuler
+                    Cancel
                   </button>
                   <button type="submit" className="ft-btn ft-btn-md ft-btn-primary">
-                    {editingId ? "Actualiser le client" : "Enregistrer le client"}
+                    {editingId ? "Update customer" : "Save customer"}
                   </button>
                 </div>
               </form>
@@ -313,10 +313,10 @@ export function Customers() {
           <table className="ft-table">
             <thead className="ft-thead">
               <tr>
-                <th className="ft-th">Fiche Client</th>
+                <th className="ft-th">Customer Record</th>
                 <th className="ft-th">Type</th>
                 <th className="ft-th">Contact</th>
-                <th className="ft-th text-center">Statut</th>
+                <th className="ft-th text-center">Status</th>
                 <th className="ft-th text-right">Actions</th>
               </tr>
             </thead>
@@ -342,10 +342,10 @@ export function Customers() {
                   <td className="ft-td">
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <Mail size={12} /> {c.email || "Non communiqué"}
+                            <Mail size={12} /> {c.email || "Not provided"}
                         </div>
                         <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <Phone size={12} /> {c.phone || "Non communiqué"}
+                            <Phone size={12} /> {c.phone || "Not provided"}
                         </div>
                     </div>
                   </td>
@@ -354,7 +354,7 @@ export function Customers() {
                         c.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                     }`}>
                         {c.is_active ? <CheckCircle size={10} /> : <AlertCircle size={10} />}
-                        {c.is_active ? "ACTIF" : "INACTIF"}
+                        {c.is_active ? "ACTIVE" : "INACTIVE"}
                     </span>
                   </td>
                   <td className="ft-td text-right">
@@ -362,21 +362,21 @@ export function Customers() {
                         <button
                             onClick={() => handleViewBalance(c)}
                             className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl transition-colors shadow-sm"
-                            title="Voir balance"
+                            title="View balance"
                         >
                             <Banknote size={16} />
                         </button>
                         <button
                             onClick={() => handleEdit(c)}
                             className="p-2 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl transition-colors shadow-sm"
-                            title="Editer"
+                            title="Edit"
                         >
                             <Edit size={16} />
                         </button>
                         <button
                             onClick={() => handleDelete(c.id)}
                             className="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl transition-colors shadow-sm"
-                            title="Retirer"
+                            title="Remove"
                         >
                             <Trash2 size={16} />
                         </button>
@@ -387,7 +387,7 @@ export function Customers() {
               {customers.length === 0 && (
                 <tr>
                     <td colSpan="5" className="ft-td text-center text-gray-400 py-20 font-medium italic">
-                        Aucun client répertorié.
+                        No customers listed.
                     </td>
                 </tr>
               )}
@@ -408,7 +408,7 @@ export function Customers() {
           <div className="ft-modal-overlay">
             <div className="ft-modal">
               <div className="ft-modal-header">
-                <h2 className="ft-modal-title">CONSULTATION SOLDE</h2>
+                <h2 className="ft-modal-title">BALANCE OVERVIEW</h2>
                 <button onClick={() => setShowBalance(false)} className="text-gray-400 hover:text-gray-600">
                   <X size={28} />
                 </button>
@@ -421,7 +421,7 @@ export function Customers() {
                 <p className="text-sm font-mono text-gray-400 mb-8 tracking-widest uppercase">{selectedCustomer.code}</p>
                 
                 <div className="bg-gray-50 rounded-3xl p-8 border-2 border-dashed border-gray-200">
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Encours client total</p>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total customer balance</p>
                     <p className="text-5xl font-black text-secondary tracking-tighter">
                         {(selectedCustomer.balance || 0).toLocaleString()} <span className="text-xl font-bold opacity-50">FCFA</span>
                     </p>
@@ -429,7 +429,7 @@ export function Customers() {
               </div>
               <div className="ft-modal-footer">
                 <button onClick={() => setShowBalance(false)} className="ft-btn ft-btn-md ft-btn-primary w-full">
-                    Terminer la consultation
+                    Close overview
                 </button>
               </div>
             </div>

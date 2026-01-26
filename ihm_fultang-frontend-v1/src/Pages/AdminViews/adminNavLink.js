@@ -35,7 +35,7 @@ export const adminNavLink = [
         ]
     },
     {
-        name: 'Messages',
+        name: 'Notifications',
         icon: FaEnvelope,
         link: appRoutes.adminMessage
     },

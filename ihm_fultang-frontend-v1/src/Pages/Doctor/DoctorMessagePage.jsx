@@ -10,9 +10,9 @@ import Loader from "../../GlobalComponents/Loader.jsx"
 import ServerErrorPage from "../../GlobalComponents/ServerError.jsx"
 import { useNotificationSocket } from "../../Utils/useNotificationSocket.js"
 
-// PAGINATION: Actuellement SimplePagination (frontend), passer à Pagination (backend) quand l'API sera prête
+// PAGINATION: currently SimplePagination (frontend), switch to Pagination (backend) when API is ready
 import SimplePagination from "../../GlobalComponents/SimplePagination.jsx"
-// import Pagination from "../../GlobalComponents/Pagination.jsx" // Décommenter pour pagination backend
+// import Pagination from "../../GlobalComponents/Pagination.jsx" // Uncomment for backend pagination
 
 
 export function DoctorMessagePage({
@@ -49,7 +49,7 @@ export function DoctorMessagePage({
   const [isSending, setIsSending] = useState(false)
   const [selectedRecipientIds, setSelectedRecipientIds] = useState([])
 
-  // PAGINATION BACKEND: Décommenter ces états quand vous passerez à la pagination backend
+  // BACKEND PAGINATION: Uncomment these states when you switch to backend pagination
   // const [nextUrl, setNextUrl] = useState(null)
   // const [previousUrl, setPreviousUrl] = useState(null)
   // const [totalPages, setTotalPages] = useState(1)
@@ -62,6 +62,23 @@ export function DoctorMessagePage({
     userData?.pk ??
     null
   const welcomeDismissKey = userId ? `fultang_welcome_dismissed_${userId}` : null
+  const readMessagesKey = userId ? `fultang_read_messages_${userId}` : null
+  const deletedMessagesKey = userId ? `fultang_deleted_messages_${userId}` : null
+
+  const getStoredIds = (key) => {
+    if (!key) return []
+    try {
+      const raw = localStorage.getItem(key)
+      return raw ? JSON.parse(raw) : []
+    } catch {
+      return []
+    }
+  }
+
+  const setStoredIds = (key, ids) => {
+    if (!key) return
+    localStorage.setItem(key, JSON.stringify(Array.from(new Set(ids))))
+  }
 
   const normalizeNotification = (notification) => {
     const priority = (notification?.computed_priority || notification?.priority || "GREEN").toUpperCase()
@@ -76,7 +93,7 @@ export function DoctorMessagePage({
     }
   }
 
-  // Récupérer les notifications internes du médecin (API)
+  // Fetch internal notifications for the doctor (API)
   async function retrieveDoctorNotifications() {
     setIsNotificationsLoading(true)
     setNotificationsError("")
@@ -87,7 +104,7 @@ export function DoctorMessagePage({
       setNotifications(normalized)
     } catch (error) {
       console.log(error)
-      setNotificationsError("Erreur lors de la récupération des notifications.")
+      setNotificationsError("Error retrieving notifications.")
     } finally {
       setIsNotificationsLoading(false)
     }
@@ -103,7 +120,7 @@ export function DoctorMessagePage({
     }
     return {
       id: message?.id,
-      subject: message?.reason || "Message",
+      subject: message?.reason || "Notification",
       senderName: "Administration",
       content: message?.message || "",
       createdAt: message?.addAt || new Date().toISOString(),
@@ -117,7 +134,14 @@ export function DoctorMessagePage({
     try {
       const response = await axiosInstance.get("/message/")
       const results = response.data?.results ?? response.data ?? []
-      const normalized = results.map(normalizeMessage)
+      const deletedIds = new Set(getStoredIds(deletedMessagesKey))
+      const readIds = new Set(getStoredIds(readMessagesKey))
+      const normalized = results
+        .filter((message) => !deletedIds.has(message?.id))
+        .map((message) => ({
+          ...normalizeMessage(message),
+          isRead: readIds.has(message?.id),
+        }))
       setMessageList((prev) => {
         let nextList = normalized
         if (userData?.role && userData.role !== "Admin" && userId) {
@@ -132,9 +156,9 @@ export function DoctorMessagePage({
             const displayName = userData?.username || "Utilisateur"
             const welcomeMessage = {
               id: `welcome-${userId}`,
-              subject: "Bienvenue sur Fultang",
+              subject: "Welcome to Fultang",
               senderName: "Fultang",
-              content: `Bonjour ${displayName}, bienvenue sur Fultang. Nous sommes heureux de vous compter parmi nous.`,
+              content: `Hello ${displayName}, welcome to Fultang. We are glad to have you with us.`,
               createdAt: new Date().toISOString(),
               isRead: false,
               priority: "low",
@@ -148,9 +172,9 @@ export function DoctorMessagePage({
               const displayName = userData?.username || "Utilisateur"
               const welcomeMessage = {
                 id: `welcome-${userId}`,
-                subject: "Bienvenue sur Fultang",
+                subject: "Welcome to Fultang",
                 senderName: "Fultang",
-                content: `Bonjour ${displayName}, bienvenue sur Fultang. Nous sommes heureux de vous compter parmi nous.`,
+                content: `Hello ${displayName}, welcome to Fultang. We are glad to have you with us.`,
                 createdAt: new Date().toISOString(),
                 isRead: false,
                 priority: "low",
@@ -165,13 +189,13 @@ export function DoctorMessagePage({
       setErrorMessage("")
     } catch (error) {
       setErrorStatus(error.status)
-      setErrorMessage("Erreur lors de la récupération de vos messages !")
+      setErrorMessage("Error retrieving your notifications!")
     } finally {
       setIsLoading(false)
     }
   }
 
-  /* VERSION API AVEC PAGINATION BACKEND - À utiliser quand l'endpoint sera prêt
+  /* API VERSION WITH BACKEND PAGINATION - Use when the endpoint is ready
   async function retrieveDoctorMessages(doctorId, page = 1) {
     setIsLoading(true)
     try {
@@ -190,11 +214,11 @@ export function DoctorMessagePage({
       setIsLoading(false)
       console.log(error)
       setErrorStatus(error.status)
-      setErrorMessage("Erreur lors de la récupération de vos messages !")
+      setErrorMessage("Error retrieving your notifications!")
     }
   }
 
-  // Fonction pour charger la page suivante/précédente
+  // Function to load next/previous page
   async function fetchNextOrPreviousMessages(url) {
     if (!url) return
     setIsLoading(true)
@@ -213,8 +237,10 @@ export function DoctorMessagePage({
   }
   */
 
-  // Marquer un message comme lu (VERSION MOCK)
+  // Mark a message as read (MOCK VERSION)
   function markAsRead(messageId) {
+    const readIds = getStoredIds(readMessagesKey)
+    setStoredIds(readMessagesKey, [...readIds, messageId])
     setMessageList(prev =>
       prev.map(msg => msg.id === messageId ? { ...msg, isRead: true } : msg)
     )
@@ -228,12 +254,12 @@ export function DoctorMessagePage({
         prev.map(msg => msg.id === messageId ? { ...msg, isRead: true } : msg)
       )
     } catch (error) {
-      console.log("Erreur lors du marquage du message", error)
+      console.log("Error marking message as read", error)
     }
   }
   */
 
-  // Supprimer un message (VERSION MOCK)
+  // Delete a message (MOCK VERSION)
   function deleteMessage(messageId) {
     if (typeof messageId === "string" && messageId.startsWith("welcome-")) {
       setMessageList(prev => prev.filter(msg => msg.id !== messageId))
@@ -249,13 +275,15 @@ export function DoctorMessagePage({
     const performDelete = async () => {
       try {
         await axiosInstance.delete(`/message/${messageId}/`)
+        const deletedIds = getStoredIds(deletedMessagesKey)
+        setStoredIds(deletedMessagesKey, [...deletedIds, messageId])
         setMessageList(prev => prev.filter(msg => msg.id !== messageId))
         if (selectedMessage?.id === messageId) {
           setIsModalOpen(false)
           setSelectedMessage(null)
         }
       } catch (error) {
-        console.log("Erreur lors de la suppression", error)
+        console.log("Error deleting message", error)
       }
     }
     performDelete()
@@ -267,7 +295,7 @@ export function DoctorMessagePage({
       await axiosInstance.delete(`/messages/${messageId}/`)
       setMessageList(prev => prev.filter(msg => msg.id !== messageId))
     } catch (error) {
-      console.log("Erreur lors de la suppression", error)
+      console.log("Error deleting message", error)
     }
   }
   */
@@ -328,7 +356,7 @@ export function DoctorMessagePage({
       setIsModalOpen(false)
       setSelectedMessage(null)
     } catch (error) {
-      console.log("Erreur lors de la suppression de tous les messages", error)
+      console.log("Error deleting all messages", error)
     }
   }
 
@@ -401,10 +429,10 @@ export function DoctorMessagePage({
 
   const roleOptions = [
     { value: "ALL", label: "Tous les acteurs" },
-    { value: "Doctor", label: "Médecins" },
+    { value: "Doctor", label: "Doctors" },
     { value: "Nurse", label: "Infirmiers" },
     { value: "Labtech", label: "Laborantins" },
-    { value: "Receptionist", label: "Réceptionnistes" },
+    { value: "Receptionist", label: "Receptionists" },
     { value: "Pharmacist", label: "Pharmaciens" },
     { value: "Cashier", label: "Caissiers" },
     { value: "Accountant", label: "Comptables" },
@@ -418,10 +446,10 @@ export function DoctorMessagePage({
 
   const doctorRoles = new Set(["Doctor", "Specialist", "Ophtalmologist", "Dentist"])
   const roleLabelMap = {
-    Doctor: "Médecins",
+    Doctor: "Doctors",
     Nurse: "Infirmiers",
     Labtech: "Laborantins",
-    Receptionist: "Réceptionnistes",
+    Receptionist: "Receptionists",
     Pharmacist: "Pharmaciens",
     Cashier: "Caissiers",
     Accountant: "Comptables",
@@ -447,17 +475,17 @@ export function DoctorMessagePage({
   async function handleSendMessage(e) {
     e.preventDefault()
     if (!composeSubject.trim() || !composeMessage.trim()) {
-      setSendStatus("Veuillez remplir le sujet et le message.")
+      setSendStatus("Please fill in the notification subject and content.")
       return
     }
     if (composeRole !== "ALL" && selectedRecipientIds.length === 0) {
       const roleLabel = roleLabelMap[composeRole] || "destinataire"
-      setSendStatus(`Veuillez sélectionner au moins un ${roleLabel.toLowerCase()}.`)
+      setSendStatus(`Please select at least one ${roleLabel.toLowerCase()}.`)
       return
     }
     const recipientsToSend = composeRole === "ALL" ? filteredStaff : selectedRecipients
     if (recipientsToSend.length === 0) {
-      setSendStatus("Aucun destinataire trouvé.")
+      setSendStatus("No recipients found.")
       return
     }
     setIsSending(true)
@@ -473,19 +501,19 @@ export function DoctorMessagePage({
           })
         )
       )
-      setSendStatus("Message(s) envoyé(s) avec succès.")
+      setSendStatus("Notification(s) sent successfully.")
       setComposeSubject("")
       setComposeMessage("")
     } catch (error) {
       console.log(error)
-      setSendStatus("Erreur lors de l'envoi des messages.")
+      setSendStatus("Error sending notifications.")
     } finally {
       setIsSending(false)
     }
   }
 
   // FILTRAGE DES MESSAGES
-  // NOTE: Avec pagination backend, les filtres devront être envoyés comme paramètres à l'API
+  // NOTE: With backend pagination, filters must be sent as API parameters
   // Exemple: /messages/doctor/${doctorId}/?page=${page}&priority=${priorityFilter}&status=${statusFilter}&search=${searchTerm}
   const filteredMessages = messageList.filter((message) => {
     const matchesSearch =
@@ -500,7 +528,7 @@ export function DoctorMessagePage({
   })
 
   // PAGINATION FRONTEND (SimplePagination)
-  // NOTE: Avec pagination backend, supprimer ces lignes car l'API retourne déjà la page demandée
+  // NOTE: With backend pagination, remove these lines because the API already returns the requested page
   const indexOfLastMessage = currentPage * messagesPerPage
   const indexOfFirstMessage = indexOfLastMessage - messagesPerPage
   const currentMessages = filteredMessages.slice(indexOfFirstMessage, indexOfLastMessage)
@@ -508,7 +536,7 @@ export function DoctorMessagePage({
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber)
 
-  // Fonction pour obtenir le style selon la priorité
+  // Function to get style by priority
   const getPriorityStyle = (priority) => {
     switch (priority) {
       case "high":
@@ -552,13 +580,13 @@ export function DoctorMessagePage({
       <div className="mx-auto p-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Messages
+            Notifications
           </h1>
         </div>
 
         {showComposer && (
           <div className="bg-white p-6 rounded-xl shadow-md mb-6 border border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Envoyer un message</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Send a notification</h2>
             <form onSubmit={handleSendMessage} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -602,7 +630,7 @@ export function DoctorMessagePage({
                           </label>
                         ))
                       ) : (
-                        <p className="text-sm text-gray-500">Aucun utilisateur disponible.</p>
+                        <p className="text-sm text-gray-500">No users available.</p>
                       )}
                     </div>
                   </div>
@@ -616,20 +644,20 @@ export function DoctorMessagePage({
                     value={composeSubject}
                     onChange={(e) => setComposeSubject(e.target.value)}
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-end focus:border-transparent"
-                    placeholder="Sujet du message"
+                    placeholder="Notification subject"
                   />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Message
+                  Notification
                 </label>
                 <textarea
                   rows={4}
                   value={composeMessage}
                   onChange={(e) => setComposeMessage(e.target.value)}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-end focus:border-transparent"
-                  placeholder="Ecrivez votre message..."
+                  placeholder="Write your notification..."
                 />
               </div>
               <div className="flex items-center gap-4">
@@ -657,7 +685,7 @@ export function DoctorMessagePage({
       </label>
       <input
         type="text"
-        placeholder="Rechercher un message..."
+        placeholder="Search notifications..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg 
@@ -668,7 +696,7 @@ export function DoctorMessagePage({
     </div>
     <div>
       <label className="block text-sm font-semibold text-gray-700 mb-2">
-        Priorité
+        Priority
       </label>
       <select
         value={priorityFilter}
@@ -678,7 +706,7 @@ export function DoctorMessagePage({
                    transition-all duration-200 hover:border-gray-400
                    bg-white cursor-pointer appearance-none"
       >
-        <option value="all">Toutes les priorités</option>
+        <option value="all">All priorities</option>
         <option value="high">Urgent</option>
         <option value="medium">Alerte</option>
         <option value="low">Info</option>
@@ -705,7 +733,7 @@ export function DoctorMessagePage({
 </div>
 
         <div className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Notifications internes</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Internal notifications</h2>
           {isNotificationsLoading ? (
             <div className="h-[200px] w-full flex justify-center items-center">
               <Loader size={"medium"} color={"primary-end"} />
@@ -735,7 +763,7 @@ export function DoctorMessagePage({
                     </h3>
 
                     <p className="text-sm text-gray-600 mb-2">
-                      De: <span className="font-semibold">{notification.senderName}</span>
+                      From: <span className="font-semibold">{notification.senderName}</span>
                     </p>
 
                     <p className="text-gray-700 text-sm line-clamp-2 mb-3">
@@ -744,7 +772,7 @@ export function DoctorMessagePage({
 
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-500">
-                        {new Date(notification.date).toLocaleDateString('fr-FR', {
+                        {new Date(notification.date).toLocaleDateString('en-US', {
                           day: '2-digit',
                           month: 'short',
                           hour: '2-digit',
@@ -757,7 +785,7 @@ export function DoctorMessagePage({
               })}
             </div>
           ) : (
-            <p className="text-gray-600">Aucune notification pour le moment.</p>
+            <p className="text-gray-600">No notifications yet.</p>
           )}
         </div>
 
@@ -790,7 +818,7 @@ export function DoctorMessagePage({
                   </h3>
 
                   <p className="text-sm text-gray-600 mb-2">
-                    De: <span className="font-semibold">{message.senderName}</span>
+                    From: <span className="font-semibold">{message.senderName}</span>
                   </p>
 
                   <p className="text-gray-700 text-sm line-clamp-2 mb-3">
@@ -812,7 +840,7 @@ export function DoctorMessagePage({
                         deleteMessage(message.id)
                       }}
                       className="p-1.5 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
-                      title="Supprimer"
+                      title="Delete"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -826,10 +854,10 @@ export function DoctorMessagePage({
             <div className="flex flex-col">
               <Bell className="h-16 w-16 text-primary-end mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-800 mb-2 mx-auto">
-                Aucun message
+                No notifications
               </h2>
               <p className="text-gray-600 mb-4 mx-auto">
-                Il n'y a actuellement aucun message.
+                There are currently no notifications.
               </p>
               <button
                 className="px-4 hover:bg-primary-start duration-300 mx-auto py-2 bg-primary-end text-white rounded-lg transition-all"
@@ -849,7 +877,7 @@ export function DoctorMessagePage({
             onPageChange={paginate}
           />
 
-          /* PAGINATION BACKEND - Remplacer SimplePagination par Pagination quand l'API sera prête:
+          /* BACKEND PAGINATION - Replace SimplePagination with Pagination when the API is ready:
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -860,11 +888,11 @@ export function DoctorMessagePage({
           />
           
           IMPORTANT: Avec pagination backend:
-          1. Supprimer le filtrage local (lignes 156-167)
-          2. Supprimer le slicing local (lignes 170-173)
-          3. Utiliser directement messageList au lieu de currentMessages
-          4. Les filtres doivent être envoyés comme paramètres à l'API
-          5. Appeler retrieveDoctorMessages à chaque changement de filtre
+          1. Remove local filtering (lines 156-167)
+          2. Remove local slicing (lines 170-173)
+          3. Use messageList directly instead of currentMessages
+          4. Filters must be sent as API parameters
+          5. Call retrieveDoctorMessages on every filter change
           */
         )}
       </div>
@@ -900,7 +928,7 @@ export function DoctorMessagePage({
 
               <div className="mb-4 pb-4 border-b border-gray-200">
                 <p className="text-sm text-gray-600">
-                  <span className="font-semibold">De:</span> {selectedMessage.senderName}
+                  <span className="font-semibold">From:</span> {selectedMessage.senderName}
                 </p>
                 <p className="text-sm text-gray-600">
                   <span className="font-semibold">Date:</span>{' '}
@@ -916,7 +944,7 @@ export function DoctorMessagePage({
               </div>
 
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Message:</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Notification:</h3>
                 {isEditingMessage ? (
                   <textarea
                     value={editedContent}
@@ -939,7 +967,7 @@ export function DoctorMessagePage({
                   className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
                 >
                   <Trash2 className="h-4 w-4" />
-                  Supprimer
+                  Delete
                 </button>
                 <button
                   onClick={closeModal}
@@ -982,7 +1010,7 @@ export function DoctorMessagePage({
 
               <div className="mb-4 pb-4 border-b border-gray-200">
                 <p className="text-sm text-gray-600">
-                  <span className="font-semibold">De:</span> {selectedNotification.senderName}
+                  <span className="font-semibold">From:</span> {selectedNotification.senderName}
                 </p>
                 <p className="text-sm text-gray-600">
                   <span className="font-semibold">Date:</span>{' '}
@@ -998,7 +1026,7 @@ export function DoctorMessagePage({
               </div>
 
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Message:</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Notification:</h3>
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {selectedNotification.message}
                 </p>

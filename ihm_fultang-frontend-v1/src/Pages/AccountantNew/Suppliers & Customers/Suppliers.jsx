@@ -64,7 +64,7 @@ export function Suppliers() {
       const class4Accounts = allAccounts.filter(acc => acc.account_class === '4');
       setAccounts(class4Accounts);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -79,17 +79,17 @@ export function Suppliers() {
     try {
       if (editingId) {
         await supplierService.updateSupplier(editingId, formData);
-        setModalMessage("Fournisseur mis à jour avec succès.");
+        setModalMessage("Supplier updated successfully.");
       } else {
         await supplierService.createSupplier(formData);
-        setModalMessage("Nouveau fournisseur créé avec succès.");
+        setModalMessage("New supplier created successfully.");
       }
       setShowForm(false);
       setIsSuccessModalOpen(true);
       resetForm();
       fetchData();
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
       setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
       setIsErrorModalOpen(true);
     }
@@ -103,16 +103,16 @@ export function Suppliers() {
 
   const handleDelete = (id) => {
     setConfirmConfig({
-      title: "Supprimer Fournisseur",
-      message: "Êtes-vous sûr de vouloir supprimer ce fournisseur ? Cette action est irréversible.",
+      title: "Delete Supplier",
+      message: "Are you sure you want to delete this supplier? This action is irreversible.",
       onConfirm: async () => {
         try {
           await supplierService.deleteSupplier(id);
-          setModalMessage("Le fournisseur a été supprimé.");
+          setModalMessage("The supplier was deleted.");
           setIsSuccessModalOpen(true);
           fetchData();
         } catch (error) {
-          console.error("Erreur:", error);
+          console.error("Error:", error);
           setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
           setIsErrorModalOpen(true);
         }
@@ -127,7 +127,7 @@ export function Suppliers() {
       setSelectedSupplier(response.data);
       setShowBalance(true);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     }
   };
 
@@ -157,7 +157,7 @@ export function Suppliers() {
       <FinancialAccountantNavBar />
       <div className="ft-page">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-black text-secondary tracking-tight uppercase">Base Fournisseurs</h1>
+          <h1 className="text-3xl font-black text-secondary tracking-tight uppercase">Supplier Directory</h1>
           <button
             onClick={() => {
               resetForm();
@@ -165,17 +165,17 @@ export function Suppliers() {
             }}
             className="ft-btn ft-btn-md ft-btn-primary"
           >
-            <Plus size={20} /> Nouveau Fournisseur
+            <Plus size={20} /> New Supplier
           </button>
         </div>
 
-        {/* Search Bar - Stylisé */}
+        {/* Search Bar - Styled */}
         <div className="flex justify-end mb-8">
             <div className="relative w-full max-w-md">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
                     type="text"
-                    placeholder="Rechercher par nom ou code..."
+                    placeholder="Search by name or code..."
                     value={searchTerm}
                     onChange={(e) => {
                         setSearchTerm(e.target.value);
@@ -191,7 +191,7 @@ export function Suppliers() {
           <div className="ft-modal-overlay">
             <div className="ft-modal max-w-3xl">
               <div className="ft-modal-header">
-                <h2 className="ft-modal-title">{editingId ? "Modifier Fournisseur" : "Nouveau Fournisseur"}</h2>
+                <h2 className="ft-modal-title">{editingId ? "Edit Supplier" : "New Supplier"}</h2>
                 <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                   <X size={28} />
                 </button>
@@ -199,10 +199,10 @@ export function Suppliers() {
               <form onSubmit={handleSubmit}>
                 <div className="ft-modal-body grid grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto">
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Code Fournisseur</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Supplier Code</label>
                     <input
                         type="text"
-                        placeholder="Ex: FRN-001"
+                        placeholder="e.g. SUP-001"
                         value={formData.code}
                         onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                         required
@@ -210,10 +210,10 @@ export function Suppliers() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Raison Sociale</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Company Name</label>
                     <input
                         type="text"
-                        placeholder="Nom de l'entreprise"
+                        placeholder="Company name"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         required
@@ -221,27 +221,27 @@ export function Suppliers() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Catégorie</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Category</label>
                     <select
                         value={formData.supplier_type}
                         onChange={(e) => setFormData({ ...formData, supplier_type: e.target.value })}
                         className="ft-select"
                     >
-                        <option value="PHARMA">Laboratoire pharmaceutique</option>
-                        <option value="EQUIPMENT">Équipementier médical</option>
-                        <option value="SERVICE">Prestataire de service</option>
-                        <option value="SUPPLIER">Fournisseur général</option>
+                        <option value="PHARMA">Pharmaceutical Lab</option>
+                        <option value="EQUIPMENT">Medical Equipment Supplier</option>
+                        <option value="SERVICE">Service Provider</option>
+                        <option value="SUPPLIER">General Supplier</option>
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Compte Comptable Liaison</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Ledger Link Account</label>
                     <select
                         value={formData.account}
                         onChange={(e) => setFormData({ ...formData, account: e.target.value })}
                         required
                         className="ft-select"
                     >
-                        <option value="">Sélectionner un compte (Classe 4)</option>
+                        <option value="">Select an account (Class 4)</option>
                         {accounts.map((a) => (
                         <option key={a.id} value={a.id}>
                             {a.code} - {a.label}
@@ -250,17 +250,17 @@ export function Suppliers() {
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Email de contact</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Contact Email</label>
                     <input
                         type="email"
-                        placeholder="fournisseur@email.com"
+                        placeholder="supplier@email.com"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className="ft-input"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Téléphone</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Phone</label>
                     <PhoneInput
                       value={formData.phone}
                       onChange={(value) => setFormData({ ...formData, phone: value })}
@@ -268,9 +268,9 @@ export function Suppliers() {
                     />
                   </div>
                   <div className="col-span-2 space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Adresse Complète</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Full Address</label>
                     <textarea
-                        placeholder="Localisation géographique"
+                        placeholder="Location"
                         value={formData.address}
                         onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                         className="ft-input"
@@ -278,7 +278,7 @@ export function Suppliers() {
                     ></textarea>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Délai de paiement (jours)</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Payment terms (days)</label>
                     <input
                         type="number"
                         value={formData.payment_terms}
@@ -287,7 +287,7 @@ export function Suppliers() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Limite de crédit (FCFA)</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Credit limit (FCFA)</label>
                     <input
                         type="number"
                         step="0.01"
@@ -299,10 +299,10 @@ export function Suppliers() {
                 </div>
                 <div className="ft-modal-footer">
                   <button type="button" onClick={() => setShowForm(false)} className="ft-btn ft-btn-md ft-btn-outline">
-                    Annuler
+                    Cancel
                   </button>
                   <button type="submit" className="ft-btn ft-btn-md ft-btn-primary">
-                    {editingId ? "Enregistrer les modifications" : "Créer le fournisseur"}
+                    {editingId ? "Save changes" : "Create supplier"}
                   </button>
                 </div>
               </form>
@@ -315,10 +315,10 @@ export function Suppliers() {
           <table className="ft-table">
             <thead className="ft-thead">
               <tr>
-                <th className="ft-th">Fiche Fournisseur</th>
-                <th className="ft-th">Catégorie</th>
-                <th className="ft-th">Coordonnées</th>
-                <th className="ft-th text-center">Statut</th>
+                <th className="ft-th">Supplier Record</th>
+                <th className="ft-th">Category</th>
+                <th className="ft-th">Contact</th>
+                <th className="ft-th text-center">Status</th>
                 <th className="ft-th text-right">Actions</th>
               </tr>
             </thead>
@@ -344,10 +344,10 @@ export function Suppliers() {
                   <td className="ft-td">
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <Mail size={12} /> {s.email || "Non défini"}
+                            <Mail size={12} /> {s.email || "Not provided"}
                         </div>
                         <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <Phone size={12} /> {s.phone || "Non défini"}
+                            <Phone size={12} /> {s.phone || "Not provided"}
                         </div>
                     </div>
                   </td>
@@ -356,7 +356,7 @@ export function Suppliers() {
                         s.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                     }`}>
                         {s.is_active ? <CheckCircle size={10} /> : <AlertCircle size={10} />}
-                        {s.is_active ? "ACTIF" : "INACTIF"}
+                        {s.is_active ? "ACTIVE" : "INACTIVE"}
                     </span>
                   </td>
                   <td className="ft-td text-right">
@@ -364,21 +364,21 @@ export function Suppliers() {
                         <button
                             onClick={() => handleViewBalance(s)}
                             className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl transition-colors shadow-sm"
-                            title="Consulter le solde"
+                            title="View balance"
                         >
                             <Banknote size={16} />
                         </button>
                         <button
                             onClick={() => handleEdit(s)}
                             className="p-2 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl transition-colors shadow-sm"
-                            title="Modifier"
+                            title="Edit"
                         >
                             <Edit size={16} />
                         </button>
                         <button
                             onClick={() => handleDelete(s.id)}
                             className="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl transition-colors shadow-sm"
-                            title="Supprimer"
+                            title="Delete"
                         >
                             <Trash2 size={16} />
                         </button>
@@ -389,7 +389,7 @@ export function Suppliers() {
               {suppliers.length === 0 && (
                 <tr>
                     <td colSpan="5" className="ft-td text-center text-gray-400 py-20 font-medium italic">
-                        Aucun fournisseur enregistré pour le moment.
+                        No suppliers recorded yet.
                     </td>
                 </tr>
               )}
@@ -410,7 +410,7 @@ export function Suppliers() {
           <div className="ft-modal-overlay">
             <div className="ft-modal">
               <div className="ft-modal-header">
-                <h2 className="ft-modal-title">ÉTAT DU COMPTE</h2>
+                <h2 className="ft-modal-title">ACCOUNT STATUS</h2>
                 <button onClick={() => setShowBalance(false)} className="text-gray-400 hover:text-gray-600">
                   <X size={28} />
                 </button>
@@ -423,7 +423,7 @@ export function Suppliers() {
                 <p className="text-sm font-mono text-gray-400 mb-8 tracking-widest uppercase">{selectedSupplier.code}</p>
                 
                 <div className="bg-gray-50 rounded-3xl p-8 border-2 border-dashed border-gray-200">
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Solde actuel à payer</p>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Current balance due</p>
                     <p className="text-5xl font-black text-secondary tracking-tighter">
                         {(selectedSupplier.balance || 0).toLocaleString()} <span className="text-xl font-bold opacity-50">FCFA</span>
                     </p>
@@ -431,7 +431,7 @@ export function Suppliers() {
               </div>
               <div className="ft-modal-footer">
                 <button onClick={() => setShowBalance(false)} className="ft-btn ft-btn-md ft-btn-primary w-full">
-                    Fermer l'aperçu
+                    Close overview
                 </button>
               </div>
             </div>

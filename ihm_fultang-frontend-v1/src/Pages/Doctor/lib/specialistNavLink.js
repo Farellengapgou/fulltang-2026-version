@@ -8,7 +8,7 @@ export const specialistNavLink = [
     icon: FaHome,
   },
   {
-    name: "Messages",
+    name: "Notifications",
     icon: FaEnvelope,
     link: appRoutes.specialistMessage,
   },

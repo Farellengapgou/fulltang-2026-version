@@ -44,7 +44,7 @@ export function Inventory() {
       setItems(invRes.data.results || invRes.data);
       setCoa(coaRes.data.results || coaRes.data);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -59,10 +59,10 @@ export function Inventory() {
     try {
       if (editingId) {
         await inventoryService.updateInventoryItem(editingId, formData);
-        setModalMessage("L'article d'inventaire a été mis à jour avec succès.");
+        setModalMessage("The inventory item was updated successfully.");
       } else {
         await inventoryService.createInventoryItem(formData);
-        setModalMessage("L'article d'inventaire a été enregistré avec succès.");
+        setModalMessage("The inventory item was saved successfully.");
       }
       setShowForm(false);
       setIsSuccessModalOpen(true);
@@ -105,7 +105,7 @@ export function Inventory() {
       <div className="ft-page">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-secondary">
-            Gestion des Stocks
+            Inventory Management
           </h1>
           <button
             onClick={() => {
@@ -114,19 +114,19 @@ export function Inventory() {
             }}
             className="ft-btn ft-btn-md ft-btn-primary"
           >
-            + Nouvel Article
+            + New Item
           </button>
         </div>
 
-        {/* Modal pour le formulaire */}
+        {/* Form modal */}
         {showForm && (
           <div className="ft-modal-overlay">
             <div className="ft-modal max-w-4xl">
               <div className="ft-modal-header">
                 <h2 className="ft-modal-title">
                   {editingId
-                    ? "Modifier l'Article"
-                    : "Nouvel Article d'Inventaire"}
+                    ? "Edit Item"
+                    : "New Inventory Item"}
                 </h2>
                 <button
                   onClick={() => setShowForm(false)}
@@ -139,7 +139,7 @@ export function Inventory() {
                 <div className="ft-modal-body grid grid-cols-2 gap-x-6 gap-y-4">
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Référence (N°)
+                      Reference (No.)
                     </label>
                     <input
                       type="text"
@@ -157,7 +157,7 @@ export function Inventory() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Désignation
+                      Description
                     </label>
                     <input
                       type="text"
@@ -172,7 +172,7 @@ export function Inventory() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Type d'article
+                      Item Type
                     </label>
                     <select
                       value={formData.inventory_type}
@@ -184,15 +184,15 @@ export function Inventory() {
                       }
                       className="ft-select"
                     >
-                      <option value="PRODUCT">Produit</option>
+                      <option value="PRODUCT">Product</option>
                       <option value="SERVICE">Service</option>
-                      <option value="RAW_MATERIAL">Matière Première</option>
-                      <option value="PHARMA">Pharmaceutique</option>
+                      <option value="RAW_MATERIAL">Raw Material</option>
+                      <option value="PHARMA">Pharmaceutical</option>
                     </select>
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Compte de Stock
+                      Stock Account
                     </label>
                     <select
                       value={formData.stock_account}
@@ -205,7 +205,7 @@ export function Inventory() {
                       required
                       className="ft-select"
                     >
-                      <option value="">Sélectionner un compte...</option>
+                      <option value="">Select an account...</option>
                       {coa.map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.code} - {c.label}
@@ -215,7 +215,7 @@ export function Inventory() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Quantité en Stock
+                      Stock Quantity
                     </label>
                     <input
                       type="number"
@@ -232,7 +232,7 @@ export function Inventory() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Coût Unitaire (FCFA)
+                      Unit Cost (FCFA)
                     </label>
                     <input
                       type="number"
@@ -251,7 +251,7 @@ export function Inventory() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Seuil de Réapprovisionnement
+                      Reorder Level
                     </label>
                     <input
                       type="number"
@@ -267,7 +267,7 @@ export function Inventory() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Quantité de Réappro.
+                      Reorder Quantity
                     </label>
                     <input
                       type="number"
@@ -284,11 +284,11 @@ export function Inventory() {
                   </div>
                   <div className="col-span-2 space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Emplacement
+                      Location
                     </label>
                     <input
                       type="text"
-                      placeholder="Ex: Étagère A-12 / Entrepôt Principal"
+                      placeholder="Ex: Shelf A-12 / Main Warehouse"
                       value={formData.location}
                       onChange={(e) =>
                         setFormData({ ...formData, location: e.target.value })
@@ -303,13 +303,13 @@ export function Inventory() {
                     onClick={() => setShowForm(false)}
                     className="ft-btn ft-btn-md ft-btn-outline"
                   >
-                    Annuler
+                    Cancel
                   </button>
                   <button
                     type="submit"
                     className="ft-btn ft-btn-md ft-btn-primary"
                   >
-                    {editingId ? "Mettre à jour" : "Enregistrer"}
+                    {editingId ? "Update" : "Save"}
                   </button>
                 </div>
               </form>
@@ -321,12 +321,12 @@ export function Inventory() {
           <table className="ft-table">
             <thead className="ft-thead">
               <tr>
-                <th className="ft-th">Réf</th>
-                <th className="ft-th">Désignation</th>
+                <th className="ft-th">Ref</th>
+                <th className="ft-th">Description</th>
                 <th className="ft-th text-right">Stock</th>
-                <th className="ft-th text-right">Cout Unit.</th>
-                <th className="ft-th text-right">Valeur Totale</th>
-                <th className="ft-th text-center">Seuil</th>
+                <th className="ft-th text-right">Unit Cost</th>
+                <th className="ft-th text-right">Total Value</th>
+                <th className="ft-th text-center">Threshold</th>
                 <th className="ft-th text-right">Actions</th>
               </tr>
             </thead>
@@ -371,7 +371,7 @@ export function Inventory() {
                     colSpan="7"
                     className="ft-td text-center text-gray-500 py-12"
                   >
-                    Aucun article en inventaire.
+                    No inventory items.
                   </td>
                 </tr>
               )}

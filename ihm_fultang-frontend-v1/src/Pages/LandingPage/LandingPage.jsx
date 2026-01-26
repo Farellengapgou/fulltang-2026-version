@@ -117,7 +117,7 @@ export function LandingPage() {
                   onClick={() => navigate("/login")}
                   className="bg-secondary text-white py-3 rounded-lg font-bold mt-2 hover:bg-[#3d9d94] transition-colors duration-500 ease-in-out"
                 >
-                  Se Connecter
+                  Log In
                 </button>
               </div>
             </motion.div>
@@ -145,20 +145,20 @@ export function LandingPage() {
               className="lg:w-1/2 text-white text-center lg:text-left"
             >
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-6">
-                Gérez votre <span className="text-white">Polyclinique</span>{" "}
-                avec Excellence
+                Manage your <span className="text-white">Polyclinic</span>{" "}
+                with Excellence
               </h1>
               <p className="text-lg md:text-xl text-white/80 mb-10 max-w-2xl leading-relaxed">
-                FULTANG est une plateforme intégrée révolutionnaire conçue pour
-                moderniser la gestion hospitalière, la comptabilité OHADA et le
-                suivi en temps réel d'un patient.
+                FULTANG is a revolutionary integrated platform designed to
+                modernize hospital management, OHADA accounting, and real-time
+                patient tracking.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <button
                   onClick={() => navigate("/login")}
                   className="px-8 py-4 bg-white text-secondary hover:bg-gray-100 rounded-lg font-bold shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex items-center justify-center gap-2"
                 >
-                  Connexion <ChevronRight className="w-5 h-5" />
+                  Sign In <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
             </motion.div>
@@ -206,29 +206,28 @@ export function LandingPage() {
               className="lg:w-1/2"
             >
               <h2 className="text-primary-end font-bold tracking-widest uppercase mb-4">
-                À propos de Fultang
+                About Fultang
               </h2>
               <h3 className="text-3xl md:text-4xl font-bold text-secondary leading-tight mb-6">
-                Une Solution Holistique pour la Gestion Moderne
+                A Holistic Solution for Modern Management
               </h3>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                Fultang Polyclinic n'est pas qu'un simple centre de soins. C'est
-                une architecture technologique pensée pour l'efficacité. Notre
-                plateforme intègre tous les aspects de la vie d'une entreprise
-                de santé.
+                Fultang Polyclinic is more than a healthcare center. It is a
+                technology architecture designed for efficiency. Our platform
+                integrates every aspect of a healthcare organization.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[
-                  { icon: ShieldCheck, text: "Conformité OHADA de pointe" },
+                  { icon: ShieldCheck, text: "Advanced OHADA compliance" },
                   {
                     icon: CheckCircle2,
-                    text: "Suivi du patient en temps réel",
+                    text: "Real-time patient tracking",
                   },
                   {
                     icon: CheckCircle2,
-                    text: "Gestion de tout le staff médical",
+                    text: "Full medical staff management",
                   },
-                  { icon: ShieldCheck, text: "Sécurité des données patients" },
+                  { icon: ShieldCheck, text: "Patient data security" },
                 ].map((item, idx) => (
                   <div key={idx} className="flex items-center gap-3">
                     <div className="bg-primary-end/10 p-2 rounded-lg">
@@ -250,14 +249,14 @@ export function LandingPage() {
         <div className="container mx-auto px-6 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-20">
             <h2 className="text-primary-end font-bold tracking-widest uppercase mb-4">
-              Nos Modules
+              Our Modules
             </h2>
             <h3 className="text-4xl md:text-5xl font-bold text-secondary mb-6">
-              Un Écosystème Connecté
+              A Connected Ecosystem
             </h3>
             <p className="text-lg text-gray-600">
-              Chaque module communique avec les autres pour garantir une
-              cohérence totale de vos données.
+              Each module communicates with the others to ensure complete
+              data consistency.
             </p>
           </div>
 
@@ -265,39 +264,39 @@ export function LandingPage() {
             {[
               {
                 icon: Briefcase,
-                title: "Gestion du Staff Medical",
-                desc: "Suivi des tâches, messagerie en temps réel, et monitoring de performance opérationnelle.",
+                title: "Medical Staff Management",
+                desc: "Task tracking, real-time messaging, and operational performance monitoring.",
                 color: "bg-blue-500",
                 features: [
-                  "Tableaux de bord",
-                  "Attribution des tâches",
-                  "Suivi budget",
+                  "Dashboards",
+                  "Task assignment",
+                  "Budget tracking",
                 ],
               },
               {
                 icon: Calculator,
-                title: "Comptabilité Financière",
-                desc: "Totalement conforme aux normes OHADA. Gestion des journaux, bilans et comptes de résultats.",
+                title: "Financial Accounting",
+                desc: "Fully compliant with OHADA standards. Manage journals, balance sheets, and income statements.",
                 color: "bg-green-500",
-                features: ["Journalisation", "États Financiers", "Grand Livre"],
+                features: ["Journal Entries", "Financial Statements", "General Ledger"],
               },
               {
                 icon: Boxes,
-                title: "Comptabilité Matière",
-                desc: "Gestion rigoureuse des stocks, inventaires périodiques et valorisation des actifs.",
+                title: "Inventory Accounting",
+                desc: "Rigorous stock management, periodic inventories, and asset valuation.",
                 color: "bg-purple-500",
                 features: [
-                  "Gestion de stock",
-                  "Immobilisations",
-                  "Valorisation",
+                  "Stock management",
+                  "Fixed assets",
+                  "Valuation",
                 ],
               },
               {
                 icon: HeartPulse,
-                title: "Suite Médicale",
-                desc: "Gestion complète du parcours patient, de la consultation à la pharmacie et au laboratoire.",
+                title: "Medical Suite",
+                desc: "Complete patient journey management, from consultation to pharmacy and lab.",
                 color: "bg-red-500",
-                features: ["Dossier Médical", "Pharmacie", "Laboratoire"],
+                features: ["Medical Record", "Pharmacy", "Laboratory"],
               },
             ].map((module, idx) => (
               <motion.div
@@ -345,26 +344,25 @@ export function LandingPage() {
           <div className="flex flex-col lg:flex-row items-end justify-between mb-16 gap-8">
             <div className="lg:w-2/3">
               <h2 className="text-white font-bold tracking-widest uppercase mb-4">
-                Nos Acteurs
+                Our Roles
               </h2>
               <h3 className="text-3xl md:text-4xl font-bold leading-tight">
-                Une Interface Dédiée pour Chaque Expertise
+                A Dedicated Interface for Each Expertise
               </h3>
             </div>
             <p className="lg:w-1/3 text-white/80 text-lg">
-              Parce que chaque rôle est unique, Fultang offre des vues
-              personnalisées.
+              Because every role is unique, Fultang offers customized views.
             </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {[
-              { icon: Stethoscope, label: "Docteur" },
-              { icon: Activity, label: "Infirmier" },
-              { icon: Users, label: "Réceptioniste" },
-              { icon: Calculator, label: "Comptable" },
-              { icon: FlaskConical, label: "Laborantin" },
-              { icon: Pill, label: "Pharmacien" },
+              { icon: Stethoscope, label: "Doctor" },
+              { icon: Activity, label: "Nurse" },
+              { icon: Users, label: "Receptionist" },
+              { icon: Calculator, label: "Accountant" },
+              { icon: FlaskConical, label: "Lab Technician" },
+              { icon: Pill, label: "Pharmacist" },
             ].map((actor, idx) => (
               <motion.div
                 key={idx}
@@ -391,24 +389,24 @@ export function LandingPage() {
           >
             <div className="md:w-1/2">
               <h4 className="text-2xl font-bold mb-4">
-                Gagnez en efficacité dès aujourd'hui
+                Boost efficiency starting today
               </h4>
               <p className="text-white/70 mb-8">
-                Rejoignez des centaines de professionnels qui utilisent Fultang
-                pour automatiser les tâches répétitives.
+                Join hundreds of professionals who use Fultang
+                to automate repetitive tasks.
               </p>
             </div>
             <div className="md:w-1/2 grid grid-cols-2 gap-4">
               <div className="p-6 bg-white/10 rounded-2xl border border-white/20 text-center">
                 <p className="text-3xl font-black text-white mb-1">99%</p>
                 <p className="text-xs text-white/70 uppercase font-semibold">
-                  Disponibilité
+                  Availability
                 </p>
               </div>
               <div className="p-6 bg-white/10 rounded-2xl border border-white/20 text-center">
                 <p className="text-3xl font-black text-white mb-1">0%</p>
                 <p className="text-xs text-white/70 uppercase font-semibold">
-                  Erreur Papier
+                  Paper Errors
                 </p>
               </div>
             </div>

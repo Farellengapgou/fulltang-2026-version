@@ -64,7 +64,7 @@ export function JournalEntries() {
       setJournals(journalsData.data.results || journalsData.data);
       setAccounts(accountsData.data.results || accountsData.data);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -110,10 +110,10 @@ export function JournalEntries() {
 
       if (editingId) {
         await journalEntryService.updateEntry(editingId, data);
-        setModalMessage("L'écriture a été mise à jour avec succès.");
+        setModalMessage("The entry was updated successfully.");
       } else {
         await journalEntryService.createEntry(data);
-        setModalMessage("L'écriture a été créée avec succès.");
+        setModalMessage("The entry was created successfully.");
       }
 
       setShowForm(false);
@@ -121,7 +121,7 @@ export function JournalEntries() {
       resetForm();
       fetchData();
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
       setModalMessage(
         error.response?.data
           ? JSON.stringify(error.response.data)
@@ -133,17 +133,17 @@ export function JournalEntries() {
 
   const handlePost = (id) => {
     setConfirmConfig({
-      title: "Valider l'Écriture",
+      title: "Post Entry",
       message:
-        "Voulez-vous vraiment valider cette écriture ? Une fois validée, elle ne pourra plus être modifiée.",
+        "Do you really want to post this entry? Once posted, it cannot be edited.",
       onConfirm: async () => {
         try {
           await journalEntryService.postEntry(id, {});
-          setModalMessage("L'écriture a été validée avec succès.");
+          setModalMessage("The entry was posted successfully.");
           setIsSuccessModalOpen(true);
           fetchData();
         } catch (error) {
-          console.error("Erreur:", error);
+          console.error("Error:", error);
           setModalMessage(
             error.response?.data
               ? JSON.stringify(error.response.data)
@@ -158,17 +158,17 @@ export function JournalEntries() {
 
   const handleReverse = (id) => {
     setConfirmConfig({
-      title: "Contre-passer",
+      title: "Reverse Entry",
       message:
-        "Voulez-vous vraiment contre-passer cette écriture ? Cela créera une écriture inverse pour annuler l'impact.",
+        "Do you really want to reverse this entry? This will create a reversing entry to cancel the impact.",
       onConfirm: async () => {
         try {
           await journalEntryService.reverseEntry(id, {});
-          setModalMessage("L'écriture a été contre-passée avec succès.");
+          setModalMessage("The entry was reversed successfully.");
           setIsSuccessModalOpen(true);
           fetchData();
         } catch (error) {
-          console.error("Erreur:", error);
+          console.error("Error:", error);
           setModalMessage(
             error.response?.data
               ? JSON.stringify(error.response.data)
@@ -204,7 +204,7 @@ export function JournalEntries() {
       <div className="ft-page">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-secondary">
-            Écritures Comptables
+            Journal Entries
           </h1>
           <button
             onClick={() => {
@@ -213,7 +213,7 @@ export function JournalEntries() {
             }}
             className="ft-btn ft-btn-md ft-btn-primary"
           >
-            + Nouvelle Écriture
+            + New Entry
           </button>
         </div>
 
@@ -223,7 +223,7 @@ export function JournalEntries() {
             <div className="ft-modal max-w-5xl">
               <div className="ft-modal-header">
                 <h2 className="ft-modal-title">
-                  {editingId ? "Modifier l'Écriture" : "Nouvelle Écriture"}
+                  {editingId ? "Edit Entry" : "New Entry"}
                 </h2>
                 <button
                   onClick={() => setShowForm(false)}
@@ -262,7 +262,7 @@ export function JournalEntries() {
                         required
                         className="ft-select"
                       >
-                        <option value="">Sélectionner</option>
+                        <option value="">Select</option>
                         {journals.map((j) => (
                           <option key={j.id} value={j.id}>
                             {j.code} - {j.name}
@@ -272,11 +272,11 @@ export function JournalEntries() {
                     </div>
                     <div className="space-y-1">
                       <label className="text-xs font-semibold text-gray-500 uppercase">
-                        Référence
+                        Reference
                       </label>
                       <input
                         type="text"
-                        placeholder="Ex: Fact-2026-001"
+                        placeholder="e.g. INV-2026-001"
                         value={formData.reference}
                         onChange={(e) =>
                           setFormData({
@@ -293,7 +293,7 @@ export function JournalEntries() {
                       </label>
                       <input
                         type="text"
-                        placeholder="Description de l'écriture"
+                        placeholder="Entry description"
                         value={formData.description}
                         onChange={(e) =>
                           setFormData({
@@ -311,14 +311,14 @@ export function JournalEntries() {
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider">
-                        Lignes d'Écriture
+                        Entry Lines
                       </h3>
                       <button
                         type="button"
                         onClick={handleAddLine}
                         className="ft-btn ft-btn-sm ft-btn-out"
                       >
-                        <Plus size={16} /> Ajouter une ligne
+                        <Plus size={16} /> Add line
                       </button>
                     </div>
                     <div className="border border-gray-100 rounded-lg overflow-hidden">
@@ -326,9 +326,9 @@ export function JournalEntries() {
                         <thead className="ft-thead">
                           <tr>
                             <th className="ft-th !py-2">Compte</th>
-                            <th className="ft-th !py-2">Libellé</th>
-                            <th className="ft-th !py-2 text-right">Débit</th>
-                            <th className="ft-th !py-2 text-right">Crédit</th>
+                            <th className="ft-th !py-2">Label</th>
+                            <th className="ft-th !py-2 text-right">Debit</th>
+                            <th className="ft-th !py-2 text-right">Credit</th>
                             <th className="ft-th !py-2 text-right"></th>
                           </tr>
                         </thead>
@@ -348,7 +348,7 @@ export function JournalEntries() {
                                   required
                                   className="ft-select !py-1.5 text-xs font-mono"
                                 >
-                                  <option value="">Compte...</option>
+                                  <option value="">Account...</option>
                                   {accounts.map((a) => (
                                     <option key={a.id} value={a.id}>
                                       {a.code} - {a.label}
@@ -369,7 +369,7 @@ export function JournalEntries() {
                                   }
                                   required
                                   className="ft-input !py-1.5 text-xs"
-                                  placeholder="Libellé de la ligne"
+                                  placeholder="Line label"
                                 />
                               </td>
                               <td className="px-3 py-2 w-32">
@@ -419,7 +419,7 @@ export function JournalEntries() {
                                 colSpan="5"
                                 className="px-3 py-6 text-center text-gray-400 text-sm"
                               >
-                                Cliquez sur "+ Ajouter une ligne" pour commencer
+                                Click "+ Add line" to start
                               </td>
                             </tr>
                           )}
@@ -431,7 +431,7 @@ export function JournalEntries() {
                                 colSpan="2"
                                 className="px-3 py-2 text-right text-xs uppercase text-gray-500"
                               >
-                                Totaux
+                                Totals
                               </td>
                               <td className="px-3 py-2 text-right font-mono text-secondary">
                                 {formData.lines
@@ -465,13 +465,13 @@ export function JournalEntries() {
                     onClick={() => setShowForm(false)}
                     className="ft-btn ft-btn-md ft-btn-outline"
                   >
-                    Annuler
+                    Cancel
                   </button>
                   <button
                     type="submit"
                     className="ft-btn ft-btn-md ft-btn-primary"
                   >
-                    {editingId ? "Mettre à jour" : "Confirmer l'écriture"}
+                    {editingId ? "Update" : "Confirm entry"}
                   </button>
                 </div>
               </form>
@@ -484,13 +484,13 @@ export function JournalEntries() {
           <table className="ft-table">
             <thead className="ft-thead">
               <tr>
-                <th className="ft-th">N° Écriture</th>
+                <th className="ft-th">Entry No.</th>
                 <th className="ft-th">Journal</th>
                 <th className="ft-th">Date</th>
                 <th className="ft-th">Description</th>
-                <th className="ft-th text-right">Débit</th>
-                <th className="ft-th text-right">Crédit</th>
-                <th className="ft-th text-center">Statut</th>
+                <th className="ft-th text-right">Debit</th>
+                <th className="ft-th text-right">Credit</th>
+                <th className="ft-th text-center">Status</th>
                 <th className="ft-th text-right">Actions</th>
               </tr>
             </thead>
@@ -510,12 +510,12 @@ export function JournalEntries() {
                     {entry.description}
                   </td>
                   <td className="ft-td text-right font-mono text-gray-700">
-                    {entry.total_debit.toLocaleString("fr-FR", {
+                    {entry.total_debit.toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                     })}
                   </td>
                   <td className="ft-td text-right font-mono text-gray-700">
-                    {entry.total_credit.toLocaleString("fr-FR", {
+                    {entry.total_credit.toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                     })}
                   </td>
@@ -541,7 +541,7 @@ export function JournalEntries() {
                           setShowDetails(true);
                         }}
                         className="p-1.5 text-secondary hover:bg-secondary/10 rounded-lg transition-colors"
-                        title="Voir détails"
+                        title="View details"
                       >
                         <Eye size={18} />
                       </button>
@@ -549,7 +549,7 @@ export function JournalEntries() {
                         <button
                           onClick={() => handlePost(entry.id)}
                           className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                          title="Valider"
+                          title="Post"
                         >
                           <Check size={18} />
                         </button>
@@ -558,7 +558,7 @@ export function JournalEntries() {
                         <button
                           onClick={() => handleReverse(entry.id)}
                           className="p-1.5 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                          title="Contre-passer"
+                          title="Reverse"
                         >
                           <RotateCcw size={18} />
                         </button>
@@ -573,7 +573,7 @@ export function JournalEntries() {
                     colSpan="8"
                     className="ft-td text-center text-gray-500 py-16"
                   >
-                    Aucune écriture enregistrée pour le moment.
+                    No entries recorded yet.
                   </td>
                 </tr>
               )}
@@ -595,7 +595,7 @@ export function JournalEntries() {
             <div className="ft-modal max-w-4xl">
               <div className="ft-modal-header">
                 <h2 className="ft-modal-title">
-                  Écriture {selectedEntry.entry_number}
+                  Entry {selectedEntry.entry_number}
                 </h2>
                 <button
                   onClick={() => setShowDetails(false)}
@@ -624,7 +624,7 @@ export function JournalEntries() {
                   </div>
                   <div>
  
-                    <span className="block text-[10px] uppercase font-bold text-gray-400 mb-1">Statut</span>
+                    <span className="block text-[10px] uppercase font-bold text-gray-400 mb-1">Status</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-bold uppercase ${selectedEntry.state === "POSTED" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
                       }`}>
  
@@ -645,10 +645,10 @@ export function JournalEntries() {
                   <table className="ft-table">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="ft-th">Compte</th>
-                        <th className="ft-th">Libellé</th>
-                        <th className="ft-th text-right">Débit</th>
-                        <th className="ft-th text-right">Crédit</th>
+                        <th className="ft-th">Account</th>
+                        <th className="ft-th">Label</th>
+                        <th className="ft-th text-right">Debit</th>
+                        <th className="ft-th text-right">Credit</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -659,12 +659,12 @@ export function JournalEntries() {
                           </td>
                           <td className="ft-td text-xs">{line.label}</td>
                           <td className="ft-td text-right font-mono text-xs">
-                            {line.debit_amount.toLocaleString("fr-FR", {
+                            {line.debit_amount.toLocaleString("en-US", {
                               minimumFractionDigits: 2,
                             })}
                           </td>
                           <td className="ft-td text-right font-mono text-xs">
-                            {line.credit_amount.toLocaleString("fr-FR", {
+                            {line.credit_amount.toLocaleString("en-US", {
                               minimumFractionDigits: 2,
                             })}
                           </td>
@@ -675,15 +675,15 @@ export function JournalEntries() {
                           colSpan="2"
                           className="px-6 py-4 text-right text-xs uppercase text-gray-500"
                         >
-                          Total
+                        Total
                         </td>
                         <td className="px-6 py-4 text-right font-mono text-secondary">
-                          {selectedEntry.total_debit.toLocaleString("fr-FR", {
+                          {selectedEntry.total_debit.toLocaleString("en-US", {
                             minimumFractionDigits: 2,
                           })}
                         </td>
                         <td className="px-6 py-4 text-right font-mono text-secondary">
-                          {selectedEntry.total_credit.toLocaleString("fr-FR", {
+                          {selectedEntry.total_credit.toLocaleString("en-US", {
                             minimumFractionDigits: 2,
                           })}
                         </td>
@@ -698,7 +698,7 @@ export function JournalEntries() {
                   onClick={() => setShowDetails(false)}
                   className="ft-btn ft-btn-md ft-btn-outline w-full"
                 >
-                  Fermer
+                  Close
                 </button>
               </div>
             </div>

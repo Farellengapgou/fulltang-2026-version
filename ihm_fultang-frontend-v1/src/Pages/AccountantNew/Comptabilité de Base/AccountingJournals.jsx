@@ -33,12 +33,12 @@ export function AccountingJournals() {
   });
 
   const journalTypes = [
-    { value: 'SALES', label: 'Journal des ventes' },
-    { value: 'PURCHASES', label: 'Journal des achats' },
-    { value: 'BANK', label: 'Journal de banque' },
-    { value: 'CASH', label: 'Journal de caisse' },
-    { value: 'GENERAL', label: 'Journal général' },
-    { value: 'MISC', label: 'Opérations diverses' },
+    { value: 'SALES', label: 'Sales Journal' },
+    { value: 'PURCHASES', label: 'Purchases Journal' },
+    { value: 'BANK', label: 'Bank Journal' },
+    { value: 'CASH', label: 'Cash Journal' },
+    { value: 'GENERAL', label: 'General Journal' },
+    { value: 'MISC', label: 'Miscellaneous Entries' },
   ];
 
   const fetchData = async () => {
@@ -51,7 +51,7 @@ export function AccountingJournals() {
       setJournals(journalsRes.data.results || journalsRes.data);
       setAccounts(accountsRes.data.results || accountsRes.data);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -66,17 +66,17 @@ export function AccountingJournals() {
     try {
       if (editingId) {
         await journalService.updateJournal(editingId, formData);
-        setModalMessage("Le journal a été modifié avec succès.");
+        setModalMessage("The journal was updated successfully.");
       } else {
         await journalService.createJournal(formData);
-        setModalMessage("Le journal a été créé avec succès.");
+        setModalMessage("The journal was created successfully.");
       }
       setShowForm(false);
       resetForm();
       setIsSuccessModalOpen(true);
       fetchData();
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
       setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
       setIsErrorModalOpen(true);
     }
@@ -97,16 +97,16 @@ export function AccountingJournals() {
 
   const handleDelete = (id) => {
     setConfirmConfig({
-      title: "Supprimer le journal",
-      message: "Êtes-vous sûr de vouloir supprimer ce journal ? Cette action est irréversible.",
+      title: "Delete Journal",
+      message: "Are you sure you want to delete this journal? This action is irreversible.",
       onConfirm: async () => {
         try {
           await journalService.deleteJournal(id);
-          setModalMessage("Le journal a été supprimé avec succès.");
+          setModalMessage("The journal was deleted successfully.");
           setIsSuccessModalOpen(true);
           fetchData();
         } catch (error) {
-          console.error("Erreur:", error);
+          console.error("Error:", error);
           setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
           setIsErrorModalOpen(true);
         }
@@ -138,8 +138,8 @@ export function AccountingJournals() {
       <div className="ft-page">
         <div className="flex justify-between items-center mb-10">
           <div>
-            <h1 className="text-3xl font-black text-secondary tracking-tight uppercase">Journaux Comptables</h1>
-            <p className="text-gray-400 text-sm font-medium mt-1 uppercase tracking-widest">Configuration des journaux de saisie</p>
+            <h1 className="text-3xl font-black text-secondary tracking-tight uppercase">Accounting Journals</h1>
+            <p className="text-gray-400 text-sm font-medium mt-1 uppercase tracking-widest">Journal entry configuration</p>
           </div>
           <button
             onClick={() => {
@@ -148,7 +148,7 @@ export function AccountingJournals() {
             }}
             className="ft-btn ft-btn-md ft-btn-primary"
           >
-            <Plus size={20} /> Nouveau Journal
+            <Plus size={20} /> New Journal
           </button>
         </div>
 
@@ -157,7 +157,7 @@ export function AccountingJournals() {
           <div className="ft-modal-overlay">
             <div className="ft-modal max-w-2xl">
               <div className="ft-modal-header">
-                <h2 className="ft-modal-title">{editingId ? "Modifier le journal" : "Nouveau Journal"}</h2>
+                <h2 className="ft-modal-title">{editingId ? "Edit Journal" : "New Journal"}</h2>
                 <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
                   <X size={28} />
                 </button>
@@ -166,12 +166,12 @@ export function AccountingJournals() {
                 <div className="ft-modal-body space-y-6">
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-1">
-                      <label className="text-sm font-bold text-gray-700 ml-1">Code Journal</label>
+                      <label className="text-sm font-bold text-gray-700 ml-1">Journal Code</label>
                       <div className="relative">
                         <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <input
                           type="text"
-                          placeholder="Ex: ACHAT, VENTE, BQ"
+                          placeholder="e.g. PUR, SAL, BK"
                           value={formData.code}
                           onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
                           required
@@ -180,12 +180,12 @@ export function AccountingJournals() {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-sm font-bold text-gray-700 ml-1">Nom du Journal</label>
+                      <label className="text-sm font-bold text-gray-700 ml-1">Journal Name</label>
                       <div className="relative">
                         <Book className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <input
                           type="text"
-                          placeholder="Ex: Journal des achats"
+                          placeholder="e.g. Purchases Journal"
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                           required
@@ -197,7 +197,7 @@ export function AccountingJournals() {
 
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-1">
-                      <label className="text-sm font-bold text-gray-700 ml-1">Type de Journal</label>
+                      <label className="text-sm font-bold text-gray-700 ml-1">Journal Type</label>
                       <div className="relative">
                         <Settings className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <select
@@ -219,36 +219,36 @@ export function AccountingJournals() {
                             onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
                             className="w-5 h-5 accent-secondary cursor-pointer"
                         />
-                        <label htmlFor="is_active" className="text-sm font-bold text-gray-700 cursor-pointer">Journal Actif</label>
+                        <label htmlFor="is_active" className="text-sm font-bold text-gray-700 cursor-pointer">Active Journal</label>
                     </div>
                   </div>
 
                   <div className="p-6 bg-gray-50 rounded-2xl space-y-4 border border-gray-100">
                     <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                        <ArrowRight size={14} /> Contreparties par défaut
+                        <ArrowRight size={14} /> Default Counterpart Accounts
                     </h3>
                     <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-gray-500 ml-1 uppercase">Compte Débit (Optionnel)</label>
+                            <label className="text-xs font-bold text-gray-500 ml-1 uppercase">Debit Account (Optional)</label>
                             <select
                                 value={formData.default_debit_account}
                                 onChange={(e) => setFormData({ ...formData, default_debit_account: e.target.value })}
                                 className="ft-select"
                             >
-                                <option value="">Aucun</option>
+                                <option value="">None</option>
                                 {accounts.map((acc) => (
                                     <option key={acc.id} value={acc.id}>{acc.code} - {acc.label}</option>
                                 ))}
                             </select>
                         </div>
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-gray-500 ml-1 uppercase">Compte Crédit (Optionnel)</label>
+                            <label className="text-xs font-bold text-gray-500 ml-1 uppercase">Credit Account (Optional)</label>
                             <select
                                 value={formData.default_credit_account}
                                 onChange={(e) => setFormData({ ...formData, default_credit_account: e.target.value })}
                                 className="ft-select"
                             >
-                                <option value="">Aucun</option>
+                                <option value="">None</option>
                                 {accounts.map((acc) => (
                                     <option key={acc.id} value={acc.id}>{acc.code} - {acc.label}</option>
                                 ))}
@@ -259,10 +259,10 @@ export function AccountingJournals() {
                 </div>
                 <div className="ft-modal-footer">
                   <button type="button" onClick={() => setShowForm(false)} className="ft-btn ft-btn-md ft-btn-outline">
-                    Annuler
+                    Cancel
                   </button>
                   <button type="submit" className="ft-btn ft-btn-md ft-btn-primary">
-                    {editingId ? "Enregistrer les modifications" : "Créer le journal"}
+                    {editingId ? "Save Changes" : "Create Journal"}
                   </button>
                 </div>
               </form>
@@ -274,10 +274,10 @@ export function AccountingJournals() {
           <table className="ft-table">
             <thead className="ft-thead">
               <tr>
-                <th className="ft-th">Code & Nom</th>
+                <th className="ft-th">Code & Name</th>
                 <th className="ft-th">Type</th>
-                <th className="ft-th">Contreparties</th>
-                <th className="ft-th text-center">Statut</th>
+                <th className="ft-th">Counterpart Accounts</th>
+                <th className="ft-th text-center">Status</th>
                 <th className="ft-th text-right">Actions</th>
               </tr>
             </thead>
@@ -315,7 +315,7 @@ export function AccountingJournals() {
                             </div>
                         )}
                         {!journal.default_debit_account_name && !journal.default_credit_account_name && (
-                            <span className="text-[10px] font-bold text-gray-300 italic uppercase">Aucune contrepartie</span>
+                            <span className="text-[10px] font-bold text-gray-300 italic uppercase">No counterpart</span>
                         )}
                     </div>
                   </td>
@@ -323,7 +323,7 @@ export function AccountingJournals() {
                     <span className={`text-[10px] font-black px-3 py-1 rounded-full ${
                         journal.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                     }`}>
-                        {journal.is_active ? "ACTIF" : "INACTIF"}
+                        {journal.is_active ? "ACTIVE" : "INACTIVE"}
                     </span>
                   </td>
                   <td className="ft-td text-right">
@@ -331,14 +331,14 @@ export function AccountingJournals() {
                       <button
                         onClick={() => handleEdit(journal)}
                         className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
-                        title="Modifier"
+                        title="Edit"
                       >
                         <Edit size={14} />
                       </button>
                       <button
                         onClick={() => handleDelete(journal.id)}
                         className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all shadow-sm"
-                        title="Supprimer"
+                        title="Delete"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -349,7 +349,7 @@ export function AccountingJournals() {
               {journals.length === 0 && (
                 <tr>
                     <td colSpan="5" className="ft-td text-center text-gray-400 py-20 font-medium italic uppercase tracking-widest">
-                        Aucun journal comptable configuré.
+                        No accounting journals configured.
                     </td>
                 </tr>
               )}
@@ -363,12 +363,12 @@ export function AccountingJournals() {
                 <Info size={24} />
             </div>
             <div className="space-y-3">
-                <h3 className="text-sm font-black text-secondary uppercase tracking-widest">Guide des Journaux Comptables</h3>
+                <h3 className="text-sm font-black text-secondary uppercase tracking-widest">Accounting Journals Guide</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-2 text-[11px] font-bold text-gray-500 uppercase tracking-tight">
-                    <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> Utilisez des codes courts et explicites (ex: ACH, VEN, COQ).</p>
-                    <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> Les types Sales/Purchases automatisent certaines écritures TVA.</p>
-                    <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> Les contreparties par défaut accélèrent la saisie des écritures.</p>
-                    <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> Un journal inactif ne pourra plus recevoir de nouvelles écritures.</p>
+                    <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> Use short, explicit codes (e.g. PUR, SAL, CSH).</p>
+                    <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> Sales/Purchases types automate some VAT entries.</p>
+                    <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> Default counterpart accounts speed up data entry.</p>
+                    <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> An inactive journal cannot receive new entries.</p>
                 </div>
             </div>
         </div>
@@ -395,4 +395,3 @@ export function AccountingJournals() {
     </CustomDashboard>
   );
 }
-

@@ -46,8 +46,8 @@ export function Budget() {
 
   const months = ["january", "february", "march", "april", "may", "june", 
                   "july", "august", "september", "october", "november", "december"];
-  const monthNames = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", 
-                      "Juil", "Aoû", "Sep", "Oct", "Nov", "Déc"];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   const fetchData = async () => {
     setLoading(true);
@@ -55,7 +55,7 @@ export function Budget() {
       const budgetsData = await budgetService.getAllBudgets();
       setBudgets(budgetsData.data.results || budgetsData.data);
     } catch (error) {
-      console.error("Erreur récupération budgets:", error);
+      console.error("Error fetching budgets:", error);
     }
 
     try {
@@ -66,7 +66,7 @@ export function Budget() {
       );
       setAccounts(expenseAccounts);
     } catch (error) {
-      console.error("Erreur récupération comptes:", error);
+      console.error("Error fetching accounts:", error);
     }
     setLoading(false);
   };
@@ -79,13 +79,13 @@ export function Budget() {
     e.preventDefault();
     try {
       await budgetService.createBudget(formData);
-      setModalMessage("Le budget a été créé avec succès.");
+      setModalMessage("The budget was created successfully.");
       setShowForm(false);
       setIsSuccessModalOpen(true);
       resetForm();
       fetchData();
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
       setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
       setIsErrorModalOpen(true);
     }
@@ -98,7 +98,7 @@ export function Budget() {
       setBudgetLines(linesData.data || []);
       setShowLinesModal(true);
     } catch (error) {
-      console.error("Erreur récupération lignes:", error);
+      console.error("Error fetching lines:", error);
       setBudgetLines([]);
       setShowLinesModal(true);
     }
@@ -111,7 +111,7 @@ export function Budget() {
         ...lineFormData,
         budget: selectedBudget.id,
       });
-      setModalMessage("Ligne budgétaire ajoutée avec succès.");
+      setModalMessage("Budget line added successfully.");
       setIsSuccessModalOpen(true);
       resetLineForm();
       // Refresh lines
@@ -119,7 +119,7 @@ export function Budget() {
       setBudgetLines(linesData.data || []);
       fetchData(); // Refresh budgets to update totals
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
       setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
       setIsErrorModalOpen(true);
     }
@@ -127,16 +127,16 @@ export function Budget() {
 
   const handleApprove = (id) => {
     setConfirmConfig({
-      title: "Approuver le Budget",
-      message: "Voulez-vous officiellement approuver ce budget ? Cette action fixera les objectifs pour l'exercice.",
+      title: "Approve Budget",
+      message: "Do you want to officially approve this budget? This will set targets for the fiscal year.",
       onConfirm: async () => {
         try {
           await budgetService.approveBudget(id);
-          setModalMessage("Le budget a été approuvé avec succès.");
+          setModalMessage("The budget was approved successfully.");
           setIsSuccessModalOpen(true);
           fetchData();
         } catch (error) {
-          console.error("Erreur:", error);
+          console.error("Error:", error);
           setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
           setIsErrorModalOpen(true);
         }
@@ -179,7 +179,7 @@ export function Budget() {
       <FinancialAccountantNavBar />
       <div className="ft-page">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-secondary">Prévisions Budgétaires</h1>
+          <h1 className="text-2xl font-bold text-secondary">Budget Forecasts</h1>
           <button
             onClick={() => {
               resetForm();
@@ -187,7 +187,7 @@ export function Budget() {
             }}
             className="ft-btn ft-btn-md ft-btn-primary"
           >
-            <Plus size={20} /> Nouveau Budget
+            <Plus size={20} /> New Budget
           </button>
         </div>
 
@@ -196,7 +196,7 @@ export function Budget() {
           <div className="ft-modal-overlay">
             <div className="ft-modal max-w-2xl">
               <div className="ft-modal-header">
-                <h2 className="ft-modal-title">Nouveau Budget</h2>
+                <h2 className="ft-modal-title">New Budget</h2>
                 <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
                   <X size={24} />
                 </button>
@@ -204,10 +204,10 @@ export function Budget() {
               <form onSubmit={handleSubmit}>
                 <div className="ft-modal-body grid grid-cols-2 gap-4">
                   <div className="col-span-2 space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Nom du Budget</label>
+                    <label className="text-sm font-semibold text-gray-700">Budget Name</label>
                     <input
                       type="text"
-                      placeholder="Ex: Budget de Fonctionnement 2026"
+                      placeholder="e.g. Operating Budget 2026"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       required
@@ -221,13 +221,13 @@ export function Budget() {
                       onChange={(e) => setFormData({ ...formData, budget_type: e.target.value })}
                       className="ft-select"
                     >
-                      <option value="ANNUAL">Annuel</option>
-                      <option value="QUARTERLY">Trimestriel</option>
-                      <option value="MONTHLY">Mensuel</option>
+                      <option value="ANNUAL">Annual</option>
+                      <option value="QUARTERLY">Quarterly</option>
+                      <option value="MONTHLY">Monthly</option>
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Exercice Fiscal</label>
+                    <label className="text-sm font-semibold text-gray-700">Fiscal Year</label>
                     <input
                       type="number"
                       value={formData.fiscal_year}
@@ -237,7 +237,7 @@ export function Budget() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Date de début</label>
+                    <label className="text-sm font-semibold text-gray-700">Start Date</label>
                     <input
                       type="date"
                       value={formData.start_date}
@@ -247,7 +247,7 @@ export function Budget() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Date de fin</label>
+                    <label className="text-sm font-semibold text-gray-700">End Date</label>
                     <input
                       type="date"
                       value={formData.end_date}
@@ -259,10 +259,10 @@ export function Budget() {
                 </div>
                 <div className="ft-modal-footer">
                   <button type="button" onClick={() => setShowForm(false)} className="ft-btn ft-btn-md ft-btn-outline">
-                    Annuler
+                    Cancel
                   </button>
                   <button type="submit" className="ft-btn ft-btn-md ft-btn-primary">
-                    Créer le budget
+                    Create budget
                   </button>
                 </div>
               </form>
@@ -276,7 +276,7 @@ export function Budget() {
             <div className="ft-modal max-w-6xl">
               <div className="ft-modal-header">
                 <div>
-                  <h2 className="ft-modal-title">Lignes Budgétaires</h2>
+                  <h2 className="ft-modal-title">Budget Lines</h2>
                   <p className="ft-modal-subtitle">{selectedBudget.name}</p>
                 </div>
                 <button onClick={() => setShowLinesModal(false)} className="text-white/80 hover:text-white">
@@ -287,17 +287,17 @@ export function Budget() {
               <div className="ft-modal-body max-h-[70vh] overflow-y-auto">
                 {/* Add Line Form */}
                 <form onSubmit={handleAddLine} className="bg-gray-50 p-4 rounded-lg mb-4">
-                  <h3 className="font-bold text-gray-700 mb-3">Ajouter une ligne budgétaire</h3>
+                  <h3 className="font-bold text-gray-700 mb-3">Add a budget line</h3>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div className="col-span-2">
-                      <label className="text-xs font-semibold text-gray-600">Compte (Classe 6 - Charges)</label>
+                      <label className="text-xs font-semibold text-gray-600">Account (Class 6 - Expenses)</label>
                       <select
                         value={lineFormData.account}
                         onChange={(e) => setLineFormData({ ...lineFormData, account: e.target.value })}
                         required
                         className="ft-select text-sm"
                       >
-                        <option value="">Sélectionner un compte</option>
+                        <option value="">Select an account</option>
                         {accounts.map((acc) => (
                           <option key={acc.id} value={acc.id}>
                             {acc.code} - {acc.label}
@@ -324,17 +324,17 @@ export function Budget() {
                   
                   <div className="flex justify-between items-center">
                     <div className="text-sm font-bold text-secondary">
-                      Total annuel: {calculateLineTotal().toLocaleString()} FCFA
+                      Annual total: {calculateLineTotal().toLocaleString()} FCFA
                     </div>
                     <button type="submit" className="ft-btn ft-btn-sm ft-btn-primary">
-                      <Plus size={16} /> Ajouter
+                      <Plus size={16} /> Add
                     </button>
                   </div>
                 </form>
 
                 {/* Existing Lines */}
                 <div className="space-y-2">
-                  <h3 className="font-bold text-gray-700 mb-2">Lignes existantes ({budgetLines.length})</h3>
+                  <h3 className="font-bold text-gray-700 mb-2">Existing lines ({budgetLines.length})</h3>
                   {budgetLines.map((line) => (
                     <div key={line.id} className="bg-white border border-gray-200 rounded-lg p-3">
                       <div className="flex justify-between items-start mb-2">
@@ -344,7 +344,7 @@ export function Budget() {
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-secondary">{(line.annual_total || 0).toLocaleString()} FCFA</p>
-                          <p className="text-[10px] text-gray-400">Total annuel</p>
+                          <p className="text-[10px] text-gray-400">Annual total</p>
                         </div>
                       </div>
                       <div className="grid grid-cols-12 gap-1 text-[10px]">
@@ -358,7 +358,7 @@ export function Budget() {
                     </div>
                   ))}
                   {budgetLines.length === 0 && (
-                    <p className="text-center text-gray-400 py-8 italic">Aucune ligne budgétaire pour le moment</p>
+                    <p className="text-center text-gray-400 py-8 italic">No budget lines yet</p>
                   )}
                 </div>
               </div>
@@ -371,11 +371,11 @@ export function Budget() {
           <table className="ft-table">
             <thead className="ft-thead">
               <tr>
-                <th className="ft-th">Désignation</th>
+                <th className="ft-th">Name</th>
                 <th className="ft-th">Type</th>
-                <th className="ft-th text-center">Exercice</th>
-                <th className="ft-th text-right">Montant Total</th>
-                <th className="ft-th text-center">Approbation</th>
+                <th className="ft-th text-center">Fiscal Year</th>
+                <th className="ft-th text-right">Total Amount</th>
+                <th className="ft-th text-center">Approval</th>
                 <th className="ft-th text-right">Actions</th>
               </tr>
             </thead>
@@ -400,7 +400,7 @@ export function Budget() {
                           : "bg-amber-100 text-amber-700"
                       }`}
                     >
-                      {b.is_approved ? "APPROUVÉ" : "EN ATTENTE"}
+                      {b.is_approved ? "APPROVED" : "PENDING"}
                     </span>
                   </td>
                   <td className="ft-td text-right">
@@ -408,7 +408,7 @@ export function Budget() {
                       <button
                         onClick={() => handleManageLines(b)}
                         className="p-1 px-3 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-xs font-bold border border-blue-200"
-                        title="Gérer les lignes"
+                        title="Manage lines"
                       >
                         <DollarSign size={14} className="inline" /> Lignes
                       </button>
@@ -417,12 +417,12 @@ export function Budget() {
                           onClick={() => handleApprove(b.id)}
                           className="p-1 px-3 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors text-xs font-bold border border-emerald-200"
                         >
-                          Approuver
+                          Approve
                         </button>
                       )}
                       {b.is_approved && (
                           <span className="text-gray-400 italic text-xs flex justify-end items-center gap-1">
-                              Validé <CheckCircle size={14} />
+                              Validated <CheckCircle size={14} />
                           </span>
                       )}
                     </div>
@@ -432,7 +432,7 @@ export function Budget() {
               {budgets.length === 0 && (
                 <tr>
                   <td colSpan="6" className="ft-td text-center text-gray-500 py-12">
-                    Aucun budget enregistré.
+                    No budgets recorded.
                   </td>
                 </tr>
               )}

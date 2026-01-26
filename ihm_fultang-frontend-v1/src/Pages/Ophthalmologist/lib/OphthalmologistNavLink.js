@@ -31,7 +31,7 @@ export const ophthaNavLink = [
         ]
     },
     {
-        name: 'Messages',
+        name: 'Notifications',
         icon: FaEnvelope,
         link: appRoutes.ophthaMessage,
     },

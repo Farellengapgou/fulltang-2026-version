@@ -39,7 +39,7 @@ export const doctorNavLink = [
         ]
     },
     {
-        name: 'Messages',
+        name: 'Notifications',
         icon: FaEnvelope,
         link: appRoutes.doctorMessage,
     },

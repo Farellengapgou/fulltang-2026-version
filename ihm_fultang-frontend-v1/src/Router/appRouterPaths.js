@@ -13,6 +13,7 @@ export const AppRoutesPaths = {
   pharmacyAdd: "/pharmacy/add",
 
   pharmacyPrescriptions: "/pharmacy/prescriptions",
+  pharmacyMessage: "/pharmacy/messages",
 
   doctorPage: "/doctor/dashboard",
   ophthalmologistPage: "/ophthalmologist/dashboard",
@@ -20,6 +21,7 @@ export const AppRoutesPaths = {
   laboratoryAssistantPage: "/laboratory-assistant/home",
   receptionistPage: "/receptionist/patients",
   cashierPage: "/cashier/consultation-list",
+  cashierMessage: "/cashier/messages",
   consultationsList: "/cashier/consultations-list",
   examsList: "/cashier/exams-list",
   hospitalisations: "/cashier/hospitalisations-list",
@@ -45,6 +47,7 @@ export const AppRoutesPaths = {
   adminHospitalRoomPage: "/admin/room-list",
   adminFinancialReportsPage: "/admin/financial-report",
   accountantPage: "/accountant/dashboard",
+  accountantMessage: "/accountant/messages",
   adminConsultationDetailsPage: "/admin/consultation-list/details",
   laboratoryHistory: "/laboratory/exams-history",
   laboratoryCurrent: "/laboratory/current-exams",
@@ -94,6 +97,7 @@ export const AppRoutesPaths = {
     "/laboratory-assistant/exams-history/details/:id",
 
   financialAccountantHome: "/accountant-financial/home",
+  materialAccountantMessage: "/material-accountant/messages",
   financialAccountantChartOfAccount: "/accountant-financial/chart-account",
   financialAccountantJournalEntries: "/accountant-financial/journat-entries",
   financialAccountantAccountingJournals:

@@ -30,7 +30,7 @@ export function TaxRates() {
       const response = await taxService.getAllTaxRates();
       setRates(response.data.results || response.data);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -44,13 +44,13 @@ export function TaxRates() {
     e.preventDefault();
     try {
       await taxService.createTaxRate(formData);
-      setModalMessage("Le taux de fiscalité a été créé avec succès.");
+      setModalMessage("The tax rate was created successfully.");
       setShowForm(false);
       setIsSuccessModalOpen(true);
       resetForm();
       fetchRates();
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
       setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
       setIsErrorModalOpen(true);
     }
@@ -75,7 +75,7 @@ export function TaxRates() {
       <FinancialAccountantNavBar />
       <div className="ft-page">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-secondary">Taux de Fiscalité</h1>
+          <h1 className="text-2xl font-bold text-secondary">Tax Rates</h1>
           <button
             onClick={() => {
               resetForm();
@@ -83,16 +83,16 @@ export function TaxRates() {
             }}
             className="ft-btn ft-btn-md ft-btn-primary"
           >
-            + Nouveau Taux
+            + New Rate
           </button>
         </div>
 
-        {/* Modal pour le formulaire */}
+        {/* Form modal */}
         {showForm && (
           <div className="ft-modal-overlay">
             <div className="ft-modal max-w-xl">
               <div className="ft-modal-header">
-                <h2 className="ft-modal-title">Nouveau Taux de Fiscalité</h2>
+                <h2 className="ft-modal-title">New Tax Rate</h2>
                 <button
                   onClick={() => setShowForm(false)}
                   className="text-gray-400 hover:text-gray-600"
@@ -103,10 +103,10 @@ export function TaxRates() {
               <form onSubmit={handleSubmit}>
                 <div className="ft-modal-body grid grid-cols-2 gap-4">
                   <div className="col-span-2 space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Nom du Taux</label>
+                    <label className="text-sm font-semibold text-gray-700">Rate Name</label>
                     <input
                       type="text"
-                      placeholder="Ex: TVA Standard 18%"
+                      placeholder="e.g. Standard VAT 18%"
                       value={formData.name}
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
@@ -116,7 +116,7 @@ export function TaxRates() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Type de Taxe</label>
+                    <label className="text-sm font-semibold text-gray-700">Tax Type</label>
                     <select
                       value={formData.tax_type}
                       onChange={(e) =>
@@ -124,17 +124,17 @@ export function TaxRates() {
                       }
                       className="ft-select"
                     >
-                      <option value="VAT">TVA</option>
-                      <option value="WITHHOLDING">Retenue à la source</option>
+                      <option value="VAT">VAT</option>
+                      <option value="WITHHOLDING">Withholding</option>
                       <option value="EXCISE">Accise</option>
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Taux (%)</label>
+                    <label className="text-sm font-semibold text-gray-700">Rate (%)</label>
                     <input
                       type="number"
                       step="0.0001"
-                      placeholder="Ex: 0.18 pour 18%"
+                      placeholder="e.g. 0.18 for 18%"
                       value={formData.rate}
                       onChange={(e) =>
                         setFormData({ ...formData, rate: parseFloat(e.target.value) })
@@ -144,7 +144,7 @@ export function TaxRates() {
                     />
                   </div>
                   <div className="col-span-2 space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Date d'application</label>
+                    <label className="text-sm font-semibold text-gray-700">Effective date</label>
                     <input
                       type="date"
                       value={formData.start_date}
@@ -162,13 +162,13 @@ export function TaxRates() {
                     onClick={() => setShowForm(false)}
                     className="ft-btn ft-btn-md ft-btn-outline"
                   >
-                    Annuler
+                    Cancel
                   </button>
                   <button
                     type="submit"
                     className="ft-btn ft-btn-md ft-btn-primary"
                   >
-                    Créer le taux
+                    Create rate
                   </button>
                 </div>
               </form>
@@ -180,11 +180,11 @@ export function TaxRates() {
           <table className="ft-table">
             <thead className="ft-thead">
               <tr>
-                <th className="ft-th">Nom</th>
+                <th className="ft-th">Name</th>
                 <th className="ft-th">Type</th>
-                <th className="ft-th text-right">Taux (%)</th>
-                <th className="ft-th">Date d'effet</th>
-                <th className="ft-th text-center">Statut</th>
+                <th className="ft-th text-right">Rate (%)</th>
+                <th className="ft-th">Effective Date</th>
+                <th className="ft-th text-center">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -200,7 +200,7 @@ export function TaxRates() {
                     {( (typeof r.rate === "number" ? r.rate : parseFloat(r.rate)) * 100).toFixed(2)}%
                   </td>
                   <td className="ft-td text-sm text-gray-500">
-                    {new Date(r.start_date).toLocaleDateString('fr-FR')}
+                    {new Date(r.start_date).toLocaleDateString('en-US')}
                   </td>
                   <td className="ft-td text-center">
                     <span
@@ -208,7 +208,7 @@ export function TaxRates() {
                         r.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                       }`}
                     >
-                      {r.is_active ? "Actif" : "Inactif"}
+                      {r.is_active ? "Active" : "Inactive"}
                     </span>
                   </td>
                 </tr>
@@ -216,7 +216,7 @@ export function TaxRates() {
               {rates.length === 0 && (
                 <tr>
                   <td colSpan="5" className="ft-td text-center text-gray-500 py-12">
-                    Aucun taux de fiscalité configuré.
+                    No tax rates configured.
                   </td>
                 </tr>
               )}

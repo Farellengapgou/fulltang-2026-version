@@ -41,7 +41,7 @@ export function BankAccounts() {
       setAccounts(bankRes.data.results || bankRes.data);
       setCoa(coaRes.data.results || coaRes.data);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -55,13 +55,13 @@ export function BankAccounts() {
     e.preventDefault();
     try {
       await bankAccountService.createBankAccount(formData);
-      setModalMessage("Le compte bancaire a été créé avec succès.");
+      setModalMessage("The bank account was created successfully.");
       setShowForm(false);
       setIsSuccessModalOpen(true);
       resetForm();
       fetchData();
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
       setModalMessage(
         error.response?.data
           ? JSON.stringify(error.response.data)
@@ -94,7 +94,7 @@ export function BankAccounts() {
       <div className="ft-page">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-secondary">
-            Comptes Bancaires
+            Bank Accounts
           </h1>
           <button
             onClick={() => {
@@ -103,16 +103,16 @@ export function BankAccounts() {
             }}
             className="ft-btn ft-btn-md ft-btn-primary"
           >
-            + Nouveau Compte
+            + New Account
           </button>
         </div>
 
-        {/* Modal pour le formulaire */}
+        {/* Form modal */}
         {showForm && (
           <div className="ft-modal-overlay">
             <div className="ft-modal max-w-2xl">
               <div className="ft-modal-header">
-                <h2 className="ft-modal-title">Nouveau Compte Bancaire</h2>
+                <h2 className="ft-modal-title">New Bank Account</h2>
                 <button
                   onClick={() => setShowForm(false)}
                   className="text-gray-400 hover:text-gray-600"
@@ -124,7 +124,7 @@ export function BankAccounts() {
                 <div className="ft-modal-body grid grid-cols-2 gap-4">
                   <div className="col-span-2 space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Compte Comptable
+                      Ledger Account
                     </label>
                     <select
                       value={formData.account}
@@ -135,7 +135,7 @@ export function BankAccounts() {
                       className="ft-select"
                     >
                       <option value="">
-                        Sélectionner un compte (Classe 5)
+                        Select an account (Class 5)
                       </option>
                       {coa.map((c) => (
                         <option key={c.id} value={c.id}>
@@ -146,11 +146,11 @@ export function BankAccounts() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Nom de la Banque
+                      Bank Name
                     </label>
                     <input
                       type="text"
-                      placeholder="Ex: UBA, Ecobank..."
+                      placeholder="e.g. UBA, Ecobank..."
                       value={formData.bank_name}
                       onChange={(e) =>
                         setFormData({ ...formData, bank_name: e.target.value })
@@ -161,11 +161,11 @@ export function BankAccounts() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Numéro de Compte
+                      Account Number
                     </label>
                     <input
                       type="text"
-                      placeholder="Numéro national"
+                      placeholder="National number"
                       value={formData.account_number}
                       onChange={(e) =>
                         setFormData({
@@ -207,7 +207,7 @@ export function BankAccounts() {
                   </div>
                   <div className="col-span-2 space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Solde Initial (FCFA)
+                      Opening Balance (FCFA)
                     </label>
                     <input
                       type="number"
@@ -230,13 +230,13 @@ export function BankAccounts() {
                     onClick={() => setShowForm(false)}
                     className="ft-btn ft-btn-md ft-btn-outline"
                   >
-                    Annuler
+                    Cancel
                   </button>
                   <button
                     type="submit"
                     className="ft-btn ft-btn-md ft-btn-primary"
                   >
-                    Créer le compte
+                    Create account
                   </button>
                 </div>
               </form>
@@ -248,11 +248,11 @@ export function BankAccounts() {
           <table className="ft-table">
             <thead className="ft-thead">
               <tr>
-                <th className="ft-th">Banque & N° Compte</th>
-                <th className="ft-th">Compte Comptable</th>
+                <th className="ft-th">Bank & Account No.</th>
+                <th className="ft-th">Ledger Account</th>
                 <th className="ft-th">IBAN / SWIFT</th>
-                <th className="ft-th text-right">Solde Actuel</th>
-                <th className="ft-th text-center">Statut</th>
+                <th className="ft-th text-right">Current Balance</th>
+                <th className="ft-th text-center">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -312,7 +312,7 @@ export function BankAccounts() {
                       ) : (
                         <AlertCircle size={10} />
                       )}
-                      {acc.is_active ? "ACTIF" : "INACTIF"}
+                      {acc.is_active ? "ACTIVE" : "INACTIVE"}
                     </span>
                   </td>
                 </tr>
@@ -323,7 +323,7 @@ export function BankAccounts() {
                     colSpan="5"
                     className="ft-td text-center text-gray-500 py-12"
                   >
-                    Aucun compte bancaire configuré.
+                    No bank accounts configured.
                   </td>
                 </tr>
               )}

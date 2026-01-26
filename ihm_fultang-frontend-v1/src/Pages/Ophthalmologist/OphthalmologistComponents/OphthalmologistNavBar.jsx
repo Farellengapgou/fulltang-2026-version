@@ -1,4 +1,4 @@
-import {FaCog, FaEnvelope, FaSignOutAlt} from "react-icons/fa";
+import {FaEnvelope, FaSignOutAlt} from "react-icons/fa";
 import {Tooltip} from "antd";
 import {useAuthentication} from "../../../Utils/Provider.jsx";
 import userIcon from "../../../assets/userIcon.png";
@@ -27,14 +27,8 @@ export function OphthalmologistNavBar({ messageCount }) {
                        Ophthalmologist
                     </h1>
                     <div className="flex gap-3 mt-3.5 mb-4 mr-5">
-                        <Tooltip placement={"top"} title={"settings"}>
-                            <button className={applyNavLinkBtnStyle()}>
-                                <FaCog/>
-                            </button>
-                        </Tooltip>
-
                         <div className="relative">
-                            <Tooltip placement={"top"} title={"Messages"}>
+                            <Tooltip placement={"top"} title={"Notifications"}>
                                 <button
                                     onClick={() => navigate("/ophthalmologist/messages")}
                                     className={applyNavLinkBtnStyle()}

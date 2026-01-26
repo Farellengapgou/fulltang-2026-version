@@ -7,43 +7,43 @@ const TechnicalIssues = () => {
 
     const commonIssues = [
         {
-            problem: "Je ne peux pas me connecter au système",
+            problem: "I can't log in to the system",
             icon: <FaExclamationTriangle className="text-red-600" />,
             solutions: [
-                "Vérifiez que votre nom d'utilisateur et mot de passe sont corrects",
-                "Assurez-vous que CAPS LOCK n'est pas activé",
-                "Contactez l'administrateur si vous avez oublié votre mot de passe",
-                "Vérifiez votre connexion internet"
+                "Check that your username and password are correct",
+                "Make sure CAPS LOCK is not enabled",
+                "Contact the administrator if you forgot your password",
+                "Check your internet connection"
             ]
         },
         {
-            problem: "Les données ne se chargent pas",
+            problem: "Data is not loading",
             icon: <FaBug className="text-orange-600" />,
             solutions: [
-                "Actualisez la page (F5 ou Ctrl+R)",
-                "Videz le cache de votre navigateur",
-                "Vérifiez votre connexion internet",
-                "Si le problème persiste, contactez le support technique"
+                "Refresh the page (F5 or Ctrl+R)",
+                "Clear your browser cache",
+                "Check your internet connection",
+                "If the problem persists, contact technical support"
             ]
         },
         {
-            problem: "Erreur lors de l'enregistrement",
+            problem: "Error while saving",
             icon: <FaExclamationTriangle className="text-yellow-600" />,
             solutions: [
-                "Vérifiez que tous les champs obligatoires sont remplis",
-                "Assurez-vous que les formats de données sont corrects (dates, numéros, etc.)",
-                "Essayez de vous déconnecter et reconnecter",
-                "Notez le message d'erreur et contactez le support"
+                "Check that all required fields are filled",
+                "Make sure data formats are correct (dates, numbers, etc.)",
+                "Try logging out and back in",
+                "Note the error message and contact support"
             ]
         },
         {
-            problem: "Le chatbot ne répond pas",
+            problem: "The chatbot is not responding",
             icon: <FaQuestionCircle className="text-blue-600" />,
             solutions: [
-                "Vérifiez que le service chatbot est activé",
-                "Assurez-vous que votre question est claire et en français",
-                "Actualisez la page",
-                "En cas de problème persistant, utilisez le formulaire de support"
+                "Check that the chatbot service is enabled",
+                "Make sure your question is clear and in English",
+                "Refresh the page",
+                "If the problem persists, use the support form"
             ]
         }
     ];
@@ -56,23 +56,23 @@ const TechnicalIssues = () => {
                         onClick={() => navigate(-1)}
                         className="flex items-center gap-2 text-blue-900 hover:text-blue-700 mb-4"
                     >
-                        <FaArrowLeft /> Retour
+                        <FaArrowLeft /> Back
                     </button>
                     <h1 className="text-3xl font-bold text-blue-900">
-                        Problèmes Techniques
+                        Technical Issues
                     </h1>
                     <p className="text-gray-600 mt-2">
-                        Solutions aux problèmes techniques courants
+                        Solutions to common technical issues
                     </p>
                 </div>
             </div>
 
             <div className="container mx-auto px-6">
                 <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg mb-6">
-                    <h3 className="font-bold text-blue-900 mb-2">💡 Conseil</h3>
+                    <h3 className="font-bold text-blue-900 mb-2">💡 Tip</h3>
                     <p className="text-blue-800">
-                        Avant de contacter le support, essayez les solutions ci-dessous. 
-                        90% des problèmes peuvent être résolus rapidement !
+                        Before contacting support, try the solutions below. 
+                        90% of issues can be resolved quickly!
                     </p>
                 </div>
 
@@ -85,7 +85,7 @@ const TechnicalIssues = () => {
                             </h2>
                         </div>
                         <div className="ml-8">
-                            <h3 className="font-semibold text-gray-700 mb-2">Solutions :</h3>
+                            <h3 className="font-semibold text-gray-700 mb-2">Solutions:</h3>
                             <ol className="space-y-2">
                                 {issue.solutions.map((solution, i) => (
                                     <li key={i} className="flex gap-3">
@@ -101,14 +101,14 @@ const TechnicalIssues = () => {
                 ))}
 
                 <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg">
-                    <h3 className="font-bold text-red-800 mb-2">🆘 Support d'urgence</h3>
+                    <h3 className="font-bold text-red-800 mb-2">🆘 Emergency Support</h3>
                     <p className="text-red-700 mb-3">
-                        Si aucune de ces solutions ne fonctionne :
+                        If none of these solutions work:
                     </p>
                     <ul className="list-disc list-inside text-red-700 space-y-1">
-                        <li>Contactez le support technique : support@fultang.cm</li>
-                        <li>Appelez le : +237 XXX XXX XXX</li>
-                        <li>Utilisez le formulaire de contact dans le Help Center</li>
+                        <li>Contact technical support: support@fultang.cm</li>
+                        <li>Call: +237 XXX XXX XXX</li>
+                        <li>Use the contact form in the Help Center</li>
                     </ul>
                 </div>
             </div>

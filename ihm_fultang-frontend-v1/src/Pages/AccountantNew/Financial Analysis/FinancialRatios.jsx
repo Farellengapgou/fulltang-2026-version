@@ -33,7 +33,7 @@ export function FinancialRatios() {
         );
         setRatios(response.data.results || response.data);
       } catch (error) {
-        console.error("Erreur:", error);
+        console.error("Error:", error);
       } finally {
         setLoading(false);
       }
@@ -57,7 +57,7 @@ export function FinancialRatios() {
   // Sort by month
   chartData.sort((a, b) => a.month - b.month);
 
-  const monthNames = ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun", "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   return (
     <CustomDashboard
@@ -68,11 +68,11 @@ export function FinancialRatios() {
       <div className="ft-page">
         <div className="flex justify-between items-end mb-10">
           <div>
-            <h1 className="text-3xl font-black text-secondary tracking-tight uppercase">Analyses Financières</h1>
-            <p className="text-gray-400 text-sm font-medium mt-1 uppercase tracking-widest italic">Indicateurs de performance et de santé financière</p>
+            <h1 className="text-3xl font-black text-secondary tracking-tight uppercase">Financial Analysis</h1>
+            <p className="text-gray-400 text-sm font-medium mt-1 uppercase tracking-widest italic">Performance and financial health indicators</p>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Exercice</span>
+            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Fiscal Year</span>
             <div className="relative">
                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                 <input
@@ -92,20 +92,20 @@ export function FinancialRatios() {
                 <div className="p-2 bg-secondary/10 text-secondary rounded-xl">
                     <TrendingUp size={20} />
                 </div>
-                <h2 className="text-lg font-black text-secondary tracking-tight uppercase">Évolution des Ratios Clés</h2>
+                <h2 className="text-lg font-black text-secondary tracking-tight uppercase">Key Ratios Trend</h2>
             </div>
             <div className="flex gap-4">
                 <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                    <span className="text-[10px] font-black text-gray-400 uppercase">Liquidité</span>
+                    <span className="text-[10px] font-black text-gray-400 uppercase">Liquidity</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                    <span className="text-[10px] font-black text-gray-400 uppercase">Rentabilité</span>
+                    <span className="text-[10px] font-black text-gray-400 uppercase">Profitability</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                    <span className="text-[10px] font-black text-gray-400 uppercase">Solvabilité</span>
+                    <span className="text-[10px] font-black text-gray-400 uppercase">Solvency</span>
                 </div>
             </div>
           </div>
@@ -148,7 +148,7 @@ export function FinancialRatios() {
                         strokeWidth={4}
                         fillOpacity={1}
                         fill="url(#colorLiq)"
-                        name="Liquidité"
+                        name="Liquidity"
                     />
                     <Area
                         type="monotone"
@@ -157,7 +157,7 @@ export function FinancialRatios() {
                         strokeWidth={4}
                         fillOpacity={1}
                         fill="url(#colorRent)"
-                        name="Rentabilité"
+                        name="Profitability"
                     />
                     <Line
                         type="monotone"
@@ -165,14 +165,14 @@ export function FinancialRatios() {
                         stroke="#f59e0b"
                         strokeWidth={4}
                         dot={{ r: 6, fill: "#f59e0b", border: 0 }}
-                        name="Solvabilité"
+                        name="Solvency"
                     />
                 </AreaChart>
                 </ResponsiveContainer>
             ) : (
                 <div className="flex flex-col items-center justify-center h-full text-gray-300">
                     <Activity size={48} className="mb-4 opacity-20" />
-                    <p className="font-black uppercase tracking-widest text-xs">Aucune donnée disponible pour {year}</p>
+                    <p className="font-black uppercase tracking-widest text-xs">No data available for {year}</p>
                 </div>
             )}
           </div>
@@ -214,7 +214,7 @@ export function FinancialRatios() {
           {ratios.length === 0 && (
               <div className="col-span-full py-20 bg-gray-50 rounded-[2.5rem] border-2 border-dashed border-gray-100 flex flex-col items-center justify-center text-gray-400">
                 <Activity size={32} className="mb-2" />
-                <p className="font-bold text-sm uppercase tracking-widest italic">Chargement des données indicateurs...</p>
+                <p className="font-bold text-sm uppercase tracking-widest italic">Loading indicator data...</p>
               </div>
           )}
         </div>

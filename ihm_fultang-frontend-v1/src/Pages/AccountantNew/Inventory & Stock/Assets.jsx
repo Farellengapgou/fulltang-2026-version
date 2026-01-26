@@ -45,7 +45,7 @@ export function Assets() {
       setAssets(assetRes.data.results || assetRes.data);
       setCoa(coaRes.data.results || coaRes.data);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -60,10 +60,10 @@ export function Assets() {
     try {
       if (editingId) {
         await fixedAssetService.updateAsset(editingId, formData);
-        setModalMessage("L'immobilisation a été mise à jour avec succès.");
+        setModalMessage("The fixed asset was updated successfully.");
       } else {
         await fixedAssetService.createAsset(formData);
-        setModalMessage("L'immobilisation a été enregistrée avec succès.");
+        setModalMessage("The fixed asset was saved successfully.");
       }
       setShowForm(false);
       setIsSuccessModalOpen(true);
@@ -105,7 +105,7 @@ export function Assets() {
       <FinancialAccountantNavBar />
       <div className="ft-page">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-secondary">Immobilisations</h1>
+          <h1 className="text-2xl font-bold text-secondary">Fixed Assets</h1>
           <button
             onClick={() => {
               resetForm();
@@ -113,19 +113,19 @@ export function Assets() {
             }}
             className="ft-btn ft-btn-md ft-btn-primary"
           >
-            + Nouveau
+            + New
           </button>
         </div>
 
-        {/* Modal pour le formulaire */}
+        {/* Form modal */}
         {showForm && (
           <div className="ft-modal-overlay">
             <div className="ft-modal max-w-2xl">
               <div className="ft-modal-header">
                 <h2 className="ft-modal-title">
                   {editingId
-                    ? "Modifier l'Immobilisation"
-                    : "Nouvelle Immobilisation"}
+                    ? "Edit Fixed Asset"
+                    : "New Fixed Asset"}
                 </h2>
                 <button
                   onClick={() => setShowForm(false)}
@@ -138,7 +138,7 @@ export function Assets() {
                 <div className="ft-modal-body grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      N° Immobilisation
+                      Asset No.
                     </label>
                     <input
                       type="text"
@@ -156,7 +156,7 @@ export function Assets() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Nom / Désignation
+                      Name / Description
                     </label>
                     <input
                       type="text"
@@ -171,7 +171,7 @@ export function Assets() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Catégorie
+                      Category
                     </label>
                     <select
                       value={formData.category}
@@ -180,20 +180,20 @@ export function Assets() {
                       }
                       className="ft-select"
                     >
-                      <option value="BUILDING">Bâtiment</option>
+                      <option value="BUILDING">Building</option>
                       <option value="MEDICAL_EQUIPMENT">
-                        Équipement médical
+                        Medical Equipment
                       </option>
                       <option value="IT_EQUIPMENT">
-                        Matériel informatique
+                        IT Equipment
                       </option>
                       <option value="FURNITURE">Mobilier</option>
-                      <option value="VEHICLE">Véhicule</option>
+                      <option value="VEHICLE">Vehicle</option>
                     </select>
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Date d'acquisition
+                      Acquisition Date
                     </label>
                     <input
                       type="date"
@@ -210,7 +210,7 @@ export function Assets() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Coût d'acquisition (FCFA)
+                      Acquisition Cost (FCFA)
                     </label>
                     <input
                       type="number"
@@ -229,7 +229,7 @@ export function Assets() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Vie utile (années)
+                      Useful Life (years)
                     </label>
                     <input
                       type="number"
@@ -246,7 +246,7 @@ export function Assets() {
                   </div>
                   <div className="col-span-2 space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Compte d'Immobilisation
+                      Fixed Asset Account
                     </label>
                     <select
                       value={formData.asset_account}
@@ -259,7 +259,7 @@ export function Assets() {
                       required
                       className="ft-select"
                     >
-                      <option value="">Sélectionner un compte...</option>
+                      <option value="">Select an account...</option>
                       {coa.map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.code} - {c.label}
@@ -274,13 +274,13 @@ export function Assets() {
                     onClick={() => setShowForm(false)}
                     className="ft-btn ft-btn-md ft-btn-outline"
                   >
-                    Annuler
+                    Cancel
                   </button>
                   <button
                     type="submit"
                     className="ft-btn ft-btn-md ft-btn-primary"
                   >
-                    {editingId ? "Mettre à jour" : "Enregistrer"}
+                    {editingId ? "Update" : "Save"}
                   </button>
                 </div>
               </form>
@@ -292,11 +292,11 @@ export function Assets() {
           <table className="ft-table">
             <thead className="ft-thead">
               <tr>
-                <th className="ft-th">N° Immo</th>
-                <th className="ft-th">Désignation</th>
-                <th className="ft-th">Catégorie</th>
-                <th className="ft-th text-right">V. Brute</th>
-                <th className="ft-th text-right">V. Nette</th>
+                <th className="ft-th">Asset No.</th>
+                <th className="ft-th">Description</th>
+                <th className="ft-th">Category</th>
+                <th className="ft-th text-right">Gross Value</th>
+                <th className="ft-th text-right">Net Value</th>
                 <th className="ft-th text-right">Actions</th>
               </tr>
             </thead>
@@ -336,7 +336,7 @@ export function Assets() {
                     colSpan="6"
                     className="ft-td text-center text-gray-500 py-12"
                   >
-                    Aucune immobilisation enregistrée.
+                    No fixed assets recorded.
                   </td>
                 </tr>
               )}

@@ -43,7 +43,7 @@ export function FinancialReports() {
 
       setData(response.data);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -65,10 +65,10 @@ export function FinancialReports() {
         <div className="flex justify-between items-end mb-10">
           <div>
             <h1 className="text-3xl font-black text-secondary tracking-tight uppercase">
-              Etats Financiers
+              Financial Statements
             </h1>
             <p className="text-gray-400 text-sm font-medium mt-1 uppercase tracking-widest italic">
-              Production des documents de synthèse comptable
+              Production of financial summary documents
             </p>
           </div>
           <div className="flex gap-3 no-print">
@@ -76,13 +76,13 @@ export function FinancialReports() {
               onClick={() => window.print()}
               className="ft-btn ft-btn-md ft-btn-outl gap-2"
             >
-              <Printer size={18} /> Imprimer l'Etat
+              <Printer size={18} /> Print Statement
             </button>
             <button
               onClick={fetchReport}
               className="ft-btn ft-btn-md ft-btn-primary gap-2"
             >
-              <Play size={18} /> Générer
+              <Play size={18} /> Generate
             </button>
           </div>
         </div>
@@ -92,7 +92,7 @@ export function FinancialReports() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-1">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                Nature du document
+                Document type
               </label>
               <div className="relative">
                 <FileText
@@ -104,17 +104,17 @@ export function FinancialReports() {
                   onChange={(e) => setReportType(e.target.value)}
                   className="ft-select pl-12"
                 >
-                  <option value="balance_sheet">Bilan de l'Exercice</option>
+                  <option value="balance_sheet">Balance Sheet</option>
                   <option value="income_statement">
-                    Compte de Résultat (SIG)
+                    Income Statement (P&L)
                   </option>
-                  <option value="trial_balance">Balance de Vérification</option>
+                  <option value="trial_balance">Trial Balance</option>
                 </select>
               </div>
             </div>
             <div className="space-y-1">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                Période du
+                Period from
               </label>
               <div className="relative">
                 <Calendar
@@ -131,7 +131,7 @@ export function FinancialReports() {
             </div>
             <div className="space-y-1">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                Au
+                To
               </label>
               <div className="relative">
                 <Calendar
@@ -155,7 +155,7 @@ export function FinancialReports() {
               <div className="space-y-12">
                 <div className="text-center border-b pb-8">
                   <h2 className="text-2xl font-black text-secondary uppercase tracking-tight">
-                    BILAN ACTIF / PASSIF
+                    BALANCE SHEET
                   </h2>
                   <p className="text-gray-400 text-xs font-bold uppercase tracking-[0.2em] mt-2">
                     Situation au {endDate || new Date().toLocaleDateString()}
@@ -168,7 +168,7 @@ export function FinancialReports() {
                     <div className="flex items-center gap-3 mb-6 border-l-4 border-emerald-500 pl-4">
                       <ArrowUpRight className="text-emerald-500" size={24} />
                       <h3 className="text-lg font-black text-gray-800 uppercase">
-                        ACTIF
+                        ASSETS
                       </h3>
                     </div>
                     <table className="w-full">
@@ -195,7 +195,7 @@ export function FinancialReports() {
                       <tfoot>
                         <tr>
                           <td className="py-6 font-black text-secondary uppercase">
-                            Total Actif
+                            Total Assets
                           </td>
                           <td className="py-6 text-right font-mono text-xl font-black text-secondary">
                             {data.assets
@@ -215,7 +215,7 @@ export function FinancialReports() {
                     <div className="flex items-center gap-3 mb-6 border-l-4 border-amber-500 pl-4">
                       <ArrowDownRight className="text-amber-500" size={24} />
                       <h3 className="text-lg font-black text-gray-800 uppercase">
-                        PASSIF
+                        LIABILITIES
                       </h3>
                     </div>
                     <table className="w-full">
@@ -242,7 +242,7 @@ export function FinancialReports() {
                       <tfoot>
                         <tr>
                           <td className="py-6 font-black text-secondary uppercase">
-                            Total Passif
+                            Total Liabilities
                           </td>
                           <td className="py-6 text-right font-mono text-xl font-black text-secondary">
                             {data.liabilities
@@ -264,10 +264,10 @@ export function FinancialReports() {
               <div className="space-y-12">
                 <div className="text-center border-b pb-8">
                   <h2 className="text-2xl font-black text-secondary uppercase tracking-tight">
-                    COMPTE DE RÉSULTAT
+                    INCOME STATEMENT
                   </h2>
                   <p className="text-gray-400 text-xs font-bold uppercase tracking-[0.2em] mt-2">
-                    Période du {startDate || "N/A"} au {endDate || "N/A"}
+                    Period from {startDate || "N/A"} to {endDate || "N/A"}
                   </p>
                 </div>
 
@@ -275,7 +275,7 @@ export function FinancialReports() {
                   {/* PRODUITS */}
                   <div className="bg-emerald-50/30 rounded-[2rem] p-8 border border-emerald-100">
                     <h3 className="text-emerald-700 font-black uppercase text-sm tracking-widest mb-6">
-                      Produits d'Exploitation
+                      Operating Revenue
                     </h3>
                     <table className="w-full">
                       <tbody>
@@ -296,7 +296,7 @@ export function FinancialReports() {
                       <tfoot>
                         <tr>
                           <td className="pt-6 font-black text-emerald-800 uppercase italic">
-                            Total des Produits
+                            Total Revenue
                           </td>
                           <td className="pt-6 text-right font-mono text-2xl font-black text-emerald-800">
                             {data.total_revenue?.toLocaleString()}
@@ -309,7 +309,7 @@ export function FinancialReports() {
                   {/* CHARGES */}
                   <div className="bg-rose-50/30 rounded-[2rem] p-8 border border-rose-100">
                     <h3 className="text-rose-700 font-black uppercase text-sm tracking-widest mb-6">
-                      Charges d'Exploitation
+                      Operating Expenses
                     </h3>
                     <table className="w-full">
                       <tbody>
@@ -330,7 +330,7 @@ export function FinancialReports() {
                       <tfoot>
                         <tr>
                           <td className="pt-6 font-black text-rose-800 uppercase italic">
-                            Total des Charges
+                            Total Expenses
                           </td>
                           <td className="pt-6 text-right font-mono text-2xl font-black text-rose-800">
                             {data.total_expense?.toLocaleString()}
@@ -352,11 +352,11 @@ export function FinancialReports() {
                       <div className="flex items-center gap-3">
                         <Calculator className="opacity-50" size={24} />
                         <h3 className="text-xl font-black uppercase tracking-tighter">
-                          Résultat Net de l'Exercice
+                          Net Income for the Period
                         </h3>
                       </div>
                       <p className="text-[10px] font-bold opacity-60 uppercase tracking-widest mt-1">
-                        Calculé après compensationProduits/Charges
+                        Calculated after offsetting revenue and expenses
                       </p>
                     </div>
                     <div className="text-right">
@@ -376,19 +376,19 @@ export function FinancialReports() {
               <div className="space-y-8">
                 <div className="text-center border-b pb-8">
                   <h2 className="text-2xl font-black text-secondary uppercase tracking-tight">
-                    BALANCE DE VÉRIFICATION
+                    TRIAL BALANCE
                   </h2>
                   <p className="text-gray-400 text-xs font-bold uppercase tracking-[0.2em] mt-2">
-                    Détails des écritures par compte
+                    Entry details by account
                   </p>
                 </div>
 
                 <table className="ft-table">
                   <thead className="ft-thead">
                     <tr>
-                      <th className="ft-th">Compte G/L</th>
-                      <th className="ft-th text-right">Mouvement Débit</th>
-                      <th className="ft-th text-right">Mouvement Crédit</th>
+                      <th className="ft-th">G/L Account</th>
+                      <th className="ft-th text-right">Debit Movement</th>
+                      <th className="ft-th text-right">Credit Movement</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -419,7 +419,7 @@ export function FinancialReports() {
                   <tfoot>
                     <tr className="bg-secondary/5">
                       <td className="py-6 px-4 font-black text-secondary tracking-widest uppercase italic">
-                        Totaux Généraux
+                        Grand Totals
                       </td>
                       <td className="py-6 px-4 text-right font-mono text-xl font-black text-secondary">
                         {data.total_debit?.toLocaleString()}

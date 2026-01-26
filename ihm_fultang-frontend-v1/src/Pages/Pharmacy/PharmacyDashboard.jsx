@@ -1,4 +1,4 @@
-import { FiGrid, FiPlusCircle, FiList, FiFileText } from 'react-icons/fi';
+import { FiGrid, FiPlusCircle, FiList, FiFileText, FiMail } from 'react-icons/fi';
 import { NavLink } from 'react-router-dom';
 import PropTypes from "prop-types";
 
@@ -36,6 +36,11 @@ export const PharmacyDashboard = ({ children }) => {
           <NavLink to="/prescriptions" className={getLinkClass}>
             <FiFileText />
             <span>Prescriptions</span>
+          </NavLink>
+
+          <NavLink to="/pharmacy/messages" className={getLinkClass}>
+            <FiMail />
+            <span>Notifications</span>
           </NavLink>
         </nav>
       </div>

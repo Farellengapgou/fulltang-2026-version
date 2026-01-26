@@ -9,6 +9,7 @@ import {
     FaFileInvoice,
     FaChartBar,
     FaQuestionCircle,
+    FaEnvelope,
 } from "react-icons/fa";
 import { Package, PackageCheck, PackageX, Layers, TrendingUp, ShoppingCart, FolderTree } from "lucide-react";
 import { AppRoutesPaths as appRoutes } from "../../Router/appRouterPaths.js";
@@ -163,5 +164,11 @@ export const MaterialAccountingNavLink = [
         icon: FaQuestionCircle,
         link: appRoutes.helpCenterPage,
         description: "Documentation et support",
+    },
+    {
+        name: "Notifications",
+        icon: FaEnvelope,
+        link: appRoutes.materialAccountantMessage,
+        description: "Notifications internes",
     },
 ];

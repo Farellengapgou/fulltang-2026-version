@@ -14,77 +14,78 @@ import {
   FaUsers,
   FaQuestionCircle,
   FaLock,
+  FaEnvelope,
 } from "react-icons/fa";
 import { AppRoutesPaths as appRoutes } from "../../Router/appRouterPaths.js";
 
 export const FinancialAccountantNavLink = [
   {
-    name: "Tableau De Bord",
+    name: "Dashboard",
     link: appRoutes.financialAccountantHome,
     icon: FaHome,
   },
   {
-    name: "Comptabilité De Base",
+    name: "Basic Accounting",
     subLinks: [
       {
-        name: "Plan Comptable",
+        name: "Chart of Accounts",
         link: appRoutes.financialAccountantChartOfAccount,
         icon: FaChartBar,
       },
       {
-        name: "Journal Comptable",
+        name: "Accounting Journals",
         link: appRoutes.financialAccountantAccountingJournals,
         icon: FaBook,
       },
       {
-        name: "Écritures Comptable",
+        name: "Journal Entries",
         link: appRoutes.financialAccountantJournalEntries,
         icon: FaEdit,
       },
       {
-        name: "Périodes Comptables",
+        name: "Accounting Periods",
         link: appRoutes.periodClose,
         icon: FaLock,
       },
     ],
   },
   {
-    name: "Tiers",
+    name: "Third Parties",
     subLinks: [
       {
-        name: "Clients",
+        name: "Customers",
         link: appRoutes.customers,
         icon: FaUsers,
       },
       {
-        name: "Fournisseurs",
+        name: "Suppliers",
         link: appRoutes.suppliers,
         icon: FaTruck,
       },
     ],
   },
   {
-    name: "Actifs Et Stocks",
+    name: "Assets & Inventory",
     subLinks: [
       {
-        name: "Immobilisations",
+        name: "Fixed Assets",
         link: appRoutes.fixedAssetsRegister,
         icon: FaBuilding,
       },
       {
-        name: "Inventaire",
+        name: "Inventory",
         link: appRoutes.inventoryValuation,
         icon: FaBoxes,
       },
     ],
   },
   {
-    name: "Gestion de Paie",
+    name: "Payroll Management",
     link: appRoutes.financialAccountPayroll,
     icon: FaUserTie,
   },
   {
-    name: "Fiscalité",
+    name: "Taxation",
     subLinks: [
       {
         name: "TVA",
@@ -92,27 +93,27 @@ export const FinancialAccountantNavLink = [
         icon: FaCalculator,
       },
       {
-        name: "Taux Fiscaux",
+        name: "Tax Rates",
         link: appRoutes.taxCalendar,
         icon: FaChartLine,
       },
       {
-        name: "Déclarations Fiscales",
+        name: "Tax Declarations",
         link: appRoutes.taxDeclarations,
         icon: FaFileAlt,
       },
     ],
   },
   {
-    name: "Trésorerie",
+    name: "Cash Management",
     subLinks: [
       {
-        name: "Comptes Bancaires",
+        name: "Bank Accounts",
         link: appRoutes.cashPositions,
         icon: FaUniversity,
       },
       {
-        name: "Réconciliation Bancaire",
+        name: "Bank Reconciliation",
         link: appRoutes.bankReconciliation,
         icon: FaCalculator,
       },
@@ -124,27 +125,32 @@ export const FinancialAccountantNavLink = [
     icon: FaCalculator,
   },
   {
-    name: "Analyse Et Ratios",
+    name: "Analysis & Ratios",
     subLinks: [
       {
-        name: "Ratios Financiers",
+        name: "Financial Ratios",
         link: appRoutes.financialRatios,
         icon: FaChartLine,
       },
       {
-        name: "Comptes Analytiques",
+        name: "Analytic Accounts",
         link: appRoutes.profitabilityAnalysis,
         icon: FaChartBar,
       },
     ],
   },
   {
-    name: "Rapports Financiers",
+    name: "Financial Reports",
     link: appRoutes.financialStatements,
   },
   {
-    name: "Centre d'Aide",
-    link: appRoutes.helpCenter,
+    name: "Notifications",
+    link: appRoutes.accountantMessage,
+    icon: FaEnvelope,
+  },
+  {
+    name: "Help Center",
+    link: appRoutes.helpCenterPage,
     icon: FaQuestionCircle,
   },
 ];

@@ -28,7 +28,7 @@ export function ForgottenPassword() {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("Les mots de passe ne correspondent pas.");
+      setError("Passwords do not match.");
       return;
     }
 
@@ -42,7 +42,7 @@ export function ForgottenPassword() {
     ];
     if (commonPasswords.includes(password.toLowerCase())) {
       setError(
-        "Ce mot de passe est trop commun. Veuillez en choisir un plus robuste.",
+        "This password is too common. Please choose a stronger one.",
       );
       return;
     }
@@ -64,7 +64,7 @@ export function ForgottenPassword() {
       }
     } catch (err) {
       console.error(err);
-      setError("Erreur lors de la réinitialisation. Vérifiez l'adresse email.");
+      setError("Reset failed. Please check the email address.");
     } finally {
       setLoading(false);
     }
@@ -91,18 +91,18 @@ export function ForgottenPassword() {
             <div className="relative z-10 ml-[1rem] text-white">
 
               <h2 className="text-6xl text-secondary text-black font-semibold mb-10 leading-tight">
-                Sécurité du Compte
+                Account Security
               </h2>
 
               <p className="text-black text-secondary text-3xl mb-8 leading-relaxed">
-                Réinitialisez votre mot de passe en toute sécurité. Utilisez un
-                mot de passe fort pour protéger vos accès.
+                Reset your password securely. Use a strong password to protect
+                your access.
               </p>
 
               <div className="space-y-3">
                 {[
-                  { icon: ShieldCheck, text: "Au moins 8 caractères" },
-                  { icon: ShieldCheck, text: "Lettres, chiffres et symboles" },
+                  { icon: ShieldCheck, text: "At least 8 characters" },
+                  { icon: ShieldCheck, text: "Letters, numbers, and symbols" },
                 ].map((tip, idx) => (
                   <div
                     key={idx}
@@ -128,10 +128,10 @@ export function ForgottenPassword() {
                 >
                   <div className="mb-8">
                     <h3 className="text-3xl font-bold text-secondary mb-2">
-                      Réinitialisation
+                      Reset
                     </h3>
                     <p className="text-gray-600 text-xl">
-                      Créez un nouveau mot de passe
+                      Create a new password
                     </p>
                   </div>
 
@@ -147,7 +147,7 @@ export function ForgottenPassword() {
                   <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="space-y-1.5">
                       <label className="text-xl font-semibold text-gray-600 mb-1 block">
-                        Adresse Email
+                        Email Address
                       </label>
                       <input
                         type="email"
@@ -155,13 +155,13 @@ export function ForgottenPassword() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-md bg-white focus:outline-none focus:border-2 focus:border-primary-end transition-all duration-300 text-gray-800"
-                        placeholder="votre@email.com"
+                        placeholder="your@email.com"
                       />
                     </div>
 
                     <div className="space-y-1.5">
                       <label className="text-xl font-semibold text-gray-600 mb-1 block">
-                        Nouveau Mot de passe
+                        New Password
                       </label>
                       <input
                         type="password"
@@ -175,7 +175,7 @@ export function ForgottenPassword() {
 
                     <div className="space-y-1.5">
                       <label className="text-xl font-semibold text-gray-600 mb-1 block">
-                        Confirmer
+                        Confirm
                       </label>
                       <input
                         type="password"
@@ -197,7 +197,7 @@ export function ForgottenPassword() {
                       ) : (
                         <Send className="w-5 h-5" />
                       )}
-                      {loading ? "Traitement..." : "Réinitialiser"}
+                      {loading ? "Processing..." : "Reset"}
                     </button>
                   </form>
                 </motion.div>
@@ -212,17 +212,16 @@ export function ForgottenPassword() {
                     <CheckCircle2 className="w-10 h-10 text-emerald-600" />
                   </div>
                   <h3 className="text-2xl font-bold text-secondary mb-2">
-                    Succès !
+                    Success!
                   </h3>
                   <p className="text-gray-600 font-semibold mb-8">
-                    Votre mot de passe a été mis à jour. Vous pouvez maintenant
-                    vous connecter.
+                    Your password has been updated. You can now sign in.
                   </p>
                   <button
                     onClick={() => navigate("/login")}
                     className="inline-flex items-center gap-2 px-8 py-3 bg-secondary text-white font-bold rounded-lg hover:bg-[#3d9d94] transition-all duration-500 ease-in-out shadow-md hover:shadow-lg"
                   >
-                    Se Connecter
+                    Sign in
                   </button>
                 </motion.div>
               )}
@@ -234,7 +233,7 @@ export function ForgottenPassword() {
                 className="inline-flex text-md items-center gap-2 text-gray-400 hover:text-secondary transition-colors duration-500 ease-in-out font-semibold"
               >
                 <ArrowLeft className="w-4 h-4"/>
-                Retour à la connexion
+                Back to sign in
               </Link>
             </div>
           </div>

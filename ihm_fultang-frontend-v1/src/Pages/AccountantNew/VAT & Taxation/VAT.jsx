@@ -35,7 +35,7 @@ export function VAT() {
       const response = await vatService.getAllVAT();
       setVats(response.data.results || response.data);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -49,13 +49,13 @@ export function VAT() {
     e.preventDefault();
     try {
       await vatService.createVAT(formData);
-      setModalMessage("La déclaration de TVA a été enregistrée avec succès.");
+      setModalMessage("The VAT declaration was recorded successfully.");
       setShowForm(false);
       setIsSuccessModalOpen(true);
       resetForm();
       fetchVATs();
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
       setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
       setIsErrorModalOpen(true);
     }
@@ -63,16 +63,16 @@ export function VAT() {
 
   const handleDeclare = (id) => {
     setConfirmConfig({
-      title: "Confirmation Déclaration",
-      message: "Confirmer la déclaration de cette TVA ? Cette action validera les montants pour la période.",
+      title: "Confirm Declaration",
+      message: "Confirm declaring this VAT? This action will validate the amounts for the period.",
       onConfirm: async () => {
         try {
           await vatService.declareVAT(id);
-          setModalMessage("La TVA a été déclarée avec succès.");
+          setModalMessage("The VAT was declared successfully.");
           setIsSuccessModalOpen(true);
           fetchVATs();
         } catch (error) {
-          console.error("Erreur:", error);
+          console.error("Error:", error);
           setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
           setIsErrorModalOpen(true);
         }
@@ -102,7 +102,7 @@ export function VAT() {
       <FinancialAccountantNavBar />
       <div className="ft-page">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-secondary">Gestion de la TVA</h1>
+          <h1 className="text-2xl font-bold text-secondary">VAT Management</h1>
           <button
             onClick={() => {
               resetForm();
@@ -110,16 +110,16 @@ export function VAT() {
             }}
             className="ft-btn ft-btn-md ft-btn-primary"
           >
-            + Nouvelle Déclaration
+            + New Declaration
           </button>
         </div>
 
-        {/* Modal pour le formulaire */}
+        {/* Form modal */}
         {showForm && (
           <div className="ft-modal-overlay">
             <div className="ft-modal max-w-2xl">
               <div className="ft-modal-header">
-                <h2 className="ft-modal-title">Nouvelle Déclaration de TVA</h2>
+                <h2 className="ft-modal-title">New VAT Declaration</h2>
                 <button
                   onClick={() => setShowForm(false)}
                   className="text-gray-400 hover:text-gray-600"
@@ -130,10 +130,10 @@ export function VAT() {
               <form onSubmit={handleSubmit}>
                 <div className="ft-modal-body grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">N° TVA / Référence</label>
+                    <label className="text-sm font-semibold text-gray-700">VAT No. / Reference</label>
                     <input
                       type="text"
-                      placeholder="Ex: VAT-2026-001"
+                      placeholder="e.g. VAT-2026-001"
                       value={formData.vat_number}
                       onChange={(e) =>
                         setFormData({ ...formData, vat_number: e.target.value })
@@ -143,7 +143,7 @@ export function VAT() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Type de TVA</label>
+                    <label className="text-sm font-semibold text-gray-700">VAT Type</label>
                     <select
                       value={formData.vat_type}
                       onChange={(e) =>
@@ -151,12 +151,12 @@ export function VAT() {
                       }
                       className="ft-select"
                     >
-                      <option value="COLLECTED">TVA Collectée</option>
-                      <option value="DEDUCTIBLE">TVA Déductible</option>
+                      <option value="COLLECTED">Collected VAT</option>
+                      <option value="DEDUCTIBLE">Deductible VAT</option>
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Année fiscale</label>
+                    <label className="text-sm font-semibold text-gray-700">Fiscal year</label>
                     <input
                       type="number"
                       value={formData.period_year}
@@ -182,7 +182,7 @@ export function VAT() {
                     />
                   </div>
                   <div className="col-span-2 space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Montant total (FCFA)</label>
+                    <label className="text-sm font-semibold text-gray-700">Total amount (FCFA)</label>
                     <input
                       type="number"
                       step="0.01"
@@ -205,13 +205,13 @@ export function VAT() {
                     onClick={() => setShowForm(false)}
                     className="ft-btn ft-btn-md ft-btn-outline"
                   >
-                    Annuler
+                    Cancel
                   </button>
                   <button
                     type="submit"
                     className="ft-btn ft-btn-md ft-btn-primary"
                   >
-                    Enregistrer
+                    Save
                   </button>
                 </div>
               </form>
@@ -223,11 +223,11 @@ export function VAT() {
           <table className="ft-table">
             <thead className="ft-thead">
               <tr>
-                <th className="ft-th">N° TVA</th>
-                <th className="ft-th">Période</th>
+                <th className="ft-th">VAT No.</th>
+                <th className="ft-th">Period</th>
                 <th className="ft-th">Type</th>
                 <th className="ft-th text-right">Montant</th>
-                <th className="ft-th text-center">Statut</th>
+                <th className="ft-th text-center">Status</th>
                 <th className="ft-th text-right">Actions</th>
               </tr>
             </thead>
@@ -242,7 +242,7 @@ export function VAT() {
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
                         vat.vat_type === "COLLECTED" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"
                     }`}>
-                        {vat.vat_type === "COLLECTED" ? "Collectée" : "Déductible"}
+                        {vat.vat_type === "COLLECTED" ? "Collected" : "Deductible"}
                     </span>
                   </td>
                   <td className="ft-td text-right font-mono font-bold text-gray-700">
@@ -256,7 +256,7 @@ export function VAT() {
                           : "bg-amber-100 text-amber-700"
                       }`}
                     >
-                      {vat.status === "DECLARED" ? "Déclarant" : "En attente"}
+                      {vat.status === "DECLARED" ? "Declared" : "Pending"}
                     </span>
                   </td>
                   <td className="ft-td text-right">
@@ -265,12 +265,12 @@ export function VAT() {
                         onClick={() => handleDeclare(vat.id)}
                         className="p-1 px-3 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors text-xs font-bold border border-emerald-200"
                       >
-                        Déclarer
+                        Declare
                       </button>
                     )}
                     {vat.status === "DECLARED" && (
                         <span className="text-gray-400 italic text-xs flex justify-end items-center gap-1">
-                            Validé <CheckCircle size={14} />
+                            Validated <CheckCircle size={14} />
                         </span>
                     )}
                   </td>
@@ -279,7 +279,7 @@ export function VAT() {
               {vats.length === 0 && (
                 <tr>
                   <td colSpan="6" className="ft-td text-center text-gray-500 py-12">
-                    Aucune entrée de TVA enregistrée.
+                    No VAT entries recorded.
                   </td>
                 </tr>
               )}

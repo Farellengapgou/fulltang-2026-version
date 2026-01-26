@@ -45,7 +45,7 @@ export function Periods() {
       setPeriods(response.data.results || response.data);
       setTotalPages(Math.ceil((response.data.count || 0) / 10));
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -61,7 +61,7 @@ export function Periods() {
     // Validate dates
     if (formData.start_date && formData.end_date) {
       if (new Date(formData.end_date) < new Date(formData.start_date)) {
-        setDateError("La date de clôture ne peut pas être antérieure à la date d'ouverture");
+        setDateError("The closing date cannot be earlier than the opening date");
         return;
       }
     }
@@ -79,17 +79,17 @@ export function Periods() {
       
       if (editingId) {
         await accountingPeriodService.updatePeriod(editingId, payload);
-        setModalMessage("La période comptable a été modifiée avec succès.");
+        setModalMessage("The accounting period was updated successfully.");
       } else {
         await accountingPeriodService.createPeriod(payload);
-        setModalMessage("La période comptable a été créée avec succès.");
+        setModalMessage("The accounting period was created successfully.");
       }
       setShowForm(false);
       resetForm();
       setIsSuccessModalOpen(true);
       fetchPeriods();
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
       setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
       setIsErrorModalOpen(true);
     }
@@ -103,16 +103,16 @@ export function Periods() {
 
   const handleClosePeriod = (id) => {
     setConfirmConfig({
-      title: "Clôturer la période",
-      message: "Êtes-vous sûr de vouloir fermer cette période? Cette action est irréversible et verrouillera toutes les écritures.",
+      title: "Close Period",
+      message: "Are you sure you want to close this period? This action is irreversible and will lock all entries.",
       onConfirm: async () => {
         try {
           await accountingPeriodService.closePeriod(id);
-          setModalMessage("La période a été fermée avec succès.");
+          setModalMessage("The period was closed successfully.");
           setIsSuccessModalOpen(true);
           fetchPeriods();
         } catch (error) {
-          console.error("Erreur:", error);
+          console.error("Error:", error);
           setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
           setIsErrorModalOpen(true);
         }
@@ -123,16 +123,16 @@ export function Periods() {
 
   const handleOpenPeriod = (id) => {
     setConfirmConfig({
-      title: "Rouvrir la période",
-      message: "Voulez-vous vraiment rouvrir cette période? Cela autorisera de nouveau la saisie d'écritures.",
+      title: "Reopen Period",
+      message: "Do you really want to reopen this period? This will allow entries again.",
       onConfirm: async () => {
         try {
           await accountingPeriodService.openPeriod(id);
-          setModalMessage("La période a été rouverte avec succès.");
+          setModalMessage("The period was reopened successfully.");
           setIsSuccessModalOpen(true);
           fetchPeriods();
         } catch (error) {
-          console.error("Erreur:", error);
+          console.error("Error:", error);
           setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
           setIsErrorModalOpen(true);
         }
@@ -143,16 +143,16 @@ export function Periods() {
 
   const handleDelete = (id) => {
     setConfirmConfig({
-      title: "Supprimer la période",
-      message: "Voulez-vous vraiment supprimer cette période? Cette action est définitive.",
+      title: "Delete Period",
+      message: "Do you really want to delete this period? This action is final.",
       onConfirm: async () => {
         try {
           await accountingPeriodService.deletePeriod(id);
-          setModalMessage("La période a été supprimée avec succès.");
+          setModalMessage("The period was deleted successfully.");
           setIsSuccessModalOpen(true);
           fetchPeriods();
         } catch (error) {
-          console.error("Erreur:", error);
+          console.error("Error:", error);
           setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
           setIsErrorModalOpen(true);
         }
@@ -173,7 +173,7 @@ export function Periods() {
     setDateError("");
   };
 
-  const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
   if (loading) return <Loader />;
 
@@ -186,8 +186,8 @@ export function Periods() {
       <div className="ft-page">
         <div className="flex justify-between items-center mb-10">
           <div>
-            <h1 className="text-3xl font-black text-secondary tracking-tight uppercase">Périodes Comptables</h1>
-            <p className="text-gray-400 text-sm font-medium mt-1 uppercase tracking-widest">Configuration des cycles d'exploitation</p>
+            <h1 className="text-3xl font-black text-secondary tracking-tight uppercase">Accounting Periods</h1>
+            <p className="text-gray-400 text-sm font-medium mt-1 uppercase tracking-widest">Operating cycle configuration</p>
           </div>
           <button
             onClick={() => {
@@ -196,7 +196,7 @@ export function Periods() {
             }}
             className="ft-btn ft-btn-md ft-btn-primary"
           >
-            <Plus size={20} /> Nouvelle Période
+            <Plus size={20} /> New Period
           </button>
         </div>
 
@@ -205,7 +205,7 @@ export function Periods() {
           <div className="ft-modal-overlay">
             <div className="ft-modal max-w-2xl">
               <div className="ft-modal-header">
-                <h2 className="ft-modal-title">{editingId ? "Modifier la période" : "Nouvelle Période"}</h2>
+                <h2 className="ft-modal-title">{editingId ? "Edit Period" : "New Period"}</h2>
                 <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                   <X size={28} />
                 </button>
@@ -214,7 +214,7 @@ export function Periods() {
                 <div className="ft-modal-body space-y-6">
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-1">
-                      <label className="text-sm font-bold text-gray-700 ml-1">Année Fiscale</label>
+                      <label className="text-sm font-bold text-gray-700 ml-1">Fiscal Year</label>
                       <div className="relative">
                         <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <input
@@ -227,7 +227,7 @@ export function Periods() {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-sm font-bold text-gray-700 ml-1">Mois du Calendrier</label>
+                      <label className="text-sm font-bold text-gray-700 ml-1">Calendar Month</label>
                       <div className="relative">
                         <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <select
@@ -245,7 +245,7 @@ export function Periods() {
 
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-1">
-                      <label className="text-sm font-bold text-gray-700 ml-1">Date d'Ouverture</label>
+                      <label className="text-sm font-bold text-gray-700 ml-1">Opening Date</label>
                       <div className="relative">
                         <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <DatePicker
@@ -258,7 +258,7 @@ export function Periods() {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-sm font-bold text-gray-700 ml-1">Date de Clôture</label>
+                      <label className="text-sm font-bold text-gray-700 ml-1">Closing Date</label>
                       <div className="relative">
                         <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <DatePicker
@@ -282,7 +282,7 @@ export function Periods() {
                   )}
 
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Statut Initial</label>
+                    <label className="text-sm font-bold text-gray-700 ml-1">Initial Status</label>
                     <div className="relative">
                       <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                         {formData.status === 'OPEN' ? <Unlock size={18} /> : <Lock size={18} />}
@@ -292,18 +292,18 @@ export function Periods() {
                         onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                         className="ft-select pl-12"
                       >
-                        <option value="OPEN">OUVERTE - Saisie Autorisée</option>
-                        <option value="CLOSED">FERMÉE - Consultation Uniquement</option>
+                        <option value="OPEN">OPEN - Entries Allowed</option>
+                        <option value="CLOSED">CLOSED - View Only</option>
                       </select>
                     </div>
                   </div>
                 </div>
                 <div className="ft-modal-footer">
                   <button type="button" onClick={() => setShowForm(false)} className="ft-btn ft-btn-md ft-btn-outline">
-                    Annuler
+                    Cancel
                   </button>
                   <button type="submit" className="ft-btn ft-btn-md ft-btn-primary">
-                    {editingId ? "Enregistrer les modifications" : "Créer la période"}
+                    {editingId ? "Save Changes" : "Create Period"}
                   </button>
                 </div>
               </form>
@@ -316,10 +316,10 @@ export function Periods() {
             <thead className="ft-thead">
               <tr>
                 <th className="ft-th">Cycle</th>
-                <th className="ft-th">Calendrier</th>
-                <th className="ft-th">Intervalle de Dates</th>
-                <th className="ft-th text-center">Statut</th>
-                <th className="ft-th text-right">Opérations</th>
+                <th className="ft-th">Calendar</th>
+                <th className="ft-th">Date Range</th>
+                <th className="ft-th text-center">Status</th>
+                <th className="ft-th text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -344,11 +344,11 @@ export function Periods() {
  
                         <Calendar size={12} />
                         <span className="font-black text-gray-600 uppercase tracking-tighter">
-                          {period.start_date ? new Date(period.start_date).toLocaleDateString('fr-FR') : 'N/A'}
+                          {period.start_date ? new Date(period.start_date).toLocaleDateString('en-US') : 'N/A'}
                         </span>
                         <span className="opacity-30">→</span>
                         <span className="font-black text-gray-600 uppercase tracking-tighter">
-                          {period.end_date ? new Date(period.end_date).toLocaleDateString('fr-FR') : 'N/A'}
+                          {period.end_date ? new Date(period.end_date).toLocaleDateString('en-US') : 'N/A'}
                         </span>
  
                     </div>
@@ -357,7 +357,7 @@ export function Periods() {
                     <span className={`text-[10px] font-black px-3 py-1 rounded-full flex items-center justify-center gap-1 mx-auto w-fit ${period.status === "OPEN" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                       }`}>
                       {period.status === "OPEN" ? <Unlock size={10} /> : <Lock size={10} />}
-                      {period.status === "OPEN" ? "OUVERTE" : "CLÔTURÉE"}
+                      {period.status === "OPEN" ? "OPEN" : "CLOSED"}
                     </span>
                   </td>
                   <td className="ft-td text-right">
@@ -367,14 +367,14 @@ export function Periods() {
                           <button
                             onClick={() => handleEdit(period)}
                             className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
-                            title="Modifier"
+                            title="Edit"
                           >
                             <Edit size={14} />
                           </button>
                           <button
                             onClick={() => handleClosePeriod(period.id)}
                             className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-600 hover:text-white transition-all shadow-sm"
-                            title="Clôturer"
+                            title="Close"
                           >
                             <Lock size={14} />
                           </button>
@@ -383,7 +383,7 @@ export function Periods() {
                         <button
                           onClick={() => handleOpenPeriod(period.id)}
                           className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
-                          title="Réouvrir"
+                          title="Reopen"
                         >
                           <Unlock size={14} />
                         </button>
@@ -391,7 +391,7 @@ export function Periods() {
                       <button
                         onClick={() => handleDelete(period.id)}
                         className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all shadow-sm"
-                        title="Supprimer"
+                        title="Delete"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -402,7 +402,7 @@ export function Periods() {
               {periods.length === 0 && (
                 <tr>
                   <td colSpan="5" className="ft-td text-center text-gray-400 py-20 font-medium italic uppercase tracking-widest">
-                    Aucune période comptable configurée.
+                    No accounting period configured.
                   </td>
                 </tr>
               )}
@@ -424,12 +424,12 @@ export function Periods() {
             <Info size={24} />
           </div>
           <div className="space-y-3">
-            <h3 className="text-sm font-black text-secondary uppercase tracking-widest">Consignes de Gestion des Périodes</h3>
+            <h3 className="text-sm font-black text-secondary uppercase tracking-widest">Period Management Guidelines</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-2 text-[11px] font-bold text-gray-500 uppercase tracking-tight">
-              <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> La clôture verrouille toutes les écritures du mois.</p>
-              <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> Seule une période ouverte autorise la saisie comptable.</p>
-              <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> Vérifiez les rapprochements banques avant clôture.</p>
-              <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> La réouverture est tracée dans le journal d'audit.</p>
+              <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> Closing locks all entries for the month.</p>
+              <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> Only an open period allows posting entries.</p>
+              <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> Check bank reconciliations before closing.</p>
+              <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-secondary"></div> Reopening is logged in the audit trail.</p>
             </div>
           </div>
         </div>

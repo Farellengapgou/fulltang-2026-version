@@ -58,7 +58,7 @@ export function BankReconciliation() {
       setReconciliations(reconcData.data.results || reconcData.data);
       setBankAccounts(bankData.data.results || bankData.data);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -73,7 +73,7 @@ export function BankReconciliation() {
     try {
       await bankReconciliationService.createReconciliation(formData);
       setShowForm(false);
-      setModalMessage("La demande de réconciliation a été créée avec succès.");
+      setModalMessage("The reconciliation request was created successfully.");
       setIsSuccessModalOpen(true);
       setFormData({
         bank_account: "",
@@ -84,7 +84,7 @@ export function BankReconciliation() {
       });
       fetchData();
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
       setModalMessage(
         error.response?.data
           ? JSON.stringify(error.response.data)
@@ -96,17 +96,17 @@ export function BankReconciliation() {
 
   const handleReconcile = (id) => {
     setConfirmConfig({
-      title: "Finaliser la Réconciliation",
+      title: "Finalize Reconciliation",
       message:
-        "Voulez-vous finaliser cette réconciliation ? Cette action est irréversible et validera le solde bancaire.",
+        "Do you want to finalize this reconciliation? This action is irreversible and will validate the bank balance.",
       onConfirm: async () => {
         try {
           await bankReconciliationService.reconcileBank(id);
-          setModalMessage("Réconciliation finalisée avec succès.");
+          setModalMessage("Reconciliation finalized successfully.");
           setIsSuccessModalOpen(true);
           fetchData();
         } catch (error) {
-          console.error("Erreur:", error);
+          console.error("Error:", error);
           setModalMessage(
             error.response?.data
               ? JSON.stringify(error.response.data)
@@ -131,17 +131,17 @@ export function BankReconciliation() {
         <div className="flex justify-between items-center mb-10">
           <div>
             <h1 className="text-3xl font-black text-secondary tracking-tight uppercase">
-              Réconciliation Bancaire
+              Bank Reconciliation
             </h1>
             <p className="text-gray-400 text-sm font-medium mt-1 uppercase tracking-widest">
-              Ajustement des soldes banque et comptabilité
+              Reconcile bank and accounting balances
             </p>
           </div>
           <button
             onClick={() => setShowForm(true)}
             className="ft-btn ft-btn-md ft-btn-primary"
           >
-            <Plus size={20} /> Nouvelle Opération
+            <Plus size={20} /> New Operation
           </button>
         </div>
 
@@ -150,7 +150,7 @@ export function BankReconciliation() {
           <div className="ft-modal-overlay">
             <div className="ft-modal max-w-2xl">
               <div className="ft-modal-header">
-                <h2 className="ft-modal-title">Nouvelle Réconciliation</h2>
+                <h2 className="ft-modal-title">New Reconciliation</h2>
                 <button
                   onClick={() => setShowForm(false)}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -162,7 +162,7 @@ export function BankReconciliation() {
                 <div className="ft-modal-body grid grid-cols-2 gap-6">
                   <div className="col-span-2 space-y-1">
                     <label className="text-sm font-bold text-gray-700 ml-1">
-                      Compte Bancaire
+                      Bank Account
                     </label>
                     <div className="relative">
                       <Landmark
@@ -180,7 +180,7 @@ export function BankReconciliation() {
                         required
                         className="ft-select pl-12"
                       >
-                        <option value="">Sélectionner un compte</option>
+                        <option value="">Select an account</option>
                         {bankAccounts.map((b) => (
                           <option key={b.id} value={b.id}>
                             {b.bank_name} - {b.account_number}
@@ -191,7 +191,7 @@ export function BankReconciliation() {
                   </div>
                   <div className="col-span-2 space-y-1">
                     <label className="text-sm font-bold text-gray-700 ml-1">
-                      Date d'arrêté
+                      Statement Date
                     </label>
                     <div className="relative">
                       <Calendar
@@ -214,7 +214,7 @@ export function BankReconciliation() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-bold text-gray-700 ml-1">
-                      Solde Relevé Bancaire (FCFA)
+                      Bank Statement Balance (FCFA)
                     </label>
                     <div className="relative">
                       <CreditCard
@@ -239,7 +239,7 @@ export function BankReconciliation() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-bold text-gray-700 ml-1">
-                      Solde Comptable (FCFA)
+                      Book Balance (FCFA)
                     </label>
                     <div className="relative">
                       <Banknote
@@ -269,13 +269,13 @@ export function BankReconciliation() {
                     onClick={() => setShowForm(false)}
                     className="ft-btn ft-btn-md ft-btn-outline"
                   >
-                    Annuler
+                    Cancel
                   </button>
                   <button
                     type="submit"
                     className="ft-btn ft-btn-md ft-btn-primary"
                   >
-                    Lancer la Réconciliation
+                    Start Reconciliation
                   </button>
                 </div>
               </form>
@@ -287,12 +287,12 @@ export function BankReconciliation() {
           <table className="ft-table">
             <thead className="ft-thead">
               <tr>
-                <th className="ft-th">Information Compte</th>
-                <th className="ft-th">Date Arrêté</th>
-                <th className="ft-th text-right">Solde Banque</th>
-                <th className="ft-th text-right">Solde Livre</th>
-                <th className="ft-th text-right">Écart</th>
-                <th className="ft-th text-center">Statut</th>
+                <th className="ft-th">Account Info</th>
+                <th className="ft-th">Statement Date</th>
+                <th className="ft-th text-right">Bank Balance</th>
+                <th className="ft-th text-right">Book Balance</th>
+                <th className="ft-th text-right">Variance</th>
+                <th className="ft-th text-center">Status</th>
                 <th className="ft-th text-right">Action</th>
               </tr>
             </thead>
@@ -343,7 +343,7 @@ export function BankReconciliation() {
                       ) : (
                         <History size={10} />
                       )}
-                      {r.is_reconciled ? "RÉCONCILIÉ" : "EN ATTENTE"}
+                      {r.is_reconciled ? "RECONCILED" : "PENDING"}
                     </span>
                   </td>
                   <td className="ft-td text-right">
@@ -352,7 +352,7 @@ export function BankReconciliation() {
                         onClick={() => handleReconcile(r.id)}
                         className="ft-btn ft-btn-sm ft-btn-primary flex items-center gap-2 ml-auto"
                       >
-                        Finaliser <ArrowRight size={14} />
+                        Finalize <ArrowRight size={14} />
                       </button>
                     )}
                   </td>
@@ -364,7 +364,7 @@ export function BankReconciliation() {
                     colSpan="7"
                     className="ft-td text-center text-gray-400 py-20 font-medium italic uppercase tracking-widest"
                   >
-                    Aucune réconciliation enregistrée.
+                    No reconciliations recorded.
                   </td>
                 </tr>
               )}

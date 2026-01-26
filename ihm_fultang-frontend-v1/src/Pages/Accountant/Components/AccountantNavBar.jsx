@@ -1,4 +1,4 @@
-import { FaCog, FaEnvelope, FaSignOutAlt } from "react-icons/fa";
+import { FaEnvelope, FaSignOutAlt } from "react-icons/fa";
 import { Tooltip } from "antd";
 import { useAuthentication } from "../../../Utils/Provider.jsx";
 import userIcon from "../../../assets/userIcon.png";
@@ -10,6 +10,11 @@ export function AccountantNavBar() {
   const { logout, userData } = useAuthentication();
   const navigate = useNavigate();
   const messageCount = useMessageBadge();
+  const isMaterialAccountant = userData?.role === "MaterialAccountant";
+  const title = isMaterialAccountant ? "Material Accountant" : "Accountant";
+  const messagePath = isMaterialAccountant
+    ? AppRoutesPaths.materialAccountantMessage
+    : AppRoutesPaths.accountantMessage;
 
   const applyNavLinkBtnStyle = () => {
     return " w-12 h-10 mt-1 border-2 bg-gray-100 flex justify-center items-center rounded-xl shadow-xl hover:bg-secondary text-secondary text-xl hover:text-white transition-all duration-300";
@@ -20,19 +25,13 @@ export function AccountantNavBar() {
       <div className="border-b-2 m-3  border-b-gray-300">
         <div className="w-full h-[70px] flex justify-between">
           <h1 className="ml-7 text-4xl text-secondary mt-3.5 font-bold">
-            Accountant
+            {title}
           </h1>
           <div className="flex gap-3 mt-3.5 mb-4 mr-5">
-            <Tooltip placement={"top"} title={"settings"}>
-              <button className={applyNavLinkBtnStyle()}>
-                <FaCog />
-              </button>
-            </Tooltip>
-
             <div className="relative">
-              <Tooltip placement={"top"} title={"Messages"}>
+              <Tooltip placement={"top"} title={"Notifications"}>
                 <button
-                  onClick={() => navigate(AppRoutesPaths.helpCenterPage)}
+                  onClick={() => navigate(messagePath)}
                   className={applyNavLinkBtnStyle()}
                 >
                   <FaEnvelope />

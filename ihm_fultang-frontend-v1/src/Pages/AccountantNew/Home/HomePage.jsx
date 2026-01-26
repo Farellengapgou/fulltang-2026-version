@@ -317,7 +317,7 @@ export function DashBoard() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <QuickActionButton
               icon={Calendar}
-              label="Périodes Comptables"
+              label="Accounting Periods"
               onClick={() => navigate(AppRouterPaths.periodClose)}
             />
             <QuickActionButton

@@ -37,7 +37,7 @@ export function TaxDeclarations() {
       const response = await taxService.getAllTaxDeclarations();
       setDeclarations(response.data.results || response.data);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -51,13 +51,13 @@ export function TaxDeclarations() {
     e.preventDefault();
     try {
       await taxService.createTaxDeclaration(formData);
-      setModalMessage("La déclaration fiscale a été créé avec succès.");
+      setModalMessage("The tax declaration was created successfully.");
       setShowForm(false);
       setIsSuccessModalOpen(true);
       resetForm();
       fetchDeclarations();
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
       setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
       setIsErrorModalOpen(true);
     }
@@ -65,16 +65,16 @@ export function TaxDeclarations() {
 
   const handleSubmitDeclaration = (id) => {
     setConfirmConfig({
-      title: "Soumission Fiscale",
-      message: "Soumettre cette déclaration aux autorités fiscales ? Cette action est irréversible.",
+      title: "Tax Submission",
+      message: "Submit this declaration to the tax authorities? This action is irreversible.",
       onConfirm: async () => {
         try {
           await taxService.submitTaxDeclaration(id);
-          setModalMessage("La déclaration a été soumise avec succès.");
+          setModalMessage("The declaration was submitted successfully.");
           setIsSuccessModalOpen(true);
           fetchDeclarations();
         } catch (error) {
-          console.error("Erreur:", error);
+          console.error("Error:", error);
           setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
           setIsErrorModalOpen(true);
         }
@@ -85,16 +85,16 @@ export function TaxDeclarations() {
 
   const handlePayDeclaration = (id) => {
     setConfirmConfig({
-      title: "Paiement Taxe",
-      message: "Marquer cette déclaration comme payée ? Assurez-vous que le règlement a bien été effectué.",
+      title: "Tax Payment",
+      message: "Mark this declaration as paid? Make sure the payment was made.",
       onConfirm: async () => {
         try {
           await taxService.payTaxDeclaration(id);
-          setModalMessage("La déclaration a été marquée comme payée.");
+          setModalMessage("The declaration was marked as paid.");
           setIsSuccessModalOpen(true);
           fetchDeclarations();
         } catch (error) {
-          console.error("Erreur:", error);
+          console.error("Error:", error);
           setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
           setIsErrorModalOpen(true);
         }
@@ -126,7 +126,7 @@ export function TaxDeclarations() {
       <FinancialAccountantNavBar />
       <div className="ft-page">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-secondary">Déclarations Fiscales</h1>
+          <h1 className="text-2xl font-bold text-secondary">Tax Declarations</h1>
           <button
             onClick={() => {
               resetForm();
@@ -134,16 +134,16 @@ export function TaxDeclarations() {
             }}
             className="ft-btn ft-btn-md ft-btn-primary"
           >
-            + Nouvelle Déclaration
+            + New Declaration
           </button>
         </div>
 
-        {/* Modal pour le formulaire */}
+        {/* Form modal */}
         {showForm && (
           <div className="ft-modal-overlay">
             <div className="ft-modal max-w-4xl">
               <div className="ft-modal-header">
-                <h2 className="ft-modal-title">Nouvelle Déclaration Fiscale</h2>
+                <h2 className="ft-modal-title">New Tax Declaration</h2>
                 <button
                   onClick={() => setShowForm(false)}
                   className="text-gray-400 hover:text-gray-600"
@@ -154,7 +154,7 @@ export function TaxDeclarations() {
               <form onSubmit={handleSubmit}>
                 <div className="ft-modal-body grid grid-cols-3 gap-4">
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Type de Déclaration</label>
+                    <label className="text-sm font-semibold text-gray-700">Declaration Type</label>
                     <select
                       value={formData.declaration_type}
                       onChange={(e) =>
@@ -162,17 +162,17 @@ export function TaxDeclarations() {
                       }
                       className="ft-select"
                     >
-                      <option value="VAT_MONTHLY">TVA Mensuelle</option>
-                      <option value="VAT_QUARTERLY">TVA Trimestrielle</option>
-                      <option value="INCOME_TAX">Impôt sur Bénéfices</option>
-                      <option value="PAYROLL_TAX">Charges Sociales</option>
+                      <option value="VAT_MONTHLY">Monthly VAT</option>
+                      <option value="VAT_QUARTERLY">Quarterly VAT</option>
+                      <option value="INCOME_TAX">Income Tax</option>
+                      <option value="PAYROLL_TAX">Payroll Contributions</option>
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Année fiscale</label>
+                    <label className="text-sm font-semibold text-gray-700">Fiscal year</label>
                     <input
                       type="number"
-                      placeholder="Ex: 2026"
+                      placeholder="e.g. 2026"
                       value={formData.period_year}
                       onChange={(e) =>
                         setFormData({
@@ -186,7 +186,7 @@ export function TaxDeclarations() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      {formData.declaration_type === "VAT_QUARTERLY" ? "Trimestre" : "Mois"}
+                      {formData.declaration_type === "VAT_QUARTERLY" ? "Quarter" : "Month"}
                     </label>
                     {formData.declaration_type === "VAT_QUARTERLY" ? (
                       <select
@@ -195,16 +195,16 @@ export function TaxDeclarations() {
                         className="ft-select"
                       >
                         <option value={1}>T1 (Jan-Mar)</option>
-                        <option value={2}>T2 (Avr-Juin)</option>
-                        <option value={3}>T3 (Juil-Sept)</option>
-                        <option value={4}>T4 (Oct-Déc)</option>
+                        <option value={2}>Q2 (Apr-Jun)</option>
+                        <option value={3}>Q3 (Jul-Sep)</option>
+                        <option value={4}>Q4 (Oct-Dec)</option>
                       </select>
                     ) : (
                       <input
                         type="number"
                         min="1"
                         max="12"
-                        placeholder="Mois (1-12)"
+                        placeholder="Month (1-12)"
                         value={formData.period_month}
                         onChange={(e) =>
                           setFormData({
@@ -218,7 +218,7 @@ export function TaxDeclarations() {
                     )}
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Base Imposable (FCFA)</label>
+                    <label className="text-sm font-semibold text-gray-700">Tax Base (FCFA)</label>
                     <input
                       type="number"
                       step="0.01"
@@ -235,7 +235,7 @@ export function TaxDeclarations() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Montant de Taxe (FCFA)</label>
+                    <label className="text-sm font-semibold text-gray-700">Tax Amount (FCFA)</label>
                     <input
                       type="number"
                       step="0.01"
@@ -252,7 +252,7 @@ export function TaxDeclarations() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Date d'échéance</label>
+                    <label className="text-sm font-semibold text-gray-700">Due date</label>
                     <input
                       type="date"
                       value={formData.due_date}
@@ -270,13 +270,13 @@ export function TaxDeclarations() {
                     onClick={() => setShowForm(false)}
                     className="ft-btn ft-btn-md ft-btn-outline"
                   >
-                    Annuler
+                    Cancel
                   </button>
                   <button
                     type="submit"
                     className="ft-btn ft-btn-md ft-btn-primary"
                   >
-                    Enregistrer la déclaration
+                    Save declaration
                   </button>
                 </div>
               </form>
@@ -289,10 +289,10 @@ export function TaxDeclarations() {
             <thead className="ft-thead">
               <tr>
                 <th className="ft-th">Type</th>
-                <th className="ft-th text-center">Période</th>
-                <th className="ft-th text-right">Base Imposable</th>
-                <th className="ft-th text-right">Montant Taxe</th>
-                <th className="ft-th text-center">Statut</th>
+                <th className="ft-th text-center">Period</th>
+                <th className="ft-th text-right">Tax Base</th>
+                <th className="ft-th text-right">Tax Amount</th>
+                <th className="ft-th text-center">Status</th>
                 <th className="ft-th text-right">Actions</th>
               </tr>
             </thead>
@@ -325,7 +325,7 @@ export function TaxDeclarations() {
                           : "bg-amber-100 text-amber-700"
                       }`}
                     >
-                      {d.status === "PAID" ? "Payé" : d.status === "SUBMITTED" ? "Soumis" : "Brouillon"}
+                      {d.status === "PAID" ? "Paid" : d.status === "SUBMITTED" ? "Submitted" : "Draft"}
                     </span>
                   </td>
                   <td className="ft-td text-right">
@@ -335,7 +335,7 @@ export function TaxDeclarations() {
                             onClick={() => handleSubmitDeclaration(d.id)}
                             className="flex items-center gap-1 p-1 px-3 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-xs font-bold border border-blue-200"
                         >
-                            <Send size={12} /> Soumettre
+                            <Send size={12} /> Submit
                         </button>
                         )}
                         {d.status === "SUBMITTED" && (
@@ -343,12 +343,12 @@ export function TaxDeclarations() {
                             onClick={() => handlePayDeclaration(d.id)}
                             className="flex items-center gap-1 p-1 px-3 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors text-xs font-bold border border-emerald-200"
                         >
-                            <CreditCard size={12} /> Payer
+                            <CreditCard size={12} /> Pay
                         </button>
                         )}
                         {d.status === "PAID" && (
                             <span className="text-gray-400 italic text-xs flex items-center gap-1">
-                                Validé <CheckCircle size={14} />
+                                Validated <CheckCircle size={14} />
                             </span>
                         )}
                     </div>
@@ -358,7 +358,7 @@ export function TaxDeclarations() {
               {declarations.length === 0 && (
                 <tr>
                   <td colSpan="6" className="ft-td text-center text-gray-500 py-12">
-                    Aucune déclaration fiscale enregistrée.
+                    No tax declarations recorded.
                   </td>
                 </tr>
               )}

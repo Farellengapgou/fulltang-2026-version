@@ -13,9 +13,26 @@ export function useMessageBadge({ includeWelcome = true, pollInterval = 30000 } 
     userData?.userId ??
     userData?.pk ??
     null;
+  const readMessagesKey = userId ? `fultang_read_messages_${userId}` : null;
+  const deletedMessagesKey = userId ? `fultang_deleted_messages_${userId}` : null;
+
+  const getStoredIds = (key) => {
+    if (!key) return [];
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  };
 
   const computeTotal = (messages, notifications) => {
-    let total = messages.length + notifications.length;
+    const deletedIds = new Set(getStoredIds(deletedMessagesKey));
+    const readIds = new Set(getStoredIds(readMessagesKey));
+    const unreadMessages = messages.filter(
+      (message) => !deletedIds.has(message?.id) && !readIds.has(message?.id)
+    );
+    let total = unreadMessages.length + notifications.length;
     if (includeWelcome && userId && userData.role !== "Admin") {
       const welcomeKey = `fultang_welcome_message_${userId}`;
       if (!localStorage.getItem(welcomeKey)) {

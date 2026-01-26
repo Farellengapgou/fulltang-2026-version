@@ -14,7 +14,7 @@ export const receptionistNavLink = [
         link: appRoutes.receptionistMedicalStaffsPage,
     },
     {
-        name: 'Messages',
+        name: 'Notifications',
         icon: FaEnvelope,
         link: appRoutes.receptionistMessage,
     },

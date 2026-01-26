@@ -1,4 +1,4 @@
-import { FaFlag, FaBell, FaEnvelope, FaUser, FaCog, FaSignOutAlt } from 'react-icons/fa';
+import { FaFlag, FaBell, FaEnvelope, FaUser, FaSignOutAlt } from 'react-icons/fa';
 import {useAuthentication} from "../../Utils/Provider.jsx";
 import {Tooltip} from "antd";
 import PropTypes from "prop-types";
@@ -39,7 +39,7 @@ export function NurseNavBar({children})
                     </div>
                     <div className="flex gap-2 mt-5 mb-4 mr-5">
                         <div className="relative">
-                            <Tooltip placement={"top"} title={"Messages"}>
+                            <Tooltip placement={"top"} title={"Notifications"}>
                                 <button
                                     onClick={() => navigate("/nurse/messages")}
                                     className={applyNavLinkBtnStyle()}>

@@ -7,55 +7,55 @@ const PaymentsBilling = () => {
 
     const sections = [
         {
-            title: "Créer une facture",
+            title: "Create an invoice",
             icon: <FaReceipt className="text-blue-900 text-2xl" />,
             content: [
-                "Allez dans le menu 'Billing' ou 'Facturation'",
-                "Cliquez sur 'Nouvelle facture' ou 'New Bill'",
-                "Sélectionnez le patient concerné",
-                "Ajoutez les éléments à facturer :",
-                "  • Consultations (automatiquement au prix configuré)",
-                "  • Examens demandés",
-                "  • Médicaments prescrits",
-                "  • Hospitalisation (si applicable)",
-                "Le montant total est calculé automatiquement",
-                "Vérifiez et confirmez la facture",
-                "Un code unique est généré (format: YYYYMMDD-OperationID-CNI-UniqueID)"
+                "Go to the 'Billing' menu",
+                "Click 'New Invoice'",
+                "Select the patient",
+                "Add billable items:",
+                "  • Consultations (automatically at the configured price)",
+                "  • Requested exams",
+                "  • Prescribed medications",
+                "  • Hospitalization (if applicable)",
+                "The total amount is calculated automatically",
+                "Review and confirm the invoice",
+                "A unique code is generated (format: YYYYMMDD-OperationID-CNI-UniqueID)"
             ]
         },
         {
-            title: "Enregistrer un paiement",
+            title: "Record a payment",
             icon: <FaMoneyBillWave className="text-green-600 text-2xl" />,
             content: [
-                "Trouvez la facture du patient",
-                "Cliquez sur 'Enregistrer un paiement' ou 'Record Payment'",
-                "Entrez le montant reçu",
-                "Sélectionnez le mode de paiement (Cash, Mobile Money, Carte, etc.)",
-                "Confirmez le paiement",
-                "Le statut de la facture est mis à jour automatiquement",
-                "Un reçu peut être imprimé pour le patient"
+                "Find the patient's invoice",
+                "Click 'Record Payment'",
+                "Enter the amount received",
+                "Select the payment method (Cash, Mobile Money, Card, etc.)",
+                "Confirm the payment",
+                "The invoice status is updated automatically",
+                "A receipt can be printed for the patient"
             ]
         },
         {
-            title: "Consulter l'historique des paiements",
+            title: "View payment history",
             icon: <FaHistory className="text-purple-600 text-2xl" />,
             content: [
-                "Accédez à la section 'Historique des paiements'",
-                "Utilisez les filtres disponibles :",
-                "  • Par patient",
-                "  • Par date",
-                "  • Par mode de paiement",
-                "  • Par statut (Payé/Non payé)",
-                "Exportez les rapports si nécessaire",
-                "Vérifiez les opérations comptables associées"
+                "Go to the 'Payment History' section",
+                "Use the available filters:",
+                "  • By patient",
+                "  • By date",
+                "  • By payment method",
+                "  • By status (Paid/Unpaid)",
+                "Export reports if needed",
+                "Review related accounting operations"
             ]
         }
     ];
 
     const billStatuses = [
-        { status: "Invalid", color: "text-red-600", description: "Facture non payée" },
-        { status: "Valid", color: "text-green-600", description: "Facture payée complètement" },
-        { status: "Partial", color: "text-yellow-600", description: "Paiement partiel effectué" }
+        { status: "Invalid", color: "text-red-600", description: "Unpaid invoice" },
+        { status: "Valid", color: "text-green-600", description: "Fully paid invoice" },
+        { status: "Partial", color: "text-yellow-600", description: "Partial payment made" }
     ];
 
     return (
@@ -66,13 +66,13 @@ const PaymentsBilling = () => {
                         onClick={() => navigate(-1)}
                         className="flex items-center gap-2 text-blue-900 hover:text-blue-700 mb-4"
                     >
-                        <FaArrowLeft /> Retour
+                        <FaArrowLeft /> Back
                     </button>
                     <h1 className="text-3xl font-bold text-blue-900">
-                        Paiements & Facturation
+                        Payments & Billing
                     </h1>
                     <p className="text-gray-600 mt-2">
-                        Gérez les paiements et factures des patients
+                        Manage patient payments and invoices
                     </p>
                 </div>
             </div>
@@ -98,7 +98,7 @@ const PaymentsBilling = () => {
 
                 <div className="bg-white rounded-lg shadow-md p-6 mb-6">
                     <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                        Statuts des factures
+                        Invoice statuses
                     </h2>
                     <div className="grid md:grid-cols-3 gap-4">
                         {billStatuses.map((item, idx) => (

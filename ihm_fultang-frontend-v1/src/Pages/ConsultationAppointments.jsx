@@ -7,41 +7,41 @@ const ConsultationAppointments = () => {
 
     const sections = [
         {
-            title: "Comment prendre un rendez-vous",
+            title: "How to schedule an appointment",
             icon: <FaCalendar className="text-blue-900 text-2xl" />,
             steps: [
-                "Connectez-vous au système avec vos identifiants de réceptionniste",
-                "Allez dans le menu 'Appointments' ou 'Rendez-vous'",
-                "Cliquez sur 'Nouveau rendez-vous' ou 'New Appointment'",
-                "Sélectionnez ou créez le dossier patient",
-                "Choisissez le type de consultation (Généraliste, Spécialiste, Dentiste, etc.)",
-                "Sélectionnez le médecin disponible",
-                "Choisissez la date et l'heure du rendez-vous",
-                "Ajoutez une raison pour la consultation si nécessaire",
-                "Confirmez et enregistrez le rendez-vous"
+                "Log in with your receptionist credentials",
+                "Go to the 'Appointments' menu",
+                "Click 'New Appointment'",
+                "Select or create the patient file",
+                "Choose the consultation type (General, Specialist, Dentist, etc.)",
+                "Select an available doctor",
+                "Choose the appointment date and time",
+                "Add a reason for the consultation if needed",
+                "Confirm and save the appointment"
             ]
         },
         {
-            title: "Comment annuler un rendez-vous",
+            title: "How to cancel an appointment",
             icon: <FaClock className="text-red-600 text-2xl" />,
             steps: [
-                "Recherchez le rendez-vous dans la liste des appointments",
-                "Cliquez sur le rendez-vous à annuler",
-                "Sélectionnez l'option 'Annuler' ou 'Cancel'",
-                "Ajoutez une raison pour l'annulation (optionnel)",
-                "Confirmez l'annulation",
-                "Le patient sera automatiquement notifié si un email est renseigné"
+                "Find the appointment in the appointments list",
+                "Click the appointment to cancel",
+                "Select the 'Cancel' option",
+                "Add a reason for the cancellation (optional)",
+                "Confirm the cancellation",
+                "The patient will be automatically notified if an email is provided"
             ]
         },
         {
-            title: "Comment modifier un rendez-vous",
+            title: "How to edit an appointment",
             icon: <FaUser className="text-green-600 text-2xl" />,
             steps: [
-                "Trouvez le rendez-vous dans le calendrier ou la liste",
-                "Cliquez sur 'Modifier' ou 'Edit'",
-                "Changez les informations nécessaires (date, heure, médecin)",
-                "Sauvegardez les modifications",
-                "Vérifiez que le statut est mis à jour"
+                "Find the appointment in the calendar or list",
+                "Click 'Edit'",
+                "Change the needed information (date, time, doctor)",
+                "Save the changes",
+                "Verify the status is updated"
             ]
         }
     ];
@@ -54,13 +54,13 @@ const ConsultationAppointments = () => {
                         onClick={() => navigate(-1)}
                         className="flex items-center gap-2 text-blue-900 hover:text-blue-700 mb-4"
                     >
-                        <FaArrowLeft /> Retour
+                        <FaArrowLeft /> Back
                     </button>
                     <h1 className="text-3xl font-bold text-blue-900">
-                        Consultations & Rendez-vous
+                        Consultations & Appointments
                     </h1>
                     <p className="text-gray-600 mt-2">
-                        Guide complet pour gérer les consultations et rendez-vous dans Fultang
+                        Complete guide to manage consultations and appointments in Fultang
                     </p>
                 </div>
             </div>
@@ -90,9 +90,9 @@ const ConsultationAppointments = () => {
                 <div className="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-lg">
                     <h3 className="font-bold text-yellow-800 mb-2">⚠️ Important</h3>
                     <ul className="list-disc list-inside text-yellow-700 space-y-1">
-                        <li>Vérifiez toujours la disponibilité du médecin avant de fixer un rendez-vous</li>
-                        <li>Les rendez-vous peuvent être marqués comme "Payable" ou "Not Payable"</li>
-                        <li>Assurez-vous que les informations du patient sont à jour</li>
+                        <li>Always check the doctor's availability before scheduling an appointment</li>
+                        <li>Appointments can be marked as "Payable" or "Not Payable"</li>
+                        <li>Make sure patient information is up to date</li>
                     </ul>
                 </div>
             </div>

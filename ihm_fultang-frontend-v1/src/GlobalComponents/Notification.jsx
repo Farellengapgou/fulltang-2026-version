@@ -6,27 +6,27 @@ import { Bell } from "lucide-react";
 export default function NotificationsList() {
     const [notifications, setNotifications] = useState([]);
 
-    // Exemple de chargement de notifications (simulé)
+    // Example of loading notifications (simulated)
     useEffect(() => {
         setNotifications([
             {
                 id: 1,
-                title: "Nouvelle alerte de sécurité",
-                message: "Votre compte a détecté une activité suspecte. Veuillez vérifier.",
+                title: "New security alert",
+                message: "Your account detected suspicious activity. Please review.",
                 date: "2025-03-20T14:00:00",
                 isRead: false,
             },
             {
                 id: 2,
-                title: "Mise à jour de l'application",
-                message: "L'application a été mise à jour avec de nouvelles fonctionnalités.",
+                title: "Application update",
+                message: "The application was updated with new features.",
                 date: "2025-03-19T09:30:00",
                 isRead: true,
             },
             {
                 id: 3,
-                title: "Rappel de réunion",
-                message: "N'oubliez pas votre réunion à 11:00 AM demain.",
+                title: "Meeting reminder",
+                message: "Don't forget your meeting at 11:00 AM tomorrow.",
                 date: "2025-03-21T11:00:00",
                 isRead: false,
             },
@@ -76,7 +76,7 @@ export default function NotificationsList() {
                                     : "bg-blue-600 text-white hover:bg-blue-700"
                             }`}
                         >
-                            {notification.isRead ? "Marquer comme non lue" : "Marquer comme lue"}
+                            {notification.isRead ? "Mark as unread" : "Mark as read"}
                         </button>
                     </div>
                 ))}

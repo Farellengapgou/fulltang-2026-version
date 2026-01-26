@@ -37,7 +37,7 @@ export function Payroll() {
       const response = await payrollService.getAllPayrolls();
       setPayrolls(response.data.results || response.data);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -55,13 +55,13 @@ export function Payroll() {
         payroll_period: `${String(formData.month).padStart(2, '0')}/${formData.year}`
       };
       await payrollService.createPayroll(payload);
-      setModalMessage("Le dossier de paie a été créé avec succès.");
+      setModalMessage("The payroll file was created successfully.");
       setShowForm(false);
       setIsSuccessModalOpen(true);
       resetForm();
       fetchPayrolls();
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
       setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
       setIsErrorModalOpen(true);
     }
@@ -69,16 +69,16 @@ export function Payroll() {
 
   const handleApprove = (id) => {
     setConfirmConfig({
-      title: "Approuver la Paie",
-      message: "Voulez-vous officiellement approuver cette paie ? Cette action est nécessaire avant le paiement.",
+      title: "Approve Payroll",
+      message: "Do you want to officially approve this payroll? This is required before payment.",
       onConfirm: async () => {
         try {
           await payrollService.approvePayroll(id);
-          setModalMessage("La paie a été approuvée avec succès.");
+          setModalMessage("The payroll was approved successfully.");
           setIsSuccessModalOpen(true);
           fetchPayrolls();
         } catch (error) {
-          console.error("Erreur:", error);
+          console.error("Error:", error);
           setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
           setIsErrorModalOpen(true);
         }
@@ -89,16 +89,16 @@ export function Payroll() {
 
   const handlePay = (id) => {
     setConfirmConfig({
-      title: "Confirmer Paiement",
-      message: "Confirmer le paiement de cette paie ? Cette action enregistrera les sorties de fonds.",
+      title: "Confirm Payment",
+      message: "Confirm payment for this payroll? This action will record cash outflow.",
       onConfirm: async () => {
         try {
           await payrollService.payPayroll(id);
-          setModalMessage("Le paiement a été enregistré avec succès.");
+          setModalMessage("The payment was recorded successfully.");
           setIsSuccessModalOpen(true);
           fetchPayrolls();
         } catch (error) {
-          console.error("Erreur:", error);
+          console.error("Error:", error);
           setModalMessage(error.response?.data ? JSON.stringify(error.response.data) : error.message);
           setIsErrorModalOpen(true);
         }
@@ -130,7 +130,7 @@ export function Payroll() {
       <FinancialAccountantNavBar />
       <div className="ft-page">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-secondary">Gestion de la Paie</h1>
+          <h1 className="text-2xl font-bold text-secondary">Payroll Management</h1>
           <button
             onClick={() => {
               resetForm();
@@ -138,16 +138,16 @@ export function Payroll() {
             }}
             className="ft-btn ft-btn-md ft-btn-primary"
           >
-            + Nouvelle Paie
+            + New Payroll
           </button>
         </div>
 
-        {/* Modal pour le formulaire */}
+        {/* Form modal */}
         {showForm && (
           <div className="ft-modal-overlay">
             <div className="ft-modal max-w-4xl">
               <div className="ft-modal-header">
-                <h2 className="ft-modal-title">Nouveau Dossier de Paie</h2>
+                <h2 className="ft-modal-title">New Payroll File</h2>
                 <button
                   onClick={() => setShowForm(false)}
                   className="text-gray-400 hover:text-gray-600"
@@ -158,10 +158,10 @@ export function Payroll() {
               <form onSubmit={handleSubmit}>
                 <div className="ft-modal-body grid grid-cols-4 gap-4">
                   <div className="col-span-2 space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">N° Dossier Paie</label>
+                    <label className="text-sm font-semibold text-gray-700">Payroll File No.</label>
                     <input
                       type="text"
-                      placeholder="Ex: PAY-2026-001"
+                      placeholder="e.g. PAY-2026-001"
                       value={formData.payroll_number}
                       onChange={(e) =>
                         setFormData({ ...formData, payroll_number: e.target.value })
@@ -171,7 +171,7 @@ export function Payroll() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Année</label>
+                    <label className="text-sm font-semibold text-gray-700">Year</label>
                     <input
                         type="number"
                         value={formData.year}
@@ -183,7 +183,7 @@ export function Payroll() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Mois</label>
+                    <label className="text-sm font-semibold text-gray-700">Month</label>
                     <input
                         type="number"
                         min="1"
@@ -197,7 +197,7 @@ export function Payroll() {
                     />
                   </div>
                   <div className="col-span-2 space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Début de Période</label>
+                    <label className="text-sm font-semibold text-gray-700">Period Start</label>
                     <input
                         type="date"
                         value={formData.period_start}
@@ -209,7 +209,7 @@ export function Payroll() {
                     />
                   </div>
                   <div className="col-span-2 space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Fin de Période</label>
+                    <label className="text-sm font-semibold text-gray-700">Period End</label>
                     <input
                         type="date"
                         value={formData.period_end}
@@ -221,7 +221,7 @@ export function Payroll() {
                     />
                   </div>
                   <div className="col-span-2 space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Masse Salariale Brute (FCFA)</label>
+                    <label className="text-sm font-semibold text-gray-700">Gross Payroll (FCFA)</label>
                     <input
                         type="number"
                         step="0.01"
@@ -234,7 +234,7 @@ export function Payroll() {
                     />
                   </div>
                   <div className="col-span-2 space-y-1">
-                    <label className="text-sm font-semibold text-gray-700">Total Retenues (FCFA)</label>
+                    <label className="text-sm font-semibold text-gray-700">Total Deductions (FCFA)</label>
                     <input
                         type="number"
                         step="0.01"
@@ -253,13 +253,13 @@ export function Payroll() {
                     onClick={() => setShowForm(false)}
                     className="ft-btn ft-btn-md ft-btn-outline"
                   >
-                    Annuler
+                    Cancel
                   </button>
                   <button
                     type="submit"
                     className="ft-btn ft-btn-md ft-btn-primary"
                   >
-                    Créer le dossier
+                    Create file
                   </button>
                 </div>
               </form>
@@ -271,12 +271,12 @@ export function Payroll() {
           <table className="ft-table">
             <thead className="ft-thead">
               <tr>
-                <th className="ft-th">Réf.</th>
-                <th className="ft-th">Période</th>
-                <th className="ft-th text-right">Masse Brute</th>
-                <th className="ft-th text-right">Retenues</th>
-                <th className="ft-th text-right font-bold">Salaire Net</th>
-                <th className="ft-th text-center">Statut</th>
+                <th className="ft-th">Ref.</th>
+                <th className="ft-th">Period</th>
+                <th className="ft-th text-right">Gross</th>
+                <th className="ft-th text-right">Deductions</th>
+                <th className="ft-th text-right font-bold">Net Pay</th>
+                <th className="ft-th text-center">Status</th>
                 <th className="ft-th text-right">Actions</th>
               </tr>
             </thead>
@@ -306,7 +306,7 @@ export function Payroll() {
                           : "bg-amber-100 text-amber-700"
                       }`}
                     >
-                      {p.status === "PAID" ? "Payé" : p.status === "APPROVED" ? "Approuvé" : "Brouillon"}
+                      {p.status === "PAID" ? "Paid" : p.status === "APPROVED" ? "Approved" : "Draft"}
                     </span>
                   </td>
                   <td className="ft-td text-right">
@@ -316,7 +316,7 @@ export function Payroll() {
                             onClick={() => handleApprove(p.id)}
                             className="flex items-center gap-1 p-1 px-3 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-xs font-bold border border-blue-200"
                         >
-                            <Send size={12} /> Approuver
+                            <Send size={12} /> Approve
                         </button>
                         )}
                         {p.status === "APPROVED" && (
@@ -324,12 +324,12 @@ export function Payroll() {
                             onClick={() => handlePay(p.id)}
                             className="flex items-center gap-1 p-1 px-3 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors text-xs font-bold border border-emerald-200"
                         >
-                            <CreditCard size={12} /> Payer
+                            <CreditCard size={12} /> Pay
                         </button>
                         )}
                         {p.status === "PAID" && (
                             <span className="text-gray-400 italic text-xs flex items-center gap-1">
-                                Payé <CheckCircle size={14} />
+                                Paid <CheckCircle size={14} />
                             </span>
                         )}
                     </div>
@@ -339,7 +339,7 @@ export function Payroll() {
               {payrolls.length === 0 && (
                 <tr>
                   <td colSpan="7" className="ft-td text-center text-gray-500 py-12">
-                    Aucun dossier de paie enregistré.
+                    No payroll file recorded.
                   </td>
                 </tr>
               )}
@@ -369,4 +369,3 @@ export function Payroll() {
     </CustomDashboard>
   );
 }
-

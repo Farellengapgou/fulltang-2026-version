@@ -67,7 +67,7 @@ export function PhoneInput({ value, onChange, required = false, className = "" }
 
   const handleBlur = () => {
     if (required && value.length <= 5) {
-      setError("Le numéro de téléphone est requis");
+      setError("Phone number is required");
     } else if (value.length > 5 && !validatePhoneNumber(value)) {
       setError("Format invalide. Attendu: +237 XXX XXX XXX");
     }

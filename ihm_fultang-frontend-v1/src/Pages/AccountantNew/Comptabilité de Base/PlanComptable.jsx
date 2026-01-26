@@ -48,7 +48,7 @@ export function ChartOfAccounts() {
       setAccounts(response.data.results || response.data);
       setTotalPages(Math.ceil((response.data.count || 0) / 10));
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,7 @@ export function ChartOfAccounts() {
     // Validate that code starts with the account class digit
     if (formData.code && formData.account_class) {
       if (!formData.code.startsWith(formData.account_class)) {
-        setCodeError(`Le code doit commencer par ${formData.account_class} pour la classe sélectionnée`);
+        setCodeError(`The code must start with ${formData.account_class} for the selected class`);
         return;
       }
     }
@@ -73,17 +73,17 @@ export function ChartOfAccounts() {
     try {
       if (editingId) {
         await chartOfAccountsService.updateAccount(editingId, formData);
-        setModalMessage("Le compte a été mis à jour avec succès.");
+        setModalMessage("The account was updated successfully.");
       } else {
         await chartOfAccountsService.createAccount(formData);
-        setModalMessage("Le compte a été créé avec succès.");
+        setModalMessage("The account was created successfully.");
       }
       setShowForm(false);
       setIsSuccessModalOpen(true);
       setEditingId(null);
       fetchAccounts();
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
       setModalMessage(
         error.response?.data
           ? JSON.stringify(error.response.data)
@@ -101,17 +101,17 @@ export function ChartOfAccounts() {
 
   const handleDelete = (id) => {
     setConfirmConfig({
-      title: "Supprimer Compte",
+      title: "Delete Account",
       message:
-        "Êtes-vous sûr de vouloir supprimer ce compte ? Cette action peut impacter vos écritures.",
+        "Are you sure you want to delete this account? This action may affect your entries.",
       onConfirm: async () => {
         try {
           await chartOfAccountsService.deleteAccount(id);
-          setModalMessage("Le compte a été supprimé avec succès.");
+          setModalMessage("The account was deleted successfully.");
           setIsSuccessModalOpen(true);
           fetchAccounts();
         } catch (error) {
-          console.error("Erreur:", error);
+          console.error("Error:", error);
           setModalMessage(
             error.response?.data
               ? JSON.stringify(error.response.data)
@@ -134,7 +134,7 @@ export function ChartOfAccounts() {
       <FinancialAccountantNavBar />
       <div className="ft-page">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-secondary">Plan Comptable</h1>
+          <h1 className="text-2xl font-bold text-secondary">Chart of Accounts</h1>
           <button
             onClick={() => {
               setEditingId(null);
@@ -149,7 +149,7 @@ export function ChartOfAccounts() {
             }}
             className="ft-btn ft-btn-md ft-btn-primary"
           >
-            + Nouveau Compte
+            + New Account
           </button>
         </div>
 
@@ -161,7 +161,7 @@ export function ChartOfAccounts() {
             </span>
             <input
               type="text"
-              placeholder="Rechercher par code ou libellé..."
+              placeholder="Search by code or label..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -172,13 +172,13 @@ export function ChartOfAccounts() {
           </div>
         </div>
 
-        {/* Modal pour le formulaire */}
+        {/* Form modal */}
         {showForm && (
           <div className="ft-modal-overlay">
             <div className="ft-modal">
               <div className="ft-modal-header">
                 <h2 className="ft-modal-title">
-                  {editingId ? "Modifier le Compte" : "Nouveau Compte"}
+                  {editingId ? "Edit Account" : "New Account"}
                 </h2>
                 <button
                   onClick={() => setShowForm(false)}
@@ -195,7 +195,7 @@ export function ChartOfAccounts() {
                     </label>
                     <input
                       type="text"
-                      placeholder="Ex: 101000"
+                      placeholder="e.g. 101000"
                       value={formData.code}
                       onChange={(e) =>
                         setFormData({ ...formData, code: e.target.value })
@@ -206,11 +206,11 @@ export function ChartOfAccounts() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Libellé
+                      Label
                     </label>
                     <input
                       type="text"
-                      placeholder="Ex: Capital social"
+                      placeholder="e.g. Share capital"
                       value={formData.label}
                       onChange={(e) =>
                         setFormData({ ...formData, label: e.target.value })
@@ -221,7 +221,7 @@ export function ChartOfAccounts() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Classe de compte
+                      Account Class
                     </label>
                     <select
                       value={formData.account_class}
@@ -233,19 +233,19 @@ export function ChartOfAccounts() {
                       }
                       className="ft-select"
                     >
-                      <option value="1">1 - Capitaux</option>
-                      <option value="2">2 - Immobilisations</option>
-                      <option value="3">3 - Stocks</option>
-                      <option value="4">4 - Tiers</option>
-                      <option value="5">5 - Trésorerie</option>
-                      <option value="6">6 - Charges</option>
-                      <option value="7">7 - Produits</option>
-                      <option value="8">8 - Spéciaux</option>
+                      <option value="1">1 - Equity</option>
+                      <option value="2">2 - Fixed Assets</option>
+                      <option value="3">3 - Inventory</option>
+                      <option value="4">4 - Third Parties</option>
+                      <option value="5">5 - Cash</option>
+                      <option value="6">6 - Expenses</option>
+                      <option value="7">7 - Revenue</option>
+                      <option value="8">8 - Special</option>
                     </select>
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-semibold text-gray-700">
-                      Type de compte
+                      Account Type
                     </label>
                     <select
                       value={formData.account_type}
@@ -257,11 +257,11 @@ export function ChartOfAccounts() {
                       }
                       className="ft-select"
                     >
-                      <option value="ASSET">Actif</option>
-                      <option value="LIABILITY">Passif</option>
-                      <option value="EQUITY">Capitaux Propres</option>
-                      <option value="REVENUE">Produit</option>
-                      <option value="EXPENSE">Charge</option>
+                      <option value="ASSET">Asset</option>
+                      <option value="LIABILITY">Liability</option>
+                      <option value="EQUITY">Equity</option>
+                      <option value="REVENUE">Revenue</option>
+                      <option value="EXPENSE">Expense</option>
                     </select>
                   </div>
 
@@ -280,13 +280,13 @@ export function ChartOfAccounts() {
                     onClick={() => setShowForm(false)}
                     className="ft-btn ft-btn-md ft-btn-outline"
                   >
-                    Annuler
+                    Cancel
                   </button>
                   <button
                     type="submit"
                     className="ft-btn ft-btn-md ft-btn-primary"
                   >
-                    {editingId ? "Mettre à jour" : "Créer le compte"}
+                    {editingId ? "Update" : "Create Account"}
                   </button>
                 </div>
               </form>
@@ -299,10 +299,10 @@ export function ChartOfAccounts() {
             <thead className="ft-thead">
               <tr>
                 <th className="ft-th">Code</th>
-                <th className="ft-th">Libellé</th>
-                <th className="ft-th text-center">Classe</th>
+                <th className="ft-th">Label</th>
+                <th className="ft-th text-center">Class</th>
                 <th className="ft-th text-center">Type</th>
-                <th className="ft-th text-center">Statut</th>
+                <th className="ft-th text-center">Status</th>
                 <th className="ft-th text-right">Actions</th>
               </tr>
             </thead>
@@ -320,11 +320,11 @@ export function ChartOfAccounts() {
                   </td>
                   <td className="ft-td text-center">
                     <span className="text-xs font-semibold uppercase px-2.5 py-1 rounded-full bg-blue-100 text-blue-700">
-                      {account.account_type === 'ASSET' && 'Actif'}
-                      {account.account_type === 'LIABILITY' && 'Passif'}
-                      {account.account_type === 'EQUITY' && 'Capitaux'}
-                      {account.account_type === 'REVENUE' && 'Produit'}
-                      {account.account_type === 'EXPENSE' && 'Charge'}
+                      {account.account_type === 'ASSET' && 'Asset'}
+                      {account.account_type === 'LIABILITY' && 'Liability'}
+                      {account.account_type === 'EQUITY' && 'Equity'}
+                      {account.account_type === 'REVENUE' && 'Revenue'}
+                      {account.account_type === 'EXPENSE' && 'Expense'}
                     </span>
                   </td>
                   <td className="ft-td text-center">
@@ -335,7 +335,7 @@ export function ChartOfAccounts() {
                           : "bg-red-100 text-red-700"
                       }`}
                     >
-                      {account.is_active ? "Actif" : "Inactif"}
+                      {account.is_active ? "Active" : "Inactive"}
                     </span>
                   </td>
                   <td className="ft-td text-right">
@@ -362,7 +362,7 @@ export function ChartOfAccounts() {
                     colSpan="6"
                     className="ft-td text-center text-gray-500 py-12"
                   >
-                    Aucun compte trouvé.
+                    No accounts found.
                   </td>
                 </tr>
               )}

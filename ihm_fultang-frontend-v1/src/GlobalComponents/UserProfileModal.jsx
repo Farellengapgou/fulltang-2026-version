@@ -33,7 +33,7 @@ export function UserProfileModal({ isOpen, onClose }) {
     
     const [editForm] = Form.useForm();
     const [passwordForm] = Form.useForm();
-    // Récupérer les données du profil au chargement
+    // Fetch profile data on load
     useEffect(() => {
         if (isOpen) {
             fetchProfileData();
@@ -41,7 +41,7 @@ export function UserProfileModal({ isOpen, onClose }) {
         }
     }, [isOpen]);
     /**
-     * Récupère les données du profil depuis l'API
+     * Fetches profile data from the API
      */
     const fetchProfileData = async () => {
         try {
@@ -57,7 +57,7 @@ export function UserProfileModal({ isOpen, onClose }) {
                 setProfileData(response.data);
                 setPreviewUrl(response.data.profilePicture);
                 
-                // Pré-remplir le formulaire d'édition
+                // Pre-fill the edit form
                 editForm.setFieldsValue({
                     first_name: response.data.first_name || '',
                     last_name: response.data.last_name || '',
@@ -67,14 +67,14 @@ export function UserProfileModal({ isOpen, onClose }) {
                 });
             }
         } catch (error) {
-            console.error('Erreur lors de la récupération du profil:', error);
-            message.error('Erreur lors du chargement des données');
+            console.error('Error fetching profile:', error);
+            message.error('Error loading data');
         } finally {
             setIsLoading(false);
         }
     };
     /**
-     * Gère la mise à jour du profil
+     * Handles profile update
      */
     const handleProfileUpdate = async (values) => {
         try {
@@ -88,14 +88,14 @@ export function UserProfileModal({ isOpen, onClose }) {
             );
             
             if (response.status === 200) {
-                message.success('Profil mis à jour avec succès');
+                message.success('Profile updated successfully');
                 await fetchProfileData();
                 if (refreshUserData) {
                     await refreshUserData();
                 }
             }
         } catch (error) {
-            console.error('Erreur lors de la mise à jour:', error);
+            console.error('Error updating profile:', error);
             if (error.response?.data) {
                 Object.keys(error.response.data).forEach(key => {
                     if (key !== 'message') {
@@ -103,14 +103,14 @@ export function UserProfileModal({ isOpen, onClose }) {
                     }
                 });
             } else {
-                message.error('Erreur lors de la mise à jour du profil');
+                message.error('Error updating profile');
             }
         } finally {
             setIsUpdating(false);
         }
     };
     /**
-     * Gère le changement de mot de passe
+     * Handles password change
      */
     const handlePasswordChange = async (values) => {
         try {
@@ -124,37 +124,37 @@ export function UserProfileModal({ isOpen, onClose }) {
             );
             
             if (response.status === 200) {
-                message.success('Mot de passe changé avec succès');
+                message.success('Password changed successfully');
                 passwordForm.resetFields();
             }
         } catch (error) {
-            console.error('Erreur lors du changement de mot de passe:', error);
+            console.error('Error changing password:', error);
             if (error.response?.data) {
                 Object.keys(error.response.data).forEach(key => {
                     message.error(`${error.response.data[key]}`);
                 });
             } else {
-                message.error('Erreur lors du changement de mot de passe');
+                message.error('Error changing password');
             }
         } finally {
             setIsChangingPassword(false);
         }
     };
     /**
-     * Gère l'upload de la photo de profil
+     * Handles profile photo upload
      */
     const handlePhotoUpload = async (file) => {
         try {
-            // Validation côté client
+            // Client-side validation
             const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
             if (!validTypes.includes(file.type)) {
-                message.error('Format non supporté. Utilisez JPG ou PNG');
+                message.error('Unsupported format. Use JPG or PNG.');
                 return false;
             }
             
             const maxSize = 5 * 1024 * 1024; // 5MB
             if (file.size > maxSize) {
-                message.error('Le fichier est trop volumineux (max 5MB)');
+                message.error('File is too large (max 5MB)');
                 return false;
             }
             
@@ -174,7 +174,7 @@ export function UserProfileModal({ isOpen, onClose }) {
             );
             
             if (response.status === 200) {
-                message.success('Photo mise à jour avec succès');
+                message.success('Photo updated successfully');
                 setPreviewUrl(response.data.profilePicture);
                 await fetchProfileData();
                 if (refreshUserData) {
@@ -182,14 +182,14 @@ export function UserProfileModal({ isOpen, onClose }) {
                 }
             }
         } catch (error) {
-            console.error('Erreur lors de l\'upload:', error);
-            message.error('Erreur lors de l\'upload de la photo');
+            console.error('Error during upload:', error);
+            message.error('Error uploading photo');
         }
         
-        return false; // Empêcher l'upload automatique
+        return false; // Prevent automatic upload
     };
     /**
-     * Gère la suppression de la photo de profil
+     * Handles profile photo deletion
      */
     const handleDeletePhoto = async () => {
         try {
@@ -202,7 +202,7 @@ export function UserProfileModal({ isOpen, onClose }) {
             );
             
             if (response.status === 200) {
-                message.success('Photo supprimée avec succès');
+                message.success('Photo deleted successfully');
                 setPreviewUrl(null);
                 await fetchProfileData();
                 if (refreshUserData) {
@@ -210,11 +210,11 @@ export function UserProfileModal({ isOpen, onClose }) {
                 }
             }
         } catch (error) {
-            console.error('Erreur lors de la suppression:', error);
+            console.error('Error deleting photo:', error);
             if (error.response?.status === 404) {
-                message.warning('Aucune photo à supprimer');
+                message.warning('No photo to delete');
             } else {
-                message.error('Erreur lors de la suppression de la photo');
+                message.error('Error deleting photo');
             }
         } finally {
             setIsDeletingPhoto(false);
@@ -236,7 +236,7 @@ export function UserProfileModal({ isOpen, onClose }) {
                 </div>
             ) : (
                 <div>
-                    {/* Header avec photo et nom */}
+                    {/* Header with photo and name */}
                     <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 -mt-6 -mx-6 mb-6 rounded-t-lg">
                         <div className="flex items-center gap-4">
                             <img
@@ -255,30 +255,30 @@ export function UserProfileModal({ isOpen, onClose }) {
                             </div>
                         </div>
                     </div>
-                    {/* Onglets */}
+                    {/* Tabs */}
                     <Tabs activeKey={activeTab} onChange={setActiveTab}>
-                        {/* ONGLET 1: INFORMATIONS */}
-                        <TabPane tab="📋 Informations" key="info">
+                        {/* TAB 1: INFORMATION */}
+                        <TabPane tab="📋 Information" key="info">
                             <div className="space-y-4">
-                                <InfoRow icon={<UserOutlined />} label="Nom d'utilisateur" value={profileData?.username} />
-                                <InfoRow icon={<UserOutlined />} label="Prénom" value={profileData?.first_name || 'Non renseigné'} />
-                                <InfoRow icon={<UserOutlined />} label="Nom" value={profileData?.last_name || 'Non renseigné'} />
+                                <InfoRow icon={<UserOutlined />} label="Username" value={profileData?.username} />
+                                <InfoRow icon={<UserOutlined />} label="First name" value={profileData?.first_name || 'Not provided'} />
+                                <InfoRow icon={<UserOutlined />} label="Last name" value={profileData?.last_name || 'Not provided'} />
                                 <InfoRow icon={<MailOutlined />} label="Email" value={profileData?.email} />
-                                <InfoRow icon={<PhoneOutlined />} label="Téléphone" value={profileData?.phoneNumber} />
-                                <InfoRow icon={<HomeOutlined />} label="Adresse" value={profileData?.address} />
-                                <InfoRow icon={<UserOutlined />} label="Genre" value={profileData?.gender} />
-                                <InfoRow icon={<UserOutlined />} label="CNI" value={profileData?.cniNumber} />
-                                <InfoRow icon={<UserOutlined />} label="Date de naissance" value={profileData?.birthDate} />
-                                <InfoRow icon={<UserOutlined />} label="Rôle" value={profileData?.role} />
+                                <InfoRow icon={<PhoneOutlined />} label="Phone" value={profileData?.phoneNumber} />
+                                <InfoRow icon={<HomeOutlined />} label="Address" value={profileData?.address} />
+                                <InfoRow icon={<UserOutlined />} label="Gender" value={profileData?.gender} />
+                                <InfoRow icon={<UserOutlined />} label="National ID" value={profileData?.cniNumber} />
+                                <InfoRow icon={<UserOutlined />} label="Date of birth" value={profileData?.birthDate} />
+                                <InfoRow icon={<UserOutlined />} label="Role" value={profileData?.role} />
                                 <InfoRow icon={<UserOutlined />} label="Type" value={profileData?.userType} />
                             </div>
                         </TabPane>
-                        {/* ONGLET 2: MODIFIER LE PROFIL */}
-                        <TabPane tab="✏️ Modifier le Profil" key="edit">
+                        {/* TAB 2: EDIT PROFILE */}
+                        <TabPane tab="✏️ Edit Profile" key="edit">
                             <div className="space-y-6">
-                                {/* Section Photo */}
+                                {/* Photo section */}
                                 <div className="border-b pb-4">
-                                    <h3 className="text-lg font-semibold mb-3">Photo de profil</h3>
+                                    <h3 className="text-lg font-semibold mb-3">Profile photo</h3>
                                     <div className="flex items-center gap-4">
                                         <img
                                             src={previewUrl || userIcon}
@@ -292,7 +292,7 @@ export function UserProfileModal({ isOpen, onClose }) {
                                                 accept="image/png,image/jpeg,image/jpg"
                                             >
                                                 <Button icon={<UploadOutlined />}>
-                                                    Changer la photo
+                                                    Change photo
                                                 </Button>
                                             </Upload>
                                             
@@ -303,56 +303,56 @@ export function UserProfileModal({ isOpen, onClose }) {
                                                     onClick={handleDeletePhoto}
                                                     loading={isDeletingPhoto}
                                                 >
-                                                    Supprimer
+                                                    Delete
                                                 </Button>
                                             )}
                                         </div>
                                     </div>
                                 </div>
-                                {/* Formulaire d'édition */}
+                                {/* Edit form */}
                                 <Form
                                     form={editForm}
                                     layout="vertical"
                                     onFinish={handleProfileUpdate}
                                 >
                                     <Form.Item
-                                        label="Prénom"
+                                        label="First name"
                                         name="first_name"
                                     >
-                                        <Input prefix={<UserOutlined />} placeholder="Prénom" />
+                                        <Input prefix={<UserOutlined />} placeholder="First name" />
                                     </Form.Item>
                                     <Form.Item
-                                        label="Nom"
+                                        label="Last name"
                                         name="last_name"
                                     >
-                                        <Input prefix={<UserOutlined />} placeholder="Nom" />
+                                        <Input prefix={<UserOutlined />} placeholder="Last name" />
                                     </Form.Item>
                                     <Form.Item
                                         label="Email"
                                         name="email"
                                         rules={[
-                                            { type: 'email', message: 'Email invalide' },
-                                            { required: true, message: 'Email requis' }
+                                            { type: 'email', message: 'Invalid email' },
+                                            { required: true, message: 'Email is required' }
                                         ]}
                                     >
                                         <Input prefix={<MailOutlined />} placeholder="Email" />
                                     </Form.Item>
                                     <Form.Item
-                                        label="Téléphone professionnel"
+                                        label="Work phone"
                                         name="phoneNumber"
                                     >
-                                        <Input prefix={<PhoneOutlined />} placeholder="Téléphone" />
+                                        <Input prefix={<PhoneOutlined />} placeholder="Phone" />
                                     </Form.Item>
                                     <Form.Item
-                                        label="Adresse"
+                                        label="Address"
                                         name="address"
                                     >
-                                        <Input prefix={<HomeOutlined />} placeholder="Adresse" />
+                                        <Input prefix={<HomeOutlined />} placeholder="Address" />
                                     </Form.Item>
                                     <Form.Item>
                                         <div className="flex gap-2 justify-end">
                                             <Button onClick={() => editForm.resetFields()}>
-                                                Annuler
+                                                Cancel
                                             </Button>
                                             <Button
                                                 type="primary"
@@ -360,50 +360,50 @@ export function UserProfileModal({ isOpen, onClose }) {
                                                 icon={<SaveOutlined />}
                                                 loading={isUpdating}
                                             >
-                                                Enregistrer
+                                                Save
                                             </Button>
                                         </div>
                                     </Form.Item>
                                 </Form>
                             </div>
                         </TabPane>
-                        {/* ONGLET 3: SÉCURITÉ */}
-                        <TabPane tab="🔒 Sécurité" key="security">
+                        {/* TAB 3: SECURITY */}
+                        <TabPane tab="🔒 Security" key="security">
                             <div>
-                                <h3 className="text-lg font-semibold mb-4">Changer le mot de passe</h3>
+                                <h3 className="text-lg font-semibold mb-4">Change password</h3>
                                 <Form
                                     form={passwordForm}
                                     layout="vertical"
                                     onFinish={handlePasswordChange}
                                 >
                                     <Form.Item
-                                        label="Mot de passe actuel"
+                                        label="Current password"
                                         name="current_password"
-                                        rules={[{ required: true, message: 'Requis' }]}
+                                        rules={[{ required: true, message: 'Required' }]}
                                     >
                                         <Input.Password prefix={<LockOutlined />} />
                                     </Form.Item>
                                     <Form.Item
-                                        label="Nouveau mot de passe"
+                                        label="New password"
                                         name="new_password"
                                         rules={[
-                                            { required: true, message: 'Requis' },
-                                            { min: 8, message: 'Minimum 8 caractères' }
+                                            { required: true, message: 'Required' },
+                                            { min: 8, message: 'Minimum 8 characters' }
                                         ]}
                                     >
                                         <Input.Password prefix={<LockOutlined />} />
                                     </Form.Item>
                                     <Form.Item
-                                        label="Confirmer le mot de passe"
+                                        label="Confirm password"
                                         name="confirm_password"
                                         rules={[
-                                            { required: true, message: 'Requis' },
+                                            { required: true, message: 'Required' },
                                             ({ getFieldValue }) => ({
                                                 validator(_, value) {
                                                     if (!value || getFieldValue('new_password') === value) {
                                                         return Promise.resolve();
                                                     }
-                                                    return Promise.reject(new Error('Les mots de passe ne correspondent pas'));
+                                                    return Promise.reject(new Error('Passwords do not match'));
                                                 },
                                             }),
                                         ]}
@@ -413,7 +413,7 @@ export function UserProfileModal({ isOpen, onClose }) {
                                     <Form.Item>
                                         <div className="flex gap-2 justify-end">
                                             <Button onClick={() => passwordForm.resetFields()}>
-                                                Annuler
+                                                Cancel
                                             </Button>
                                             <Button
                                                 type="primary"
@@ -421,7 +421,7 @@ export function UserProfileModal({ isOpen, onClose }) {
                                                 icon={<LockOutlined />}
                                                 loading={isChangingPassword}
                                             >
-                                                Changer le mot de passe
+                                                Change password
                                             </Button>
                                         </div>
                                     </Form.Item>
@@ -432,7 +432,7 @@ export function UserProfileModal({ isOpen, onClose }) {
                     {/* Footer */}
                     <div className="flex justify-end mt-6 pt-4 border-t">
                         <Button icon={<CloseOutlined />} onClick={onClose}>
-                            Fermer
+                            Close
                         </Button>
                     </div>
                 </div>
@@ -441,7 +441,7 @@ export function UserProfileModal({ isOpen, onClose }) {
     );
 }
 /**
- * Composant pour afficher une ligne d'information
+ * Component to display an information row
  */
 function InfoRow({ icon, label, value }) {
     return (
@@ -449,7 +449,7 @@ function InfoRow({ icon, label, value }) {
             <div className="text-blue-600 mt-1">{icon}</div>
             <div className="flex-1">
                 <p className="text-sm text-gray-500 font-medium">{label}</p>
-                <p className="text-gray-900 font-semibold">{value || 'Non renseigné'}</p>
+                <p className="text-gray-900 font-semibold">{value || 'Not provided'}</p>
             </div>
         </div>
     );
