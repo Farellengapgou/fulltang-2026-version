@@ -1,16 +1,18 @@
-import {FaCog, FaEnvelope, FaSignOutAlt} from "react-icons/fa";
-import {Tooltip} from "antd";
-import {useAuthentication} from "../../Utils/Provider.jsx";
+import { FaCog, FaEnvelope, FaSignOutAlt } from "react-icons/fa";
+import { Tooltip } from "antd";
+import { useAuthentication } from "../../Utils/Provider.jsx";
 import userIcon from "../../assets/userIcon.png";
 import { useNavigate } from "react-router-dom";
 import { useMessageBadge } from "../../Utils/useMessageBadge.js";
+import { UserProfileModal } from '../../GlobalComponents/UserProfileModal';
+import { useState } from "react";
+export function AdminNavBar() {
 
-export function AdminNavBar()
-{
-
-    const {logout , userData} = useAuthentication();
+    const { logout, userData } = useAuthentication();
     const navigate = useNavigate();
     const messageCount = useMessageBadge();
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+
 
     const applyNavLinkBtnStyle = () => {
         return " w-12 h-10 mt-1 border-2 bg-gray-100 flex justify-center items-center rounded-xl shadow-xl hover:bg-secondary text-secondary text-xl hover:text-white transition-all duration-300";
@@ -24,10 +26,10 @@ export function AdminNavBar()
                     <h1 className="ml-3 text-4xl text-secondary mt-3.5 font-bold">
                         Administrator
                     </h1>
-                     <div className="flex gap-3 mt-3.5 mb-4 mr-5">
-                         <Tooltip placement={"top"} title={"settings"}>
+                    <div className="flex gap-3 mt-3.5 mb-4 mr-5">
+                        <Tooltip placement={"top"} title={"settings"}>
                             <button className={applyNavLinkBtnStyle()}>
-                                <FaCog/>
+                                <FaCog />
                             </button>
 
                         </Tooltip>
@@ -37,7 +39,7 @@ export function AdminNavBar()
                                 <button
                                     onClick={() => navigate("/admin/messages")}
                                     className={applyNavLinkBtnStyle()}>
-                                    <FaEnvelope/>
+                                    <FaEnvelope />
                                 </button>
                             </Tooltip>
                             {messageCount > 0 && (
@@ -48,21 +50,27 @@ export function AdminNavBar()
                         </div>
                         <Tooltip placement={"top"} title={"LogOut"}>
                             <button
-                                onClick={() => {logout()}}
+                                onClick={() => { logout() }}
                                 className={" w-12 h-10 mt-1 border-2 bg-red-400 flex justify-center items-center rounded-xl shadow-xl hover:bg-white text-white text-xl hover:text-red-500 transition-all duration-300"}>
-                                <FaSignOutAlt/>
+                                <FaSignOutAlt />
                             </button>
                         </Tooltip>
                         <Tooltip placement={"top"} title={"Profile"}>
-                            <div className="ml-3 flex">
-                                <p className="font-bold text-secondary text-xl mt-2">{"Hello " +userData?.username + "!"}</p>
-                                <img src={userIcon} alt={"user-icon"} className="w-12 h-12 ml-2 mr-3"/>
+                            <div className="ml-3 flex"  onClick={() => setIsProfileOpen(true)}>
+                               
+                                <p className="font-bold text-secondary text-xl mt-2">{"Hello " + userData?.username + "!"}</p>
+                                <img src={userIcon} alt={"user-icon"} className="w-12 h-12 ml-2 mr-3" />
 
                             </div>
                         </Tooltip>
                     </div>
                 </div>
             </div>
+            <UserProfileModal
+                isOpen={isProfileOpen}
+                onClose={() => setIsProfileOpen(false)}
+            />
+
         </>
     )
 }

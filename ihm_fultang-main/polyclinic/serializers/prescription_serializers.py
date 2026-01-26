@@ -3,8 +3,14 @@ from polyclinic.models import Prescription, PrescriptionDrug
 from polyclinic.serializers.prescription_drug_serializers import PrescriptionDrugSerializer, PrescriptionDrugCreateSerializer
 from rest_framework.exceptions import ValidationError
 
+from polyclinic.serializers.patient_serializers import PatientSerializer
+from authentication.serializers.medical_staff_serializers import MedicalStaffSerializer
+
 class PrescriptionSerializer(serializers.ModelSerializer):
+    idPatient = PatientSerializer(read_only=True)
+    idMedicalStaff = MedicalStaffSerializer(read_only=True)
     prescriptionDrug = serializers.SerializerMethodField()
+    
     class Meta:
         model = Prescription
         fields = ["id", "addDate", "note", "idPatient", "idConsultation", "idMedicalStaff", "prescriptionDrug"]

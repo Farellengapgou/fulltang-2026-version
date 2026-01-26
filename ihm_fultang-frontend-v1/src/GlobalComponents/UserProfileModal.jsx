@@ -237,7 +237,7 @@ export function UserProfileModal({ isOpen, onClose }) {
             ) : (
                 <div>
                     {/* Header avec photo et nom */}
-                    <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 -mt-6 -mx-6 mb-6 rounded-t-lg">
+                    <div className="bg-gradient-to-r from-teal-500 to-blue-500 p6 -mt-6 -mx-6 mb-6 rounded-t-lg">
                         <div className="flex items-center gap-4">
                             <img
                                 src={previewUrl || userIcon}
@@ -250,8 +250,8 @@ export function UserProfileModal({ isOpen, onClose }) {
                                         ? `${profileData.first_name} ${profileData.last_name}`
                                         : profileData?.username}
                                 </h2>
-                                <p className="text-blue-100">{profileData?.role}</p>
-                                <p className="text-sm text-blue-200">{profileData?.email}</p>
+                                <p className="text-teal-100">{profileData?.role}</p>
+                                <p className="text-sm text-teal-100">{profileData?.email}</p>
                             </div>
                         </div>
                     </div>
