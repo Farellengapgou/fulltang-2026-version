@@ -1,160 +1,315 @@
-import React, { useState } from 'react';
-import { Search, Edit2, Trash2, Settings } from 'lucide-react';
-import { PharmacyDashboard } from './PharmacyDashboard';
+import { useState, useEffect } from "react";
+import { CustomDashboard } from "../../GlobalComponents/CustomDashboard.jsx";
+import { pharmacyNavLink } from "./lib/pharmacyNavLink.js";
+import { PharmacyNavbar } from "./PharmacyNavBar.jsx";
+import medicationImage from "../../assets/medication.jpeg"
+import axiosInstance from "../../Utils/axiosInstance.js";
+import { SuccessModal } from "../Modals/SuccessModal.jsx";
+import { ErrorModal } from "../Modals/ErrorModal.jsx";
+import Wait from "../Modals/wait.jsx";
+import { AddCategoryModal } from "../AdminViews/AddCategoryModal.jsx";
 
-export  function PharmacistPage() {
-    const [medications] = useState([
-        {
-            id: 1,
-            name: 'para',
-            quantity: 8,
-            price: 2000,
-            status: 'Valid',
-            expirationDate: 'Dec,12,2001',
-            description: 'Head ache'
-        },
-        {
-            id: 2,
-            name: 'para',
-            quantity: 8,
-            price: 2000,
-            status: 'Valid',
-            expirationDate: 'Dec,12,2001',
-            description: 'Head ache'
-        },
-        {
-            id: 3,
-            name: 'para',
-            quantity: 8,
-            price: 2000,
-            status: 'Valid',
-            expirationDate: 'Dec,12,2001',
-            description: 'Head ache'
-        },
-        {
-            id: 4,
-            name: 'para',
-            quantity: 8,
-            price: 2000,
-            status: 'Valid',
-            expirationDate: 'Dec,12,2001',
-            description: 'Head ache'
-        },
-        {
-            id: 5,
-            name: 'para',
-            quantity: 8,
-            price: 2000,
-            status: 'Valid',
-            expirationDate: 'Dec,12,2001',
-            description: 'Head ache'
+
+export function PharmacyAddMedication() {
+    const [successMessage, setSuccessMessage] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [canOpenErrorModal, setCanOpenErrorModal] = useState(false);
+    const [canOpenSuccessModal, setCanOpenSuccessModal] = useState(false);
+    const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+    const [categories, setCategories] = useState([]);
+    const [medicationData, setMedicationData] = useState({
+        category: '',
+        name: '',
+        generic_name: '',
+        brand: '',
+        description: '',
+        price: 0,
+        current_stock: 0,
+        min_stock_level: 10,
+        requires_prescription: false,
+        expiry_date: ''
+    });
+
+    async function fetchCategories() {
+        try {
+            const response = await axiosInstance.get("/category-product/");
+            const categoriesData = response.data.results || [];
+            setCategories(categoriesData);
+            console.log("Categories:", categoriesData);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
         }
-    ]);
+    }
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
+    function handleChange(e) {
+        const { name, value, type, checked } = e.target;
+        setMedicationData(prevData => ({
+            ...prevData,
+            [name]: type === "checkbox" ? checked : value
+        }));
+    }
+
+    async function handleSubmit(e) {
+        e.preventDefault();
+        setIsLoading(true);
+
+        const finalData = {
+            category: Number(medicationData.category),
+            name: medicationData.name,
+            generic_name: medicationData.generic_name,
+            brand: medicationData.brand,
+            description: medicationData.description,
+            price: Number(medicationData.price),
+            current_stock: Number(medicationData.current_stock),
+            min_stock_level: Number(medicationData.min_stock_level),
+            requires_prescription: medicationData.requires_prescription,
+            expiry_date: medicationData.expiry_date
+        };
+        console.log("Sending data:", finalData);
+
+        try {
+            const response = await axiosInstance.post("/product/", finalData);
+            if (response.status === 201) {
+                setIsLoading(false);
+                setErrorMessage("");
+                setSuccessMessage(`The product ${finalData.name} created successfully`);
+                setCanOpenSuccessModal(true);
+                setCanOpenErrorModal(false);
+                // Réinitialiser le formulaire
+                setMedicationData({
+                    category: '',
+                    name: '',
+                    generic_name: '',
+                    brand: '',
+                    description: '',
+                    price: 0,
+                    current_stock: 0,
+                    min_stock_level: 10,
+                    requires_prescription: false,
+                    expiry_date: ''
+                });
+            }
+        }
+        catch (error) {
+            setIsLoading(false);
+            console.error("Error details:", error.response?.data);
+            setSuccessMessage("");
+
+            // Afficher le vrai message d'erreur du backend
+            const errorMsg = error.response?.data?.detail
+                || error.response?.data?.message
+                || JSON.stringify(error.response?.data)
+                || `Error when registering the product ${finalData.name}. Please retry!`;
+
+            setErrorMessage(errorMsg);
+            setCanOpenSuccessModal(false);
+            setCanOpenErrorModal(true);
+        }
+    }
+
+    function applyInputStyle() {
+        return "w-full px-4 py-2 border-2 border-gray-200 rounded-md focus:outline-none  focus:border-2  focus:border-primary-end";
+    }
+
+    function applyLabelStyle() {
+        return "block text-md font-semibold text-gray-600 mb-1";
+    }
 
     return (
-         <PharmacyDashboard>
-        <div className="p-6 max-w-full min-h-screen bg-gray-50">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-800">Pharmacist</h1>
-                <div className="flex items-center gap-4">
-                    <button className="p-2 rounded-full bg-gray-100">
-                        <Settings className="w-5 h-5 text-gray-600" />
-                    </button>
-                    <button className="p-2 rounded-full bg-gray-100">
-                        <Search className="w-5 h-5 text-gray-600" />
-                    </button>
-                    <div className="flex items-center gap-2">
-                        <span className="text-gray-700">Username.N</span>
-                        <div className="w-8 h-8 bg-blue-500 rounded-full"></div>
+        <>
+            <AddCategoryModal
+                isOpen={showAddCategoryModal}
+                onClose={() => setShowAddCategoryModal(false)}
+                onCategoryCreated={(newCat) => {
+                    setCategories(prev => [...prev, newCat]); // ajoute à la liste
+                    setMedicationData(prev => ({ ...prev, category: newCat.id })); // sélectionne auto
+                }}
+            />
+            <CustomDashboard linkList={pharmacyNavLink} requiredRole={"Pharmacist"}>
+                <PharmacyNavbar />
+                <div className="flex m-5">
+                    <div className="w-1/2 mr-6 flex flex-col items-center justify-center">
+                        <h1 className="text-4xl font-bold text-secondary mb-4">Add a new medication</h1>
+                        <p className="text-justify text-secondary font-normal text-md mb-5">Please complete all
+                            fields below to add a new product to Fultang Clinic.</p>
+                        <img src={medicationImage} alt={"image"} className={"w-[700px] h-[500px] rounded-2xl"} />
+                    </div>
+
+                    <div className="w-1/2 p-6 mt-8 flex items-center justify-center">
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label className={applyLabelStyle()}>
+                                        Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={medicationData.name}
+                                        onChange={handleChange}
+                                        className={applyInputStyle()}
+                                        placeholder="Enter the product's name"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className={applyLabelStyle()}>
+                                        Generic name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="generic_name"
+                                        value={medicationData.generic_name}
+                                        onChange={handleChange}
+                                        className={applyInputStyle()}
+                                        placeholder="Enter the product's generic name"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label className={applyLabelStyle()}>
+                                        Category
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <select
+                                            name="category"
+                                            value={medicationData.category}
+                                            onChange={handleChange}
+                                            className={applyInputStyle()}
+                                            required
+                                        >
+                                            <option value="">Select a category</option>
+                                            {categories.map(cat => (
+                                                <option key={cat.id} value={cat.id}>
+                                                    {cat.name}
+                                                </option>
+                                            ))}
+                                        </select>
+
+                                        {/* Bouton + */}
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowAddCategoryModal(true)}
+                                            className="bg-secondary text-white w-10 h-10 rounded-lg text-xl font-bold"
+                                            title="Add a new category"
+
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className={applyLabelStyle()}>
+                                        Brand
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="brand"
+                                        value={medicationData.brand}
+                                        onChange={handleChange}
+                                        className={applyInputStyle()}
+                                        placeholder="Enter the product's brand"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-2">
+                                <div>
+                                    <label className={applyLabelStyle()}>
+                                        Price (FCFA)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="price"
+                                        value={medicationData.price}
+                                        onChange={handleChange}
+                                        className={applyInputStyle()}
+                                        placeholder={0}
+                                        min={0}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className={applyLabelStyle()}>
+                                        Stock
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="current_stock"
+                                        value={medicationData.current_stock}
+                                        onChange={handleChange}
+                                        className={applyInputStyle()}
+                                        placeholder={0}
+                                        min={0}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className={applyLabelStyle()}>
+                                        Expiry date
+                                    </label>
+                                    <input
+                                        type="date"
+                                        name="expiry_date"
+                                        value={medicationData.expiry_date}
+                                        onChange={handleChange}
+                                        className={applyInputStyle()}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className={applyLabelStyle()}>
+                                    Description
+                                </label>
+                                <input
+                                    type="text"
+                                    name="description"
+                                    value={medicationData.description}
+                                    onChange={handleChange}
+                                    className="w-full h-20 px-4 py-2 border-2 border-gray-200 rounded-md focus:outline-none  focus:border-2  focus:border-primary-end"
+                                    placeholder="Enter product's description"
+                                    required
+                                />
+                            </div>
+
+                            <div className="flex flex-row">
+                                <label className={applyLabelStyle()}>
+                                    Requires prescription ?
+                                </label>
+                                <input
+                                    type="checkbox"
+                                    name="requires_prescription"
+                                    checked={medicationData.requires_prescription}
+                                    onChange={handleChange}
+                                    className="ml-2 w-5 h-5"
+                                />
+                            </div>
+
+                            <div className="flex gap-4 justify-center">
+                                <button
+                                    type="submit"
+                                    className="bg-secondary text-white py-2 px-12 font-bold rounded-lg hover:bg-[#3d9d94] transition-colors duration-300"
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-            </div>
-
-            {/* Search Bar */}
-            <div className="flex items-center justify-between mb-6">
-                <div className="relative flex-1 max-w-2xl">
-                    <input
-                        type="text"
-                        placeholder="Search by Name/description/date & price"
-                        className="w-full pl-4 pr-12 py-2 border rounded-lg"
-                    />
-                    <button className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1 bg-blue-600 text-white rounded-lg">
-                        Search
-                    </button>
-                </div>
-                <button className="ml-4 p-2 border rounded-lg">
-                    <span className="font-medium">Filter</span>
-                </button>
-            </div>
-
-            {/* Medication List */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="flex justify-between items-center p-4 border-b">
-                    <h2 className="text-lg font-medium">List of All Medication (5)</h2>
-                </div>
-
-                {/* Table */}
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="bg-gradient-to-r from-teal-500 to-blue-500 text-white">
-                                <th className="py-3 px-4 text-left">No.</th>
-                                <th className="py-3 px-4 text-left">Medicines Name</th>
-                                <th className="py-3 px-4 text-left">Quantity</th>
-                                <th className="py-3 px-4 text-left">Price</th>
-                                <th className="py-3 px-4 text-left">Status</th>
-                                <th className="py-3 px-4 text-left">Expiration Date</th>
-                                <th className="py-3 px-4 text-left">Description</th>
-                                <th className="py-3 px-4 text-left"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {medications.map((med) => (
-                                <tr key={med.id} className="border-b bg-gray-50">
-                                    <td className="py-3 px-4">{med.id}</td>
-                                    <td className="py-3 px-4">{med.name}</td>
-                                    <td className="py-3 px-4">{med.quantity}</td>
-                                    <td className="py-3 px-4">{med.price}</td>
-                                    <td className="py-3 px-4">
-                                        <span className="px-3 py-1 rounded-full bg-green-100 text-green-800">
-                                            {med.status}
-                                        </span>
-                                    </td>
-                                    <td className="py-3 px-4">{med.expirationDate}</td>
-                                    <td className="py-3 px-4">{med.description}</td>
-                                    <td className="py-3 px-4">
-                                        <div className="flex gap-2">
-                                            <button className="text-blue-600 hover:text-blue-800">
-                                                <Edit2 className="w-4 h-4" />
-                                            </button>
-                                            <button className="text-red-600 hover:text-red-800">
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Pagination */}
-                <div className="flex justify-center items-center p-4 border-t">
-                    <button className="p-1 rounded hover:bg-gray-100">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    <span className="mx-4">1/2</span>
-                    <button className="p-1 rounded hover:bg-gray-100">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-         </PharmacyDashboard>
-    );
+                <SuccessModal isOpen={canOpenSuccessModal} canOpenSuccessModal={setCanOpenSuccessModal} message={successMessage} />
+                <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
+                {isLoading && <Wait />}
+            </CustomDashboard>
+        </>
+    )
 }
