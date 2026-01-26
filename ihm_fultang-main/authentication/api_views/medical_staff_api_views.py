@@ -13,6 +13,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
 from django.http import JsonResponse
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db import IntegrityError
 
 tags = ["medical-staff"]
 active_param = openapi.Parameter(
@@ -134,15 +136,68 @@ class MedicalStaffViewSet(ModelViewSet):
         else:
             return MedicalStaffSerializer
 
-    def perform_create(self, serializer):
-        if 'id' in serializer.validated_data:
-            serializer.validated_data.pop('id')
-        serializer.save()
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            if 'id' in serializer.validated_data:
+                serializer.validated_data.pop('id')
+            serializer.save()
+        except DjangoValidationError as e:
+            return Response(
+                {"detail": e.message if hasattr(e, 'message') else str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except IntegrityError as e:
+            error_msg = str(e).lower()
+            if 'username' in error_msg:
+                return Response(
+                    {"username": ["This username is already taken."]},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if 'email' in error_msg:
+                return Response(
+                    {"email": ["This email is already associated with another account."]},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            return Response(
+                {"detail": "A staff member with this information already exists."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    def perform_update(self, serializer):
-        if 'id' in serializer.validated_data:
-            serializer.validated_data.pop('id')
-        serializer.save()
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        try:
+            if 'id' in serializer.validated_data:
+                serializer.validated_data.pop('id')
+            serializer.save()
+        except DjangoValidationError as e:
+            return Response(
+                {"detail": e.message if hasattr(e, 'message') else str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except IntegrityError as e:
+            error_msg = str(e).lower()
+            if 'username' in error_msg:
+                return Response(
+                    {"username": ["This username is already taken."]},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if 'email' in error_msg:
+                return Response(
+                    {"email": ["This email is already associated with another account."]},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            return Response(
+                {"detail": "A staff member with this information already exists."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return Response(serializer.data)
 
     @swagger_auto_schema(
         operation_description="Renvoie la liste de tous les médécins",

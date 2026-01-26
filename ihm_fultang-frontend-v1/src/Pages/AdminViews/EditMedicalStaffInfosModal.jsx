@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import axiosInstance from "../../Utils/axiosInstance.js";
+import { extractApiError } from "../../Utils/extractApiError.js";
 
 export function EditMedicalStaffInfosModal({ isOpen, onClose, setCanOpenSuccessModal, setSuccessMessage, setIsLoading, medicalStaffData }) {
 
@@ -86,7 +87,7 @@ export function EditMedicalStaffInfosModal({ isOpen, onClose, setCanOpenSuccessM
             setIsLoading(false);
             setSuccessMessage("");
             setCanOpenSuccessModal(false);
-            setError("Something went wrong, please try again later!");
+            setError(extractApiError(error, "Something went wrong while updating staff information."));
             console.log(error);
         }
         setIsLoading(false);

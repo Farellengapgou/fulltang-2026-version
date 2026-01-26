@@ -7,6 +7,7 @@ import axiosInstance from "../../Utils/axiosInstance.js";
 import { SuccessModal } from "../Modals/SuccessModal.jsx";
 import { ErrorModal } from "../Modals/ErrorModal.jsx";
 import Wait from "../Modals/wait.jsx";
+import { extractApiError } from "../../Utils/extractApiError.js";
 import { Eye, EyeOff } from 'lucide-react';
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css';
@@ -89,7 +90,7 @@ export function AddMedicalStaff() {
             setIsLoading(false);
             console.log(error);
             setSuccessMessage("");
-            setErrorMessage(`Error when registering the ${medicalStaffData.role + " " + medicalStaffData.username} please retry !`);
+            setErrorMessage(extractApiError(error, `Error when registering the ${medicalStaffData.role} ${medicalStaffData.username}.`));
             setCanOpenSuccessModal(false);
             setCanOpenErrorModal(true);
         }

@@ -7,6 +7,7 @@ import axiosInstance from "../../Utils/axiosInstance.js";
 import { SuccessModal } from "../Modals/SuccessModal.jsx";
 import { ErrorModal } from "../Modals/ErrorModal.jsx";
 import Wait from "../Modals/wait.jsx";
+import { extractApiError } from "../../Utils/extractApiError.js";
 import { AddCategoryModal } from "./AddCategoryModal.jsx";
 import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
@@ -86,7 +87,7 @@ export function AddMedication() {
             setIsLoading(false);
             console.log(error);
             setSuccessMessage("");
-            setErrorMessage(`Error when registering the product ${finalData.name} please retry !`);
+            setErrorMessage(extractApiError(error, `Error when registering the product ${finalData.name}.`));
             setCanOpenSuccessModal(false);
             setCanOpenErrorModal(true);
         }
