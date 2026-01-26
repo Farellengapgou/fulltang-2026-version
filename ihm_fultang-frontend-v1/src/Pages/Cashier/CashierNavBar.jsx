@@ -7,12 +7,14 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
 import { UserProfileModal } from '../../GlobalComponents/UserProfileModal';
+import { useMessageBadge } from "../../Utils/useMessageBadge.js";
 
 export function CashierNavBar() {
   const { logout, userData } = useAuthentication();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const navigate = useNavigate();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const messageCount = useMessageBadge();
   const [profileForm, setProfileForm] = useState({
     username: userData?.username || "",
     email: userData?.email || "",
@@ -46,17 +48,24 @@ export function CashierNavBar() {
               </button>
             </Tooltip>
 
-            <Tooltip placement={"top"} title={"Messages"}>
-              <button
-                onClick={() => {
-                  // Navigate to the help center / messages page
-                  navigate(AppRoutesPaths.helpCenter);
-                }}
-                className={applyNavLinkBtnStyle()}
-              >
-                <FaEnvelope />
-              </button>
-            </Tooltip>
+            <div className="relative">
+              <Tooltip placement={"top"} title={"Messages"}>
+                <button
+                  onClick={() => {
+                    // Navigate to the help center / messages page
+                    navigate(AppRoutesPaths.helpCenterPage);
+                  }}
+                  className={applyNavLinkBtnStyle()}
+                >
+                  <FaEnvelope />
+                </button>
+              </Tooltip>
+              {messageCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse pointer-events-none">
+                  {messageCount > 99 ? "99+" : messageCount}
+                </span>
+              )}
+            </div>
             <Tooltip placement={"top"} title={"LogOut"}>
               <button
                 onClick={() => {

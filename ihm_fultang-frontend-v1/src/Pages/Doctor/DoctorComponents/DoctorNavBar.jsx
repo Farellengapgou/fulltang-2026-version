@@ -5,10 +5,12 @@ import userIcon from "../../../assets/userIcon.png";
 import { useState } from 'react';
 import { useNavigate } from "react-router-dom"
 import PropTypes from 'prop-types';
+import { useMessageBadge } from "../../../Utils/useMessageBadge.js";
 
-
-export function DoctorNavBar({ messageCount = 2 }) {
+export function DoctorNavBar({ messageCount, messagePath = "/doctor/messages", title = "Doctor" }) {
     const navigate = useNavigate()
+    const liveCount = useMessageBadge();
+    const displayCount = messageCount ?? liveCount;
 
     const {logout , userData} = useAuthentication();
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -23,7 +25,7 @@ export function DoctorNavBar({ messageCount = 2 }) {
             <div className="border-b-2 m-3  border-b-gray-300">
                 <div className="w-full h-[70px] flex justify-between">
                     <h1 className="ml-3 text-4xl text-secondary mt-3.5 font-bold">
-                       Doctor
+                       {title}
                     </h1>
                     <div className="flex gap-3 mt-3.5 mb-4 mr-5">
                         <Tooltip placement={"top"} title={"settings"}>
@@ -36,15 +38,15 @@ export function DoctorNavBar({ messageCount = 2 }) {
                         <div className="relative">
                             <Tooltip placement={"top"} title={"Messages"}>
                                 <button
-                                    onClick={() => navigate("/doctor/messages")}
+                                    onClick={() => navigate(messagePath)}
                                     className={applyNavLinkBtnStyle()}
                                 >
                                     <FaEnvelope />
                                 </button>
                             </Tooltip>
-                            {messageCount > 0 && (
+                            {displayCount > 0 && (
                                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse pointer-events-none">
-                                    {messageCount > 99 ? "99+" : messageCount}
+                                    {displayCount > 99 ? "99+" : displayCount}
                                 </span>
                             )}
                         </div>
@@ -88,5 +90,7 @@ export function DoctorNavBar({ messageCount = 2 }) {
 }
 
 DoctorNavBar.propTypes = {
-    messageCount: PropTypes.number
+    messageCount: PropTypes.number,
+    messagePath: PropTypes.string,
+    title: PropTypes.string,
 };
