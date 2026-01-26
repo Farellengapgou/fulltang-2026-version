@@ -288,15 +288,6 @@ export function FinancialReports() {
                                     <thead className="ft-thead">
                                         <tr>
                                             <th className="ft-th">Compte G/L</th>
-negou@Negou-Donald:/media/negou/Nouveau nom9/Evolution 4GI 25-26/IHM/v2/fulltang-2026-version$ git add "../ihm_fultang-frontend-v1/src/Pages/AccountantNew/Cloture & Reports/FinancialReports.jsx"
-
-git add "../ihm_fultang-frontend-v1/src/Pages/AccountantNew/Comptabilité de Base/JournalsEntries.jsx"
-
-git add "../ihm_fultang-frontend-v1/src/Pages/Receptionist/addNewPatientModal.jsx"
-fatal: ../ihm_fultang-frontend-v1/src/Pages/AccountantNew/Cloture & Reports/FinancialReports.jsx : '../ihm_fultang-frontend-v1/src/Pages/AccountantNew/Cloture & Reports/FinancialReports.jsx' est hors du dépôt à '/media/negou/Nouveau nom9/Evolution 4GI 25-26/IHM/v2/fulltang-2026-version'
-fatal: ../ihm_fultang-frontend-v1/src/Pages/AccountantNew/Comptabilité de Base/JournalsEntries.jsx : '../ihm_fultang-frontend-v1/src/Pages/AccountantNew/Comptabilité de Base/JournalsEntries.jsx' est hors du dépôt à '/media/negou/Nouveau nom9/Evolution 4GI 25-26/IHM/v2/fulltang-2026-version'
-fatal: ../ihm_fultang-frontend-v1/src/Pages/Receptionist/addNewPatientModal.jsx : '../ihm_fultang-frontend-v1/src/Pages/Receptionist/addNewPatientModal.jsx' est hors du dépôt à '/media/negou/Nouveau nom9/Evolution 4GI 25-26/IHM/v2/fulltang-2026-version'
-negou@Negou-Donald:/media/negou/Nouveau nom9/Evolution 4GI 25-26/IHM/v2/fulltang-2026-version$ 
                                             <th className="ft-th text-right">Mouvement Débit</th>
                                             <th className="ft-th text-right">Mouvement Crédit</th>
                                         </tr>
