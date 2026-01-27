@@ -97,7 +97,7 @@ export function DentistMessagePage({
     }
     return {
       id: message?.id,
-      subject: message?.reason || "Message",
+      subject: message?.reason || "Notification",
       senderName: "Administration",
       content: message?.message || "",
       createdAt: message?.addAt || new Date().toISOString(),
@@ -134,7 +134,7 @@ export function DentistMessagePage({
       setErrorMessage("")
     } catch (error) {
       setErrorStatus(error.status)
-      setErrorMessage("Erreur lors de la récupération de vos messages !")
+      setErrorMessage("Erreur lors de la récupération de vos notifications !")
     } finally {
       setIsLoading(false)
     }
@@ -159,7 +159,7 @@ export function DentistMessagePage({
       setIsLoading(false)
       console.log(error)
       setErrorStatus(error.status)
-      setErrorMessage("Erreur lors de la récupération de vos messages !")
+      setErrorMessage("Erreur lors de la récupération de vos notifications !")
     }
   }
 
@@ -409,7 +409,7 @@ export function DentistMessagePage({
   async function handleSendMessage(e) {
     e.preventDefault()
     if (!composeSubject.trim() || !composeMessage.trim()) {
-      setSendStatus("Veuillez remplir le sujet et le message.")
+      setSendStatus("Veuillez remplir le sujet et le contenu de la notification.")
       return
     }
     if (composeRole !== "ALL" && selectedRecipientIds.length === 0) {
@@ -435,12 +435,12 @@ export function DentistMessagePage({
           })
         )
       )
-      setSendStatus("Message(s) envoyé(s) avec succès.")
+      setSendStatus("Notification(s) envoyée(s) avec succès.")
       setComposeSubject("")
       setComposeMessage("")
     } catch (error) {
       console.log(error)
-      setSendStatus("Erreur lors de l'envoi des messages.")
+      setSendStatus("Erreur lors de l'envoi des notifications.")
     } finally {
       setIsSending(false)
     }
@@ -514,13 +514,13 @@ export function DentistMessagePage({
       <div className="mx-auto p-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Messages
+            Notifications
           </h1>
         </div>
 
         {showComposer && (
           <div className="bg-white p-6 rounded-xl shadow-md mb-6 border border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Envoyer un message</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Envoyer une notification</h2>
             <form onSubmit={handleSendMessage} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -578,20 +578,20 @@ export function DentistMessagePage({
                     value={composeSubject}
                     onChange={(e) => setComposeSubject(e.target.value)}
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-end focus:border-transparent"
-                    placeholder="Sujet du message"
+                    placeholder="Sujet de la notification"
                   />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Message
+                  Notification
                 </label>
                 <textarea
                   rows={4}
                   value={composeMessage}
                   onChange={(e) => setComposeMessage(e.target.value)}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-end focus:border-transparent"
-                  placeholder="Ecrivez votre message..."
+                  placeholder="Ecrivez votre notification..."
                 />
               </div>
               <div className="flex items-center gap-4">
@@ -619,7 +619,7 @@ export function DentistMessagePage({
       </label>
       <input
         type="text"
-        placeholder="Rechercher un message..."
+        placeholder="Rechercher une notification..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg 
@@ -798,10 +798,10 @@ export function DentistMessagePage({
             <div className="flex flex-col">
               <Bell className="h-16 w-16 text-primary-end mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-800 mb-2 mx-auto">
-                Aucun message
+                Aucune notification
               </h2>
               <p className="text-gray-600 mb-4 mx-auto">
-                Il n'y a actuellement aucun message.
+                Il n'y a actuellement aucune notification.
               </p>
               <button
                 className="px-4 hover:bg-primary-start duration-300 mx-auto py-2 bg-primary-end text-white rounded-lg transition-all"
@@ -893,7 +893,7 @@ export function DentistMessagePage({
               </div>
 
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Message:</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Notification:</h3>
                 {isEditingMessage ? (
                   <textarea
                     value={editedContent}
@@ -998,7 +998,7 @@ export function DentistMessagePage({
               </div>
 
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Message:</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Notification:</h3>
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {selectedNotification.message}
                 </p>
@@ -1020,19 +1020,19 @@ export function DentistMessagePage({
   )
 }
  
-import { DoctorMessagePage } from "../Doctor/DoctorMessagePage.jsx";
-import { CustomDashboard } from "../../GlobalComponents/CustomDashboard.jsx";
-import { dentistNavLink } from "./DentistNavLink.js";
-import { DentistNavBar } from "./DentistNavBar.jsx";
+// import { DoctorMessagePage } from "../Doctor/DoctorMessagePage.jsx";
+// import { CustomDashboard } from "../../GlobalComponents/CustomDashboard.jsx";
+// import { dentistNavLink } from "./DentistNavLink.js";
+// import { DentistNavBar } from "./DentistNavBar.jsx";
 
-export function DentistMessagePage() {
-  return (
-    <DoctorMessagePage
-      DashboardComponent={CustomDashboard}
-      NavBarComponent={DentistNavBar}
-      navLink={dentistNavLink}
-      requiredRole="Dentist"
-    />
-  );
-}
+// export function DentistMessagePage() {
+//   return (
+//     <DoctorMessagePage
+//       DashboardComponent={CustomDashboard}
+//       NavBarComponent={DentistNavBar}
+//       navLink={dentistNavLink}
+//       requiredRole="Dentist"
+//     />
+//   );
+// }
  

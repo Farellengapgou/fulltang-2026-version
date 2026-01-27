@@ -5,6 +5,13 @@ export const AppRoutesPaths = {
   loginPage: "/login",
   forgottenPasswordPage: "/forgotten-password",
 
+
+  pharmacyMessage: "/pharmacy/messages",
+cashierMessage: "/cashier/messages",
+accountantMessage: "/accountant/messages",
+specialistMessage: "/specialist/messages",
+receptionistMessage: "/receptionist/messages",
+materialAccountantMessage: "/material-accountant/messages",
   // --- PHARMACY ROUTES ---
   pharmacyPage: "/pharmacy/dashboard",
   pharmacyMedicationList: "/pharmacy/medications",
@@ -12,6 +19,9 @@ export const AppRoutesPaths = {
   pharmacySales: "/pharmacy/sales",
   pharmacyReports: "/pharmacy/reports",
   pharmacyPrescriptions: "/pharmacy/prescriptions",
+  pharmacyPrescriptionSales: "/pharmacy/sales/prescription",
+  pharmacyOTCSales: "/pharmacy/sales/otc",
+  pharmacySalesHistory: "/pharmacy/sales/history",
 
   doctorPage: "/doctor/dashboard",
   ophthalmologistPage: "/ophthalmologist/dashboard",

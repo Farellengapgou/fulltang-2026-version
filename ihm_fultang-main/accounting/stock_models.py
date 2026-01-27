@@ -1789,7 +1789,7 @@ class GoodsReceiptNote(models.Model):
                     supplier=self.supplier,
                     defaults={
                         'manufacturing_date': line.manufacturing_date,
-                        'expiry_date': line.expiry_date,
+                        'expiry_date': line.expiry_date if line.expiry_date else None,
                         'reception_date': self.receipt_date,
                         'initial_quantity': line.quantity_received,
                         'remaining_quantity': line.quantity_received,

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Save, Play, CheckCircle, RefreshCcw } from "lucide-react";
+import { ArrowLeft, Save, Play, CheckCircle, RefreshCcw, Plus, X } from "lucide-react";
 import { AccountantNavBar } from "../../Accountant/Components/AccountantNavBar.jsx";
 import { AccountantDashBoard } from "../../Accountant/Components/AccountantDashboard.jsx";
 import { MaterialAccountingNavLink } from "../NavLink.js";
@@ -10,7 +10,8 @@ import {
     updateInventoryLine,
     initializeInventory,
     startCountingInventory,
-    validateInventory
+    validateInventory,
+    getArticles
 } from "../../../Utils/api/materialAccounting.js";
 import { ErrorModal } from "../../Modals/ErrorModal.jsx";
 import { SuccessModal } from "../../Modals/SuccessModal.jsx";
@@ -37,8 +38,14 @@ export function InventoryDetail() {
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
 
+    // Add Line Modal State
+    const [isAddLineModalOpen, setIsAddLineModalOpen] = useState(false);
+    const [articles, setArticles] = useState([]);
+    const [newLineData, setNewLineData] = useState({ article: "", theoretical_quantity: 0 });
+
     useEffect(() => {
         loadData();
+        loadArticles();
     }, [id]);
 
     const loadData = async () => {
@@ -54,6 +61,15 @@ export function InventoryDetail() {
             console.error("Error loading inventory details:", error);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const loadArticles = async () => {
+        try {
+            const data = await getArticles();
+            setArticles(data.results || []);
+        } catch (error) {
+            console.error("Error loading articles:", error);
         }
     };
 
@@ -89,10 +105,29 @@ export function InventoryDetail() {
         }
     };
 
+    const handleAddLineSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            setIsActionLoading(true);
+            await apiCall(`/inventories/${id}/lines/`, {
+                method: 'POST',
+                body: JSON.stringify(newLineData)
+            });
+            alert("Ligne ajoutée avec succès");
+            setIsAddLineModalOpen(false);
+            setNewLineData({ article: "", theoretical_quantity: 0 });
+            loadData();
+        } catch (error) {
+            alert(`Erreur lors de l'ajout: ${error.detail || error.message}`);
+        } finally {
+            setIsActionLoading(false);
+        }
+    };
+
     if (isLoading) {
         return (
             <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"MaterialAccountant"}>
-                <AccountantNavBar />
+                <AccountantNavBar title="Material Accountant" />
                 <div className="flex items-center justify-center p-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
                 </div>
@@ -102,14 +137,14 @@ export function InventoryDetail() {
 
     if (!inventory) return (
         <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"MaterialAccountant"}>
-            <AccountantNavBar />
+            <AccountantNavBar title="Material Accountant" />
             <div className="p-12 text-center text-red-500 font-bold">Inventaire non trouvé</div>
         </AccountantDashBoard>
     );
 
     return (
         <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"MaterialAccountant"}>
-            <AccountantNavBar />
+            <AccountantNavBar title="Material Accountant" />
             <div className="mx-auto p-12">
                 <button
                     onClick={() => navigate(-1)}
@@ -147,6 +182,14 @@ export function InventoryDetail() {
                     </div>
 
                     <div className="bg-gray-50 p-8 border-t md:border-t-0 md:border-l border-gray-100 flex flex-col justify-center gap-4 min-w-[250px]">
+                        {(inventory.status === 'PLANNED' || inventory.status === 'IN_PROGRESS') && (
+                            <button
+                                onClick={() => setIsAddLineModalOpen(true)}
+                                className="w-full flex items-center justify-center px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all shadow-sm"
+                            >
+                                <Plus className="h-5 w-5 mr-2" /> Ajouter un article
+                            </button>
+                        )}
                         {inventory.status === 'PLANNED' && lines.length === 0 && (
                             <button
                                 onClick={() => handleAction(initializeInventory, "Inventaire initialisé avec succès")}
@@ -238,8 +281,8 @@ export function InventoryDetail() {
                                 ))}
                                 {lines.length === 0 && (
                                     <tr>
-                                        <td colSpan="5" className="px-6 py-12 text-center text-gray-400 italic font-medium">
-                                            Aucune ligne générée. Veuillez initialiser l'inventaire.
+                                        <td colSpan="6" className="px-6 py-12 text-center text-gray-400 italic font-medium">
+                                            Aucune ligne générée. Utilisez le bouton "Initialiser" pour charger les stocks existants ou "Ajouter un article" pour ajouter manuellement.
                                         </td>
                                     </tr>
                                 )}
@@ -248,8 +291,64 @@ export function InventoryDetail() {
                     </div>
                 </div>
             </div>
+{/* <<<<<<< HEAD
             <SuccessModal isOpen={canOpenSuccessModal} canOpenSuccessModal={setCanOpenSuccessModal} message={successMessage} />
             <ErrorModal isOpen={canOpenErrorModal} onCloseErrorModal={setCanOpenErrorModal} message={errorMessage} />
+======= */}
+
+            {/* Add Line Modal */}
+            {isAddLineModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-teal-600 text-white">
+                            <h3 className="font-bold text-lg">Ajouter une ligne</h3>
+                            <button onClick={() => setIsAddLineModalOpen(false)} className="hover:bg-white/20 p-1 rounded-full"><X className="h-5 w-5" /></button>
+                        </div>
+                        <form onSubmit={handleAddLineSubmit} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1">Article</label>
+                                <select
+                                    required
+                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
+                                    value={newLineData.article}
+                                    onChange={(e) => setNewLineData({ ...newLineData, article: e.target.value })}
+                                >
+                                    <option value="">Sélectionner un article</option>
+                                    {articles.map(a => <option key={a.id} value={a.id}>{a.name} ({a.code})</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1">Quantité Théorique (Info)</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
+                                    value={newLineData.theoretical_quantity}
+                                    onChange={(e) => setNewLineData({ ...newLineData, theoretical_quantity: e.target.value })}
+                                />
+                                <p className="text-xs text-gray-500 mt-1">La quantité théorique sert de base de comparaison.</p>
+                            </div>
+                            <div className="flex justify-end gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsAddLineModalOpen(false)}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg font-bold text-gray-600"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isActionLoading}
+                                    className="px-6 py-2 bg-teal-600 text-white rounded-lg font-bold hover:bg-teal-700 disabled:opacity-50"
+                                >
+                                    Ajouter
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+{/* >>>>>>> origin/feature/comptaMinv */}
         </AccountantDashBoard>
     );
 }
