@@ -1,0 +1,364 @@
+import {
+    Stethoscope,
+    Weight,
+    Thermometer,
+    Activity,
+    Heart,
+    FileText,
+    Ruler,
+    AlertTriangle,
+    PillIcon as Pills,
+    Hospital,
+    CalendarCheck,
+    User, Calendar, MapPin, Phone, Printer, ArrowLeft,
+    ChevronRight,
+    Eye
+} from 'lucide-react';
+import {useLocation, useNavigate} from "react-router-dom";
+import {doctorNavLink} from "../Doctor/lib/doctorNavLink.js";
+import { DoctorNavBar } from '../Doctor/DoctorComponents/DoctorNavBar.jsx';
+import {useEffect, useState} from "react";
+import {useCalculateAge} from "../../Utils/compute.js";
+import {combineToISOString, formatDateOnly, formatDateOnlyWithoutWeekDay} from "../../Utils/formatDateMethods.js";
+import MedicalParametersCard from "../Doctor/DoctorComponents/MedicalParametersCard.jsx";
+import MedicationPrescriptionCard from "../Doctor/DoctorComponents/MedicationPrescriptionCard.jsx";
+import ExamPrescriptionCard from "../Doctor/DoctorComponents/ExamPrescriptionCard.jsx";
+import AppointmentPrescriptionCard from "../Doctor/DoctorComponents/AppointmentPrescriptionCard.jsx";
+import axiosInstance from "../../Utils/axiosInstance.js";
+import Wait from "../Modals/wait.jsx";
+import {SuccessModal} from "../Modals/SuccessModal.jsx";
+import {ErrorModal} from "../Modals/ErrorModal.jsx";
+import {CustomDashboard} from "../../GlobalComponents/CustomDashboard.jsx";
+import {useAuthentication} from "../../Utils/Provider.jsx";
+
+const consultationSteps = [
+    { id: 0, name: 'diagnostic', label: 'Eye Examination', icon: Eye },
+    { id: 1, name: 'prescriptions', label: 'Prescriptions', icon: Pills },
+    { id: 2, name: 'exams', label: 'Exams', icon: Hospital },
+    { id: 4, name: 'appointment', label: 'Schedule an appointment', icon: CalendarCheck }
+];
+
+export function OphthalmologistConsultationDetails() {
+    const navigate = useNavigate();
+    const {state} = useLocation();
+    const consultation = state?.consultation || {};
+    const patientInfo = consultation?.idPatient;
+    const medicalPageInfo = consultation?.idMedicalFolderPage;
+    
+    const [availableMedications, setAvailableMedication] = useState([]);
+    const [availableExams, setAvailableExams]  = useState([]);
+    const [isUpdatingConsultation, setIsUpdatingConsultation] = useState(false);
+    const [isPrescribing, setIsPrescribing] = useState(false);
+    const [isPrescribingExam, setIsPrescribingExams] = useState(false);
+    const [isEndingConsultation, setIsEndingConsultation] = useState(false);
+    const [canOpenSuccessModal, setCanOpenSuccessModal] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
+    const [canOpenErrorMessageModal, setCanOpenErrorMessageModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [transactionErrorMessage, setTransactionErrorMessage] = useState("");
+    const [isPrescribingAppointment, setIsPrescribingAppointment] = useState(false);
+
+    const [activeTab, setActiveTab] = useState("diagnostic");
+    
+    // Specific Ophthalmic State
+    const [diagnostic, setDiagnostic] = useState("");
+    const [doctorNote, setDoctorNote] = useState("");
+    const [visualAcuityOD, setVisualAcuityOD] = useState("");
+    const [visualAcuityOG, setVisualAcuityOG] = useState("");
+    const [pressureOD, setPressureOD] = useState("");
+    const [pressureOG, setPressureOG] = useState("");
+    const [fundusExam, setFundusExam] = useState("");
+    const [selectedSpecialExams, setSelectedSpecialExams] = useState([]);
+
+    const [prescriptions, setPrescriptions] = useState(
+        consultation?.prescriptions && consultation.prescriptions.length > 0
+            ? consultation.prescriptions.map(p => ({ id: p.id, ...p.prescriptionDrug[0] }))
+            : [{ id: Date.now(), medicament: "", dosage: "", frequency: "", duration: "", instructions: "", quantity: "" }]
+    );
+
+    const [exams, setExams] = useState(
+        consultation?.exam_requests && consultation.exam_requests.length > 0
+            ? consultation.exam_requests.map(e => ({
+                id: e.id, examName: e.idExam?.examName || e.examName, idExam: e.idExam?.id || "another",
+                notes: e.notes, isCustom: !e.idExam, idConsultation: consultation?.id,
+                idPatient: patientInfo?.id, idMedicalStaff: consultation?.idMedicalStaffGiver?.id
+            }))
+            : [{ id: Date.now(), examName: "", idExam: "", notes: "", isCustom: false, idConsultation: consultation?.id, idPatient: patientInfo?.id, idMedicalStaff: consultation?.idMedicalStaffGiver?.id }]
+    );
+
+    const [appointmentDate, setAppointmentDate] = useState(new Date());
+    const [appointmentTime, setAppointmentTime] = useState(new Date());
+    const [requirements, setRequirements] = useState("");
+    const [appointmentReason, setAppointmentReason] = useState("");
+
+    const {calculateAge} = useCalculateAge();
+    const { value: ageValue, unit: ageUnit } = calculateAge(patientInfo?.birthDate);
+
+    const MedicalParametersInfos = [
+        { icon: Weight, label: 'Weight', value: medicalPageInfo?.parameters?.weight || '-', unit: medicalPageInfo?.parameters?.weight && ' Kg' },
+        { icon: Ruler, label: 'Height', value: medicalPageInfo?.parameters?.height || '-', unit: medicalPageInfo?.parameters?.height && ' m²' },
+        { icon: Thermometer, label: 'Temperature', value: medicalPageInfo?.parameters?.temperature || '-', unit: medicalPageInfo?.parameters?.temperature && '°C' },
+        { icon: Activity, label: 'Blood Pressure', value: medicalPageInfo?.parameters?.bloodPressure || '-', unit: medicalPageInfo?.parameters?.bloodPressure && ' mmHg' }
+    ];
+
+    const specialExamsOptions = ["OCT (Tomographie)", "Champ visuel", "Angiographie rétinienne", "Topographie cornéenne", "Biométrie"];
+
+    useEffect(() => {
+        const loadInitialData = async () => {
+            try {
+                const [medRes, examRes] = await Promise.all([
+                    axiosInstance.get("/product/?page_size=100"),
+                    axiosInstance.get("/exam/?page_size=100")
+                ]);
+                if (medRes.status === 200) setAvailableMedication(medRes.data.results);
+                if (examRes.status === 200) setAvailableExams(examRes.data.results);
+            } catch (error) {
+                console.error("Error loading data:", error);
+            }
+        };
+        loadInitialData();
+    }, []);
+
+    const addPrescription = () => setPrescriptions([...prescriptions, { id: Date.now(), medicament: "", dosage: "", frequency: "", duration: "", instructions: "", quantity:"" }]);
+    const removePrescription = (id) => setPrescriptions(prescriptions.filter(p => p.id !== id));
+    const updatePrescription = (id, field, value) => setPrescriptions(prescriptions.map(p => p.id === id ? { ...p, [field]: value } : p));
+    const addExam = () => setExams([...exams, { id: Date.now(), examName: "", notes: "", isCustom: false, idConsultation: consultation?.id, idPatient: patientInfo?.id, idMedicalStaff: consultation?.idMedicalStaffGiver?.id }]);
+    const removeExam = (id) => setExams(exams.filter(e => e.id !== id));
+    const applyInputStyle = () => "w-full p-3 border-2 border-gray-300 bg-white rounded-lg focus:outline-none focus:border-primary-end focus:border-2 transition-all duration-500 text-gray-800";
+
+    const handleSpecialExamToggle = (exam) => {
+        setSelectedSpecialExams(prev => prev.includes(exam) ? prev.filter(e => e !== exam) : [...prev, exam]);
+    };
+
+    const updateConsultation = async (e) => {
+        if(e) e.preventDefault();
+        setIsUpdatingConsultation(true);
+        const eyeNotes = `
+ACUITÉ VISUELLE: OD: ${visualAcuityOD} | OG: ${visualAcuityOG}
+PRESSION INTRAOCULAIRE: OD: ${pressureOD} mmHg | OG: ${pressureOG} mmHg
+FOND D'OEIL: ${fundusExam}
+EXAMENS SPÉCIAUX: ${selectedSpecialExams.join(', ')}
+--------------------
+NOTES COMPLÉMENTAIRES: ${doctorNote}
+        `.trim();
+
+        let medicalFolderPageData = { diagnostic, doctorNote: eyeNotes };
+        try {
+            const res = await axiosInstance.put(`/medical-folder/${medicalPageInfo?.idMedicalFolder}/update-page/${medicalPageInfo?.id}/`, medicalFolderPageData);
+            setIsUpdatingConsultation(false);
+            if (res.status === 200) {
+                setTransactionErrorMessage("");
+            }
+        } catch (error) {
+            setIsUpdatingConsultation(false);
+            setTransactionErrorMessage("Error updating ophthalmic diagnostic.");
+        }
+    };
+
+    const endConsultation = async () => {
+        setIsEndingConsultation(true);
+        try {
+            await updateConsultation();
+            
+            // Prescriptions
+            const validPrescr = prescriptions.filter(p => p.medicament && p.medicament.trim() !== "");
+            if (validPrescr.length > 0) {
+                await axiosInstance.post("/prescription/", {
+                    prescription_drugs: validPrescr.map(p => { const {id, ...rest} = p; return rest; }),
+                    note: '', idConsultation: consultation?.id, idPatient: patientInfo?.id, idMedicalStaff: consultation?.idMedicalStaffGiver?.id
+                });
+            }
+
+            // Exams
+            const validExams = exams.filter(e => e.examName && e.examName.trim() !== "");
+            if (validExams.length > 0) {
+                await axiosInstance.post("/exam-request/", validExams.map(e => {
+                    const {id, isCustom, ...rest} = e;
+                    if(rest.idExam === "another" || rest.idExam === "") delete rest.idExam;
+                    return rest;
+                }));
+            }
+
+            // Appointment
+            if (appointmentReason) {
+                await axiosInstance.post("/appointment/", {
+                    atDate: combineToISOString(appointmentDate, appointmentTime),
+                    reason: appointmentReason, requirements, idConsultation: consultation?.id, idPatient: patientInfo?.id, idMedicalStaff: consultation?.idMedicalStaffGiver?.id
+                });
+            }
+
+            await axiosInstance.patch(`/consultation/${consultation?.id}/`, { state: 'InProgress' });
+            setSuccessMessage("Ophthalmic consultation finalized successfully!");
+            setCanOpenSuccessModal(true);
+        } catch (error) {
+            setErrorMessage("Error finalizing consultation.");
+            setCanOpenErrorMessageModal(true);
+        } finally {
+            setIsEndingConsultation(false);
+        }
+    };
+
+    return (
+        <CustomDashboard linkList={doctorNavLink} requiredRole={"Ophthalmologist"}>
+            <DoctorNavBar />
+            <div className="flex flex-col min-h-screen p-8 bg-slate-50">
+                <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl shadow-lg p-8 mb-8 text-white">
+                    <div className="flex items-center gap-8">
+                        <div className="w-28 h-28 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
+                            <Eye className="w-14 h-14 text-white"/>
+                        </div>
+                        <div className="flex-1">
+                            <div className="flex justify-between items-start mb-4">
+                                <h1 className="text-4xl font-bold tracking-tight uppercase">Ophthalmic Consultation</h1>
+                                <p className="bg-white/20 px-4 py-2 rounded-lg font-mono text-lg">{formatDateOnly(new Date())}</p>
+                            </div>
+                            <div className="grid grid-cols-3 gap-6 opacity-90">
+                                <div className="flex items-center gap-3"><Calendar className="w-5 h-5"/><span>{patientInfo?.firstName} {patientInfo?.lastName} ({ageValue} {ageUnit})</span></div>
+                                <div className="flex items-center gap-3"><MapPin className="w-5 h-5"/><span>{patientInfo?.address || 'N/A'}</span></div>
+                                <div className="flex items-center gap-3"><Phone className="w-5 h-5"/><span>{patientInfo?.phoneNumber || 'N/A'}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white shadow-sm border border-slate-200 rounded-xl mb-8 p-4 flex justify-between items-center">
+                    <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-600 hover:text-primary-end font-semibold transition-colors">
+                        <ArrowLeft className="w-5 h-5"/> Back to list
+                    </button>
+                    <button onClick={() => window.print()} className="bg-slate-800 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-slate-700 transition-all flex items-center gap-2 shadow-sm">
+                        <Printer className="w-5 h-5"/> Print Record
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-12 gap-8">
+                    <div className="col-span-4 space-y-8">
+                        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                            <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                                <Activity className="w-5 h-5 text-indigo-600"/> Patient Parameters
+                            </h2>
+                            <div className="grid grid-cols-2 gap-4">
+                                {MedicalParametersInfos.map((info, idx) => (
+                                    <div key={idx} className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                        <p className="text-xs font-bold text-slate-500 uppercase mb-1">{info.label}</p>
+                                        <p className="text-lg font-black text-slate-700">{info.value}{info.unit}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                            <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                <FileText className="w-5 h-5 text-amber-600"/> Nurse Notes
+                            </h2>
+                            <div className="bg-amber-50 p-4 rounded-xl border border-amber-100 text-slate-700 italic">
+                                {consultation?.consultationNotes || 'No note from the nurse'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="col-span-8">
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                            <div className="flex border-b border-slate-100 bg-slate-50/50">
+                                {consultationSteps.map(tab => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.name)}
+                                        className={`px-8 py-5 text-sm font-bold flex items-center gap-3 transition-all relative ${
+                                            activeTab === tab.name ? 'text-primary-end bg-white font-black' : 'text-slate-500 hover:bg-white/50'
+                                        }`}
+                                    >
+                                        <tab.icon className={`w-5 h-5 ${activeTab === tab.name ? 'text-primary-end' : 'text-slate-400'}`}/>
+                                        {tab.label}
+                                        {activeTab === tab.name && <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary-end rounded-t-full"/>}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="p-8">
+                                {transactionErrorMessage && <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 font-semibold flex items-center gap-2 border border-red-100"><AlertTriangle className="w-5 h-5"/>{transactionErrorMessage}</div>}
+                                
+                                {activeTab === "diagnostic" && (
+                                    <form onSubmit={updateConsultation} className="space-y-6">
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div className="col-span-2">
+                                                <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider">Final Diagnostic</label>
+                                                <textarea required rows={2} value={diagnostic} onChange={(e) => setDiagnostic(e.target.value)} className={applyInputStyle()} placeholder="Global ophthalmic diagnosis..."/>
+                                            </div>
+                                            
+                                            <div className="col-span-2 bg-slate-50 p-5 rounded-2xl border border-slate-100">
+                                                <h3 className="text-sm font-black text-slate-500 uppercase mb-4 tracking-tighter">Visual Acuity</h3>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-[10px] font-black text-slate-400 mb-1 uppercase">Right Eye (OD)</label>
+                                                        <input type="text" value={visualAcuityOD} onChange={(e) => setVisualAcuityOD(e.target.value)} className={applyInputStyle()} placeholder="Ex: 10/10"/>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[10px] font-black text-slate-400 mb-1 uppercase">Left Eye (OG)</label>
+                                                        <input type="text" value={visualAcuityOG} onChange={(e) => setVisualAcuityOG(e.target.value)} className={applyInputStyle()} placeholder="Ex: 9/10"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="col-span-2 bg-slate-50 p-5 rounded-2xl border border-slate-100">
+                                                <h3 className="text-sm font-black text-slate-500 uppercase mb-4 tracking-tighter">Intraocular Pressure (mmHg)</h3>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-[10px] font-black text-slate-400 mb-1 uppercase">Right Eye (OD)</label>
+                                                        <input type="number" value={pressureOD} onChange={(e) => setPressureOD(e.target.value)} className={applyInputStyle()} placeholder="Ex: 15"/>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[10px] font-black text-slate-400 mb-1 uppercase">Left Eye (OG)</label>
+                                                        <input type="number" value={pressureOG} onChange={(e) => setPressureOG(e.target.value)} className={applyInputStyle()} placeholder="Ex: 16"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="col-span-2">
+                                                <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider">Fundus Examination (Fond d'oeil)</label>
+                                                <textarea rows={2} value={fundusExam} onChange={(e) => setFundusExam(e.target.value)} className={applyInputStyle()} placeholder="Observations..."/>
+                                            </div>
+
+                                            <div className="col-span-2">
+                                                <label className="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wider">Special Investigations</label>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {specialExamsOptions.map(se => (
+                                                        <button key={se} type="button" onClick={() => handleSpecialExamToggle(se)} className={`px-4 py-2 rounded-full border-2 text-xs font-bold transition-all ${selectedSpecialExams.includes(se) ? 'border-primary-end bg-indigo-600 text-white' : 'border-slate-200 bg-white text-slate-500 hover:border-indigo-300'}`}>
+                                                            {se}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="col-span-2">
+                                                <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider">Additional Clinical Notes</label>
+                                                <textarea rows={3} value={doctorNote} onChange={(e) => setDoctorNote(e.target.value)} className={applyInputStyle()} placeholder="Other findings..."/>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex justify-end gap-4 pt-4">
+                                            <button disabled={isUpdatingConsultation} type="submit" className="bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold px-8 py-3 rounded-xl transition-all disabled:opacity-50">
+                                                {isUpdatingConsultation ? "Saving..." : "Save Examination"}
+                                            </button>
+                                            <button type="button" onClick={endConsultation} className="bg-primary-end hover:bg-primary-start text-white font-black px-10 py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all flex items-center gap-2">
+                                                Complete Consultation <ChevronRight className="w-5 h-5"/>
+                                            </button>
+                                        </div>
+                                    </form>
+                                )}
+
+                                {activeTab === "prescriptions" && <MedicationPrescriptionCard prescriptions={prescriptions} availableMedications={availableMedications} updatePrescription={updatePrescription} removePrescription={removePrescription} addPrescription={addPrescription} applyInputStyle={applyInputStyle} handlePrescribe={() => {}} endConsultation={endConsultation} isPrescribing={isPrescribing}/>}
+                                {activeTab === "exams" && <ExamPrescriptionCard exams={exams} availableExams={availableExams} setExams={setExams} removeExam={removeExam} addExam={addExam} applyInputStyle={applyInputStyle} handlePrescribeExam={() => {}} endConsultation={endConsultation} isPrescribingExam={isPrescribingExam}/>}
+                                {activeTab === "appointment" && <AppointmentPrescriptionCard applyInputStyle={applyInputStyle} setAppointmentReason={setAppointmentReason} appointmentReason={appointmentReason} setRequirements={setRequirements} setAppointmentDate={setAppointmentDate} setAppointmentTime={setAppointmentTime} requirements={requirements} appointmentDate={appointmentDate} appointmentTime={appointmentTime} endConsultation={endConsultation} onSubmit={() => {}} isPrescribingAppointment={isPrescribingAppointment}/>}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {isEndingConsultation && <Wait/>}
+            <SuccessModal isOpen={canOpenSuccessModal} canOpenSuccessModal={setCanOpenSuccessModal} message={successMessage} makeAction={() => navigate(-1)}/>
+            <ErrorModal isOpen={canOpenErrorMessageModal} onCloseErrorModal={setCanOpenErrorMessageModal} message={errorMessage}/>
+        </CustomDashboard>
+    );
+}
+
+export default OphthalmologistConsultationDetails;

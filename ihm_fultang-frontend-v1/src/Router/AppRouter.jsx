@@ -223,6 +223,10 @@ export function AppRoute() {
     default: (await import("../Pages/Ophthalmologist/Opthalmologist.jsx"))
       .Ophthalmologist,
   }));
+  const OphthalmologistConsultationDetails = React.lazy(async () => ({
+    default: (await import("../Pages/Ophthalmologist/OphthalmologistConsultationDetail.jsx"))
+      .OphthalmologistConsultationDetails,
+  }));
   const OphthaConsultationList = React.lazy(async () => ({
     default: (
       await import("../Pages/Ophthalmologist/OphthalmologistConsultationList.jsx")
@@ -250,6 +254,10 @@ export function AppRoute() {
   const DentistPage = React.lazy(async () => ({
     default: (await import("../Pages/Dentist/Dentist.jsx"))
       .Dentist,
+  }));
+  const DentistConsultationDetails = React.lazy(async () => ({
+    default: (await import("../Pages/Dentist/DentistConsultationDetail.jsx"))
+      .DentistConsultationDetails,
   }));
   const DentistConsultationList = React.lazy(async () => ({
     default: (
@@ -573,6 +581,10 @@ export function AppRoute() {
           element={<OphthaConsultationHistory />}
         />
         <Route
+          path={AppRoutesPaths.ophthaConsultationDetailsPage}
+          element={<OphthalmologistConsultationDetails />}
+        />
+        <Route
           path={AppRoutesPaths.ophthaPatientList}
           element={<OphthaPatientList />}
         />
@@ -600,6 +612,10 @@ export function AppRoute() {
         <Route
           path={AppRoutesPaths.dentistConsultationHistory}
           element={<DentistConsultationHistory />}
+        />
+        <Route
+          path={AppRoutesPaths.dentistConsultationDetailsPage}
+          element={<DentistConsultationDetails />}
         />
         <Route
           path={AppRoutesPaths.dentistPatientList}

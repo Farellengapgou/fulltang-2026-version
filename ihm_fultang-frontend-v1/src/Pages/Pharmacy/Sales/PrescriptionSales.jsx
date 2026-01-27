@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaUser, FaCalendarAlt,FaCreditCard, FaMobileAlt, FaStethoscope, FaCheckCircle, FaPrint, FaTrash, FaArrowLeft, FaMoneyBillWave } from 'react-icons/fa';
+import { FaSearch, FaUser, FaCalendarAlt,FaCreditCard, FaMobileAlt, FaStethoscope, FaCheckCircle, FaPrint, FaTrash, FaArrowLeft, FaArrowRight, FaMoneyBillWave } from 'react-icons/fa';
+import { Tooltip } from 'antd';
 import axiosInstance from '../../../Utils/axiosInstance';
 import axiosInstanceAccountant from '../../../Utils/axiosInstanceAccountant';
 import { useAuthentication } from '../../../Utils/Provider';
@@ -13,6 +14,11 @@ export function PrescriptionSales() {
     const [selectedPrescription, setSelectedPrescription] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+    const [nextUrl, setNextUrl] = useState(null);
+    const [previousUrl, setPreviousUrl] = useState(null);
 
     // Cart / Validation
     const [cart, setCart] = useState([]);
@@ -40,10 +46,15 @@ export function PrescriptionSales() {
         setFilteredPrescriptions(filtered);
     }, [searchTerm, prescriptions]);
 
-    const fetchPrescriptions = async () => {
+    const calculateTotalPages = () => {
+        if (totalCount === 0) return 1;
+        return totalCount % 5 === 0 ? totalCount / 5 : Math.floor(totalCount / 5) + 1;
+    }
+
+    const fetchPrescriptions = async (url = '/prescription/') => {
         setLoading(true);
         try {
-            const response = await axiosInstance.get('/prescription/');
+            const response = await axiosInstance.get(url);
             const rawData = response.data.results || response.data;
 
             const mapped = (Array.isArray(rawData) ? rawData : [])
@@ -82,6 +93,11 @@ export function PrescriptionSales() {
 
             setPrescriptions(mapped);
             setFilteredPrescriptions(mapped);
+            setTotalCount(response.data.count || mapped.length);
+            setNextUrl(response.data.next);
+            setPreviousUrl(response.data.previous);
+            setCurrentPage(response.data.current_page || 1);
+            setTotalPages(calculateTotalPages());
         } catch (error) {
             console.error("Error fetching prescriptions:", error);
         } finally {
@@ -172,66 +188,195 @@ export function PrescriptionSales() {
     };
 
     const printInvoice = () => {
-        if (!bill) return;
+    if (!bill) return;
 
-        const userName = userData ? userData.username : 'Pharmacist';
-        const html = `
-            <html>
-                <head>
-                    <title>INVOICE #${bill.billCode}</title>
-                    <style>
-                        body { font-family: 'Arial', sans-serif; padding: 40px; color: #333; line-height: 1.4; }
-                        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-                        th { text-align: left; padding: 12px 8px; border-bottom: 2px solid #eee; }
-                        td { padding: 12px 8px; border-bottom: 1px solid #f5f5f5; }
-                        .text-right { text-align: right; }
-                        .text-center { text-align: center; }
-                        .header { text-align: center; margin-bottom: 40px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>FULTANG CLINIC - PHARMACY</h1>
-                        <p>Prescription Sale Receipt</p>
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (!printWindow) {
+        alert("Veuillez autoriser les pop-ups pour imprimer le reçu.");
+        return;
+    }
+
+    const userName = userData ? userData.username : 'Pharmacist';
+    const printContent = `
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <title>Reçu #${bill.billCode}</title>
+                <style>
+                    body { 
+                        font-family: 'Arial', sans-serif; 
+                        padding: 20px; 
+                        color: #333; 
+                        line-height: 1.4; 
+                        max-width: 800px;
+                        margin: 0 auto;
+                    }
+                    .header { 
+                        text-align: center; 
+                        margin-bottom: 30px; 
+                        padding-bottom: 20px;
+                        border-bottom: 2px solid #2c7873;
+                    }
+                    .clinic-name { 
+                        font-size: 24px; 
+                        font-weight: bold; 
+                        color: #2c7873;
+                        margin-bottom: 5px;
+                    }
+                    .title { 
+                        font-size: 18px; 
+                        color: #555;
+                    }
+                    .info-section { 
+                        margin-bottom: 25px; 
+                    }
+                    .info-row { 
+                        display: flex; 
+                        margin-bottom: 8px; 
+                    }
+                    .info-label { 
+                        font-weight: bold; 
+                        width: 120px; 
+                        color: #666;
+                    }
+                    table { 
+                        width: 100%; 
+                        border-collapse: collapse; 
+                        margin: 25px 0; 
+                    }
+                    th { 
+                        text-align: left; 
+                        padding: 12px 8px; 
+                        background-color: #f0f9f8;
+                        border-bottom: 2px solid #2c7873;
+                        font-weight: bold;
+                        color: #2c7873;
+                    }
+                    td { 
+                        padding: 10px 8px; 
+                        border-bottom: 1px solid #eee; 
+                    }
+                    .text-right { text-align: right; }
+                    .text-center { text-align: center; }
+                    .total-section { 
+                        margin-top: 30px; 
+                        text-align: right; 
+                        font-size: 18px;
+                    }
+                    .total-amount { 
+                        font-size: 24px; 
+                        font-weight: bold; 
+                        color: #2c7873;
+                        margin-top: 10px;
+                    }
+                    .footer { 
+                        margin-top: 40px; 
+                        text-align: center; 
+                        font-size: 12px; 
+                        color: #888; 
+                        border-top: 1px solid #eee;
+                        padding-top: 20px;
+                    }
+                    @media print {
+                        body { padding: 0; }
+                        .no-print { display: none; }
+                        .header { border: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <div class="clinic-name">FULTANG CLINIC</div>
+                    <div class="title">Reçu de Pharmacie</div>
+                    <div style="font-size: 14px; color: #777; margin-top: 5px;">
+                        ${new Date().toLocaleDateString('fr-FR', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}
                     </div>
-                    <p><strong>Patient:</strong> ${selectedPrescription?.patientName}</p>
-                    <p><strong>Doctor:</strong> ${selectedPrescription?.doctorName}</p>
-                    <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
-                    <br/>
-                    <table>
-                        <thead>
+                </div>
+
+                <div class="info-section">
+                    <div class="info-row">
+                        <div class="info-label">Numéro Facture:</div>
+                        <div><strong>${bill.billCode || 'N/A'}</strong></div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Patient:</div>
+                        <div>${selectedPrescription?.patientName || 'N/A'}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Médecin:</div>
+                        <div>${selectedPrescription?.doctorName || 'N/A'}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Pharmacien:</div>
+                        <div>${userName}</div>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Article</th>
+                            <th class="text-center">Quantité</th>
+                            <th class="text-right">Prix Unitaire</th>
+                            <th class="text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${(bill.bill_items || []).map(item => `
                             <tr>
-                                <th>Item</th>
-                                <th class="text-center">Qty</th>
-                                <th class="text-right">Price</th>
+                                <td>${item.designation || 'N/A'}</td>
+                                <td class="text-center">${item.quantity || 0}</td>
+                                <td class="text-right">${(item.unit_price || 0).toLocaleString('fr-FR')} FCFA</td>
+                                <td class="text-right">${(item.total || 0).toLocaleString('fr-FR')} FCFA</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            ${bill.bill_items.map(item => `
-                                <tr>
-                                    <td>${item.designation}</td>
-                                    <td class="text-center">${item.quantity}</td>
-                                    <td class="text-right">${(item.total || 0).toLocaleString()}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                    <div class="text-right">
-                        <h3>TOTAL: ${(bill.amount || 0).toLocaleString()} FCFA</h3>
-                    </div>
-                </body>
-            </html>
-        `;
+                        `).join('')}
+                    </tbody>
+                </table>
 
-        const win = window.open('', '_blank');
-        win.document.write(html);
-        win.document.close();
+                <div class="total-section">
+                    <div>Total HT: <strong>${((bill.amount || 0) * 0.8).toLocaleString('fr-FR')} FCFA</strong></div>
+                    <div>TVA (20%): <strong>${((bill.amount || 0) * 0.2).toLocaleString('fr-FR')} FCFA</strong></div>
+                    <div class="total-amount">TOTAL TTC: ${(bill.amount || 0).toLocaleString('fr-FR')} FCFA</div>
+                </div>
 
-        win.onload = () => {
-            win.focus();
-            win.print();
-        };
-    };
+                <div class="footer">
+                    <div>FULTANG CLINIC - Service Pharmacie</div>
+                    <div>Merci de votre confiance !</div>
+                    <div>Ce reçu est généré automatiquement</div>
+                </div>
+
+                <div class="no-print" style="margin-top: 30px; text-align: center;">
+                    <button onclick="window.print()" style="padding: 10px 20px; background-color: #2c7873; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Imprimer
+                    </button>
+                    <button onclick="window.close()" style="padding: 10px 20px; background-color: #ccc; color: #333; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+                        Fermer
+                    </button>
+                </div>
+
+                <script>
+                    window.onload = function() {
+                        // Auto-print after 500ms
+                        setTimeout(function() {
+                            window.print();
+                        }, 500);
+                    };
+                </script>
+            </body>
+        </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+};
 
     const getOpIcon = (name) => {
         const n = name.toLowerCase();
@@ -314,6 +459,35 @@ export function PrescriptionSales() {
                                     )}
                                 </tbody>
                             </table>
+
+                            {/* Pagination */}
+                            {!loading && filteredPrescriptions.length > 0 && totalPages > 1 && (
+                                <div className="w-full justify-center flex mt-6 mb-4">
+                                    <div className="flex gap-4">
+                                        <Tooltip placement={"left"} title={"previous slide"}>
+                                            <button 
+                                                onClick={() => previousUrl && fetchPrescriptions(previousUrl)}
+                                                disabled={!previousUrl}
+                                                className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl text-secondary hover:text-2xl duration-300 transition-all hover:text-white shadow-xl flex justify-center items-center mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                <FaArrowLeft />
+                                            </button>
+                                        </Tooltip>
+                                        <p className="text-secondary text-2xl font-bold mt-4">
+                                            {`${currentPage} / ${totalPages}`}
+                                        </p>
+                                        <Tooltip placement={"right"} title={"next slide"}>
+                                            <button 
+                                                onClick={() => nextUrl && fetchPrescriptions(nextUrl)}
+                                                disabled={!nextUrl}
+                                                className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl text-secondary hover:text-2xl duration-300 transition-all hover:text-white shadow-xl flex justify-center items-center mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                <FaArrowRight />
+                                            </button>
+                                        </Tooltip>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </>

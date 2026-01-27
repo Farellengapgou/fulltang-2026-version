@@ -178,9 +178,6 @@ export function LaboratoryPatientList() {
                 <th className="text-center text-white p-4 text-xl font-bold bg-primary-end border-gray-200">
                   Address
                 </th>
-                <th className="text-center text-white p-4 text-xl font-bold bg-primary-end flex-col rounded-r-2xl">
-                  <p>Actions</p>
-                </th>
               </tr>
             </thead>
             <tbody>
@@ -216,25 +213,6 @@ export function LaboratoryPatientList() {
                   <td className="px-6 py-5 bg-gray-100">
                     <div className="w-full flex items-center justify-center">
                       {patient.address}
-                    </div>
-                  </td>
-                  <td className="px-6 py-5 bg-gray-100">
-                    <div className="w-full items-center justify-center flex gap-6">
-                      <Tooltip
-                        placement={"right"}
-                        title={"View Medical Folder"}
-                      >
-                        <button
-                          onClick={() => {
-                            navigate(
-                              `${AppRoutesPaths.LaboratoryPatientMedicalFolderPage.replace(":id", patient.id)}`,
-                            );
-                          }}
-                          className="flex items-center justify-center w-9 h-9 text-primary-end text-xl hover:bg-gray-300 hover:rounded-full transition-all duration-300"
-                        >
-                          <FaEdit />
-                        </button>
-                      </Tooltip>
                     </div>
                   </td>
                 </tr>

@@ -173,7 +173,7 @@ class ConsultationViewSet(ModelViewSet):
         try:
             self.pagination_class = None
             medical_staff = MedicalStaff.objects.get(id=id)
-            if medical_staff.role not in ["Doctor", "Specialist", "Ophthalmologist", "Ophtalmologist", "Dentist", "Laboratory"]:
+            if medical_staff.role not in ["Doctor", "Specialist", "Ophthalmologist", "Ophtalmologist", "Dentist", "Labtech"]:
                 return Response({"details": "le medical staff specifie n'est pas un docteur"}, status.HTTP_400_BAD_REQUEST)
             queryset = Consultation.objects.filter(idMedicalStaffGiver=medical_staff).filter(paymentStatus="Valid")
             history = self.request.query_params.get("history", "false")

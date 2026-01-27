@@ -2,8 +2,9 @@ import { useState } from "react"
 import {AlertCircle, Search, Calendar, User, DollarSign, Filter, CheckCircle } from "lucide-react"
 import PropTypes from "prop-types";
 import {FaUserDoctor} from "react-icons/fa6";
+import {FaArrowLeft, FaArrowRight} from "react-icons/fa";
+import {Tooltip} from "antd";
 import {PaymentModal} from "./PayementModal.jsx";
-import { Pagination } from "antd";
 
 export default function ConsultationList({consultationList, currentPage, totalPages, totalCount, onPageChange}) {
 
@@ -153,16 +154,30 @@ export default function ConsultationList({consultationList, currentPage, totalPa
           
           {/* Pagination */}
           {consultationList.length > 0 && totalPages > 1 && (
-            <div className="flex justify-center mt-8">
-              <Pagination
-                current={currentPage}
-                total={totalCount}
-                pageSize={5}
-                onChange={onPageChange}
-                showSizeChanger={false}
-                showTotal={(total, range) => `${range[0]}-${range[1]} sur ${total} consultations`}
-                className="custom-pagination"
-              />
+            <div className="w-full justify-center flex mt-6 mb-4">
+              <div className="flex gap-4">
+                <Tooltip placement={"left"} title={"previous slide"}>
+                  <button 
+                    onClick={() => onPageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl text-secondary hover:text-2xl duration-300 transition-all hover:text-white shadow-xl flex justify-center items-center mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <FaArrowLeft />
+                  </button>
+                </Tooltip>
+                <p className="text-secondary text-2xl font-bold mt-4">
+                  {`${currentPage} / ${totalPages}`}
+                </p>
+                <Tooltip placement={"right"} title={"next slide"}>
+                  <button 
+                    onClick={() => onPageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl text-secondary hover:text-2xl duration-300 transition-all hover:text-white shadow-xl flex justify-center items-center mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <FaArrowRight />
+                  </button>
+                </Tooltip>
+              </div>
             </div>
           )}
 

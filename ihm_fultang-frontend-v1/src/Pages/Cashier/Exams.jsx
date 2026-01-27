@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react"
 import {AlertCircle, Search, Calendar, User, DollarSign, Filter, CheckCircle, Activity } from "lucide-react"
+import {FaArrowLeft, FaArrowRight} from "react-icons/fa";
+import {Tooltip} from "antd";
 import axiosInstance from "../../Utils/axiosInstance.js";
 
 
@@ -9,6 +11,10 @@ export default function Exams() {
   const [filterStatus, setFilterStatus] = useState("all")
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [nextUrl, setNextUrl] = useState(null);
+  const [previousUrl, setPreviousUrl] = useState(null);
 
   const handlePayment = (examId) => {
     setExams((prevExams) => {
@@ -32,27 +38,37 @@ export default function Exams() {
     )
   })
 
+  const calculateTotalPages = () => {
+    if (totalCount === 0) return 1;
+    return totalCount % 5 === 0 ? totalCount / 5 : Math.floor(totalCount / 5) + 1;
+  }
+
   // Charger les examens
-  useEffect(() => {
-    async function fetchExams() {
-      setIsLoading(true);
-      try {
-        const response = await axiosInstance.get("/exam-request/");
-        console.log("Exams Response:", response.data);  // Debug
-        
-        if (response.status === 200) {
-          const examsData = response.data.results || response.data;
-          console.log("Exams Data:", examsData);  // Debug
-          setExams(examsData);
-        }
-      } catch (error) {
-        console.error("Error fetching exams:", error);
-        setError("Impossible de charger les examens");
-        setExams([]);
-      } finally {
-        setIsLoading(false);
+  async function fetchExams(url = "/exam-request/") {
+    setIsLoading(true);
+    try {
+      const response = await axiosInstance.get(url);
+      console.log("Exams Response:", response.data);  // Debug
+      
+      if (response.status === 200) {
+        const examsData = response.data.results || response.data;
+        console.log("Exams Data:", examsData);  // Debug
+        setExams(examsData);
+        setTotalCount(response.data.count || 0);
+        setNextUrl(response.data.next);
+        setPreviousUrl(response.data.previous);
+        setCurrentPage(response.data.current_page || 1);
       }
+    } catch (error) {
+      console.error("Error fetching exams:", error);
+      setError("Impossible de charger les examens");
+      setExams([]);
+    } finally {
+      setIsLoading(false);
     }
+  }
+
+  useEffect(() => {
     fetchExams();
   }, []);
 
@@ -194,6 +210,35 @@ export default function Exams() {
               ))}
             </tbody>
           </table>
+        )}
+
+        {/* Pagination */}
+        {!isLoading && exams.length > 0 && totalCount > 5 && (
+          <div className="w-full justify-center flex mt-6 mb-4">
+            <div className="flex gap-4">
+              <Tooltip placement={"left"} title={"previous slide"}>
+                <button 
+                  onClick={() => previousUrl && fetchExams(previousUrl)}
+                  disabled={!previousUrl}
+                  className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl text-secondary hover:text-2xl duration-300 transition-all hover:text-white shadow-xl flex justify-center items-center mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FaArrowLeft />
+                </button>
+              </Tooltip>
+              <p className="text-secondary text-2xl font-bold mt-4">
+                {`${currentPage} / ${calculateTotalPages()}`}
+              </p>
+              <Tooltip placement={"right"} title={"next slide"}>
+                <button 
+                  onClick={() => nextUrl && fetchExams(nextUrl)}
+                  disabled={!nextUrl}
+                  className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl text-secondary hover:text-2xl duration-300 transition-all hover:text-white shadow-xl flex justify-center items-center mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FaArrowRight />
+                </button>
+              </Tooltip>
+            </div>
+          </div>
         )}
       </div>
     </div>

@@ -1,54 +1,156 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaPrint, FaCalendarAlt, FaUser, FaFileInvoiceDollar } from 'react-icons/fa';
+import { FaSearch, FaPrint, FaCalendarAlt, FaUser, FaFileInvoiceDollar, FaArrowLeft, FaArrowRight, FaFilter } from 'react-icons/fa';
+import { Tooltip, Select } from 'antd';
 import axiosInstance from '../../../Utils/axiosInstance';
 import { formatDateOnly } from "../../../Utils/formatDateMethods";
 import { AlertCircle } from 'lucide-react';
 
 export function SalesHistory() {
-    const [sales, setSales] = useState([]);
-    const [filteredSales, setFilteredSales] = useState([]);
+    const [allSales, setAllSales] = useState([]); // Toutes les ventes récupérées
+    const [filteredSales, setFilteredSales] = useState([]); // Ventes filtrées affichées
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10); // Nombre d'éléments par page affichés
+    const [isFetchingAll, setIsFetchingAll] = useState(false);
+    const [selectedOperator, setSelectedOperator] = useState('all');
+    const [totalCount, setTotalCount] = useState(0);
+    const [operators, setOperators] = useState([]);
+    const [dateFilter, setDateFilter] = useState('all');
 
-    useEffect(() => {
-        fetchSales();
-    }, []);
-
-    useEffect(() => {
-        const lowerTerm = searchTerm.toLowerCase();
-        const filtered = sales.filter(
-            (sale) =>
-                sale.billCode?.toLowerCase().includes(lowerTerm) ||
-                sale.patientName?.toLowerCase().includes(lowerTerm)
-        );
-        setFilteredSales(filtered);
-    }, [searchTerm, sales]);
-
-    const fetchSales = async () => {
-        setLoading(true);
+     // Récupérer TOUTES les données paginées
+    const fetchAllSales = async () => {
+        setIsFetchingAll(true);
+        let allSalesData = [];
+        let nextUrl = '/bill/';
+        
         try {
-            const response = await axiosInstance.get('/bill/');
-            const rawData = response.data.results || response.data;
-
-            const mapped = (Array.isArray(rawData) ? rawData : []).map(bill => ({
+            while (nextUrl) {
+                const response = await axiosInstance.get(nextUrl);
+                const rawData = response.data.results || response.data;
+                
+                if (Array.isArray(rawData)) {
+                    // Filtrer immédiatement les ventes de pharmaciens
+                    const pharmacistSales = rawData.filter(bill => {
+                        const hasMedication = bill.bill_items && bill.bill_items.some(item => 
+                            item.medicament !== null && item.medicament !== undefined
+                        );
+                        const isPharmacist = bill.operator?.role === "Pharmacist";
+                        return hasMedication && isPharmacist;
+                    });
+                    
+                    allSalesData = [...allSalesData, ...pharmacistSales];
+                }
+                
+                nextUrl = response.data.next;
+            }
+            
+            // Transformer les données
+            const transformedSales = allSalesData.map(bill => ({
                 id: bill.id,
                 billCode: bill.billCode,
                 date: bill.date,
                 amount: bill.amount,
-                patientName: bill.patient ? `${bill.patient.firstName || ''} ${bill.patient.lastName || ''} ` : "External Patient / Anonymous",
+                patientName: bill.patient ? 
+                    `${bill.patient.firstName || ''} ${bill.patient.lastName || ''}`.trim() || "Patient sans nom" 
+                    : "Patient externe / Anonyme",
                 operator: bill.operator?.username,
+                operatorId: bill.operator?.id,
+                operatorName: bill.operator ? 
+                    `${bill.operator.first_name || ''} ${bill.operator.last_name || ''}`.trim() || bill.operator.username
+                    : "Opérateur inconnu",
+                operatorRole: bill.operator?.role,
                 items: bill.bill_items || []
-            }));
-
-            mapped.sort((a, b) => new Date(b.date) - new Date(a.date));
-            setSales(mapped);
-            setFilteredSales(mapped);
+            }))
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            setAllSales(transformedSales);
+            setFilteredSales(transformedSales);
+            
+            // Extraire la liste des opérateurs uniques
+            const uniqueOperators = [...new Set(transformedSales.map(s => s.operatorId))]
+                .map(id => {
+                    const sale = transformedSales.find(s => s.operatorId === id);
+                    return {
+                        id: sale.operatorId,
+                        name: sale.operatorName,
+                        username: sale.operator
+                    };
+                });
+            setOperators(uniqueOperators);
+            
         } catch (error) {
-            console.error(error);
+            console.error("Erreur lors de la récupération des ventes:", error);
         } finally {
-            setLoading(false);
+            setIsFetchingAll(false);
         }
     };
+
+    useEffect(() => {
+        fetchAllSales();
+    }, []);
+
+    const calculateTotalPages = () => {
+        if (totalCount === 0) return 1;
+        return totalCount % 5 === 0 ? totalCount / 5 : Math.floor(totalCount / 5) + 1;
+    }
+
+    // Filtrer les données
+    useEffect(() => {
+        let filtered = [...allSales];
+        
+        // Filtre par recherche
+        if (searchTerm) {
+            const lowerTerm = searchTerm.toLowerCase();
+            filtered = filtered.filter(sale =>
+                sale.billCode?.toLowerCase().includes(lowerTerm) ||
+                sale.patientName?.toLowerCase().includes(lowerTerm) ||
+                sale.operatorName?.toLowerCase().includes(lowerTerm) ||
+                sale.operator?.toLowerCase().includes(lowerTerm)
+            );
+        }
+        
+        // Filtre par opérateur
+        if (selectedOperator !== 'all') {
+            filtered = filtered.filter(sale => sale.operatorId === parseInt(selectedOperator));
+        }
+        
+        // Filtre par date
+        if (dateFilter !== 'all') {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            switch (dateFilter) {
+                case 'today':
+                    filtered = filtered.filter(sale => {
+                        const saleDate = new Date(sale.date);
+                        return saleDate >= today;
+                    });
+                    break;
+                case 'week':
+                    const weekAgo = new Date(today);
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    filtered = filtered.filter(sale => new Date(sale.date) >= weekAgo);
+                    break;
+                case 'month':
+                    const monthAgo = new Date(today);
+                    monthAgo.setMonth(monthAgo.getMonth() - 1);
+                    filtered = filtered.filter(sale => new Date(sale.date) >= monthAgo);
+                    break;
+                default:
+                    break;
+            }
+        }
+        
+        setFilteredSales(filtered);
+        setCurrentPage(1); // Réinitialiser à la première page après filtrage
+    }, [searchTerm, selectedOperator, dateFilter, allSales]);
+
+    // Pagination pour l'affichage
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredSales.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredSales.length / itemsPerPage);
 
     const handlePrint = (sale) => {
         const html = `
@@ -157,6 +259,35 @@ export function SalesHistory() {
                             ))}
                         </tbody>
                     </table>
+
+                    {/* Pagination */}
+                    {!loading && filteredSales.length > 0 && totalCount > 5 && (
+                        <div className="w-full justify-center flex mt-6 mb-4">
+                            <div className="flex gap-4">
+                                <Tooltip placement={"left"} title={"previous slide"}>
+                                    <button 
+                                        onClick={() => previousUrl && fetchSales(previousUrl)}
+                                        disabled={!previousUrl}
+                                        className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl text-secondary hover:text-2xl duration-300 transition-all hover:text-white shadow-xl flex justify-center items-center mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <FaArrowLeft />
+                                    </button>
+                                </Tooltip>
+                                <p className="text-secondary text-2xl font-bold mt-4">
+                                    {`${currentPage} / ${calculateTotalPages()}`}
+                                </p>
+                                <Tooltip placement={"right"} title={"next slide"}>
+                                    <button 
+                                        onClick={() => nextUrl && fetchSales(nextUrl)}
+                                        disabled={!nextUrl}
+                                        className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl text-secondary hover:text-2xl duration-300 transition-all hover:text-white shadow-xl flex justify-center items-center mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <FaArrowRight />
+                                    </button>
+                                </Tooltip>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

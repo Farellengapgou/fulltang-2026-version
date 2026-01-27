@@ -12,7 +12,8 @@ import random
 from accounting.models_financier import (
     ChartOfAccounts, Journal, JournalEntry, JournalEntryLine,
     Customer, Supplier, AccountingPeriod, BudgetExercise,
-    Budget, BudgetLine, BankAccount, FinancialOperation
+    Budget, BudgetLine, BankAccount, FinancialOperation,
+    Account
 )
 
 User = get_user_model()
@@ -150,8 +151,15 @@ class Command(BaseCommand):
             
             # Classe 7: Produits
             ('701000', 'Ventes de marchandises', '7', 'REVENUE'),
+            ('701100', 'Ventes de médicaments', '7', 'REVENUE'),
+            ('701200', 'Ventes de consommables médicaux', '7', 'REVENUE'),
             ('702000', 'Ventes de produits finis', '7', 'REVENUE'),
             ('706000', 'Prestations de services', '7', 'REVENUE'),
+            ('706100', 'Prestations - Consultations', '7', 'REVENUE'),
+            ('706200', 'Prestations - Laboratoire', '7', 'REVENUE'),
+            ('706300', 'Prestations - Imagerie médicale', '7', 'REVENUE'),
+            ('706400', 'Prestations - Hospitalisation', '7', 'REVENUE'),
+            ('706500', 'Prestations - Nursing et soins', '7', 'REVENUE'),
             ('707000', 'Produits accessoires', '7', 'REVENUE'),
             ('754000', 'Produits des cessions courantes', '7', 'REVENUE'),
             ('758000', 'Produits divers', '7', 'REVENUE'),
@@ -275,7 +283,27 @@ class Command(BaseCommand):
             ('CLT-003', 'Assurance SAHAM', 'INSURANCE'),
             ('CLT-004', 'Mutuelle des Fonctionnaires', 'INSURANCE'),
             ('CLT-005', 'Ministère de la Santé', 'GOVERNMENT'),
+            ('CLT-006', 'MGEN', 'INSURANCE'),
+            ('CLT-007', 'ASCOMA', 'INSURANCE'),
+            ('CLT-008', 'GRAS SAVOYE', 'INSURANCE'),
         ]
+        
+        # Add 50 individual patients
+        individual_patients = [
+            'Jean Dupont', 'Marie Ngo', 'Paul Biya II', 'Alice Mbia', 'Robert Kotto',
+            'Samba Diallo', 'Fatima Toure', 'Isabelle Ebongue', 'Samuel Eto’o Jr', 'Martine Abena',
+            'Lucas Njoh', 'Hélène Batock', 'Cédric Fofana', 'Aissatou Sow', 'Moussa Traoré',
+            'Koffi Ndri', 'Yolande Eyenga', 'Patrick Mboma', 'Françoise Ateba', 'Guy Zogo',
+            'Béatrice Ndoumbe', 'Thierry Manga', 'Chantal Biya III', 'Emilien Tataw', 'Blaise Njocke',
+            'Esther Mahe', 'David Kouam', 'Nicole Tiani', 'Simplice Fotso', 'Rosine Kamga',
+            'Ousmane Sy', 'Aminata Keita', 'Bakary Koné', 'Sékou Condé', 'Mariam Coulibaly',
+            'Djibril Cissé', 'Salif Keita', 'Angélique Kidjo', 'Manu Dibango', 'Richard Bona',
+            'Charlotte Dipanda', 'Daphne Njie', 'Stanley Enow', 'Locko Samba', 'Tenor Ebanflang',
+            'Blanche Bailly', 'Salatiel Liveniba', 'Mr Leo', 'Magasco Tohnain', 'Rinyu Mary'
+        ]
+        
+        for i, name in enumerate(individual_patients):
+            customers_data.append((f'PAT-{i+1:03d}', name, 'INDIVIDUAL'))
 
         for code, name, customer_type in customers_data:
             Customer.objects.get_or_create(
@@ -417,42 +445,115 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING('Required journals not found, skipping journal entries'))
             return
         
-        # Create 10 sample entries
+        # Get specific medical revenue accounts
+        rev_consult = ChartOfAccounts.objects.filter(code='706100').first()
+        rev_lab = ChartOfAccounts.objects.filter(code='706200').first()
+        rev_imaging = ChartOfAccounts.objects.filter(code='706300').first()
+        rev_hosp = ChartOfAccounts.objects.filter(code='706400').first()
+        rev_pharma = ChartOfAccounts.objects.filter(code='701100').first()
+        
+        # Fallback to main revenue if specific not found
+        rev_consult = rev_consult or sales_account
+        rev_lab = rev_lab or sales_account
+        rev_imaging = rev_imaging or sales_account
+        rev_hosp = rev_hosp or sales_account
+        rev_pharma = rev_pharma or sales_account
+
+        # Create 100 sample entries for Jan and Feb 2026
         count = 0
-        for i in range(10):
-            entry_date = date(2026, 1, random.randint(1, 28))
-            amount = Decimal(random.randint(50000, 500000))
-            
-            # Create sales entry
-            entry = JournalEntry.objects.create(
-                entry_date=entry_date,
-                journal=sales_journal,
-                description=f'Vente de prestations médicales - Facture {i+1:03d}',
-                created_by=self.user,
-            )
-            
-            # Debit customer
-            JournalEntryLine.objects.create(
-                journal_entry=entry,
-                sequence=1,
-                account=customer_account,
-                label='Client',
-                debit_amount=amount,
-                credit_amount=0,
-            )
-            
-            # Credit sales
-            JournalEntryLine.objects.create(
-                journal_entry=entry,
-                sequence=2,
-                account=sales_account,
-                label='Prestations de services',
-                debit_amount=0,
-                credit_amount=amount,
-            )
-            
-            entry.update_totals()
-            entry.post(self.user)
-            count += 1
+        periods = [
+            (date(2026, 1, 1), date(2026, 1, 31)),
+            (date(2026, 2, 1), date(2026, 2, 28))
+        ]
+        
+        for period_start, period_end in periods:
+            for i in range(50):
+                entry_date = period_start + timedelta(days=random.randint(0, (period_end - period_start).days))
+                amount = Decimal(random.randint(5000, 150000))
+                
+                # Pick a random revenue type
+                rev_type = random.choice([
+                    (rev_consult, 'Consultation médicale'),
+                    (rev_lab, 'Analyses de laboratoire'),
+                    (rev_imaging, 'Imagerie médicale (Radio/Echo)'),
+                    (rev_hosp, 'Frais d\'hospitalisation'),
+                    (rev_pharma, 'Vente de médicaments')
+                ])
+                
+                # Pick a random customer
+                customer_obj = Customer.objects.order_by('?').first()
+                customer_obj_name = customer_obj.name if customer_obj else 'Patient Anonyme'
+                
+                # Create sales entry
+                entry = JournalEntry.objects.create(
+                    entry_date=entry_date,
+                    journal=sales_journal,
+                    description=f'{rev_type[1]} - Patient: {customer_obj_name} - Réf: {random.randint(1000, 9999)}',
+                    created_by=self.user,
+                )
+                
+                # Debit customer (411)
+                JournalEntryLine.objects.create(
+                    journal_entry=entry,
+                    sequence=1,
+                    account=customer_account,
+                    label=f'Client: {customer_obj_name}',
+                    debit_amount=amount,
+                    credit_amount=0,
+                )
+                
+                # Credit revenue (7xx)
+                JournalEntryLine.objects.create(
+                    journal_entry=entry,
+                    sequence=2,
+                    account=rev_type[0],
+                    label=rev_type[1],
+                    debit_amount=0,
+                    credit_amount=amount,
+                )
+                
+                entry.update_totals()
+                entry.post(self.user)
+                
+                # For 70% of entries, create bank/cash payment entry
+                if random.random() < 0.7:
+                    pay_date = entry_date + timedelta(days=random.randint(0, 5))
+                    cash_journal = Journal.objects.filter(code='CAI').first()
+                    pay_journal = random.choice([bank_journal, cash_journal or bank_journal])
+                    
+                    cash_acc = ChartOfAccounts.objects.filter(code='521000').first()
+                    pay_acc = bank_account if pay_journal.code == 'BQ' else (cash_acc or bank_account)
+                    
+                    pay_entry = JournalEntry.objects.create(
+                        entry_date=pay_date,
+                        journal=pay_journal,
+                        description=f'Règlement {rev_type[1]} - {customer_obj_name}',
+                        created_by=self.user,
+                    )
+                    
+                    # Debit Cash/Bank (5xx)
+                    JournalEntryLine.objects.create(
+                        journal_entry=pay_entry,
+                        sequence=1,
+                        account=pay_acc,
+                        label=f'Encaissement {pay_journal.name}',
+                        debit_amount=amount,
+                        credit_amount=0,
+                    )
+                    
+                    # Credit Customer (411)
+                    JournalEntryLine.objects.create(
+                        journal_entry=pay_entry,
+                        sequence=2,
+                        account=customer_account,
+                        label=f'Règlement Client {customer_obj_name}',
+                        debit_amount=0,
+                        credit_amount=amount,
+                    )
+                    
+                    pay_entry.update_totals()
+                    pay_entry.post(self.user)
+                
+                count += 1
         
         self.stdout.write(self.style.SUCCESS(f'✓ Created {count} journal entries'))

@@ -45,7 +45,7 @@ export function AdminHospitalRooms() {
 
     function calculateTotalPages() {
         if (numberOfRooms > 0) return Math.ceil(numberOfRooms / 5);
-        else return 0;
+        return 1;
     }
 
     // compute filteredRooms from roomsList (mapping already applied on fetch)
