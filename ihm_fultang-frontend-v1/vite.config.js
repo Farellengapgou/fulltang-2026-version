@@ -8,12 +8,12 @@ export default defineConfig({
     port: 9000,
     strictPort: true,
     host: true,
-    allowedHosts: ["localhost", "127.0.0.1"],
+    allowedHosts: ["localhost", "127.0.0.1", "fultang.negou.tech"],
   },
   server: {
     port: 9000,
     strictPort: true,
     host: true,
-    allowedHosts: ["localhost", "127.0.0.1"],
+    allowedHosts: ["localhost", "127.0.0.1", "fultang.negou.tech"],
   },
 });
