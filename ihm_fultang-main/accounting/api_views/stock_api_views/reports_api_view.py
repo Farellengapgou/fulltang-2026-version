@@ -496,14 +496,31 @@ class InventoryVariancesReportAPI(APIView):
     permission_classes = [IsAuthenticated, AccountingStaffPermission]
 
     def get(self, request):
-        from accounting.stock_models import StockInventoryLine
+        from accounting.stock_models import StockInventoryLine, StockInventory
         from django.db.models import F, Q
         
-        # We group by Article Category to get values by OHADA account
-        # Including COMPLETED, VALIDATED, and POSTED inventories for reconciliation
+        # Base Query
         variances = StockInventoryLine.objects.filter(
             inventory__status__in=["COMPLETED", "VALIDATED", "POSTED"]
-        ).select_related("article", "article__category")
+        ).select_related("article", "article__category", "article__category__default_stock_account")
+
+        # FILTERING:
+        # 1. By specific Inventory ID (if provided)
+        inventory_id = request.query_params.get("inventory_id")
+        
+        if inventory_id:
+            variances = variances.filter(inventory_id=inventory_id)
+        else:
+            # 2. Default: Only the LATEST valid inventory (to avoid summing history)
+            latest_inventory = StockInventory.objects.filter(
+                status__in=["COMPLETED", "VALIDATED", "POSTED"]
+            ).order_by("-inventory_date", "-created_at").first()
+            
+            if latest_inventory:
+                variances = variances.filter(inventory=latest_inventory)
+            else:
+                # No inventory found -> Return empty result
+                variances = variances.none()
         
         # Simple grouping by category
         summary = {}
@@ -512,9 +529,14 @@ class InventoryVariancesReportAPI(APIView):
             cat_code = cat.code if cat else "INCONNU"
             cat_name = cat.name if cat else "Sans catégorie"
             
+            # Use actual OHADA account code if available
+            ohada_code = cat.default_stock_account.code if (cat and cat.default_stock_account) else "Non défini"
+            # Display format: Category Code - OHADA Account Code
+            account_display = f"{cat_code} - {ohada_code}"
+
             if cat_code not in summary:
                 summary[cat_code] = {
-                    "account": cat_code,
+                    "account": account_display,
                     "category": cat_name,
                     "accounting_value": 0,
                     "physical_value": 0,
