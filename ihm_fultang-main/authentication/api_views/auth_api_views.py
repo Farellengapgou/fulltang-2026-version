@@ -1,7 +1,7 @@
-from django.shortcuts import render
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
 from authentication.serializers.auth_serializers import CustomTokenObtainPairSerializer, RegistrationSerializer, PasswordResetRequestSerializer, PasswordResetConfirmSerializer
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -149,6 +149,9 @@ class UserProfileView(APIView):
         return Response(user_data)
 
 class PasswordResetRequestView(APIView):
+    authentication_classes = []   
+    permission_classes = [AllowAny]
+
     """Vue pour demander la réinitialisation du mot de passe"""
     @swagger_auto_schema(
         operation_summary="Demander la réinitialisation du mot de passe",
@@ -197,6 +200,9 @@ class PasswordResetRequestView(APIView):
 
 
 class PasswordResetConfirmView(APIView):
+    authentication_classes = []   # 🔥 IMPORTANT
+    permission_classes = [AllowAny]
+
     """Vue pour confirmer la réinitialisation du mot de passe"""
     @swagger_auto_schema(
         operation_summary="Confirmer la réinitialisation du mot de passe",

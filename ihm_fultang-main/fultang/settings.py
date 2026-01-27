@@ -173,7 +173,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-FRONTEND_URL = "fultang.cm"
+FRONTEND_URL = "http://localhost:9000"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -247,3 +247,7 @@ EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
 
 EMAIL_NOTIFICATIONS_ENABLED = True
+
+FRONTEND_URL_1 = "http://localhost:3000"
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+FRONTEND_RESET_PASSWORD_PATH = "/reset-password"

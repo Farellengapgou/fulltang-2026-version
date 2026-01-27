@@ -210,7 +210,7 @@ class PasswordResetRequestSerializer(serializers.Serializer):
         reset_token.save()
         
         # Construire l'URL de confirmation
-        confirmation_url = f"{settings.FRONTEND_URL}/confirm-password-reset/{reset_token.token}"
+        confirmation_url = f"{settings.FRONTEND_URL_1}/confirm-password-reset/{reset_token.token}"
         
         # Envoyer l'email de confirmation
         subject = "Confirmation de réinitialisation de mot de passe"
