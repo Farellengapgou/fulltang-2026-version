@@ -12,6 +12,10 @@ export function AppRoute() {
     default: (await import("../Pages/Authentication/ForgottenPassword.jsx"))
       .ForgottenPassword,
   }));
+  const ConfirmPasswordResetPage = React.lazy(async () => ({
+    default: (await import("../Pages/Authentication/ConfirmPasswordReset.jsx"))
+      .ConfirmPasswordReset,
+  }));
   const LandingPage = React.lazy(async () => ({
     default: (await import("../Pages/LandingPage/LandingPage.jsx")).LandingPage,
   }));
@@ -635,6 +639,10 @@ export function AppRoute() {
         <Route
           path={AppRoutesPaths.forgottenPasswordPage}
           element={<ForgottenPage />}
+        />
+        <Route
+          path={AppRoutesPaths.confirmPasswordResetPage}
+          element={<ConfirmPasswordResetPage />}
         />
         <Route path={AppRoutesPaths.nursePage} element={<NursePage />} />
         <Route path={AppRoutesPaths.pharmacyPage} element={<PharmacyPage />} />

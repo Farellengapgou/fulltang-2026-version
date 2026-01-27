@@ -3,6 +3,7 @@ export const AppRoutesPaths = {
   adminHomePage: "/admin/home",
   welcomePage: "/",
   loginPage: "/login",
+  confirmPasswordResetPage: "/confirm-password-reset",
   forgottenPasswordPage: "/forgotten-password",
 
 

@@ -153,3 +153,119 @@ class PasswordResetSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {"details": "Aucun utilisateur trouvé avec cet email"}
             )
+    
+from django.core.mail import send_mail
+from django.conf import settings
+from authentication.models import PasswordResetToken
+
+# Remplacez votre PasswordResetSerializer actuel par celui-ci:
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    """Serializer pour la demande de réinitialisation de mot de passe"""
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'},
+        validators=[validate_password]
+    )
+    password_confirmation = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+
+    def validate(self, attrs):
+        # Vérifier que les mots de passe correspondent
+        if attrs['password'] != attrs['password_confirmation']:
+            raise serializers.ValidationError({
+                "password_confirmation": "Les mots de passe ne correspondent pas"
+            })
+        
+        # Vérifier que l'utilisateur existe
+        email = attrs.get('email')
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError({
+                "email": "Aucun utilisateur trouvé avec cet email"
+            })
+        
+        return attrs
+
+    def save(self):
+        email = self.validated_data['email']
+        new_password = self.validated_data['password']
+        
+        # Récupérer l'utilisateur
+        user = User.objects.get(email=email)
+        
+        # Créer un token de réinitialisation
+        reset_token = PasswordResetToken.objects.create(user=user)
+        
+        # Stocker temporairement le nouveau mot de passe (hashé)
+        # On va le stocker dans le token pour éviter de créer un nouveau modèle
+        from django.contrib.auth.hashers import make_password
+        reset_token.new_password_hash = make_password(new_password)
+        reset_token.save()
+        
+        # Construire l'URL de confirmation
+        confirmation_url = f"{settings.FRONTEND_URL_1}/confirm-password-reset/{reset_token.token}"
+        
+        # Envoyer l'email de confirmation
+        subject = "Confirmation de réinitialisation de mot de passe"
+        message = f"""
+Bonjour {user.username},
+
+Vous avez demandé la réinitialisation de votre mot de passe.
+
+Pour confirmer cette demande, veuillez cliquer sur le lien ci-dessous :
+{confirmation_url}
+
+Ce lien expirera dans 24 heures.
+
+Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email.
+
+Cordialement,
+L'équipe de support
+        """
+        
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [email],
+            fail_silently=False,
+        )
+        
+        return reset_token
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """Serializer pour la confirmation de réinitialisation"""
+    token = serializers.CharField(required=True)
+
+    def validate_token(self, value):
+        try:
+            reset_token = PasswordResetToken.objects.get(token=value)
+            if not reset_token.is_valid():
+                raise serializers.ValidationError(
+                    "Ce lien de réinitialisation a expiré ou a déjà été utilisé"
+                )
+            return value
+        except PasswordResetToken.DoesNotExist:
+            raise serializers.ValidationError("Token de réinitialisation invalide")
+
+    def save(self):
+        token_value = self.validated_data['token']
+        reset_token = PasswordResetToken.objects.get(token=token_value)
+        
+        # Appliquer le nouveau mot de passe
+        user = reset_token.user
+        user.password = reset_token.new_password_hash
+        user.save(update_fields=['password'])
+        
+        # Marquer le token comme utilisé
+        reset_token.is_used = True
+        reset_token.save()
+        
+        return user

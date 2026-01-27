@@ -1,7 +1,7 @@
-from django.shortcuts import render
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
-from authentication.serializers.auth_serializers import CustomTokenObtainPairSerializer, RegistrationSerializer, PasswordResetSerializer
+from authentication.serializers.auth_serializers import CustomTokenObtainPairSerializer, RegistrationSerializer, PasswordResetRequestSerializer, PasswordResetConfirmSerializer
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -148,24 +148,25 @@ class UserProfileView(APIView):
         }
         return Response(user_data)
 
-class PasswordResetView(APIView):
+class PasswordResetRequestView(APIView):
+    authentication_classes = []   
+    permission_classes = [AllowAny]
+
+    """Vue pour demander la réinitialisation du mot de passe"""
     @swagger_auto_schema(
-        operation_summary="Réinitialisation du mot de passe",
+        operation_summary="Demander la réinitialisation du mot de passe",
         operation_description=(
-                "Cette API permet à un utilisateur de réinitialiser son mot de passe en fournissant "
-                "son email, le nouveau mot de passe et sa confirmation en une seule requête."
+            "Cette API permet à un utilisateur de demander la réinitialisation de son mot de passe. "
+            "Un email de confirmation sera envoyé à l'adresse fournie avec un lien pour confirmer le changement."
         ),
-        request_body=PasswordResetSerializer,
+        request_body=PasswordResetRequestSerializer,
         responses={
             200: openapi.Response(
-                description="Mot de passe réinitialisé avec succès",
+                description="Email de confirmation envoyé",
                 examples={
                     "application/json": {
-                        "message": "Mot de passe réinitialisé avec succès",
-                        "tokens": {
-                            "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-                            "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                        }
+                        "message": "Un email de confirmation a été envoyé à votre adresse",
+                        "email": "user@example.com"
                     }
                 }
             ),
@@ -173,29 +174,70 @@ class PasswordResetView(APIView):
                 description="Données invalides",
                 examples={
                     "application/json": {
-                        "password": ["Les mots de passe ne correspondent pas"],
+                        "password_confirmation": ["Les mots de passe ne correspondent pas"],
                         "email": ["Aucun utilisateur trouvé avec cet email"]
-                    }
-                }
-            ),
-            404: openapi.Response(
-                description="Utilisateur non trouvé",
-                examples={
-                    "application/json": {
-                        "error": "Aucun utilisateur trouvé avec cet email"
                     }
                 }
             )
         }
     )
     def post(self, request):
-        serializer = PasswordResetSerializer(data=request.data)
-
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            serializer.save()
+            return Response({
+                "message": "Un email de confirmation a été envoyé à votre adresse",
+                "email": request.data.get('email')
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "error": "Une erreur s'est produite lors de l'envoi de l'email"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        serializer.is_valid(raise_exception=True)
+
+class PasswordResetConfirmView(APIView):
+    authentication_classes = []   # 🔥 IMPORTANT
+    permission_classes = [AllowAny]
+
+    """Vue pour confirmer la réinitialisation du mot de passe"""
+    @swagger_auto_schema(
+        operation_summary="Confirmer la réinitialisation du mot de passe",
+        operation_description=(
+            "Cette API permet de confirmer la réinitialisation du mot de passe "
+            "en utilisant le token reçu par email."
+        ),
+        request_body=PasswordResetConfirmSerializer,
+        responses={
+            200: openapi.Response(
+                description="Mot de passe réinitialisé avec succès",
+                examples={
+                    "application/json": {
+                        "message": "Votre mot de passe a été réinitialisé avec succès"
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="Token invalide ou expiré",
+                examples={
+                    "application/json": {
+                        "token": ["Ce lien de réinitialisation a expiré ou a déjà été utilisé"]
+                    }
+                }
+            )
+        }
+    )
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer.save()
         return Response({
-            "details": "Mot de passe réinitialisé avec succès",
+            "message": "Votre mot de passe a été réinitialisé avec succès"
         }, status=status.HTTP_200_OK)
+    
