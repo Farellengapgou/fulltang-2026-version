@@ -36,7 +36,7 @@ export function StockTurnoverRate() {
 
     return (
         <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"MaterialAccountant"}>
-            <AccountantNavBar />
+            <AccountantNavBar title="Material Accountant" />
             <div className="mx-auto p-12">
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold text-gray-800">Rotation des Stocks</h1>

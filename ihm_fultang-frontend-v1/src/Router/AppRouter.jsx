@@ -481,6 +481,12 @@ export function AppRoute() {
     ).PhysicalInventory,
   }));
 
+  const MaterialInventoryDetail = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Inventory/InventoryDetail.jsx")
+    ).InventoryDetail,
+  }));
+
   const MaterialStockCard = React.lazy(async () => ({
     default: (
       await import("../Pages/MaterialAccounting/Reports/StockCard.jsx")
@@ -894,20 +900,20 @@ export function AppRoute() {
 
         {/** MATERIAL ACCOUNTING ROUTES */}
         <Route
-          path = {AppRoutesPaths.materialAccountingDashboard}
-          element = {<MaterialAccountingDashboard />}
+          path={AppRoutesPaths.materialAccountingDashboard}
+          element={<MaterialAccountingDashboard />}
         />
 
         <Route
-          path = {AppRoutesPaths.materialCategories}
+          path={AppRoutesPaths.materialCategories}
           element={<MaterialCategories />}
         />
         <Route
-          path = {AppRoutesPaths.materialArticles}
+          path={AppRoutesPaths.materialArticles}
           element={<MaterialArticles />}
         />
         <Route
-          path = {AppRoutesPaths.materialWarehouses}
+          path={AppRoutesPaths.materialWarehouses}
           element={<MaterialWarehouses />}
         />
         <Route
@@ -918,56 +924,60 @@ export function AppRoute() {
           path={AppRoutesPaths.materialFamilies}
           element={<MaterialFamilies />}
         />
-        
+
         <Route
-          path = {AppRoutesPaths.materialStockLevels}
+          path={AppRoutesPaths.materialStockLevels}
           element={<MaterialStockLevels />}
         />
         <Route
-          path = {AppRoutesPaths.materialBatches}
+          path={AppRoutesPaths.materialBatches}
           element={<MaterialBatches />}
         />
         <Route
-          path = {AppRoutesPaths.materialMovements}
+          path={AppRoutesPaths.materialMovements}
           element={<MaterialMovements />}
         />
-        
+
         <Route
-          path = {AppRoutesPaths.materialReceipts}
+          path={AppRoutesPaths.materialReceipts}
           element={<MaterialReceipts />}
         />
         <Route
-          path = {AppRoutesPaths.materialIssues}
+          path={AppRoutesPaths.materialIssues}
           element={<MaterialIssues />}
         />
         <Route
-          path = {AppRoutesPaths.materialTransfers}
+          path={AppRoutesPaths.materialTransfers}
           element={<MaterialTransfers />}
         />
 
         <Route
-          path = {AppRoutesPaths.materialInventories}
+          path={AppRoutesPaths.materialInventories}
           element={<PhysicalInventory />}
+        />
+        <Route
+          path={AppRoutesPaths.materialInventoryDetails}
+          element={<MaterialInventoryDetail />}
         />
 
         <Route
-          path = {AppRoutesPaths.materialStockCard}
+          path={AppRoutesPaths.materialStockCard}
           element={<MaterialStockCard />}
         />
         <Route
-          path = {AppRoutesPaths.materialPerpetualInventory}
+          path={AppRoutesPaths.materialPerpetualInventory}
           element={<MaterialPerpetualInventory />}
         />
         <Route
-          path = {AppRoutesPaths.materialABCAnalysis}
+          path={AppRoutesPaths.materialABCAnalysis}
           element={<MaterialABCAnalysis />}
         />
         <Route
-          path = {AppRoutesPaths.materialTurnoverRate}
+          path={AppRoutesPaths.materialTurnoverRate}
           element={<MaterialTurnoverRate />}
         />
         <Route
-          path = {AppRoutesPaths.materialReconciliation}
+          path={AppRoutesPaths.materialReconciliation}
           element={<MaterialReconciliation />}
         />
       </Routes>

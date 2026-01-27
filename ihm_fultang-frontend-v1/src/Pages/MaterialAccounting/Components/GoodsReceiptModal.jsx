@@ -184,7 +184,7 @@ export function GoodsReceiptModal({ isOpen, onClose, onRefresh, initialData = nu
 
                         {formData.lines.map((line, index) => (
                             <div key={index} className="grid grid-cols-12 gap-3 items-end bg-gray-50 p-3 rounded-xl border border-gray-100">
-                                <div className="col-span-12 md:col-span-4 space-y-1">
+                                <div className="col-span-12 md:col-span-3 space-y-1">
                                     <label className="text-[10px] uppercase font-bold text-gray-500">Article</label>
                                     <select
                                         required
@@ -209,7 +209,19 @@ export function GoodsReceiptModal({ isOpen, onClose, onRefresh, initialData = nu
                                         className="w-full p-2 bg-white border border-gray-200 rounded-lg outline-none disabled:bg-gray-100"
                                     />
                                 </div>
-                                <div className="col-span-12 md:col-span-3 space-y-1">
+                                <div className="col-span-6 md:col-span-2 space-y-1">
+                                    <label className="text-[10px] uppercase font-bold text-gray-500">P.U (FCFA)</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        required
+                                        disabled={isReadOnly}
+                                        value={line.unit_price}
+                                        onChange={(e) => handleLineChange(index, 'unit_price', e.target.value)}
+                                        className="w-full p-2 bg-white border border-gray-200 rounded-lg outline-none disabled:bg-gray-100"
+                                    />
+                                </div>
+                                <div className="col-span-12 md:col-span-2 space-y-1">
                                     <label className="text-[10px] uppercase font-bold text-gray-500">N° de Lot</label>
                                     <input
                                         type="text"
@@ -222,16 +234,30 @@ export function GoodsReceiptModal({ isOpen, onClose, onRefresh, initialData = nu
                                 </div>
                                 <div className="col-span-12 md:col-span-2 space-y-1">
                                     <label className="text-[10px] uppercase font-bold text-gray-500">Péremption</label>
-                                    <DatePicker
-                                        placeholder="Date expiration"
-                                        disabled={isReadOnly}
-                                        value={line.expiry_date ? dayjs(line.expiry_date) : null}
-                                        onChange={(date, dateString) => handleLineChange(index, 'expiry_date', dateString)}
-                                        disabledDate={(current) => {
-                                            return current && current.isBefore(dayjs(), 'day');
-                                        }}
-                                        className="w-full p-2 bg-white border border-gray-200 rounded-lg outline-none disabled:bg-gray-100 h-10"
-                                    />
+                                    {(() => {
+                                        const selectedArticle = articles.find(a => a.id == line.article);
+                                        const isPerishable = selectedArticle ? selectedArticle.is_perishable : true;
+
+                                        if (!isPerishable) {
+                                            return (
+                                                <div className="w-full p-2 bg-gray-100 border border-gray-200 rounded-lg text-gray-400 text-sm h-10 flex items-center justify-center italic">
+                                                    N/A
+                                                </div>
+                                            );
+                                        }
+                                        return (
+                                            <DatePicker
+                                                placeholder="Date expiration"
+                                                disabled={isReadOnly}
+                                                value={line.expiry_date ? dayjs(line.expiry_date) : null}
+                                                onChange={(date, dateString) => handleLineChange(index, 'expiry_date', dateString)}
+                                                disabledDate={(current) => {
+                                                    return current && current.isBefore(dayjs(), 'day');
+                                                }}
+                                                className="w-full p-2 bg-white border border-gray-200 rounded-lg outline-none disabled:bg-gray-100 h-10"
+                                            />
+                                        );
+                                    })()}
                                 </div>
                                 {!isReadOnly && (
                                     <div className="col-span-12 md:col-span-1 flex justify-end">
@@ -273,7 +299,7 @@ export function GoodsReceiptModal({ isOpen, onClose, onRefresh, initialData = nu
                         </button>
                     )}
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
