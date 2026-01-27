@@ -186,7 +186,7 @@ export function GoodsIssues() {
 
     return (
         <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"MaterialAccountant"}>
-            <AccountantNavBar />
+            <AccountantNavBar title="Material Accountant" />
             <div className="mx-auto p-12">
                 <div className="flex justify-between items-center mb-6">
                     <div>

@@ -520,6 +520,12 @@ export function AppRoute() {
     ).PhysicalInventory,
   }));
 
+  const MaterialInventoryDetail = React.lazy(async () => ({
+    default: (
+      await import("../Pages/MaterialAccounting/Inventory/InventoryDetail.jsx")
+    ).InventoryDetail,
+  }));
+
   const MaterialStockCard = React.lazy(async () => ({
     default: (
       await import("../Pages/MaterialAccounting/Reports/StockCard.jsx")
@@ -1035,6 +1041,10 @@ export function AppRoute() {
         <Route
           path={AppRoutesPaths.materialInventories}
           element={<PhysicalInventory />}
+        />
+        <Route
+          path={AppRoutesPaths.materialInventoryDetails}
+          element={<MaterialInventoryDetail />}
         />
 
         <Route

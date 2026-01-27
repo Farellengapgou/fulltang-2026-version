@@ -127,7 +127,7 @@ export function Warehouses() {
                 linkList={MaterialAccountingNavLink}
                 requiredRole={"MaterialAccountant"}
             >
-                <AccountantNavBar />
+                <AccountantNavBar title="Material Accountant" />
                 <div className="flex items-center justify-center min-h-screen">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-end mx-auto mb-4"></div>
@@ -143,7 +143,7 @@ export function Warehouses() {
             linkList={MaterialAccountingNavLink}
             requiredRole={"MaterialAccountant"}
         >
-            <AccountantNavBar />
+            <AccountantNavBar title="Material Accountant" />
             <div className="mx-auto p-12">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
