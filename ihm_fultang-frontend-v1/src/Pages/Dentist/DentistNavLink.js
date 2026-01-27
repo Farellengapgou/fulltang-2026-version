@@ -8,7 +8,7 @@ export const dentistNavLink = [
     icon: FaHome,
   },
   {
-    name: "Messages",
+    name: "Notifications",
     icon: FaEnvelope,
     link: appRoutes.dentistMessage,
   },

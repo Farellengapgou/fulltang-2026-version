@@ -52,7 +52,7 @@ export function MaterialDashboard() {
     if (isLoading) {
         return (
             <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"MaterialAccountant"}>
-                <AccountantNavBar />
+                <AccountantNavBar title="Material Accountant" />
                 <div className="flex items-center justify-center min-h-screen">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-end mx-auto mb-4"></div>
@@ -66,7 +66,7 @@ export function MaterialDashboard() {
     if (error) {
         return (
             <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"MaterialAccountant"}>
-                <AccountantNavBar />
+                <AccountantNavBar title="Material Accountant" />
                 <div className="flex items-center justify-center min-h-screen">
                     <div className="text-center p-8 bg-red-50 rounded-xl border border-red-200">
                         <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
@@ -91,18 +91,11 @@ export function MaterialDashboard() {
         value: c.value
     })) || [];
 
-    const trendData = [
-        { month: "Jan", value: 18000000 },
-        { month: "Feb", value: 19500000 },
-        { month: "Mar", value: 19000000 },
-        { month: "Apr", value: 20500000 },
-        { month: "May", value: 21000000 },
-        { month: "Jun", value: stats?.total_stock_value || 21500000 },
-    ];
+    const trendData = stats?.trend_data || [];
 
     return (
         <AccountantDashBoard linkList={MaterialAccountingNavLink} requiredRole={"MaterialAccountant"}>
-            <AccountantNavBar />
+            <AccountantNavBar title="Material Accountant" />
             <div className="mx-auto p-12">
                 {/* Header */}
                 <div className="flex justify-between items-end mb-8">

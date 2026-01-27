@@ -16,7 +16,7 @@ export const nurseNavLink =
         link: appRoutes.nurseMedicalStaffsPage,
     },
     {
-        name: 'Messages',
+        name: 'Notifications',
         icon: FaEnvelope,
         link: appRoutes.nurseMessage,
     },

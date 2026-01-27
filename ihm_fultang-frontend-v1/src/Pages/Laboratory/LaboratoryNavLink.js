@@ -27,7 +27,7 @@ export const laboratoryNavLink = [
     },
     {
         icon: FaEnvelope,
-        name: "Messages",
+        name: "Notifications",
         link: appRoutes.laboratoryMessage
     },
     {

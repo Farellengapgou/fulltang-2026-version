@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { AppRoutesPaths } from "../../../Router/appRouterPaths.js";
 import { useMessageBadge } from "../../../Utils/useMessageBadge.js";
 
-export function AccountantNavBar() {
+export function AccountantNavBar({ title = "Accountant" }) {
   const { logout, userData } = useAuthentication();
   const navigate = useNavigate();
   const messageCount = useMessageBadge();
@@ -20,7 +20,7 @@ export function AccountantNavBar() {
       <div className="border-b-2 m-3  border-b-gray-300">
         <div className="w-full h-[70px] flex justify-between">
           <h1 className="ml-7 text-4xl text-secondary mt-3.5 font-bold">
-            Accountant
+            {title}
           </h1>
           <div className="flex gap-3 mt-3.5 mb-4 mr-5">
             <Tooltip placement={"top"} title={"settings"}>
