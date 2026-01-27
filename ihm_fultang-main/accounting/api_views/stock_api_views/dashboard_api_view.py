@@ -87,6 +87,57 @@ class MaterialDashboardAPIView(APIView):
             remaining_quantity__gt=0
         ).order_by('expiry_date')[:10]
 
+        # 10. Historique réel (6 derniers mois)
+        trend_data = []
+        current_val = float(total_stock_value)
+        curr_date = today
+
+        # 1. Mois actuel (valeur aujourd'hui)
+        trend_data.append({
+            "month": curr_date.strftime("%b"),
+            "value": current_val
+        })
+
+        # 2. Remonter 5 mois en arrière
+        for i in range(5):
+            # Début du mois en cours de traitement
+            month_start = curr_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            
+            # Mouvements sur la période (du debut du mois jusqu'à la date 'curr_date')
+            # Si on est au mois actuel : du 1er au aujourd'hui
+            # Si on est au mois précédent : du 1er au dernier jour (car curr_date sera le dernier jour du mois d'avant)
+            
+            movements = StockMovement.objects.filter(
+                operation_date__gte=month_start,
+                operation_date__lte=curr_date,
+                status='CONFIRMED'
+            ).values('movement_type').annotate(total=Sum('total_value'))
+            
+            in_val = 0
+            out_val = 0
+            for m in movements:
+                if m['movement_type'] == 'IN':
+                    in_val += float(m['total'] or 0)
+                elif m['movement_type'] == 'OUT':
+                    out_val += float(m['total'] or 0)
+            
+            # Reconstruction inverse : Stock Avant = Stock Après - (Entrées - Sorties)
+            # Donc Stock Avant = Stock Après - Entrées + Sorties
+            prev_val = current_val - in_val + out_val
+            if prev_val < 0: prev_val = 0 # Sécurité
+            
+            # Reculer d'un jour pour avoir la fin du mois précédent
+            curr_date = month_start - timedelta(days=1) 
+            
+            trend_data.append({
+                "month": curr_date.strftime("%b"),
+                "value": prev_val
+            })
+            current_val = prev_val
+
+        # Remettre dans l'ordre chronologique
+        trend_data.reverse()
+
         data = {
             "total_stock_value": float(total_stock_value),
             "total_articles": total_articles,
@@ -98,7 +149,7 @@ class MaterialDashboardAPIView(APIView):
             "recent_movements": [
                 {
                     "number": m.movement_number,
-                    "type": m.movement_type,
+                    "movement_type": m.movement_type,
                     "article": {"name": m.article.name},
                     "source_warehouse": {"name": m.source_depot.name} if m.source_depot else None,
                     "destination_warehouse": {"name": m.destination_depot.name} if m.destination_depot else None,
@@ -110,6 +161,7 @@ class MaterialDashboardAPIView(APIView):
             ],
             "stock_by_warehouse": stock_by_warehouse,
             "stock_by_category": stock_by_category,
+            "trend_data": trend_data,
             "top_consuming_articles": [
                 {
                     "article": item["article__name"],
