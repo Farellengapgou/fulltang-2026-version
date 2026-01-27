@@ -38,6 +38,10 @@ export function AppRoute() {
   const PharmacyPage = React.lazy(async () => ({
     default: (await import("../Pages/Pharmacy/Pharmacy.jsx")).Pharmacy,
   }));
+  const PharmacyMessages = React.lazy(async () => ({
+    default: (await import("../Pages/Pharmacy/PharmacyMessagePage.jsx"))
+      .PharmacyMessagePage,
+  }));
   const ReceptionistPage = React.lazy(async () => ({
     default: (await import("../Pages/Receptionist/Receptionist.jsx"))
       .Receptionist,
@@ -51,6 +55,10 @@ export function AppRoute() {
   const CashierPage = React.lazy(async () => ({
     default: (await import("../Pages/Cashier/Cashier.jsx")).Cashier,
   }));
+  const CashierMessages = React.lazy(async () => ({
+    default: (await import("../Pages/Cashier/CashierMessagePage.jsx"))
+      .CashierMessagePage,
+  }));
   const ExamsList = React.lazy(async () => ({
     default: (await import("../Pages/Cashier/ExamsList.jsx")).ExamsList,
   }));
@@ -61,6 +69,17 @@ export function AppRoute() {
   const FinancialReport = React.lazy(async () => ({
     default: (await import("../Pages/Cashier/FinancialReport.jsx"))
       .FinancialReport,
+  }));
+  const AccountantMessages = React.lazy(async () => ({
+    default: (await import("../Pages/Accountant/AccountantMessagePage.jsx"))
+      .AccountantMessagePage,
+  }));
+  const MaterialAccountantMessages = React.lazy(async () => ({
+    default: (
+      await import(
+        "../Pages/MaterialAccounting/MaterialAccountantMessagePage.jsx"
+      )
+    ).MaterialAccountantMessagePage,
   }));
   const AdminHomePage = React.lazy(async () => ({
     default: (await import("../Pages/AdminViews/AdminHomePage.jsx"))
@@ -589,11 +608,19 @@ export function AppRoute() {
         <Route path={AppRoutesPaths.nursePage} element={<NursePage />} />
         <Route path={AppRoutesPaths.pharmacyPage} element={<PharmacyPage />} />
         <Route
+ 
           path={AppRoutesPaths.pharmacyMedicationList}
           element={<PharmacyMedicationList />}
         />
         <Route
           path={AppRoutesPaths.pharmacyAddMedication}
+ 
+          
+          element={<PharmacyMessages />}
+        />
+        <Route
+          path={AppRoutesPaths.PharmacistPage}
+ 
           element={<PharmacistPage />}
         />
         <Route
@@ -628,11 +655,23 @@ export function AppRoute() {
           path={AppRoutesPaths.helpCenterPage}
           element={<HelpCenterPage />}
         />
+                <Route
+          path={AppRoutesPaths.accountantMessage}
+          element={<AccountantMessages />}
+        />
+        <Route
+          path={AppRoutesPaths.materialAccountantMessage}
+          element={<MaterialAccountantMessages />}
+        />
         <Route
           path={AppRoutesPaths.patientDetailsPage}
           element={<PatientDetailsPage />}
         />
         <Route path={AppRoutesPaths.cashierPage} element={<CashierPage />} />
+        <Route
+          path={AppRoutesPaths.cashierMessage}
+          element={<CashierMessages />}
+        />
         <Route path={AppRoutesPaths.examsList} element={<ExamsList />} />
         <Route
           path={AppRoutesPaths.hospitalisations}
@@ -641,6 +680,14 @@ export function AppRoute() {
         <Route
           path={AppRoutesPaths.financialReport}
           element={<FinancialReport />}
+        />
+        <Route
+          path={AppRoutesPaths.accountantMessage}
+          element={<AccountantMessages />}
+        />
+        <Route
+          path={AppRoutesPaths.materialAccountantMessage}
+          element={<MaterialAccountantMessages />}
         />
         <Route
           path={AppRoutesPaths.receptionistPage}

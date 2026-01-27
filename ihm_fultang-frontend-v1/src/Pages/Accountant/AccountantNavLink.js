@@ -5,6 +5,7 @@ import {
   FaFileInvoice,
   FaCashRegister,
   FaChartLine,
+  FaEnvelope,
 } from "react-icons/fa";
 export const AccountantNavLink = [
   {
@@ -23,6 +24,11 @@ export const AccountantNavLink = [
     name: "Create a bill",
     link: appRoutes.createFactureAccountant,
     icon: FaFileInvoice,
+  },
+  {
+    name: "Notifications",
+    link: appRoutes.accountantMessage,
+    icon: FaEnvelope,
   },
 
   {

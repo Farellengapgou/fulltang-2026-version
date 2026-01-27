@@ -9,6 +9,7 @@ import {
     FaFileInvoice,
     FaChartBar,
     FaQuestionCircle,
+    FaEnvelope,
 } from "react-icons/fa";
 import { Package, PackageCheck, PackageX, Layers, TrendingUp, ShoppingCart, FolderTree } from "lucide-react";
 import { AppRoutesPaths as appRoutes } from "../../Router/appRouterPaths.js";
@@ -59,33 +60,6 @@ export const MaterialAccountingNavLink = [
         ],
     },
 
-        // Opérations
-    {
-        name: "Opérations",
-        icon: FaExchangeAlt,
-        subLinks: [
-            {
-                icon: PackageCheck,
-                name: "Bons d'Entrée",
-                link: appRoutes.materialReceipts,
-                description: "Réceptions de marchandises",
-            },
-            {
-                icon: PackageX,
-                name: "Bons de Sortie",
-                link: appRoutes.materialIssues,
-                description: "Sorties de stock",
-            },
-            {
-                icon: FaExchangeAlt,
-                name: "Transferts",
-                link: appRoutes.materialTransfers,
-                description: "Transferts inter-dépôts",
-            },
-        ],
-    },
-
-
     // Gestion des Stocks
     {
         name: "Gestion des Stocks",
@@ -108,6 +82,32 @@ export const MaterialAccountingNavLink = [
                 name: "Mouvements",
                 link: appRoutes.materialMovements,
                 description: "Historique des mouvements",
+            },
+        ],
+    },
+
+    // Opérations
+    {
+        name: "Opérations",
+        icon: FaExchangeAlt,
+        subLinks: [
+            {
+                icon: PackageCheck,
+                name: "Bons d'Entrée",
+                link: appRoutes.materialReceipts,
+                description: "Réceptions de marchandises",
+            },
+            {
+                icon: PackageX,
+                name: "Bons de Sortie",
+                link: appRoutes.materialIssues,
+                description: "Sorties de stock",
+            },
+            {
+                icon: FaExchangeAlt,
+                name: "Transferts",
+                link: appRoutes.materialTransfers,
+                description: "Transferts inter-dépôts",
             },
         ],
     },
@@ -164,5 +164,11 @@ export const MaterialAccountingNavLink = [
         icon: FaQuestionCircle,
         link: appRoutes.helpCenterPage,
         description: "Documentation et support",
+    },
+    {
+        name: "Notifications",
+        icon: FaEnvelope,
+        link: appRoutes.materialAccountantMessage,
+        description: "Notifications internes",
     },
 ];
