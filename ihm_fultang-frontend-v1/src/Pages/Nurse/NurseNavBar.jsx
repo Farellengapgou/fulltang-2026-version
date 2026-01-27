@@ -2,7 +2,7 @@ import React, { useState } from "react"; // <-- Ajout de useState
 import { FaFlag, FaBell, FaEnvelope, FaUser, FaCog, FaSignOutAlt } from 'react-icons/fa';
 import { useAuthentication } from "../../Utils/Provider.jsx";
 import { Tooltip } from "antd";
-import { useState} from "react";
+ 
 import PropTypes from "prop-types";
 import userIcon from "../../assets/userIcon.png";
 import { useNavigate } from "react-router-dom";
