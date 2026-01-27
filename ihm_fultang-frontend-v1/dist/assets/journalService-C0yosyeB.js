@@ -1,0 +1,1 @@
+import{a as t}from"./axiosInstanceAccountant-DJWTx0jg.js";const a="journals",r={getAllJournals:(e={})=>t.get(a+"/",{params:e}),getJournal:e=>t.get(`${a}/${e}/`),createJournal:e=>t.post(a+"/",e),updateJournal:(e,o)=>t.put(`${a}/${e}/`,o),deleteJournal:e=>t.delete(`${a}/${e}/`),getActiveJournals:()=>t.get(`${a}/?is_active=true`)};export{r as j};

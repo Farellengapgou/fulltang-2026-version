@@ -1,0 +1,1 @@
+import{a as c}from"./axiosInstanceAccountant-DJWTx0jg.js";const e="bank-accounts",o={getAllBankAccounts:(t={})=>c.get(e+"/",{params:t}),getBankAccount:t=>c.get(`${e}/${t}/`),createBankAccount:t=>c.post(e+"/",t),updateBankAccount:(t,n)=>c.put(`${e}/${t}/`,n),deleteBankAccount:t=>c.delete(`${e}/${t}/`),getActiveBankAccounts:()=>c.get(`${e}/?is_active=true`)};export{o as b};

@@ -1,0 +1,1 @@
+import{b as a}from"./index-V_9YcWOP.js";const n=a.create({baseURL:"http://api.fultang.negou.tech/api/v1/accounting",headers:{"Content-Type":"application/json"}});n.interceptors.request.use(t=>{const e=localStorage.getItem("token_key_fultang");return e&&(t.headers.Authorization=`Bearer ${e}`),t});export{n as a};
