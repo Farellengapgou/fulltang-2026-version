@@ -22,15 +22,15 @@ import {
 } from "lucide-react";
 import { message } from "antd";
 import axiosInstance from "../../Utils/axiosInstance.js";
-import { DoctorNavBar } from "./DoctorComponents/DoctorNavBar.jsx";
-import { doctorNavLink } from "./lib/doctorNavLink.js";
+import { LaboratoryNavBar } from "./LaboratoryNavBar.jsx";
+import { laboratoryNavLink } from "./LaboratoryNavLink.js";
 import { useAuthentication } from "../../Utils/Provider.jsx";
 import Loader from "../../GlobalComponents/Loader.jsx";
 import ServerErrorPage from "../../GlobalComponents/ServerError.jsx";
 import { CustomDashboard } from "../../GlobalComponents/CustomDashboard.jsx";
 import { useCalculateAge } from "../../Utils/compute.js";
 import { formatDateOnly, formatDateOnlyWithoutWeekDay } from "../../Utils/formatDateMethods.js";
-import MedicalParametersCard from "./DoctorComponents/MedicalParametersCard.jsx";
+import MedicalParametersCard from "../Doctor/DoctorComponents/MedicalParametersCard.jsx";
 
 export function PatientMedicalFolder() {
     const { id: patientId } = useParams();
@@ -65,7 +65,7 @@ export function PatientMedicalFolder() {
                 folderId = patient.idMedicalFolder;
             } else {
                 // 2. Fallback: recharger la liste des patients du docteur
-                console.log("→ Rechargement de la liste des patients du docteur");
+                console.log("→ Rechargement de la liste des patients du laborantin");
                 const patientsRes = await axiosInstance.get(`/patient/doctor/${userData.id}/`);
                 const currentPatient = patientsRes.data.find(p => p.id === parseInt(patientId));
 
@@ -330,8 +330,8 @@ export function PatientMedicalFolder() {
 
     if (isLoading) {
         return (
-            <CustomDashboard linkList={doctorNavLink} requiredRole={"Doctor"}>
-                <DoctorNavBar />
+            <CustomDashboard linkList={laboratoryNavLink} requiredRole={"Doctor"}>
+                <LaboratoryNavBar />
                 <div className="h-[500px] w-full flex justify-center items-center flex-col">
                     <Loader size={"medium"} color={"primary-end"} />
                     <p className="mt-4 text-gray-600">Chargement du dossier médical...</p>
@@ -393,8 +393,8 @@ export function PatientMedicalFolder() {
     ] : [];
 
     return (
-        <CustomDashboard linkList={doctorNavLink} requiredRole={"Doctor"}>
-            <div className="no-print"><DoctorNavBar /></div>
+        <CustomDashboard linkList={laboratoryNavLink} requiredRole={"Doctor"}>
+            <div className="no-print"><LaboratoryNavBar /></div>
 
             {/* --- HEADER IMPRESSION (Visible uniquement à l'impression) --- */}
             <div className="print-header">

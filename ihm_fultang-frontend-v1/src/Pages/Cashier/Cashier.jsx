@@ -12,6 +12,9 @@ export function Cashier() {
   const [consultations, setConsultations] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [time, setTime] = useState(new Date().toLocaleTimeString());
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -22,21 +25,29 @@ export function Cashier() {
   }, []);
 
   useEffect(() => {
-    async function fetchConsultations() {
-      setIsLoading(true);
-      try {
-        const response = await axiosInstance.get("/consultation/");
-        setIsLoading(false);
-        if (response.status === 200) {
-          setConsultations(response.data.results);
-        }
-      } catch (error) {
-        setIsLoading(false);
-        console.log(error);
+    fetchConsultations(currentPage);
+  }, [currentPage]);
+
+  async function fetchConsultations(page = 1) {
+    setIsLoading(true);
+    try {
+      const response = await axiosInstance.get(`/consultation/?page=${page}`);
+      setIsLoading(false);
+      if (response.status === 200) {
+        setConsultations(response.data.results);
+        setCurrentPage(response.data.current_page);
+        setTotalPages(response.data.total_pages);
+        setTotalCount(response.data.count);
       }
+    } catch (error) {
+      setIsLoading(false);
+      console.log(error);
     }
-    fetchConsultations();
-  }, []);
+  }
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
 
   return (
     <DashBoard linkList={cashierNavLink} requiredRole={"Cashier"}>
@@ -64,7 +75,13 @@ export function Cashier() {
             </p>
           </div>
         </div>
-        <ConsultationList consultationList={consultations} />
+        <ConsultationList 
+          consultationList={consultations} 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalCount={totalCount}
+          onPageChange={handlePageChange}
+        />
       </div>
     </DashBoard>
   );

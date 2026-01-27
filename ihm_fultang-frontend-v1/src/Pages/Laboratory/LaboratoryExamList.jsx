@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { DatePicker } from "antd";
-import dayjs from "dayjs";
 import {
   Search,
   Calendar,
@@ -70,20 +68,22 @@ export function LaboratoryExamList() {
         console.log(response.data);
         const data = response.data.results;
 
-        const transformed = data.map((exam) => ({
-          ...exam,
-          patientName: exam.idPatient
-            ? `${exam.idPatient.firstName} ${exam.idPatient.lastName}`
-            : "Patient inconnu",
-          doctorName: exam.idMedicalStaff
-            ? `${exam.idMedicalStaff.first_name} ${exam.idMedicalStaff.last_name}`
-            : "Médecin inconnu",
-          status: exam.examStatus || "En attente",
-          requestDate: exam.addDate,
-        }));
+        const transformed = data
+          .filter((exam) => exam.examStatus !== "Completed") // Filtrer les examens complétés
+          .map((exam) => ({
+            ...exam,
+            patientName: exam.idPatient
+              ? `${exam.idPatient.firstName} ${exam.idPatient.lastName}`
+              : "Patient inconnu",
+            doctorName: exam.idMedicalStaff
+              ? `${exam.idMedicalStaff.first_name} ${exam.idMedicalStaff.last_name}`
+              : "Médecin inconnu",
+            status: exam.examStatus || "En attente",
+            requestDate: exam.addDate,
+          }));
 
         setExamRequestList(transformed);
-        setNumberOfExams(response.data.count || transformed.length);
+        setNumberOfExams(transformed.length); // Utiliser la longueur du tableau filtré
         setNextUrl(response.data.next || "");
         setPreviousUrl(response.data.previous || "");
         setErrorStatus(null);
@@ -107,7 +107,11 @@ export function LaboratoryExamList() {
         const response = await axiosInstance.get(url);
         if (response.status === 200) {
           const data = response.data.results || response.data;
-          setExamRequestList(data);
+          // Filtrer les examens complétés
+          const filteredData = data.filter(
+            (exam) => exam.examStatus !== "Completed",
+          );
+          setExamRequestList(filteredData);
           setNextUrl(response.data.next || "");
           setPreviousUrl(response.data.previous || "");
         }
@@ -163,11 +167,11 @@ export function LaboratoryExamList() {
           </div>
           <div className="flex items-center gap-4">
             <Calendar className="text-gray-400 h-5 w-5" />
-            <DatePicker
-              placeholder="Filter by date"
-              value={dateFilter ? dayjs(dateFilter) : null}
-              onChange={(date, dateString) => setDateFilter(dateString)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none transition-all duration-300 h-10"
+            <input
+              type="date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-end focus:outline-none transition-all duration-300"
             />
           </div>
           <select
@@ -305,7 +309,7 @@ export function LaboratoryExamList() {
               <Tooltip placement={"left"} title={"previous slide"}>
                 <button
                   onClick={async () => {
-                    await fetchNextOrPreviousExamListv(previousUrl);
+                    await fetchNextOrPreviousExamList(previousUrl);
                     updateActualPageNumber("prev");
                   }}
                   className="w-14 h-14 border-2 rounded-lg hover:bg-secondary text-xl text-secondary hover:text-2xl duration-300 transition-all hover:text-white shadow-xl flex justify-center items-center mt-2"

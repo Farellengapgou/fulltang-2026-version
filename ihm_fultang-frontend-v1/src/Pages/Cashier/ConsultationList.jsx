@@ -3,12 +3,17 @@ import {AlertCircle, Search, Calendar, User, DollarSign, Filter, CheckCircle } f
 import PropTypes from "prop-types";
 import {FaUserDoctor} from "react-icons/fa6";
 import {PaymentModal} from "./PayementModal.jsx";
+import { Pagination } from "antd";
 
-export default function ConsultationList({consultationList}) {
+export default function ConsultationList({consultationList, currentPage, totalPages, totalCount, onPageChange}) {
 
 
   ConsultationList.propTypes = {
     consultationList: PropTypes.array.isRequired,
+    currentPage: PropTypes.number,
+    totalPages: PropTypes.number,
+    totalCount: PropTypes.number,
+    onPageChange: PropTypes.func,
   }
 
 
@@ -146,6 +151,20 @@ export default function ConsultationList({consultationList}) {
               )}
           </div>
           
+          {/* Pagination */}
+          {consultationList.length > 0 && totalPages > 1 && (
+            <div className="flex justify-center mt-8">
+              <Pagination
+                current={currentPage}
+                total={totalCount}
+                pageSize={5}
+                onChange={onPageChange}
+                showSizeChanger={false}
+                showTotal={(total, range) => `${range[0]}-${range[1]} sur ${total} consultations`}
+                className="custom-pagination"
+              />
+            </div>
+          )}
 
         <PaymentModal
             isOpen={canOpenPaymentModal}

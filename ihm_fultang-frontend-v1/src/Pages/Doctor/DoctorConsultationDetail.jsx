@@ -401,31 +401,121 @@ export function DoctorConsultationDetails() {
     async function endConsultation()
     {
         setIsEndingConsultation(true);
-        let updatedData =
-            {
-                state: 'InProgress'
-            }
+        setTransactionErrorMessage("");
+        
         try
         {
+            // 1. Sauvegarder le diagnostic et les notes du docteur
+            if (diagnostic || doctorNote) {
+                let medicalFolderPageData = {
+                    diagnostic: diagnostic,
+                    doctorNote: doctorNote,
+                };
+                
+                try {
+                    const diagnosticResponse = await axiosInstance.put(
+                        `/medical-folder/${medicalPageInfo?.idMedicalFolder}/update-page/${medicalPageInfo?.id}/`, 
+                        medicalFolderPageData
+                    );
+                    console.log("Diagnostic sauvegardé:", diagnosticResponse?.data);
+                } catch (error) {
+                    console.error("Erreur lors de la sauvegarde du diagnostic:", error);
+                    throw new Error("Échec de la sauvegarde du diagnostic");
+                }
+            }
+
+            // 2. Sauvegarder les prescriptions (si remplies)
+            const hasValidPrescriptions = prescriptions.some(p => p.medicament && p.medicament.trim() !== "");
+            if (hasValidPrescriptions) {
+                let prescriptionData = {
+                    prescription_drugs: prescriptions
+                        .filter(p => p.medicament && p.medicament.trim() !== "")
+                        .map((prescription) => Object.fromEntries(Object.entries(prescription).filter(([key]) => key !== "id"))),
+                    note: '',
+                    idConsultation: consultation?.id,
+                    idPatient: patientInfo?.id,
+                    idMedicalStaff: consultation?.idMedicalStaffGiver?.id
+                };
+
+                try {
+                    const prescriptionResponse = await axiosInstance.post("/prescription/", prescriptionData);
+                    console.log("Prescriptions sauvegardées:", prescriptionResponse?.data);
+                } catch (error) {
+                    console.error("Erreur lors de la sauvegarde des prescriptions:", error);
+                    throw new Error("Échec de la sauvegarde des prescriptions");
+                }
+            }
+
+            // 3. Sauvegarder les examens (si remplis)
+            const hasValidExams = exams.some(e => e.examName && e.examName.trim() !== "");
+            if (hasValidExams) {
+                let examsData = exams
+                    .filter(e => e.examName && e.examName.trim() !== "")
+                    .map((exam) => {
+                        const cleanExam = { ...exam };
+                        delete cleanExam.id;
+                        delete cleanExam.isCustom;
+                        if (cleanExam.idExam === "another" || cleanExam.idExam === "") {
+                            delete cleanExam.idExam;
+                        }
+                        return cleanExam;
+                    });
+
+                try {
+                    const examRequestResponse = await axiosInstance.post("/exam-request/", examsData);
+                    console.log("Examens sauvegardés:", examRequestResponse?.data);
+                } catch (error) {
+                    console.error("Erreur lors de la sauvegarde des examens:", error);
+                    throw new Error("Échec de la sauvegarde des examens");
+                }
+            }
+
+            // 4. Sauvegarder le rendez-vous (si rempli)
+            if (appointmentReason && appointmentReason.trim() !== "") {
+                let appointmentData = {
+                    atDate: combineToISOString(appointmentDate, appointmentTime),
+                    reason: appointmentReason,
+                    requirements: requirements,
+                    idConsultation: consultation?.id,
+                    idPatient: patientInfo?.id,
+                    idMedicalStaff: consultation?.idMedicalStaffGiver?.id,
+                };
+
+                try {
+                    const appointmentRequestResponse = await axiosInstance.post("/appointment/", appointmentData);
+                    console.log("Rendez-vous sauvegardé:", appointmentRequestResponse?.data);
+                } catch (error) {
+                    console.error("Erreur lors de la sauvegarde du rendez-vous:", error);
+                    throw new Error("Échec de la sauvegarde du rendez-vous");
+                }
+            }
+
+            // 5. Finaliser la consultation en mettant à jour son statut
+            let updatedData = {
+                state: 'InProgress'
+            };
+            
             const response = await axiosInstance.patch(`/consultation/${consultation?.id}/`, updatedData);
             setIsEndingConsultation(false);
+            
             if (response.status === 200)
             {
-                setSuccessMessage("Successfully Ending consultation !")
+                setSuccessMessage("Consultation finalisée avec succès ! Toutes les données ont été sauvegardées.");
                 setErrorMessage("");
                 setCanOpenErrorMessageModal(false);
                 setCanOpenSuccessModal(true);
-                console.log(response?.data);
+                console.log("Consultation finalisée:", response?.data);
             }
         }
         catch (error)
         {
             setIsEndingConsultation(false);
             setSuccessMessage("");
-            setErrorMessage(`Something went wrong, when ending consultation with ${patientInfo?.firstName + patientInfo?.lastName}, please try again!`);
+            const errorMsg = error.message || `Une erreur s'est produite lors de la finalisation de la consultation de ${patientInfo?.firstName} ${patientInfo?.lastName}. Veuillez réessayer!`;
+            setErrorMessage(errorMsg);
             setCanOpenSuccessModal(false);
             setCanOpenErrorMessageModal(true);
-            console.log(error);
+            console.error("Erreur lors de la finalisation:", error);
         }
     }
 

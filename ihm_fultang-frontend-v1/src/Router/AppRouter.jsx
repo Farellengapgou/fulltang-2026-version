@@ -2,6 +2,7 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 import { Loading } from "../GlobalComponents/Loading.jsx";
 import { AppRoutesPaths } from "./appRouterPaths.js";
+import PatientMedicalFolder from "../Pages/Laboratory/PatientMedicalFolder.jsx";
 
 export function AppRoute() {
   const LoginPage = React.lazy(async () => ({
@@ -283,6 +284,10 @@ export function AppRoute() {
     default: (await import("../Pages/Pharmacy/Sales/PrescriptionSalesPage.jsx"))
       .PrescriptionSalesPage,
   }));
+  const LaboratoryPatientMedicalFolderPage = React.lazy(async () => ({
+    default: (await import("../Pages/Laboratory/PatientMedicalFolder.jsx"))
+      .PatientMedicalFolder
+  })) 
   const PharmacyOTCSales = React.lazy(async () => ({
     default: (await import("../Pages/Pharmacy/Sales/OTCSalesPage.jsx"))
       .OTCSalesPage,
@@ -562,6 +567,10 @@ export function AppRoute() {
         <Route
           path={AppRoutesPaths.dentistConsultationList}
           element={<DentistConsultationList />}
+        />
+        <Route
+          path={AppRoutesPaths.LaboratoryPatientMedicalFolderPage}
+          element={<PatientMedicalFolder />}
         />
         <Route
           path={AppRoutesPaths.dentistConsultationHistory}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaUser, FaCalendarAlt, FaStethoscope, FaCheckCircle, FaPrint, FaTrash, FaArrowLeft, FaMoneyBillWave } from 'react-icons/fa';
+import { FaSearch, FaUser, FaCalendarAlt,FaCreditCard, FaMobileAlt, FaStethoscope, FaCheckCircle, FaPrint, FaTrash, FaArrowLeft, FaMoneyBillWave } from 'react-icons/fa';
 import axiosInstance from '../../../Utils/axiosInstance';
 import axiosInstanceAccountant from '../../../Utils/axiosInstanceAccountant';
 import { useAuthentication } from '../../../Utils/Provider';
